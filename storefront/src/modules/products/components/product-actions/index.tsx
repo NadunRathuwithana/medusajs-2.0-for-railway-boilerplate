@@ -67,17 +67,14 @@ export default function ProductActions({
 
   // check if the selected variant is in stock
   const inStock = useMemo(() => {
-    // If we don't manage inventory, we can always add to cart
     if (selectedVariant && !selectedVariant.manage_inventory) {
       return true
     }
 
-    // If we allow back orders on the variant, we can add to cart
     if (selectedVariant?.allow_backorder) {
       return true
     }
 
-    // If there is inventory available, we can add to cart
     if (
       selectedVariant?.manage_inventory &&
       (selectedVariant?.inventory_quantity || 0) > 0
@@ -85,7 +82,6 @@ export default function ProductActions({
       return true
     }
 
-    // Otherwise, we can't add to cart
     return false
   }, [selectedVariant])
 
@@ -110,10 +106,17 @@ export default function ProductActions({
 
   return (
     <>
-      <div className="flex flex-col gap-y-2" ref={actionsRef}>
+      <div className="flex flex-col gap-y-6" ref={actionsRef}>
+        
+        {/* Price at the top */}
+        <div className="-mt-4">
+          <ProductPrice product={product} variant={selectedVariant} />
+        </div>
+
+        {/* Options */}
         <div>
           {(product.variants?.length ?? 0) > 1 && (
-            <div className="flex flex-col gap-y-4">
+            <div className="flex flex-col gap-y-6">
               {(product.options || []).map((option) => {
                 return (
                   <div key={option.id}>
@@ -124,31 +127,32 @@ export default function ProductActions({
                       title={option.title ?? ""}
                       data-testid="product-options"
                       disabled={!!disabled || isAdding}
+                      variants={product.variants}
                     />
                   </div>
                 )
               })}
-              <Divider />
             </div>
           )}
         </div>
 
-        <ProductPrice product={product} variant={selectedVariant} />
+        {/* Add to Cart */}
+        <div className="flex items-center w-full mt-2">
+          <Button
+            onClick={handleAddToCart}
+            disabled={!inStock || !selectedVariant || !!disabled || isAdding}
+            className="w-full h-14 rounded-full bg-black hover:bg-gray-800 text-white text-base font-medium shadow-none transition-colors border-none"
+            isLoading={isAdding}
+            data-testid="add-product-button"
+          >
+            {!selectedVariant
+              ? "Select variant"
+              : !inStock
+              ? "Out of stock"
+              : "Add to Cart"}
+          </Button>
+        </div>
 
-        <Button
-          onClick={handleAddToCart}
-          disabled={!inStock || !selectedVariant || !!disabled || isAdding}
-          variant="primary"
-          className="w-full h-10"
-          isLoading={isAdding}
-          data-testid="add-product-button"
-        >
-          {!selectedVariant
-            ? "Select variant"
-            : !inStock
-            ? "Out of stock"
-            : "Add to cart"}
-        </Button>
         <MobileActions
           product={product}
           variant={selectedVariant}

@@ -5,6 +5,8 @@ import { StoreRegion } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
 import SideMenu from "@modules/layout/components/side-menu"
+import { User, ShoppingBag } from "lucide-react"
+import Image from "next/image"
 
 export default async function Nav() {
   const regions = await listRegions().then((regions: StoreRegion[]) => regions)
@@ -14,7 +16,21 @@ export default async function Nav() {
       <header className="relative h-16 mx-auto border-b duration-200 bg-white border-ui-border-base">
         <nav className="content-container txt-xsmall-plus text-ui-fg-subtle flex items-center justify-between w-full h-full text-small-regular">
           <div className="flex-1 basis-0 h-full flex items-center">
-            <div className="h-full">
+            <div className="hidden small:flex items-center gap-x-6 h-full">
+              <LocalizedClientLink
+                href="/store"
+                className="hover:text-ui-fg-base uppercase font-medium"
+              >
+                Store
+              </LocalizedClientLink>
+              <LocalizedClientLink
+                href="/customize"
+                className="hover:text-ui-fg-base uppercase font-medium"
+              >
+                Customize Your Bag
+              </LocalizedClientLink>
+            </div>
+            <div className="small:hidden h-full">
               <SideMenu regions={regions} />
             </div>
           </div>
@@ -22,10 +38,10 @@ export default async function Nav() {
           <div className="flex items-center h-full">
             <LocalizedClientLink
               href="/"
-              className="txt-compact-xlarge-plus hover:text-ui-fg-base uppercase"
+              className="flex items-center justify-center"
               data-testid="nav-store-link"
             >
-              Medusa Store
+              <img src="/Logo.png" alt="Logo" className="h-6 w-auto" />
             </LocalizedClientLink>
           </div>
 
@@ -42,21 +58,21 @@ export default async function Nav() {
                 </LocalizedClientLink>
               )}
               <LocalizedClientLink
-                className="hover:text-ui-fg-base"
+                className="hover:text-ui-fg-base flex items-center gap-2"
                 href="/account"
                 data-testid="nav-account-link"
               >
-                Account
+                <User className="h-5 w-5" strokeWidth={1.5} />
               </LocalizedClientLink>
             </div>
             <Suspense
               fallback={
                 <LocalizedClientLink
-                  className="hover:text-ui-fg-base flex gap-2"
+                  className="hover:text-ui-fg-base flex items-center gap-2 relative"
                   href="/cart"
                   data-testid="nav-cart-link"
                 >
-                  Cart (0)
+                  <ShoppingBag className="w-5 h-5" strokeWidth={1.5} />
                 </LocalizedClientLink>
               }
             >

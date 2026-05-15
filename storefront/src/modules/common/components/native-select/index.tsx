@@ -3,7 +3,6 @@ import { clx } from "@medusajs/ui"
 import {
   SelectHTMLAttributes,
   forwardRef,
-  useEffect,
   useImperativeHandle,
   useRef,
   useState,
@@ -13,55 +12,55 @@ export type NativeSelectProps = {
   placeholder?: string
   errors?: Record<string, unknown>
   touched?: Record<string, unknown>
+  label?: string
 } & SelectHTMLAttributes<HTMLSelectElement>
 
 const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
   (
-    { placeholder = "Select...", defaultValue, className, children, ...props },
+    { placeholder = "Select...", defaultValue, className, children, label, required, name, ...props },
     ref
   ) => {
     const innerRef = useRef<HTMLSelectElement>(null)
-    const [isPlaceholder, setIsPlaceholder] = useState(false)
 
     useImperativeHandle<HTMLSelectElement | null, HTMLSelectElement | null>(
       ref,
       () => innerRef.current
     )
 
-    useEffect(() => {
-      if (innerRef.current && innerRef.current.value === "") {
-        setIsPlaceholder(true)
-      } else {
-        setIsPlaceholder(false)
-      }
-    }, [innerRef.current?.value])
-
     return (
-      <div>
+      <div className="flex flex-col w-full gap-1.5">
+        {label && (
+          <label
+            htmlFor={name}
+            className="text-[13px] font-medium text-gray-700 ml-1"
+          >
+            {label}
+            {required && <span className="text-rose-500 ml-1">*</span>}
+          </label>
+        )}
+        
         <div
-          onFocus={() => innerRef.current?.focus()}
-          onBlur={() => innerRef.current?.blur()}
           className={clx(
-            "relative flex items-center text-base-regular border border-ui-border-base bg-ui-bg-subtle rounded-md hover:bg-ui-bg-field-hover",
-            className,
-            {
-              "text-ui-fg-muted": isPlaceholder,
-            }
+            "relative flex items-center w-full",
+            className
           )}
         >
           <select
             ref={innerRef}
             defaultValue={defaultValue}
+            name={name}
+            id={name}
+            required={required}
             {...props}
-            className="appearance-none flex-1 bg-transparent border-none px-4 py-2.5 transition-colors duration-150 outline-none "
+            className="appearance-none block w-full h-[46px] px-4 bg-gray-50 border border-gray-200 rounded-xl text-[15px] text-gray-900 focus:outline-none focus:ring-1 focus:ring-black focus:border-black hover:bg-gray-100 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <option disabled value="">
               {placeholder}
             </option>
             {children}
           </select>
-          <span className="absolute right-4 inset-y-0 flex items-center pointer-events-none ">
-            <ChevronUpDown />
+          <span className="absolute right-3 inset-y-0 flex items-center pointer-events-none text-gray-500">
+            <ChevronUpDown className="w-5 h-5" />
           </span>
         </div>
       </div>

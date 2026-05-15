@@ -10,7 +10,7 @@ const CountrySelect = forwardRef<
   NativeSelectProps & {
     region?: HttpTypes.StoreRegion
   }
->(({ placeholder = "Country", region, defaultValue, ...props }, ref) => {
+>(({ placeholder = "Country", region, defaultValue, label, ...props }, ref) => {
   const innerRef = useRef<HTMLSelectElement>(null)
 
   useImperativeHandle<HTMLSelectElement | null, HTMLSelectElement | null>(
@@ -23,17 +23,21 @@ const CountrySelect = forwardRef<
       return []
     }
 
-    return region.countries?.map((country) => ({
-      value: country.iso_2,
-      label: country.display_name,
-    }))
+    // Filter countries to only allow Sri Lanka
+    return region.countries
+      ?.filter((country) => country.iso_2?.toLowerCase() === "lk")
+      .map((country) => ({
+        value: country.iso_2,
+        label: country.display_name,
+      }))
   }, [region])
 
   return (
     <NativeSelect
       ref={innerRef}
       placeholder={placeholder}
-      defaultValue={defaultValue}
+      defaultValue={defaultValue || "lk"}
+      label={label || placeholder}
       {...props}
     >
       {countryOptions?.map(({ value, label }, index) => (

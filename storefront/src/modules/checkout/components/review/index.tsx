@@ -1,6 +1,6 @@
 "use client"
 
-import { Heading, Text, clx } from "@medusajs/ui"
+import { clx } from "@medusajs/ui"
 
 import PaymentButton from "../payment-button"
 import { useSearchParams } from "next/navigation"
@@ -21,28 +21,27 @@ const Review = ({ cart }: { cart: any }) => {
   return (
     <div className="bg-white">
       <div className="flex flex-row items-center justify-between mb-6">
-        <Heading
-          level="h2"
+        <h2
           className={clx(
-            "flex flex-row text-3xl-regular gap-x-2 items-baseline",
+            "flex flex-row text-[24px] font-bold text-black gap-x-2 items-center",
             {
               "opacity-50 pointer-events-none select-none": !isOpen,
             }
           )}
         >
           Review
-        </Heading>
+        </h2>
       </div>
       {isOpen && previousStepsCompleted && (
         <>
           <div className="flex items-start gap-x-1 w-full mb-6">
             <div className="w-full">
-              <Text className="txt-medium-plus text-ui-fg-base mb-1">
+              <p className="text-[14px] text-gray-500 leading-relaxed">
                 By clicking the Place Order button, you confirm that you have
                 read, understand and accept our Terms of Use, Terms of Sale and
                 Returns Policy and acknowledge that you have read Medusa
                 Store&apos;s Privacy Policy.
-              </Text>
+              </p>
             </div>
           </div>
           <PaymentButton cart={cart} data-testid="submit-order-button" />

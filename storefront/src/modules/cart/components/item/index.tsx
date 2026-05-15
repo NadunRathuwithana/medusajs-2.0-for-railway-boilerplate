@@ -1,19 +1,18 @@
 "use client"
 
-import { Table, Text, clx } from "@medusajs/ui"
-
 import { updateLineItem } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
-import CartItemSelect from "@modules/cart/components/cart-item-select"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import DeleteButton from "@modules/common/components/delete-button"
 import LineItemOptions from "@modules/common/components/line-item-options"
-import LineItemPrice from "@modules/common/components/line-item-price"
-import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import Spinner from "@modules/common/icons/spinner"
 import Thumbnail from "@modules/products/components/thumbnail"
-import { useState } from "react"
+import { useState, useEffect, useTransition, useRef } from "react"
+import { Minus, Plus, Trash2 } from "lucide-react"
+import { getPricesForVariant } from "@lib/util/get-product-price"
+import { convertToLocale } from "@lib/util/money"
+import { getPercentageDiff } from "@lib/util/get-precentage-diff"
+import { clx } from "@medusajs/ui"
 
 type ItemProps = {
   item: HttpTypes.StoreCartLineItem
@@ -21,40 +20,64 @@ type ItemProps = {
 }
 
 const Item = ({ item, type = "full" }: ItemProps) => {
-  const [updating, setUpdating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [optimisticQty, setOptimisticQty] = useState(item.quantity)
+  const [isPending, startTransition] = useTransition()
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const latestQtyRef = useRef(item.quantity)
+
+  // Sync optimistic qty when server state arrives (and we're not mid-update)
+  useEffect(() => {
+    if (!isPending && !debounceRef.current) {
+      setOptimisticQty(item.quantity)
+    }
+    latestQtyRef.current = item.quantity
+  }, [item.quantity, isPending])
 
   const { handle } = item.variant?.product ?? {}
 
-  const changeQuantity = async (quantity: number) => {
+  const changeQuantity = (quantity: number) => {
+    if (quantity < 1) return
     setError(null)
-    setUpdating(true)
+    setOptimisticQty(quantity)
 
-    const message = await updateLineItem({
-      lineId: item.id,
-      quantity,
-    })
-      .catch((err) => {
-        setError(err.message)
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+    }
+
+    debounceRef.current = setTimeout(() => {
+      debounceRef.current = null
+      startTransition(async () => {
+        await updateLineItem({
+          lineId: item.id,
+          quantity,
+        }).catch((err) => {
+          setError(err.message)
+          setOptimisticQty(latestQtyRef.current)
+        })
       })
-      .finally(() => {
-        setUpdating(false)
-      })
+    }, 500)
   }
 
-  // TODO: Update this to grab the actual max inventory
-  const maxQtyFromInventory = 10
-  const maxQuantity = item.variant?.manage_inventory ? 10 : maxQtyFromInventory
+  const { currency_code, calculated_price_number, original_price_number } = getPricesForVariant(item.variant) ?? {}
+  const adjustmentsSum = (item.adjustments || []).reduce((acc: number, adj: any) => adj.amount + acc, 0)
+  const originalPrice = (original_price_number || 0) * optimisticQty
+  const currentPrice = (calculated_price_number || 0) * optimisticQty - adjustmentsSum
+  const hasReducedPrice = currentPrice < originalPrice
+  const formatPrice = (amount: number) => convertToLocale({ amount, currency_code: currency_code || "USD" })
 
-  return (
-    <Table.Row className="w-full" data-testid="product-row">
-      <Table.Cell className="!pl-0 p-4 w-24">
+  const isPreview = type === "preview"
+
+  if (isPreview) {
+    return (
+      <div
+        className="flex gap-4 p-4 bg-[#fafafa] rounded-2xl border border-gray-100 mb-2 items-start"
+        data-testid="product-row"
+      >
+        {/* Image */}
         <LocalizedClientLink
           href={`/products/${handle}`}
-          className={clx("flex", {
-            "w-16": type === "preview",
-            "small:w-24 w-12": type === "full",
-          })}
+          className="w-[80px] h-[80px] flex-shrink-0 rounded-xl overflow-hidden bg-gray-100 relative aspect-square"
         >
           <Thumbnail
             thumbnail={item.variant?.product?.thumbnail}
@@ -62,72 +85,140 @@ const Item = ({ item, type = "full" }: ItemProps) => {
             size="square"
           />
         </LocalizedClientLink>
-      </Table.Cell>
 
-      <Table.Cell className="text-left">
-        <Text
-          className="txt-medium-plus text-ui-fg-base"
-          data-testid="product-title"
-        >
-          {item.product_title}
-        </Text>
-        <LineItemOptions variant={item.variant} data-testid="product-variant" />
-      </Table.Cell>
+        {/* Details (4 Rows) */}
+        <div className="flex flex-col flex-1 min-w-0">
+          {/* Row 1: Name */}
+          <h3 className="text-[15px] font-semibold text-gray-900 truncate">
+            {item.title}
+          </h3>
 
-      {type === "full" && (
-        <Table.Cell>
-          <div className="flex gap-2 items-center w-28">
-            <DeleteButton id={item.id} data-testid="product-delete-button" />
-            <CartItemSelect
-              value={item.quantity}
-              onChange={(value) => changeQuantity(parseInt(value.target.value))}
-              className="w-14 h-10 p-4"
-              data-testid="product-select-button"
-            >
-              {/* TODO: Update this with the v2 way of managing inventory */}
-              {Array.from(
-                {
-                  length: Math.min(maxQuantity, 10),
-                },
-                (_, i) => (
-                  <option value={i + 1} key={i}>
-                    {i + 1}
-                  </option>
-                )
-              )}
+          {/* Row 2: Variants */}
+          <LineItemOptions variant={item.variant} className="text-[13px] text-gray-500 mt-0.5" data-testid="product-variant" />
 
-              <option value={1} key={1}>
-                1
-              </option>
-            </CartItemSelect>
-            {updating && <Spinner />}
+          {/* Row 3: Qty */}
+          <span className="text-[13px] text-gray-500 font-medium mt-0.5">
+            Qty: {item.quantity}
+          </span>
+
+          {/* Row 4: Price - right aligned */}
+          <div className="flex justify-end w-full mt-1">
+            {hasReducedPrice ? (
+              <div className="flex gap-2 items-center">
+                <span className="text-gray-400 text-[13px] line-through">
+                  {formatPrice(originalPrice)}
+                </span>
+                <span className="text-[#e11d48] text-[15px] font-bold">
+                  {formatPrice(currentPrice)}
+                </span>
+              </div>
+            ) : (
+              <span className="text-black text-[15px] font-bold">
+                {formatPrice(currentPrice)}
+              </span>
+            )}
           </div>
-          <ErrorMessage error={error} data-testid="product-error-message" />
-        </Table.Cell>
-      )}
+        </div>
+      </div>
+    )
+  }
 
-      {type === "full" && (
-        <Table.Cell className="hidden small:table-cell">
-          <LineItemUnitPrice item={item} style="tight" />
-        </Table.Cell>
-      )}
+  return (
+    <div
+      className="flex gap-5 p-5 bg-[#fafafa] rounded-2xl border border-gray-100 hover:border-gray-200 transition-colors group"
+      data-testid="product-row"
+    >
+      {/* 1:1 Image */}
+      <LocalizedClientLink
+        href={`/products/${handle}`}
+        className="w-[120px] h-[120px] flex-shrink-0 rounded-xl overflow-hidden bg-gray-100 relative aspect-square"
+      >
+        <Thumbnail
+          thumbnail={item.variant?.product?.thumbnail}
+          images={item.variant?.product?.images}
+          size="square"
+        />
+      </LocalizedClientLink>
 
-      <Table.Cell className="!pr-0">
-        <span
-          className={clx("!pr-0", {
-            "flex flex-col items-end h-full justify-center": type === "preview",
-          })}
-        >
-          {type === "preview" && (
-            <span className="flex gap-x-1 ">
-              <Text className="text-ui-fg-muted">{item.quantity}x </Text>
-              <LineItemUnitPrice item={item} style="tight" />
-            </span>
-          )}
-          <LineItemPrice item={item} style="tight" />
-        </span>
-      </Table.Cell>
-    </Table.Row>
+      {/* Details */}
+      <div className="flex flex-1 flex-col justify-between min-w-0">
+        <div className="flex justify-between items-start gap-4">
+          <div className="flex flex-col gap-1 min-w-0">
+            <LocalizedClientLink href={`/products/${handle}`}>
+              <h3 className="text-[15px] font-semibold text-gray-900 leading-tight hover:text-gray-600 transition-colors truncate">
+                {item.title}
+              </h3>
+            </LocalizedClientLink>
+            <LineItemOptions variant={item.variant} className="text-[13px] text-gray-400" data-testid="product-variant" />
+          </div>
+
+          {/* Price block */}
+          <div className="flex flex-col items-end gap-1 flex-shrink-0">
+            {hasReducedPrice ? (
+              <>
+                <span className="text-gray-400 text-[13px] line-through">
+                  {formatPrice(originalPrice)}
+                </span>
+                <span className="text-[#e11d48] text-[16px] font-bold">
+                  {formatPrice(currentPrice)}
+                </span>
+              </>
+            ) : (
+              <span className="text-black text-[16px] font-bold">
+                {formatPrice(currentPrice)}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom row: discount badge + quantity + delete */}
+        <div className="flex items-center justify-between mt-4">
+          {/* Discount badge */}
+          <div className="flex items-center gap-2">
+            {hasReducedPrice && (
+              <>
+                <span className="bg-[#fce7f3] text-[#be185d] text-[11px] font-medium px-2.5 py-1 rounded-full">
+                  {getPercentageDiff(originalPrice, currentPrice)}% off
+                </span>
+                <span className="bg-[#e11d48] text-white text-[11px] font-medium px-2.5 py-1 rounded-full">
+                  -{formatPrice(originalPrice - currentPrice)}
+                </span>
+              </>
+            )}
+          </div>
+
+          {/* Quantity + Delete */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between bg-white border border-gray-200 rounded-full px-1 py-1 w-[100px] shadow-sm">
+              <button
+                onClick={() => changeQuantity(optimisticQty - 1)}
+                className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-black transition-all disabled:opacity-40"
+                disabled={optimisticQty <= 1}
+              >
+                <Minus className="w-3.5 h-3.5" strokeWidth={2.5} />
+              </button>
+              <span className={`text-[14px] font-bold text-gray-900 w-5 text-center select-none transition-opacity ${isPending ? 'opacity-40' : ''}`}>
+                {optimisticQty}
+              </span>
+              <button
+                onClick={() => changeQuantity(optimisticQty + 1)}
+                className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-black transition-all"
+              >
+                <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+              </button>
+            </div>
+
+            <DeleteButton
+              id={item.id}
+              className="text-gray-300 hover:text-[#e11d48] transition-colors"
+              data-testid="product-delete-button"
+            />
+          </div>
+        </div>
+
+        <ErrorMessage error={error} data-testid="product-error-message" />
+      </div>
+    </div>
   )
 }
 

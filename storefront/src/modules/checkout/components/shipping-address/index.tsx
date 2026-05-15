@@ -154,10 +154,11 @@ const ShippingAddress = ({
           data-testid="shipping-city-input"
         />
         <CountrySelect
+          label="Country"
           name="shipping_address.country_code"
           autoComplete="country"
           region={cart?.region}
-          value={formData["shipping_address.country_code"]}
+          value={formData["shipping_address.country_code"] || "lk"}
           onChange={handleChange}
           required
           data-testid="shipping-country-select"

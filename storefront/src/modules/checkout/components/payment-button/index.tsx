@@ -1,6 +1,5 @@
 "use client"
 
-import { Button } from "@medusajs/ui"
 import { OnApproveActions, OnApproveData } from "@paypal/paypal-js"
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js"
 import { useElements, useStripe } from "@stripe/react-stripe-js"
@@ -10,10 +9,33 @@ import Spinner from "@modules/common/icons/spinner"
 import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { isManual, isPaypal, isStripe } from "@lib/constants"
+import { clx } from "@medusajs/ui"
 
 type PaymentButtonProps = {
   cart: HttpTypes.StoreCart
   "data-testid": string
+}
+
+const CustomButton = ({ 
+  children, 
+  isLoading, 
+  ...props 
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { isLoading?: boolean }) => {
+  return (
+    <button
+      {...props}
+      className={clx(
+        "w-full px-8 h-[50px] bg-[#111111] hover:bg-black text-white rounded-[12px] font-medium transition-colors disabled:opacity-50 flex items-center justify-center",
+        props.className
+      )}
+    >
+      {isLoading ? (
+        <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      ) : (
+        children
+      )}
+    </button>
+  )
 }
 
 const PaymentButton: React.FC<PaymentButtonProps> = ({
@@ -26,14 +48,6 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     !cart.billing_address ||
     !cart.email ||
     (cart.shipping_methods?.length ?? 0) < 1
-
-  // TODO: Add this once gift cards are implemented
-  // const paidByGiftcard =
-  //   cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
-
-  // if (paidByGiftcard) {
-  //   return <GiftCardPaymentButton />
-  // }
 
   const paymentSession = cart.payment_collection?.payment_sessions?.[0]
 
@@ -59,27 +73,8 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
         />
       )
     default:
-      return <Button disabled>Select a payment method</Button>
+      return <CustomButton disabled>Select a payment method</CustomButton>
   }
-}
-
-const GiftCardPaymentButton = () => {
-  const [submitting, setSubmitting] = useState(false)
-
-  const handleOrder = async () => {
-    setSubmitting(true)
-    await placeOrder()
-  }
-
-  return (
-    <Button
-      onClick={handleOrder}
-      isLoading={submitting}
-      data-testid="submit-order-button"
-    >
-      Place order
-    </Button>
-  )
 }
 
 const StripePaymentButton = ({
@@ -172,15 +167,14 @@ const StripePaymentButton = ({
 
   return (
     <>
-      <Button
-        disabled={disabled || notReady}
+      <CustomButton
+        disabled={disabled || notReady || submitting}
         onClick={handlePayment}
-        size="large"
         isLoading={submitting}
         data-testid={dataTestId}
       >
         Place order
-      </Button>
+      </CustomButton>
       <ErrorMessage
         error={errorMessage}
         data-testid="stripe-payment-error-message"
@@ -281,15 +275,14 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
 
   return (
     <>
-      <Button
-        disabled={notReady}
+      <CustomButton
+        disabled={notReady || submitting}
         isLoading={submitting}
         onClick={handlePayment}
-        size="large"
         data-testid="submit-order-button"
       >
         Place order
-      </Button>
+      </CustomButton>
       <ErrorMessage
         error={errorMessage}
         data-testid="manual-payment-error-message"

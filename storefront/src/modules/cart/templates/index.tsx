@@ -13,33 +13,31 @@ const CartTemplate = ({
   customer: HttpTypes.StoreCustomer | null
 }) => {
   return (
-    <div className="py-12">
-      <div className="content-container" data-testid="cart-container">
+    <div className="py-12 md:py-24 bg-[#fafafa] min-h-screen">
+      <div className="content-container max-w-[1140px] mx-auto" data-testid="cart-container">
         {cart?.items?.length ? (
-          <div className="grid grid-cols-1 small:grid-cols-[1fr_360px] gap-x-40">
-            <div className="flex flex-col bg-white py-6 gap-y-6">
+          <div className="flex flex-col lg:flex-row gap-12">
+            <div className="flex flex-col flex-1 gap-y-8">
               {!customer && (
-                <>
+                <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
                   <SignInPrompt />
-                  <Divider />
-                </>
+                </div>
               )}
-              <ItemsTemplate items={cart?.items} />
+              <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                <ItemsTemplate items={cart?.items} />
+              </div>
             </div>
-            <div className="relative">
-              <div className="flex flex-col gap-y-8 sticky top-12">
+            
+            <div className="relative w-full lg:w-[400px] flex-shrink-0">
+              <div className="sticky top-24 bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
                 {cart && cart.region && (
-                  <>
-                    <div className="bg-white py-6">
-                      <Summary cart={cart as any} />
-                    </div>
-                  </>
+                  <Summary cart={cart as any} />
                 )}
               </div>
             </div>
           </div>
         ) : (
-          <div>
+          <div className="bg-white rounded-3xl shadow-sm border border-gray-100">
             <EmptyCartMessage />
           </div>
         )}

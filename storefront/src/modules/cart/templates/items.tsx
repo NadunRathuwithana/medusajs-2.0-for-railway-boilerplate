@@ -1,6 +1,5 @@
 import repeat from "@lib/util/repeat"
 import { HttpTypes } from "@medusajs/types"
-import { Heading, Table } from "@medusajs/ui"
 
 import Item from "@modules/cart/components/item"
 import SkeletonLineItem from "@modules/skeletons/components/skeleton-line-item"
@@ -12,37 +11,29 @@ type ItemsTemplateProps = {
 const ItemsTemplate = ({ items }: ItemsTemplateProps) => {
   return (
     <div>
-      <div className="pb-3 flex items-center">
-        <Heading className="text-[2rem] leading-[2.75rem]">Cart</Heading>
+      <div className="pb-6 flex items-center justify-between border-b border-gray-100">
+        <h1 className="text-[32px] font-bold tracking-tight text-black">Your Cart</h1>
+        {items && (
+          <span className="text-sm text-gray-400 font-medium">
+            {items.length} {items.length === 1 ? "item" : "items"}
+          </span>
+        )}
       </div>
-      <Table>
-        <Table.Header className="border-t-0">
-          <Table.Row className="text-ui-fg-subtle txt-medium-plus">
-            <Table.HeaderCell className="!pl-0">Item</Table.HeaderCell>
-            <Table.HeaderCell></Table.HeaderCell>
-            <Table.HeaderCell>Quantity</Table.HeaderCell>
-            <Table.HeaderCell className="hidden small:table-cell">
-              Price
-            </Table.HeaderCell>
-            <Table.HeaderCell className="!pr-0 text-right">
-              Total
-            </Table.HeaderCell>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {items
-            ? items
-                .sort((a, b) => {
-                  return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
-                })
-                .map((item) => {
-                  return <Item key={item.id} item={item} />
-                })
-            : repeat(5).map((i) => {
-                return <SkeletonLineItem key={i} />
-              })}
-        </Table.Body>
-      </Table>
+      <div className="mt-6 flex flex-col gap-5">
+        {items
+          ? items
+              .sort((a, b) => {
+                return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
+              })
+              .map((item) => {
+                return <Item key={item.id} item={item} />
+              })
+          : repeat(5).map((i) => {
+              return (
+                <div key={i} className="h-[140px] bg-gray-50 rounded-2xl animate-pulse" />
+              )
+            })}
+      </div>
     </div>
   )
 }

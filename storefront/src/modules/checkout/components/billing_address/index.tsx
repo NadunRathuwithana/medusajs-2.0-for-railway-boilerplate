@@ -88,10 +88,11 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
           data-testid="billing-city-input"
         />
         <CountrySelect
+          label="Country"
           name="billing_address.country_code"
           autoComplete="country"
           region={cart?.region}
-          value={formData["billing_address.country_code"]}
+          value={formData["billing_address.country_code"] || "lk"}
           onChange={handleChange}
           required
           data-testid="billing-country-select"
