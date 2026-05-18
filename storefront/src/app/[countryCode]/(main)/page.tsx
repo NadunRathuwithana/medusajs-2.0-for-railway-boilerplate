@@ -1,11 +1,10 @@
 import { Metadata } from "next"
 
-import FeaturedProducts from "@modules/home/components/featured-products"
 import Hero from "@modules/home/components/hero"
 import PopularProducts from "@modules/home/components/popular-products"
-import CategoriesGrid from "@modules/home/components/categories-grid"
-import PromoBanner from "@modules/home/components/promo-banner"
 import FeatureGrid from "@modules/home/components/feature-grid"
+import AllProducts from "@modules/home/components/all-products"
+import PromoBanner from "@modules/home/components/promo-banner"
 import { getCollectionsWithProducts } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
 
@@ -17,10 +16,15 @@ export const metadata: Metadata = {
 
 export default async function Home({
   params,
+  searchParams,
 }: {
   params: Promise<{ countryCode: string }>
+  searchParams: Promise<{ page?: string }>
 }) {
   const { countryCode } = await params
+  const { page } = await searchParams
+  const pageNumber = page ? parseInt(page) : 1
+
   const collections = await getCollectionsWithProducts(countryCode)
   const region = await getRegion(countryCode)
 
@@ -31,17 +35,13 @@ export default async function Home({
   return (
     <>
       <Hero />
-      <PopularProducts countryCode={countryCode} />
-      <FeatureGrid />
-      {/* <CategoriesGrid /> */}
-      <div className="py-12">
-        <ul className="flex flex-col gap-x-6">
-          <FeaturedProducts collections={collections} region={region} />
-        </ul>
+      <div className="flex flex-col gap-16 small:gap-24 py-16 small:py-24">
+        <PopularProducts countryCode={countryCode} collectionHandle="popular" />
+        <PopularProducts countryCode={countryCode} title="New Arrivals" collectionHandle="new-arrivals" />
+        <FeatureGrid />
+        <AllProducts countryCode={countryCode} page={pageNumber} />
+        <PromoBanner />
       </div>
-      <PromoBanner />
-      <PopularProducts countryCode={countryCode} title="New Arrivals" />
     </>
   )
 }
-

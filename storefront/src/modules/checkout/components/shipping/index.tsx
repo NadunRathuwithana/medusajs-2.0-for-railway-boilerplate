@@ -62,7 +62,7 @@ const Shipping: React.FC<ShippingProps> = ({
       <div className="flex flex-row items-center justify-between mb-6">
         <h2
           className={clx(
-            "flex flex-row text-[24px] font-bold text-black gap-x-2 items-center",
+            "flex flex-row text-[24px] font-bold text-bold gap-x-2 items-center",
             {
               "opacity-50 pointer-events-none select-none":
                 !isOpen && cart.shipping_methods?.length === 0,
@@ -80,7 +80,7 @@ const Shipping: React.FC<ShippingProps> = ({
           cart?.email && (
             <button
               onClick={handleEdit}
-              className="text-[14px] font-medium text-gray-500 hover:text-black transition-colors"
+              className="text-[14px] font-medium text-gray-500 hover:text-bold transition-colors"
               data-testid="edit-delivery-button"
             >
               Edit
@@ -148,7 +148,7 @@ const Shipping: React.FC<ShippingProps> = ({
           <div className="text-sm text-gray-600">
             {cart && (cart.shipping_methods?.length ?? 0) > 0 && (
               <div className="flex flex-col w-1/3">
-                <span className="font-semibold text-black mb-2">Method</span>
+                <span className="font-semibold text-bold mb-2">Method</span>
                 <span>
                   {selectedShippingMethod?.name}{" "}
                   {convertToLocale({

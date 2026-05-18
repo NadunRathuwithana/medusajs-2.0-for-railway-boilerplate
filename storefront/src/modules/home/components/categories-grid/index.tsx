@@ -22,7 +22,7 @@ export default function CategoriesGrid() {
   return (
     <div className="content-container py-12 small:py-24 max-w-[1440px] mx-auto px-6 md:px-16">
       <div className="flex flex-col gap-6 mb-8 relative">
-        <h2 className="text-[2rem] font-extrabold tracking-tight uppercase">Shop by Category</h2>
+        <h2 className="text-[2rem] font-extrabold tracking-tight capitalize">Shop by Category</h2>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {categories.map((cat, idx) => (
@@ -38,7 +38,7 @@ export default function CategoriesGrid() {
             />
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors duration-300" />
             <div className="absolute bottom-8 left-8">
-              <h3 className="text-3xl font-black uppercase text-white tracking-wider drop-shadow-md">
+              <h3 className="text-3xl font-black capitalize text-white tracking-wider drop-shadow-md">
                 {cat.title}
               </h3>
               <span className="inline-block mt-2 text-white font-semibold underline underline-offset-4 decoration-2 decoration-transparent group-hover:decoration-white transition-all duration-300">

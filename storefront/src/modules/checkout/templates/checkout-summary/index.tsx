@@ -9,7 +9,7 @@ const CheckoutSummary = ({ cart }: { cart: any }) => {
   return (
     <div className="sticky top-0 flex flex-col gap-y-6">
       <div className="flex flex-col">
-        <h2 className="text-[24px] font-bold text-black tracking-tight mb-2">
+        <h2 className="text-[24px] font-bold text-bold tracking-tight mb-2">
           Order Summary
         </h2>
         

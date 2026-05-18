@@ -30,7 +30,7 @@ const Summary = ({ cart }: SummaryProps) => {
 
   return (
     <div className="flex flex-col gap-y-6">
-      <h2 className="text-[24px] font-bold text-black tracking-tight">
+      <h2 className="text-[24px] font-bold text-bold tracking-tight">
         Order Summary
       </h2>
       

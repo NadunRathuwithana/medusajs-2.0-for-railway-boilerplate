@@ -12,7 +12,7 @@ const ItemsTemplate = ({ items }: ItemsTemplateProps) => {
   return (
     <div>
       <div className="pb-6 flex items-center justify-between border-b border-gray-100">
-        <h1 className="text-[32px] font-bold tracking-tight text-black">Your Cart</h1>
+        <h1 className="text-[32px] font-bold tracking-tight text-bold">Your Cart</h1>
         {items && (
           <span className="text-sm text-gray-400 font-medium">
             {items.length} {items.length === 1 ? "item" : "items"}

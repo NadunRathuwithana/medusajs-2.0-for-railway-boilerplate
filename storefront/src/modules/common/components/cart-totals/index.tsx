@@ -33,7 +33,7 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
       <div className="flex flex-col gap-y-3 text-[14px]">
         <div className="flex items-center justify-between">
           <span className="text-gray-500">Subtotal</span>
-          <span className="text-black font-medium" data-testid="cart-subtotal">
+          <span className="text-bold font-medium" data-testid="cart-subtotal">
             {convertToLocale({ amount: subtotal ?? 0, currency_code })}
           </span>
         </div>
@@ -49,14 +49,14 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
         
         <div className="flex items-center justify-between">
           <span className="text-gray-500">Shipping</span>
-          <span className="text-black font-medium" data-testid="cart-shipping">
+          <span className="text-bold font-medium" data-testid="cart-shipping">
             {convertToLocale({ amount: shipping_total ?? 0, currency_code })}
           </span>
         </div>
         
         <div className="flex items-center justify-between">
           <span className="text-gray-500">Taxes</span>
-          <span className="text-black font-medium" data-testid="cart-taxes">
+          <span className="text-bold font-medium" data-testid="cart-taxes">
             {convertToLocale({ amount: tax_total ?? 0, currency_code })}
           </span>
         </div>
@@ -74,8 +74,8 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
       <div className="h-px w-full bg-gray-100 my-2" />
       
       <div className="flex items-center justify-between">
-        <span className="text-[16px] font-bold text-black">Total</span>
-        <span className="text-[24px] font-bold text-black tracking-tight" data-testid="cart-total">
+        <span className="text-[16px] font-bold text-bold">Total</span>
+        <span className="text-[24px] font-bold text-bold tracking-tight" data-testid="cart-total">
           {convertToLocale({ amount: total ?? 0, currency_code })}
         </span>
       </div>

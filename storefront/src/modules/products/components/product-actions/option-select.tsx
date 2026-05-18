@@ -27,7 +27,10 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
 
   return (
     <div className="flex flex-col gap-y-3">
-      <span className="text-sm text-gray-500 font-medium">Select {title}</span>
+      <span className="text-sm text-gray-500 font-medium">
+        Select {title}
+        {isColor && current && <span className="text-black ml-1 font-semibold">{current}</span>}
+      </span>
       <div
         className="flex flex-wrap gap-3"
         data-testid={dataTestId}
@@ -46,31 +49,38 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
           }
 
           return (
-            <button
-              onClick={() => updateOption(option.title ?? "", v ?? "")}
-              key={v}
-              className={clx(
-                "transition-all duration-200 overflow-hidden",
-                {
-                  "h-12 rounded-full min-w-[3.5rem] px-5 flex items-center justify-center text-sm font-medium": !isColor || !imageUrl,
-                  "w-12 h-16 rounded-lg relative": isColor && imageUrl,
-                  "bg-black text-white border border-black": (!isColor || !imageUrl) && v === current,
-                  "bg-gray-50 text-gray-900 border border-gray-200 hover:bg-gray-100": (!isColor || !imageUrl) && v !== current,
-                  "border-2 border-black scale-105 shadow-md": isColor && imageUrl && v === current,
-                  "border-2 border-transparent hover:border-gray-300": isColor && imageUrl && v !== current,
-                }
-              )}
-              disabled={disabled}
-              data-testid="option-button"
-            >
-              {isColor && imageUrl ? (
-                <div className="relative w-full h-full">
-                  <Image src={imageUrl} alt={v || "Color"} fill className="object-cover" sizes="48px" />
-                </div>
-              ) : (
-                v
-              )}
-            </button>
+              <button
+                onClick={() => updateOption(option.title ?? "", v ?? "")}
+                key={v}
+                className={clx(
+                  "transition-all duration-200",
+                  {
+                    "h-12 rounded-full min-w-[3.5rem] px-5 flex items-center justify-center text-sm font-medium overflow-hidden": !isColor || !imageUrl,
+                    "flex flex-col items-center gap-1.5": isColor && imageUrl,
+                    "bg-black text-white border border-black": (!isColor || !imageUrl) && v === current,
+                    "bg-gray-50 text-gray-900 border border-gray-200 hover:bg-gray-100": (!isColor || !imageUrl) && v !== current,
+                  }
+                )}
+                disabled={disabled}
+                data-testid="option-button"
+              >
+                {isColor && imageUrl ? (
+                  <>
+                    <div className={clx("w-14 h-14 rounded-lg relative overflow-hidden transition-all duration-200", {
+                      "border-2 border-black scale-105 shadow-md": v === current,
+                      "border border-gray-200 hover:border-gray-300": v !== current,
+                    })}>
+                      <Image src={imageUrl} alt={v || "Color"} fill className="object-cover" sizes="56px" />
+                    </div>
+                    <span className={clx("text-xs font-medium", {
+                      "text-black": v === current,
+                      "text-gray-500": v !== current,
+                    })}>{v}</span>
+                  </>
+                ) : (
+                  v
+                )}
+              </button>
           )
         })}
       </div>

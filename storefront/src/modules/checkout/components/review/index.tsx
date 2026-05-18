@@ -23,7 +23,7 @@ const Review = ({ cart }: { cart: any }) => {
       <div className="flex flex-row items-center justify-between mb-6">
         <h2
           className={clx(
-            "flex flex-row text-[24px] font-bold text-black gap-x-2 items-center",
+            "flex flex-row text-[24px] font-bold text-bold gap-x-2 items-center",
             {
               "opacity-50 pointer-events-none select-none": !isOpen,
             }

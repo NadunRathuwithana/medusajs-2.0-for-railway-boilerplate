@@ -59,6 +59,19 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
     })
   }, [product.variants, options])
 
+  // Sync main image with selected variant
+  useEffect(() => {
+    if (selectedVariant) {
+      const variantImage = selectedVariant.thumbnail || selectedVariant.images?.[0]?.url
+      if (variantImage) {
+        const index = uniqueImages.indexOf(variantImage)
+        if (index !== -1 && index !== currentIndex) {
+          setCurrentIndex(index)
+        }
+      }
+    }
+  }, [selectedVariant, uniqueImages, currentIndex])
+
   const setOptionValue = (title: string, value: string) => {
     setOptions((prev) => ({ ...prev, [title]: value }))
   }
@@ -152,13 +165,13 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
             <>
               <button 
                 onClick={prevImage}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/80 backdrop-blur-sm hover:bg-white text-black flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-md"
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/80 backdrop-blur-sm hover:bg-white text-bold flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-md"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
               <button 
                 onClick={nextImage}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/80 backdrop-blur-sm hover:bg-white text-black flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-md"
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/80 backdrop-blur-sm hover:bg-white text-bold flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-md"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -176,7 +189,7 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
                 }}
                 className={clx(
                   "h-2.5 rounded-full transition-all duration-300 shadow-sm",
-                  idx === currentIndex ? "w-8 bg-black" : "w-2.5 bg-white/70 hover:bg-white"
+                  idx === currentIndex ? "w-8 bg-white" : "w-2.5 bg-white/70 hover:bg-white"
                 )}
               />
             ))}
@@ -190,7 +203,7 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
             <p className="text-sm font-medium text-gray-500 mb-2">
               {product.collection?.title || "Fashion"}
             </p>
-            <h2 className="text-3xl lg:text-4xl font-bold tracking-tight text-black mb-4 leading-tight">
+            <h2 className="text-3xl lg:text-4xl font-bold tracking-tight text-bold mb-4 leading-tight">
               {product.title}
             </h2>
             <div className="flex items-end justify-between">
@@ -228,7 +241,7 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
                 updateOption={setOptionValue}
                 title={option.title ?? ""}
                 disabled={isAdding}
-                variants={product.variants}
+                variants={product.variants ?? undefined}
               />
             ))}
           </div>
@@ -244,7 +257,7 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
             </button>
             <LocalizedClientLink
               href={`/products/${product.handle}`}
-              className="flex items-center justify-between w-full p-4 text-sm font-medium text-gray-600 hover:text-black transition-colors rounded-xl hover:bg-gray-50"
+              className="flex items-center justify-between w-full p-4 text-sm font-medium text-gray-600 hover:text-bold transition-colors rounded-xl hover:bg-gray-50"
             >
               View full details
               <ArrowRight className="w-4 h-4" />

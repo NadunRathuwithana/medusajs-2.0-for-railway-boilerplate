@@ -1,7 +1,6 @@
 "use client"
 
-import { useFormState } from "react-dom"
-
+import { useActionState } from "react"
 import Input from "@modules/common/components/input"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import ErrorMessage from "@modules/checkout/components/error-message"
@@ -14,36 +13,40 @@ type Props = {
 }
 
 const Register = ({ setCurrentView }: Props) => {
-  const [message, formAction] = useFormState(signup, null)
+  const [message, formAction] = useActionState(signup, null)
 
   return (
     <div
-      className="max-w-sm flex flex-col items-center"
+      className="w-full flex flex-col"
       data-testid="register-page"
     >
-      <h1 className="text-large-semi uppercase mb-6">
-        Become a Medusa Store Member
-      </h1>
-      <p className="text-center text-base-regular text-ui-fg-base mb-4">
-        Create your Medusa Store Member profile, and get access to an enhanced
-        shopping experience.
-      </p>
-      <form className="w-full flex flex-col" action={formAction}>
-        <div className="flex flex-col w-full gap-y-2">
-          <Input
-            label="First name"
-            name="first_name"
-            required
-            autoComplete="given-name"
-            data-testid="first-name-input"
-          />
-          <Input
-            label="Last name"
-            name="last_name"
-            required
-            autoComplete="family-name"
-            data-testid="last-name-input"
-          />
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold capitalize tracking-tight text-bold mb-2">
+          Become a Member
+        </h1>
+        <p className="text-sm font-medium text-gray-500">
+          Create your profile to unlock custom carry personalization, saved checkout preferences, and member-only rewards.
+        </p>
+      </div>
+
+      <form className="w-full flex flex-col gap-y-4" action={formAction}>
+        <div className="flex flex-col w-full gap-y-3.5">
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="First name"
+              name="first_name"
+              required
+              autoComplete="given-name"
+              data-testid="first-name-input"
+            />
+            <Input
+              label="Last name"
+              name="last_name"
+              required
+              autoComplete="family-name"
+              data-testid="last-name-input"
+            />
+          </div>
           <Input
             label="Email"
             name="email"
@@ -68,38 +71,44 @@ const Register = ({ setCurrentView }: Props) => {
             data-testid="password-input"
           />
         </div>
+
         <ErrorMessage error={message} data-testid="register-error" />
-        <span className="text-center text-ui-fg-base text-small-regular mt-6">
-          By creating an account, you agree to Medusa Store&apos;s{" "}
+
+        <p className="text-[11px] leading-relaxed text-gray-400 font-medium mt-4">
+          By creating an account, you agree to Cardle&apos;s{" "}
           <LocalizedClientLink
             href="/content/privacy-policy"
-            className="underline"
+            className="text-bold hover:text-gray-700 underline font-bold"
           >
             Privacy Policy
           </LocalizedClientLink>{" "}
           and{" "}
           <LocalizedClientLink
             href="/content/terms-of-use"
-            className="underline"
+            className="text-bold hover:text-gray-700 underline font-bold"
           >
             Terms of Use
           </LocalizedClientLink>
           .
-        </span>
-        <SubmitButton className="w-full mt-6" data-testid="register-button">
-          Join
+        </p>
+
+        <SubmitButton 
+          className="w-full mt-6 bg-black text-white hover:bg-zinc-900 transition-colors duration-200 py-3.5 rounded-full text-xs font-bold tracking-widest capitalize shadow-sm"
+          data-testid="register-button"
+        >
+          Join Now
         </SubmitButton>
       </form>
-      <span className="text-center text-ui-fg-base text-small-regular mt-6">
-        Already a member?{" "}
+
+      <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between text-xs font-medium capitalize tracking-wider text-gray-500">
+        <span>Already a member?</span>
         <button
           onClick={() => setCurrentView(LOGIN_VIEW.SIGN_IN)}
-          className="underline"
+          className="text-bold hover:text-gray-700 underline font-bold transition-colors"
         >
           Sign in
         </button>
-        .
-      </span>
+      </div>
     </div>
   )
 }

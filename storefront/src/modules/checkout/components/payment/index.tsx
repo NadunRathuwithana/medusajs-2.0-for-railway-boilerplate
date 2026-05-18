@@ -117,7 +117,7 @@ const Payment = ({
       <div className="flex flex-row items-center justify-between mb-6">
         <h2
           className={clx(
-            "flex flex-row text-[24px] font-bold text-black gap-x-2 items-center",
+            "flex flex-row text-[24px] font-bold text-bold gap-x-2 items-center",
             {
               "opacity-50 pointer-events-none select-none":
                 !isOpen && !paymentReady,
@@ -130,7 +130,7 @@ const Payment = ({
         {!isOpen && paymentReady && (
           <button
             onClick={handleEdit}
-            className="text-[14px] font-medium text-gray-500 hover:text-black transition-colors"
+            className="text-[14px] font-medium text-gray-500 hover:text-bold transition-colors"
             data-testid="edit-payment-button"
           >
             Edit
@@ -162,7 +162,7 @@ const Payment = ({
               </RadioGroup>
               {isStripe && stripeReady && (
                 <div className="mt-5 transition-all duration-150 ease-in-out">
-                  <span className="font-semibold text-black mb-2 block">
+                  <span className="font-semibold text-bold mb-2 block">
                     Enter your card details:
                   </span>
 
@@ -184,7 +184,7 @@ const Payment = ({
 
           {paidByGiftcard && (
             <div className="flex flex-col w-1/3">
-              <span className="font-semibold text-black mb-2">
+              <span className="font-semibold text-bold mb-2">
                 Payment method
               </span>
               <span
@@ -226,7 +226,7 @@ const Payment = ({
           {cart && paymentReady && activeSession ? (
             <div className="flex items-start gap-x-8 w-full text-sm">
               <div className="flex flex-col flex-1">
-                <span className="font-semibold text-black mb-2">
+                <span className="font-semibold text-bold mb-2">
                   Payment method
                 </span>
                 <span
@@ -238,7 +238,7 @@ const Payment = ({
                 </span>
               </div>
               <div className="flex flex-col flex-1">
-                <span className="font-semibold text-black mb-2">
+                <span className="font-semibold text-bold mb-2">
                   Payment details
                 </span>
                 <div
@@ -260,7 +260,7 @@ const Payment = ({
             </div>
           ) : paidByGiftcard ? (
             <div className="flex flex-col flex-1 text-sm">
-              <span className="font-semibold text-black mb-2">
+              <span className="font-semibold text-bold mb-2">
                 Payment method
               </span>
               <span

@@ -79,6 +79,8 @@ export default async function ProductPage({ params }: Props) {
     notFound()
   }
 
+  console.log("Single Product Response:", pricedProduct)
+
   return (
     <ProductTemplate
       product={pricedProduct}

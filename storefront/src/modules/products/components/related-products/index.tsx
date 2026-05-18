@@ -10,6 +10,8 @@ type RelatedProductsProps = {
 
 type StoreProductParamsWithTags = HttpTypes.StoreProductParams & {
   tags?: string[]
+  is_giftcard?: boolean
+  collection_id?: string[]
 }
 
 type StoreProductWithTags = HttpTypes.StoreProduct & {
@@ -58,7 +60,7 @@ export default async function RelatedProducts({
   return (
     <div className="w-full">
       <div className="flex flex-col items-center text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-black mb-4">
+        <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-bold mb-4">
           You Might Also Like
         </h2>
         <p className="text-sm text-gray-500 max-w-lg">
@@ -67,7 +69,7 @@ export default async function RelatedProducts({
       </div>
 
       <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
-        {products.map((product) => (
+        {products.slice(0, 4).map((product) => (
           <li key={product.id}>
             <ProductCard product={product} />
           </li>

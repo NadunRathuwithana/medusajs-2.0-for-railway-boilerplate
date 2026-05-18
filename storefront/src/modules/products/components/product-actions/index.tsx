@@ -65,6 +65,16 @@ export default function ProductActions({
     }))
   }
 
+  // update main image when variant changes
+  useEffect(() => {
+    if (selectedVariant) {
+      const imageUrl = selectedVariant.thumbnail || (selectedVariant.images?.[0]?.url)
+      if (imageUrl) {
+        window.dispatchEvent(new CustomEvent("updateImage", { detail: imageUrl }))
+      }
+    }
+  }, [selectedVariant])
+
   // check if the selected variant is in stock
   const inStock = useMemo(() => {
     if (selectedVariant && !selectedVariant.manage_inventory) {
