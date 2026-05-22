@@ -65,7 +65,7 @@ const Modal = ({
                     "max-w-xl": size === "medium",
                     "max-w-3xl": size === "large",
                     "bg-transparent shadow-none": search,
-                    "bg-white shadow-xl border rounded-rounded": !search,
+                    "bg-white shadow-xl border rounded-3xl": !search,
                   }
                 )}
               >
@@ -83,10 +83,14 @@ const Title: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { close } = useModal()
 
   return (
-    <Dialog.Title className="flex items-center justify-between">
-      <div className="text-large-semi">{children}</div>
+    <Dialog.Title className="flex items-center justify-between pb-4 mb-4 border-b border-gray-100">
+      <div className="text-xl font-bold text-gray-900 leading-none">{children}</div>
       <div>
-        <button onClick={close} data-testid="close-modal-button">
+        <button 
+          onClick={close} 
+          data-testid="close-modal-button"
+          className="text-gray-400 hover:text-gray-600 transition-colors p-1.5 hover:bg-gray-100 rounded-full"
+        >
           <X size={20} />
         </button>
       </div>
@@ -96,18 +100,22 @@ const Title: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 const Description: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <Dialog.Description className="flex text-small-regular text-ui-fg-base items-center justify-center pt-2 pb-4 h-full">
+    <Dialog.Description className="flex text-sm text-gray-500 pt-1 pb-3">
       {children}
     </Dialog.Description>
   )
 }
 
 const Body: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return <div className="flex justify-center">{children}</div>
+  return <div className="w-full">{children}</div>
 }
 
 const Footer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return <div className="flex items-center justify-end gap-x-4">{children}</div>
+  return (
+    <div className="flex items-center justify-end gap-x-3 mt-6 pt-4 border-t border-gray-100 w-full">
+      {children}
+    </div>
+  )
 }
 
 Modal.Title = Title

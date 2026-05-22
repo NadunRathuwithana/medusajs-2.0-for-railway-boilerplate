@@ -16,9 +16,13 @@ type InputProps = Omit<
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ type, name, label, touched, required, topLabel, ...props }, ref) => {
+  ({ type, name, label, touched, required, topLabel, value, defaultValue, ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false)
     const inputType = type === "password" && showPassword ? "text" : type
+
+    // Standardize values to avoid changing uncontrolled elements to controlled
+    const finalValue = value !== undefined && value !== null ? value : undefined
+    const finalDefaultValue = finalValue !== undefined ? undefined : (defaultValue !== undefined && defaultValue !== null ? defaultValue : "")
 
     return (
       <div className="flex flex-col w-full gap-1.5">
@@ -36,8 +40,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             name={name}
             id={name}
             required={required}
-            className="block w-full h-[46px] px-4 bg-gray-50 border border-gray-200 rounded-xl text-[15px] text-gray-900 focus:outline-none focus:ring-1 focus:ring-black focus:border-black hover:bg-gray-100 transition-colors duration-200 placeholder:text-gray-400"
+            className="block w-full h-[38px] px-3 bg-gray-50 border border-gray-200 rounded-lg text-[14px] text-gray-900 focus:outline-none focus:ring-1 focus:ring-black focus:border-black hover:bg-gray-100 transition-colors duration-200 placeholder:text-gray-400"
             ref={ref}
+            value={finalValue}
+            defaultValue={finalDefaultValue}
             {...props}
           />
           

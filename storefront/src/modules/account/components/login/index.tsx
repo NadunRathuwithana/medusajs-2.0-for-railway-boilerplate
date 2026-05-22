@@ -1,4 +1,5 @@
-import { useActionState } from "react"
+import { useActionState, useEffect } from "react"
+import { useParams } from "next/navigation"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import Input from "@modules/common/components/input"
 import ErrorMessage from "@modules/checkout/components/error-message"
@@ -10,7 +11,14 @@ type Props = {
 }
 
 const Login = ({ setCurrentView }: Props) => {
+  const { countryCode } = useParams()
   const [message, formAction] = useActionState(login, null)
+
+  useEffect(() => {
+    if (message === "SUCCESS") {
+      window.location.reload()
+    }
+  }, [message])
 
   return (
     <div
@@ -27,6 +35,7 @@ const Login = ({ setCurrentView }: Props) => {
       </div>
 
       <form className="w-full flex flex-col gap-y-4" action={formAction}>
+        <input type="hidden" name="countryCode" value={countryCode as string} />
         <div className="flex flex-col w-full gap-y-3.5">
           <Input
             label="Email"
@@ -47,7 +56,7 @@ const Login = ({ setCurrentView }: Props) => {
           />
         </div>
         
-        <ErrorMessage error={message} data-testid="login-error-message" />
+        <ErrorMessage error={message === "SUCCESS" ? null : message} data-testid="login-error-message" />
         
         <SubmitButton 
           data-testid="sign-in-button" 

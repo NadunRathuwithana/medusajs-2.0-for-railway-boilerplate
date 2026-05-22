@@ -1,5 +1,5 @@
 import { HttpTypes } from "@medusajs/types"
-import { Table, Text } from "@medusajs/ui"
+import { Text } from "@medusajs/ui"
 
 import LineItemOptions from "@modules/common/components/line-item-options"
 import LineItemPrice from "@modules/common/components/line-item-price"
@@ -12,38 +12,37 @@ type ItemProps = {
 
 const Item = ({ item }: ItemProps) => {
   return (
-    <Table.Row className="w-full" data-testid="product-row">
-      <Table.Cell className="!pl-0 p-4 w-24">
-        <div className="flex w-16">
-          <Thumbnail thumbnail={item.thumbnail} size="square" />
-        </div>
-      </Table.Cell>
+    <div className="flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-xl w-full" data-testid="product-row">
+      <div className="w-16 flex-shrink-0">
+        <Thumbnail thumbnail={item.thumbnail} size="square" className="rounded-md" />
+      </div>
 
-      <Table.Cell className="text-left">
+      <div className="flex-1 flex flex-col justify-center">
         <Text
-          className="txt-medium-plus text-ui-fg-base"
+          className="text-base font-semibold text-gray-900"
           data-testid="product-name"
         >
           {item.title}
         </Text>
         {item.variant && (
-          <LineItemOptions variant={item.variant} data-testid="product-variant" />
+          <div className="mt-1">
+            <LineItemOptions variant={item.variant} data-testid="product-variant" />
+          </div>
         )}
-      </Table.Cell>
+      </div>
 
-      <Table.Cell className="!pr-0">
-        <span className="!pr-0 flex flex-col items-end h-full justify-center">
-          <span className="flex gap-x-1 ">
-            <Text className="text-ui-fg-muted">
-              <span data-testid="product-quantity">{item.quantity}</span>x{" "}
-            </Text>
-            <LineItemUnitPrice item={item} style="tight" />
-          </span>
-
-          <LineItemPrice item={item} style="tight" />
+      <div className="flex flex-col items-end justify-center">
+        <span className="flex gap-x-1 items-center text-sm">
+          <Text className="text-gray-500 font-medium">
+            <span data-testid="product-quantity">{item.quantity}</span>x{" "}
+          </Text>
+          <LineItemUnitPrice item={item} style="tight" />
         </span>
-      </Table.Cell>
-    </Table.Row>
+        <div className="mt-1 font-semibold text-gray-900">
+          <LineItemPrice item={item} style="tight" />
+        </div>
+      </div>
+    </div>
   )
 }
 

@@ -1,6 +1,7 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useEffect } from "react"
+import { useParams } from "next/navigation"
 import Input from "@modules/common/components/input"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import ErrorMessage from "@modules/checkout/components/error-message"
@@ -13,7 +14,14 @@ type Props = {
 }
 
 const Register = ({ setCurrentView }: Props) => {
+  const { countryCode } = useParams()
   const [message, formAction] = useActionState(signup, null)
+
+  useEffect(() => {
+    if (message === "SUCCESS") {
+      window.location.reload()
+    }
+  }, [message])
 
   return (
     <div
@@ -30,6 +38,7 @@ const Register = ({ setCurrentView }: Props) => {
       </div>
 
       <form className="w-full flex flex-col gap-y-4" action={formAction}>
+        <input type="hidden" name="countryCode" value={countryCode as string} />
         <div className="flex flex-col w-full gap-y-3.5">
           <div className="grid grid-cols-2 gap-4">
             <Input
@@ -72,7 +81,7 @@ const Register = ({ setCurrentView }: Props) => {
           />
         </div>
 
-        <ErrorMessage error={message} data-testid="register-error" />
+        <ErrorMessage error={message === "SUCCESS" ? null : message} data-testid="register-error" />
 
         <p className="text-[11px] leading-relaxed text-gray-400 font-medium mt-4">
           By creating an account, you agree to Cardle&apos;s{" "}

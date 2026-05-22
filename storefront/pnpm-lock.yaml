@@ -19,13 +19,13 @@ importers:
         version: 2.13.6(react@19.0.4)
       '@medusajs/js-sdk':
         specifier: preview
-        version: 2.15.2-snapshot-20260513083227
+        version: 2.15.3-snapshot-20260515193434
       '@medusajs/types':
         specifier: preview
-        version: 2.15.2-snapshot-20260513083227
+        version: 2.15.3-snapshot-20260515193434
       '@medusajs/ui':
         specifier: preview
-        version: 4.1.12-snapshot-20260513083227(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@19.0.4(react@19.0.4))(react@19.0.4)(typescript@5.3.2)
+        version: 4.1.13-snapshot-20260515193434(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@19.0.4(react@19.0.4))(react@19.0.4)(typescript@5.3.2)
       '@meilisearch/instant-meilisearch':
         specifier: ^0.7.1
         version: 0.7.1
@@ -56,6 +56,9 @@ importers:
       axios:
         specifier: ^1.15.0
         version: 1.15.0
+      framer-motion:
+        specifier: ^12.38.0
+        version: 12.38.0(react-dom@19.0.4(react@19.0.4))(react@19.0.4)
       lodash:
         specifier: ^4.18.1
         version: 4.18.1
@@ -107,7 +110,7 @@ importers:
         version: 0.2.12-preview-20240505115807
       '@medusajs/ui-preset':
         specifier: preview
-        version: 2.15.2-snapshot-20260513083227(tailwindcss@3.4.19)
+        version: 2.15.3-snapshot-20260515193434(tailwindcss@3.4.19)
       '@playwright/test':
         specifier: ^1.55.1
         version: 1.57.0
@@ -621,17 +624,17 @@ packages:
     peerDependencies:
       react: ^18.3.1
 
-  '@medusajs/icons@2.15.2-snapshot-20260513083227':
-    resolution: {integrity: sha512-kT1mRw4Elnro8HmEZKGTvfn6iIahjwQRZ/ECVL2FJbc5SHxBfb6VASWMnndeKKgNybClbNd+OLE2M0sFDNaQUA==}
+  '@medusajs/icons@2.15.3-snapshot-20260515193434':
+    resolution: {integrity: sha512-0i+rfTMHtqw7mW/QEGyLCFykGbiW5MXMpJEqv1kbUf0FPf9sH2nDjI7gLA944HZCydstZgxH8OuZhwQgBGVn8A==}
     peerDependencies:
       react: ^19.2.5
 
-  '@medusajs/js-sdk@2.15.2-snapshot-20260513083227':
-    resolution: {integrity: sha512-vC8QtiJOI2TgOFuzhm2+TFi+ZuqDcyjnm8CmEkRbCS8Z/s294Qp7UwRYrQDcnb7hHgwEE6Fw8yehNjVJ6+1NhA==}
+  '@medusajs/js-sdk@2.15.3-snapshot-20260515193434':
+    resolution: {integrity: sha512-/dyDFknJQD0lN2UTQnJD/hFydom5A0jfOPMJhqVVIlwr2QuC3qP8sYqGOY2qokkoFPshYpk+Xx3fAcYC1Kwynw==}
     engines: {node: '>=20'}
 
-  '@medusajs/types@2.15.2-snapshot-20260513083227':
-    resolution: {integrity: sha512-LQSgDlOTX38fROek+QLT2d0tz1XoQiGdkeLmIr8XJfBbdjxjjXkpj+FAvLt/AED4Q9A61sWXRThq9Vuue10R1Q==}
+  '@medusajs/types@2.15.3-snapshot-20260515193434':
+    resolution: {integrity: sha512-v4IZBTwGuHFM1g+i1OWAUiwyDNd9JlhGN53QSoW6FlwwlBh5/JHQNx2vQ20JRrI/FU/L7RCfS9d0FYH1pT6B9A==}
     engines: {node: '>=20'}
     peerDependencies:
       ioredis: ^5.4.1
@@ -642,13 +645,13 @@ packages:
       vite:
         optional: true
 
-  '@medusajs/ui-preset@2.15.2-snapshot-20260513083227':
-    resolution: {integrity: sha512-ThfmGiQUy+g4C1SKqpTyLF5DF5xYPsNsGBcmlYkJRGrQO7ObUHwTCRkqOvS8XhE1rdMgygtWWgG6Ki8/MDnWgQ==}
+  '@medusajs/ui-preset@2.15.3-snapshot-20260515193434':
+    resolution: {integrity: sha512-46HHumuMh7O67jGHVnQT/DgcZLrSGkz+m2BYEYwg7Nw7LowBj+qybFujcWEZemigmvqtzDCX/HmJ3fIVy+YDyw==}
     peerDependencies:
       tailwindcss: ^3.4.3
 
-  '@medusajs/ui@4.1.12-snapshot-20260513083227':
-    resolution: {integrity: sha512-inDA0xznlQScHyvfwh/tjZ+lXZ9jMX+0FzAUX6mggesKKe76fWmHLBndxbim82Hp2izAmAQTj1B0q0e+2h5RUQ==}
+  '@medusajs/ui@4.1.13-snapshot-20260515193434':
+    resolution: {integrity: sha512-dNtYoVFCQxe8U5Lq6PvbdzEa2EjWgEtX/4UPKRxhU1E0KDZEsXkYz0vvdDZ0o1r6z2G6YkDRTRFCkkoPyLRjug==}
     peerDependencies:
       react: ^18.3.1
       react-dom: ^18.3.1
@@ -3048,6 +3051,20 @@ packages:
   fraction.js@4.3.7:
     resolution: {integrity: sha512-ZsDfxO51wGAXREY55a7la9LScWpwv9RxIrYABrlvOFBlH/ShPnrtsXeuUIfXKKOVicNxQ+o8JTbJvjS4M89yew==}
 
+  framer-motion@12.38.0:
+    resolution: {integrity: sha512-rFYkY/pigbcswl1XQSb7q424kSTQ8q6eAC+YUsSKooHQYuLdzdHjrt6uxUC+PRAO++q5IS7+TamgIw1AphxR+g==}
+    peerDependencies:
+      '@emotion/is-prop-valid': '*'
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      '@emotion/is-prop-valid':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+
   fsevents@2.3.2:
     resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -3489,6 +3506,12 @@ packages:
   mkdirp@0.3.0:
     resolution: {integrity: sha512-OHsdUcVAQ6pOtg5JYWpCBo9W/GySVuwvP9hueRMW7UqshC0tbfzLv8wjySTPm3tfUZ/21CE9E1pJagOA91Pxew==}
     deprecated: Legacy versions of mkdirp are no longer supported. Please update to mkdirp 1.x. (Note that the API surface has changed to use Promises in 1.x.)
+
+  motion-dom@12.38.0:
+    resolution: {integrity: sha512-pdkHLD8QYRp8VfiNLb8xIBJis1byQ9gPT3Jnh2jqfFtAsWUA3dEepDlsWe/xMpO8McV+VdpKVcp+E+TGJEtOoA==}
+
+  motion-utils@12.36.0:
+    resolution: {integrity: sha512-eHWisygbiwVvf6PZ1vhaHCLamvkSbPIeAYxWUuL3a2PD/TROgE7FvfHWTIH4vMl798QLfMw15nRqIaRDXTlYRg==}
 
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
@@ -4914,31 +4937,31 @@ snapshots:
     dependencies:
       react: 19.0.4
 
-  '@medusajs/icons@2.15.2-snapshot-20260513083227(react@19.0.4)':
+  '@medusajs/icons@2.15.3-snapshot-20260515193434(react@19.0.4)':
     dependencies:
       react: 19.0.4
 
-  '@medusajs/js-sdk@2.15.2-snapshot-20260513083227':
+  '@medusajs/js-sdk@2.15.3-snapshot-20260515193434':
     dependencies:
       fetch-event-stream: 0.1.5
       qs: 6.15.1
 
-  '@medusajs/types@2.15.2-snapshot-20260513083227':
+  '@medusajs/types@2.15.3-snapshot-20260515193434':
     dependencies:
       bignumber.js: 9.1.2
 
-  '@medusajs/ui-preset@2.15.2-snapshot-20260513083227(tailwindcss@3.4.19)':
+  '@medusajs/ui-preset@2.15.3-snapshot-20260515193434(tailwindcss@3.4.19)':
     dependencies:
       '@tailwindcss/forms': 0.5.9(tailwindcss@3.4.19)
       tailwindcss: 3.4.19
       tailwindcss-animate: 1.0.7(tailwindcss@3.4.19)
 
-  '@medusajs/ui@4.1.12-snapshot-20260513083227(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@19.0.4(react@19.0.4))(react@19.0.4)(typescript@5.3.2)':
+  '@medusajs/ui@4.1.13-snapshot-20260515193434(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@19.0.4(react@19.0.4))(react@19.0.4)(typescript@5.3.2)':
     dependencies:
       '@dnd-kit/core': 6.3.1(react-dom@19.0.4(react@19.0.4))(react@19.0.4)
       '@dnd-kit/sortable': 8.0.0(@dnd-kit/core@6.3.1(react-dom@19.0.4(react@19.0.4))(react@19.0.4))(react@19.0.4)
       '@dnd-kit/utilities': 3.2.2(react@19.0.4)
-      '@medusajs/icons': 2.15.2-snapshot-20260513083227(react@19.0.4)
+      '@medusajs/icons': 2.15.3-snapshot-20260515193434(react@19.0.4)
       '@radix-ui/react-dialog': 1.1.4(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@19.0.4(react@19.0.4))(react@19.0.4)
       '@radix-ui/react-dismissable-layer': 1.1.4(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@19.0.4(react@19.0.4))(react@19.0.4)
       '@tanstack/react-table': 8.20.5(react-dom@19.0.4(react@19.0.4))(react@19.0.4)
@@ -7958,6 +7981,15 @@ snapshots:
 
   fraction.js@4.3.7: {}
 
+  framer-motion@12.38.0(react-dom@19.0.4(react@19.0.4))(react@19.0.4):
+    dependencies:
+      motion-dom: 12.38.0
+      motion-utils: 12.36.0
+      tslib: 2.8.1
+    optionalDependencies:
+      react: 19.0.4
+      react-dom: 19.0.4(react@19.0.4)
+
   fsevents@2.3.2:
     optional: true
 
@@ -8402,6 +8434,12 @@ snapshots:
   minipass@7.1.2: {}
 
   mkdirp@0.3.0: {}
+
+  motion-dom@12.38.0:
+    dependencies:
+      motion-utils: 12.36.0
+
+  motion-utils@12.36.0: {}
 
   ms@2.1.3: {}
 

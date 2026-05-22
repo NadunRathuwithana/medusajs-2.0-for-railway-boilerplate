@@ -17,7 +17,7 @@ export type NativeSelectProps = {
 
 const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
   (
-    { placeholder = "Select...", defaultValue, className, children, label, required, name, ...props },
+    { placeholder = "Select...", defaultValue, value, className, children, label, required, name, ...props },
     ref
   ) => {
     const innerRef = useRef<HTMLSelectElement>(null)
@@ -47,12 +47,13 @@ const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
         >
           <select
             ref={innerRef}
-            defaultValue={defaultValue}
             name={name}
             id={name}
             required={required}
+            value={value !== undefined ? value : undefined}
+            defaultValue={value !== undefined ? undefined : defaultValue}
             {...props}
-            className="appearance-none block w-full h-[46px] px-4 bg-gray-50 border border-gray-200 rounded-xl text-[15px] text-gray-900 focus:outline-none focus:ring-1 focus:ring-black focus:border-black hover:bg-gray-100 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="appearance-none block w-full h-[38px] px-3 bg-gray-50 border border-gray-200 rounded-lg text-[14px] text-gray-900 focus:outline-none focus:ring-1 focus:ring-black focus:border-black hover:bg-gray-100 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <option disabled value="">
               {placeholder}

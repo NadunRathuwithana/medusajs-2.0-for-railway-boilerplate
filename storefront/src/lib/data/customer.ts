@@ -6,11 +6,12 @@ import { HttpTypes } from "@medusajs/types"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import { cache } from "react"
-import { getAuthHeaders, removeAuthToken, setAuthToken } from "./cookies"
+import { getAuthHeaders, removeAuthToken } from "./cookies"
+import { cookies } from "next/headers"
 
 export const getCustomer = cache(async function () {
   return await sdk.store.customer
-    .retrieve({}, { next: { tags: ["customer"] }, ...getAuthHeaders() })
+    .retrieve({}, { next: { tags: ["customer"] }, ...await getAuthHeaders() })
     .then(({ customer }) => customer)
     .catch(() => null)
 })
@@ -19,7 +20,7 @@ export const updateCustomer = cache(async function (
   body: HttpTypes.StoreUpdateCustomer
 ) {
   const updateRes = await sdk.store.customer
-    .update(body, {}, getAuthHeaders())
+    .update(body, {}, await getAuthHeaders())
     .then(({ customer }) => customer)
     .catch(medusaError)
 
@@ -29,6 +30,7 @@ export const updateCustomer = cache(async function (
 
 export async function signup(_currentState: unknown, formData: FormData) {
   const password = formData.get("password") as string
+  const countryCode = formData.get("countryCode") as string
   const customerForm = {
     email: formData.get("email") as string,
     first_name: formData.get("first_name") as string,
@@ -36,6 +38,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
     phone: formData.get("phone") as string,
   }
 
+  let success = false
   try {
     const token = await sdk.auth.register("customer", "emailpass", {
       email: customerForm.email,
@@ -55,37 +58,63 @@ export async function signup(_currentState: unknown, formData: FormData) {
       password,
     })
 
-    setAuthToken(typeof loginToken === 'string' ? loginToken : loginToken.location)
+    const tokenValue = typeof loginToken === 'string' ? loginToken : loginToken.location
+    const cookiesStore = await cookies()
+    cookiesStore.set("_medusa_jwt", tokenValue, {
+      maxAge: 60 * 60 * 24 * 7,
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    })
 
     revalidateTag("customer")
-    return createdCustomer
+    success = true
   } catch (error: any) {
     return error.toString()
+  }
+
+  if (success) {
+    return "SUCCESS"
   }
 }
 
 export async function login(_currentState: unknown, formData: FormData) {
   const email = formData.get("email") as string
   const password = formData.get("password") as string
+  const countryCode = formData.get("countryCode") as string
 
+  let success = false
   try {
-    await sdk.auth
-      .login("customer", "emailpass", { email, password })
-      .then((token) => {
-        setAuthToken(typeof token === 'string' ? token : token.location)
-        revalidateTag("customer")
-      })
+    const token = await sdk.auth.login("customer", "emailpass", { email, password })
+    const tokenValue = typeof token === 'string' ? token : token.location
+    const cookiesStore = await cookies()
+    cookiesStore.set("_medusa_jwt", tokenValue, {
+      maxAge: 60 * 60 * 24 * 7,
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    })
+    revalidateTag("customer")
+    success = true
   } catch (error: any) {
     return error.toString()
+  }
+
+  if (success) {
+    return "SUCCESS"
   }
 }
 
 export async function signout(countryCode: string) {
-  await sdk.auth.logout()
-  removeAuthToken()
+  try {
+    await sdk.auth.logout()
+  } catch (error) {
+    console.error("SDK logout error:", error)
+  }
+  await removeAuthToken()
   revalidateTag("auth")
   revalidateTag("customer")
-  redirect(`/${countryCode}/account`)
+  redirect(`/${countryCode}`)
 }
 
 export const addCustomerAddress = async (
@@ -95,18 +124,18 @@ export const addCustomerAddress = async (
   const address = {
     first_name: formData.get("first_name") as string,
     last_name: formData.get("last_name") as string,
-    company: formData.get("company") as string,
+    company: (formData.get("company") as string) || "",
     address_1: formData.get("address_1") as string,
-    address_2: formData.get("address_2") as string,
+    address_2: (formData.get("address_2") as string) || "",
     city: formData.get("city") as string,
     postal_code: formData.get("postal_code") as string,
-    province: formData.get("province") as string,
-    country_code: formData.get("country_code") as string,
-    phone: formData.get("phone") as string,
+    province: (formData.get("province") as string) || "",
+    country_code: (formData.get("country_code") as string)?.toLowerCase() || "lk",
+    phone: (formData.get("phone") as string) || "",
   }
 
   return sdk.store.customer
-    .createAddress(address, {}, getAuthHeaders())
+    .createAddress(address, {}, await getAuthHeaders())
     .then(({ customer }) => {
       revalidateTag("customer")
       return { success: true, error: null }
@@ -120,7 +149,7 @@ export const deleteCustomerAddress = async (
   addressId: string
 ): Promise<void> => {
   await sdk.store.customer
-    .deleteAddress(addressId, getAuthHeaders())
+    .deleteAddress(addressId, await getAuthHeaders())
     .then(() => {
       revalidateTag("customer")
       return { success: true, error: null }
@@ -139,18 +168,18 @@ export const updateCustomerAddress = async (
   const address = {
     first_name: formData.get("first_name") as string,
     last_name: formData.get("last_name") as string,
-    company: formData.get("company") as string,
+    company: (formData.get("company") as string) || "",
     address_1: formData.get("address_1") as string,
-    address_2: formData.get("address_2") as string,
+    address_2: (formData.get("address_2") as string) || "",
     city: formData.get("city") as string,
     postal_code: formData.get("postal_code") as string,
-    province: formData.get("province") as string,
-    country_code: formData.get("country_code") as string,
-    phone: formData.get("phone") as string,
+    province: (formData.get("province") as string) || "",
+    country_code: (formData.get("country_code") as string)?.toLowerCase() || "lk",
+    phone: (formData.get("phone") as string) || "",
   }
 
   return sdk.store.customer
-    .updateAddress(addressId, address, {}, getAuthHeaders())
+    .updateAddress(addressId, address, {}, await getAuthHeaders())
     .then(() => {
       revalidateTag("customer")
       return { success: true, error: null }
