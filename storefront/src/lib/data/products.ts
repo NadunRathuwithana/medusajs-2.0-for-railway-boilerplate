@@ -21,7 +21,10 @@ export const getProductsById = cache(async function ({
       },
       { next: { tags: ["products"] } }
     )
-    .then(({ products }) => products)
+    .then(({ products }) => {
+      console.log("getProductsById response:", JSON.stringify(products, null, 2))
+      return products
+    })
 })
 
 export const getProductByHandle = cache(async function (
@@ -37,7 +40,10 @@ export const getProductByHandle = cache(async function (
       },
       { next: { tags: ["products"] } }
     )
-    .then(({ products }) => products[0])
+    .then(({ products }) => {
+      console.log("getProductByHandle response:", JSON.stringify(products[0], null, 2))
+      return products[0]
+    })
 })
 
 export const getProductsList = cache(async function ({
@@ -76,6 +82,7 @@ export const getProductsList = cache(async function ({
       { next: { tags: ["products"] } }
     )
     .then(({ products, count }) => {
+      console.log("getProductsList response:", JSON.stringify({ count, products }, null, 2))
       const nextPage = count > offset + limit ? pageParam + 1 : null
 
       return {

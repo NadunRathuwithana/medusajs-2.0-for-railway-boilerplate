@@ -141,12 +141,12 @@ const AccountNav = ({
               </li>
               <li className="w-full">
                 <AccountNavLink
-                  href="/account/profile"
+                  href="/account/orders"
                   route={route!}
-                  data-testid="profile-link"
-                  icon={<User size={20} />}
+                  data-testid="orders-link"
+                  icon={<Package size={20} />}
                 >
-                  Profile
+                  Orders
                 </AccountNavLink>
               </li>
               <li className="w-full">
@@ -161,12 +161,12 @@ const AccountNav = ({
               </li>
               <li className="w-full">
                 <AccountNavLink
-                  href="/account/orders"
+                  href="/account/profile"
                   route={route!}
-                  data-testid="orders-link"
-                  icon={<Package size={20} />}
+                  data-testid="profile-link"
+                  icon={<User size={20} />}
                 >
-                  Orders
+                  Profile
                 </AccountNavLink>
               </li>
               <li className="w-full mt-4 pt-4 border-t border-gray-100">

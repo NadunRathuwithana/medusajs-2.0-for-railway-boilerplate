@@ -117,7 +117,7 @@ export default async function Footer() {
               </div>
 
               {/* Newsletter form */}
-              <div className="flex flex-col gap-2.5">
+              {/* <div className="flex flex-col gap-2.5">
                 <p className="text-xs text-gray-400 font-medium leading-relaxed">
                   Join our exclusive inner circle to get early notifications of
                   product drops and personalization releases.
@@ -135,33 +135,41 @@ export default async function Footer() {
                     Join
                   </button>
                 </form>
-              </div>
+              </div> */}
 
               {/* Social Icons */}
-              <div className="flex items-center gap-4 mt-2">
+              <div className="flex items-center gap-2 mt-2">
                 <a
-                  href="https://www.facebook.com/cardle"
+                  href="https://www.facebook.com/people/Cardlelk/61585796349137/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="hover:opacity-80 transition-opacity"
                 >
-                  <FacebookIcon className="w-4.5 h-4.5" />
+                  <img src="/social/facebook.png" alt="Facebook" className="w-8 h-8 object-contain" />
                 </a>
                 <a
-                  href="https://www.instagram.com/cardle"
+                  href="https://www.instagram.com/cardle_lk/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="hover:opacity-80 transition-opacity"
                 >
-                  <InstagramIcon className="w-4.5 h-4.5" />
+                  <img src="/social/instagram.png" alt="Instagram" className="w-8 h-8 object-contain" />
                 </a>
                 <a
-                  href="https://www.tiktok.com/@cardle"
+                  href="https://www.tiktok.com/@cardle.srilanka/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="hover:opacity-80 transition-opacity"
                 >
-                  <TikTokIcon className="w-4.5 h-4.5" />
+                  <img src="/social/tiktok.png" alt="TikTok" className="w-8 h-8 object-contain" />
+                </a>
+                <a
+                  href="https://wa.me/94779497859"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:opacity-80 transition-opacity"
+                >
+                  <img src="/social/whatsapp.png" alt="WhatsApp" className="w-8 h-8 object-contain" />
                 </a>
               </div>
             </div>
@@ -220,14 +228,14 @@ export default async function Footer() {
                 Information
               </h4>
               <ul className="flex flex-col gap-3 text-[13px] text-gray-400 font-medium">
-                <li>
+                {/* <li>
                   <LocalizedClientLink
                     href="/about"
                     className="hover:text-white transition-colors"
                   >
                     About Us
                   </LocalizedClientLink>
-                </li>
+                </li> */}
                 <li>
                   <LocalizedClientLink
                     href="/contact"
@@ -309,6 +317,12 @@ export default async function Footer() {
                 className="hover:text-white transition-colors"
               >
                 Refund policy
+              </LocalizedClientLink>
+              <LocalizedClientLink
+                href="/returns"
+                className="hover:text-white transition-colors"
+              >
+                Return & Exchange policy
               </LocalizedClientLink>
               <LocalizedClientLink
                 href="/shipping"

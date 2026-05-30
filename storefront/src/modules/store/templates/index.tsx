@@ -30,15 +30,15 @@ const StoreTemplate = ({
 
         {/* Hero Content */}
         <div className="relative z-10 w-full max-w-[1440px] px-6 md:px-16 flex flex-col items-center justify-center text-center h-full pt-16">
-          <p className="text-zinc-900 mix-blend-difference text-sm md:text-base font-bold tracking-[0.3em] capitalize mb-6 drop-shadow-sm">
+          <p className="text-zinc-900 mix-blend-difference text-xs md:text-base font-bold tracking-[0.3em] capitalize mb-6 drop-shadow-sm">
             The Collection
           </p>
-          <h1 className="text-[4.5rem] md:text-[6rem] lg:text-[8rem] font-extrabold capitalize tracking-tighter leading-[0.85] text-zinc-900 mix-blend-difference drop-shadow-sm mb-8">
+          <h1 className="text-[3.5rem] sm:text-[4.5rem] md:text-[6rem] lg:text-[8rem] font-extrabold capitalize tracking-tighter leading-[0.85] text-zinc-900 mix-blend-difference drop-shadow-sm mb-8">
             Shop
             <br />
             Cardle
           </h1>
-          <p className="text-xl md:text-2xl text-zinc-900 mix-blend-difference font-medium max-w-2xl mx-auto italic drop-shadow-sm">
+          <p className="text-lg sm:text-xl md:text-2xl text-zinc-900 mix-blend-difference font-medium max-w-2xl mx-auto italic drop-shadow-sm">
             Discover the ultimate everyday carry.
           </p>
         </div>
@@ -46,11 +46,13 @@ const StoreTemplate = ({
 
       <div className="content-container max-w-[1440px] mx-auto px-6 md:px-16 py-12" data-testid="category-container">
         {/* Header Section */}
-        <div className="flex items-center justify-between mb-12 border-b border-gray-150 pb-6">
-          <h1 className="text-4xl font-bold capitalize tracking-tight text-bold" data-testid="store-page-title">
+        <div className="flex flex-row items-center justify-between mb-8 sm:mb-12 border-b border-gray-150 pb-6 gap-4">
+          <h1 className="text-3xl sm:text-4xl font-bold capitalize tracking-tight text-bold" data-testid="store-page-title">
             All products
           </h1>
-          <SortDropdown sortBy={sort} />
+          <div>
+            <SortDropdown sortBy={sort} />
+          </div>
         </div>
 
         {/* Products Grid */}

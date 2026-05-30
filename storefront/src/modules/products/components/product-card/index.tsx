@@ -8,6 +8,7 @@ import { addToCart } from "@lib/data/cart"
 import { getProductPrice } from "@lib/util/get-product-price"
 import { clx } from "@medusajs/ui"
 import QuickViewModal from "./quick-view-modal"
+import { convertToLocale } from "@lib/util/money"
 
 function AddToCartBtn({ product, onOpenModal }: { product: HttpTypes.StoreProduct, onOpenModal: () => void }) {
   const [isAdding, setIsAdding] = useState(false)
@@ -45,9 +46,9 @@ function AddToCartBtn({ product, onOpenModal }: { product: HttpTypes.StoreProduc
     <button
       onClick={handleAddToCart}
       disabled={isAdding || (!hasOptions && (!product.variants || product.variants.length === 0))}
-      className="bg-[#111111] text-white px-6 py-2.5 rounded-full text-xs font-bold tracking-widest capitalize hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      className="w-full lg:w-auto bg-[#111111] text-white px-3 sm:px-6 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-xs font-bold tracking-widest capitalize hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
     >
-      {isAdding ? "Adding..." : hasOptions ? "Choose Options" : "Add to Cart"}
+      {isAdding ? "Adding..." : hasOptions ? "Options" : "Add to Cart"}
     </button>
   )
 }
@@ -140,37 +141,49 @@ export default function ProductCard({
   )
 
   const info = (
-    <div className="flex flex-col flex-grow px-1">
-      <h3 className="text-xl font-bold tracking-tighter mb-2 text-bold line-clamp-1 font-sans">
+    <div className="flex flex-col flex-grow px-1 mt-2">
+      <h3 className="text-sm sm:text-xl font-bold tracking-tighter mb-1 sm:mb-2 text-bold line-clamp-1 font-sans">
         {product.title}
       </h3>
-      <div className="mt-auto flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="mt-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2 sm:gap-3">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           {cheapestPrice ? (
             <>
-              <span className="text-md font-semibold text-gray-700">
-                {cheapestPrice.calculated_price}
-              </span>
               {Number(cheapestPrice.percentage_diff) > 0 && (
-                <span className="text-sm font-medium text-gray-400 line-through">
+                <span className="text-xs sm:text-sm font-medium text-gray-400 line-through">
                   {cheapestPrice.original_price}
                 </span>
               )}
+              <span className={clx("text-sm sm:text-md font-semibold", Number(cheapestPrice.percentage_diff) > 0 ? "text-[#e11d48]" : "text-gray-700")}>
+                {cheapestPrice.calculated_price}
+              </span>
+              {Number(cheapestPrice.percentage_diff) > 0 && (
+                <div className="flex items-center gap-1 mt-1 sm:mt-0 w-full sm:w-auto">
+                  <span className="bg-[#fce7f3] text-[#be185d] text-[10px] font-medium px-2 py-0.5 rounded-full">
+                    {cheapestPrice.percentage_diff}% off
+                  </span>
+                  <span className="bg-[#e11d48] text-white text-[10px] font-medium px-2 py-0.5 rounded-full">
+                    -{convertToLocale({ amount: cheapestPrice.original_price_number - cheapestPrice.calculated_price_number, currency_code: cheapestPrice.currency_code })}
+                  </span>
+                </div>
+              )}
             </>
           ) : (
-            <span className="text-md font-semibold text-gray-500">Coming soon</span>
+            <span className="text-sm sm:text-md font-semibold text-gray-500">Coming soon</span>
           )}
         </div>
-        {cheapestPrice ? (
-          <AddToCartBtn product={product} onOpenModal={() => setIsModalOpen(true)} />
-        ) : (
-          <button
-            disabled
-            className="bg-zinc-100 text-zinc-400 border border-zinc-200 px-6 py-2.5 rounded-full text-xs font-bold tracking-widest capitalize cursor-not-allowed select-none"
-          >
-            Unavailable
-          </button>
-        )}
+        <div className="w-full lg:w-auto">
+          {cheapestPrice ? (
+            <AddToCartBtn product={product} onOpenModal={() => setIsModalOpen(true)} />
+          ) : (
+            <button
+              disabled
+              className="w-full lg:w-auto bg-zinc-100 text-zinc-400 border border-zinc-200 px-3 sm:px-6 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-xs font-bold tracking-widest capitalize cursor-not-allowed select-none whitespace-nowrap"
+            >
+              Unavailable
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )

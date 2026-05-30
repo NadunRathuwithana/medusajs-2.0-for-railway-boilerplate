@@ -10,13 +10,13 @@ export default function PromoBanner() {
         className="block w-full h-[350px] md:h-[500px] lg:h-[700px] rounded-3xl overflow-hidden relative group"
       >
         <Image
-          src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
+          src="/home/customize.jpg"
           alt="Cardle - Bespoke Craftsmanship"
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1440px) 100vw, 1440px"
-          className="object-cover object-center group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
+          className="object-cover object-center"
         />
-        <div className="absolute inset-0 bg-black/50 group-hover:bg-black/60 transition-colors duration-[1500ms]" />
+        <div className="absolute inset-0 bg-black/60" />
         
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 md:p-12">
           <span className="text-gray-300 uppercase tracking-[0.3em] text-xs md:text-sm font-semibold mb-4 md:mb-6 drop-shadow-md">

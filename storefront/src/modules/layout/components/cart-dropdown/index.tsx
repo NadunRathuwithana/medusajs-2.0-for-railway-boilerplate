@@ -36,7 +36,7 @@ const CartDropdown = ({
       return acc + item.quantity
     }, 0) || 0
 
-  const subtotal = cartState?.subtotal ?? 0
+  const subtotal = (cartState?.subtotal ?? 0) - (cartState?.discount_total ?? 0)
   const itemRef = useRef<number>(totalItems || 0)
   const pathname = usePathname()
 
@@ -170,8 +170,7 @@ const CartDropdown = ({
                                 {convertToLocale({
                                   amount: subtotal,
                                   currency_code: cartState.currency_code,
-                                })}{" "}
-                                {cartState.currency_code.toUpperCase()}
+                                })}
                               </p>
                             </div>
                           </div>
@@ -310,9 +309,8 @@ const SidebarCartItem = ({ item, close }: { item: any; close: () => void }) => {
               <Minus className="w-3.5 h-3.5" strokeWidth={2.5} />
             </button>
             <span
-              className={`text-[13px] font-bold text-gray-900 w-5 text-center select-none transition-opacity ${
-                isPending ? "opacity-40" : ""
-              }`}
+              className={`text-[13px] font-bold text-gray-900 w-5 text-center select-none transition-opacity ${isPending ? "opacity-40" : ""
+                }`}
             >
               {optimisticQty}
             </span>

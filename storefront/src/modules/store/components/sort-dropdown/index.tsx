@@ -4,17 +4,13 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useState, useRef, useEffect } from "react"
 import { clx } from "@medusajs/ui"
 import { SortOptions } from "../refinement-list/sort-products"
+import { ListFilter } from "lucide-react"
 
 const sortOptions = [
-  { value: "featured", label: "Featured" },
   { value: "most_relevant", label: "Most relevant" },
   { value: "best_selling", label: "Best selling" },
-  { value: "alphabetical_asc", label: "Alphabetically, A-Z" },
-  { value: "alphabetical_desc", label: "Alphabetically, Z-A" },
   { value: "price_asc", label: "Price, low to high" },
   { value: "price_desc", label: "Price, high to low" },
-  { value: "created_at_asc", label: "Date, old to new" },
-  { value: "created_at", label: "Date, new to old" },
 ] as const
 
 export default function SortDropdown({ sortBy }: { sortBy: SortOptions }) {
@@ -24,7 +20,7 @@ export default function SortDropdown({ sortBy }: { sortBy: SortOptions }) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const activeOption = sortOptions.find((opt) => opt.value === sortBy) || sortOptions[2] // default to Best selling if not matched
+  const activeOption = sortOptions.find((opt) => opt.value === sortBy) || sortOptions[1] // default to Best selling if not matched
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -80,10 +76,21 @@ export default function SortDropdown({ sortBy }: { sortBy: SortOptions }) {
 
       {/* Trigger Button */}
       <div className="flex items-center gap-3">
-        <span className="text-gray-600 font-medium text-sm">Sort by:</span>
+        <span className="hidden sm:inline text-gray-600 font-medium text-sm">Sort by:</span>
+        
+        {/* Mobile Icon Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="inline-flex items-center justify-between gap-3 px-6 py-2.5 rounded-full border border-black text-sm font-semibold tracking-wide bg-white text-bold hover:bg-gray-50 transition-colors duration-200 min-w-[160px]"
+          className="sm:hidden flex items-center justify-center w-10 h-10 rounded-full border border-black bg-white text-black hover:bg-gray-50 transition-colors duration-200"
+          aria-label="Sort options"
+        >
+          <ListFilter className="w-4 h-4" />
+        </button>
+
+        {/* Desktop Text Button */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="hidden sm:inline-flex items-center justify-between gap-3 px-6 py-2.5 rounded-full border border-black text-sm font-semibold tracking-wide bg-white text-bold hover:bg-gray-50 transition-colors duration-200 min-w-[160px]"
         >
           <span>{activeOption.label}</span>
           <span className="w-1.5 h-1.5 rounded-full bg-black flex-shrink-0" />
@@ -100,7 +107,7 @@ export default function SortDropdown({ sortBy }: { sortBy: SortOptions }) {
             </span>
             <button
               onClick={() => setIsOpen(false)}
-              className="w-8 h-8 rounded-full bg-white text-bold flex items-center justify-center hover:bg-gray-200 transition-transform duration-300 hover:rotate-90"
+              className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:bg-gray-200 transition-transform duration-300 hover:rotate-90"
               aria-label="Close sort options"
             >
               <svg

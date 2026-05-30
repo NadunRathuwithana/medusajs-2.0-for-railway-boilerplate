@@ -117,7 +117,7 @@ export default function ProductActions({
   return (
     <>
       <div className="flex flex-col gap-y-6" ref={actionsRef}>
-        
+
         {/* Price at the top */}
         <div className="-mt-4">
           <ProductPrice product={product} variant={selectedVariant} />
@@ -137,7 +137,7 @@ export default function ProductActions({
                       title={option.title ?? ""}
                       data-testid="product-options"
                       disabled={!!disabled || isAdding}
-                      variants={product.variants}
+                      variants={product.variants ?? undefined}
                     />
                   </div>
                 )
@@ -158,8 +158,8 @@ export default function ProductActions({
             {!selectedVariant
               ? "Select variant"
               : !inStock
-              ? "Out of stock"
-              : "Add to Cart"}
+                ? "Out of stock"
+                : "Add to Cart"}
           </Button>
         </div>
 

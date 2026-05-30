@@ -1,25 +1,21 @@
 "use client"
 
 import { Popover, Transition } from "@headlessui/react"
-import { ArrowRightMini, XMark } from "@medusajs/icons"
-import { Text, clx, useToggleState } from "@medusajs/ui"
+import { XMark } from "@medusajs/icons"
+import { Text } from "@medusajs/ui"
 import { Fragment } from "react"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import CountrySelect from "../country-select"
 import { HttpTypes } from "@medusajs/types"
 
 const SideMenuItems = {
   Home: "/",
   Store: "/store",
-  Search: "/search",
-  Account: "/account",
   Cart: "/cart",
+  Account: "/account",
 }
 
 const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
-  const toggleState = useToggleState()
-
   return (
     <div className="h-full">
       <style>{`
@@ -57,7 +53,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
               {/* Backdrop Overlay with Blur */}
               {open && (
                 <div 
-                  className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300 animate-in fade-in" 
+                  className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] transition-opacity duration-300 animate-in fade-in" 
                   onClick={close} 
                 />
               )}
@@ -73,7 +69,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                 leaveFrom="translate-x-0"
                 leaveTo="-translate-x-full"
               >
-                <Popover.Panel className="fixed inset-y-0 left-0 w-full sm:max-w-[320px] bg-[#111111] text-white z-50 shadow-2xl flex flex-col justify-between p-8">
+                <Popover.Panel className="fixed inset-y-0 left-0 w-full sm:max-w-[320px] bg-[#111111] text-white z-[101] shadow-2xl flex flex-col justify-between p-8">
                   <div
                     data-testid="nav-menu-popup"
                     className="flex flex-col h-full justify-between"
@@ -81,9 +77,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                     {/* Header */}
                     <div className="flex items-center justify-between border-b border-zinc-800 pb-5">
                       <div>
-                        <span className="text-xl font-black capitalize tracking-widest text-white">
-                          Cardle
-                        </span>
+                        <img src="/LogoLight.png" alt="Cardle Logo" className="h-6 w-auto mb-2" />
                         <p className="text-[9px] font-bold tracking-[0.2em] text-gray-500 capitalize mt-0.5">
                           Everyday Carry
                         </p>
@@ -91,7 +85,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                       <button
                         data-testid="close-menu-button"
                         onClick={close}
-                        className="w-8 h-8 rounded-full bg-white text-bold flex items-center justify-center hover:bg-gray-200 transition-transform duration-300 hover:rotate-90"
+                        className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:bg-gray-200 transition-transform duration-300 hover:rotate-90"
                       >
                         <XMark />
                       </button>
@@ -119,26 +113,8 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                       })}
                     </ul>
 
-                    {/* Footer / Region Selector */}
+                    {/* Footer */}
                     <div className="flex flex-col gap-y-6 border-t border-zinc-800 pt-6">
-                      <div
-                        className="flex justify-between items-center text-gray-300 hover:text-white transition-colors cursor-pointer"
-                        onMouseEnter={toggleState.open}
-                        onMouseLeave={toggleState.close}
-                      >
-                        {regions && (
-                          <CountrySelect
-                            toggleState={toggleState}
-                            regions={regions}
-                          />
-                        )}
-                        <ArrowRightMini
-                          className={clx(
-                            "transition-transform duration-150 text-white",
-                            toggleState.state ? "-rotate-90" : ""
-                          )}
-                        />
-                      </div>
                       <Text className="flex justify-between text-[11px] font-semibold text-gray-500 tracking-wider capitalize">
                         © {new Date().getFullYear()} Cardle. All rights
                         reserved.

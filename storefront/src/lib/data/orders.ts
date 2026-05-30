@@ -33,9 +33,13 @@ export const listOrders = cache(async function (
 
   return sdk.store.order
     .list(
-      { limit, offset },
+      { 
+        limit, 
+        offset,
+        fields: "*payment_collections.payments,*items,*items.metadata,*items.variant,*items.product" 
+      },
       { next: { revalidate: 0, tags: ["order"] } as any, ...headers }
     )
-    .then(({ orders }) => orders.filter((order) => order.email === customer.email))
+    .then(({ orders }) => orders)
     .catch((err) => medusaError(err))
 })

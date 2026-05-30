@@ -1,22 +1,26 @@
 const Hero = () => {
   return (
     <div className="h-[90vh] w-full relative overflow-hidden bg-[#e5e5e5] flex flex-col items-center justify-center">
-      {/* Background Image Placeholder */}
+      {/* Mobile Background Image (< 768px) */}
       <img
-        src="/home/hero-1.jpg"
-        alt="Hero Background"
-        className="absolute inset-0 w-full h-full object-cover object-top"
+        src="/home/hero-mobile.jpg"
+        alt="Hero Background Mobile"
+        className="block md:hidden absolute inset-0 w-full h-full object-cover object-top"
       />
 
-      {/* Content Container */}
-      <div className="relative z-10 w-full max-w-[1440px] px-6 md:px-16 flex flex-col items-center justify-center text-center h-full pt-16">
-        {/* Main Title */}
-        <h1 className="text-[4.5rem] md:text-[8rem] lg:text-[11rem] font-extrabold tracking-tighter leading-[0.85] text-zinc-900 mix-blend-difference drop-shadow-sm">
-          Define
-          <br />
-          Your Base
-        </h1>
-      </div>
+      {/* Tablet Background Image (768px – 1023px) */}
+      <img
+        src="/home/hero-tab.jpg"
+        alt="Hero Background Tablet"
+        className="hidden md:block lg:hidden absolute inset-0 w-full h-full object-cover object-top"
+      />
+
+      {/* Desktop Background Image (1024px+) */}
+      <img
+        src="/home/hero-1.jpg"
+        alt="Hero Background Desktop"
+        className="hidden lg:block absolute inset-0 w-full h-full object-cover object-top"
+      />
     </div>
   )
 }

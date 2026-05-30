@@ -59,11 +59,14 @@ const Item = ({ item, type = "full" }: ItemProps) => {
     }, 500)
   }
 
-  const { currency_code, calculated_price_number, original_price_number } = getPricesForVariant(item.variant) ?? {}
-  const adjustmentsSum = (item.adjustments || []).reduce((acc: number, adj: any) => adj.amount + acc, 0)
-  const originalPrice = (original_price_number || 0) * optimisticQty
-  const currentPrice = (calculated_price_number || 0) * optimisticQty - adjustmentsSum
-  const hasReducedPrice = currentPrice < originalPrice
+  const { currency_code } = getPricesForVariant(item.variant) ?? {}
+  
+  // Use item totals returned by Medusa v2 API
+  const originalPrice = item.original_total ?? 0
+  const currentPrice = item.total ?? 0
+  const discountTotal = item.discount_total ?? 0
+  const hasReducedPrice = discountTotal > 0 || currentPrice < originalPrice
+
   const formatPrice = (amount: number) => convertToLocale({ amount, currency_code: currency_code || "USD" })
 
   const isPreview = type === "preview"
