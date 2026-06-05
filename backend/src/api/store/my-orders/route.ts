@@ -1,7 +1,7 @@
-import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 
 export const GET = async (
-  req: MedusaRequest,
+  req: AuthenticatedMedusaRequest,
   res: MedusaResponse
 ) => {
   const customerId = req.auth_context?.actor_id

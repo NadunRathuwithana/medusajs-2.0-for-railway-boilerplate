@@ -1,20 +1,26 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { Modules } from "@medusajs/framework/utils"
+import { Modules, PaymentWebhookEvents } from "@medusajs/framework/utils"
 
 export async function POST(
   req: MedusaRequest,
   res: MedusaResponse
 ): Promise<void> {
-  const paymentModule = req.scope.resolve(Modules.PAYMENT)
-
   try {
-    await paymentModule.processEvent({
-      provider_id: "pp_onepay_onepay",
-      payload: {
-        data: req.body as Record<string, unknown>,
-        rawData: JSON.stringify(req.body),
-        headers: req.headers as Record<string, unknown>,
+    const eventBus = req.scope.resolve(Modules.EVENT_BUS)
+
+    await eventBus.emit({
+      name: PaymentWebhookEvents.WebhookReceived,
+      data: {
+        provider: "pp_onepay_onepay",
+        payload: {
+          data: req.body as Record<string, unknown>,
+          rawData: req.rawBody || JSON.stringify(req.body),
+          headers: req.headers as Record<string, unknown>,
+        },
       },
+    }, {
+      delay: 5000,
+      attempts: 3,
     })
   } catch (e) {
     console.error("Onepay webhook error:", e)

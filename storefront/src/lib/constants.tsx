@@ -30,6 +30,14 @@ export const paymentInfoMap: Record<
     title: "Manual Payment",
     icon: <CreditCard />,
   },
+  pp_onepay_onepay: {
+    title: "OnePay",
+    icon: <CreditCard />,
+  },
+  pp_koko_koko: {
+    title: "Koko (3 Instalments)",
+    icon: <CreditCard />,
+  },
   // Add more payment providers here
 }
 
@@ -42,6 +50,12 @@ export const isPaypal = (providerId?: string) => {
 }
 export const isManual = (providerId?: string) => {
   return providerId?.startsWith("pp_system_default")
+}
+export const isOnepay = (providerId?: string) => {
+  return providerId?.startsWith("pp_onepay")
+}
+export const isKoko = (providerId?: string) => {
+  return providerId?.startsWith("pp_koko")
 }
 
 // Add currencies that don't need to be divided by 100

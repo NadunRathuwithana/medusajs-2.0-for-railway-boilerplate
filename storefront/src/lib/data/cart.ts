@@ -9,6 +9,7 @@ import { redirect } from "next/navigation"
 import { getAuthHeaders, getCartId, removeCartId, setCartId } from "./cookies"
 import { getProductsById } from "./products"
 import { getRegion } from "./regions"
+import { listCartShippingMethods } from "./fulfillment"
 
 export async function retrieveCart() {
   const cartId = await getCartId()
@@ -18,7 +19,7 @@ export async function retrieveCart() {
   }
 
   return await sdk.store.cart
-    .retrieve(cartId, {}, { next: { tags: ["cart"] }, ...(await getAuthHeaders()) })
+    .retrieve(cartId, { fields: "+region,+region.countries" }, { next: { tags: ["cart"] }, ...(await getAuthHeaders()) })
     .then(({ cart }) => cart)
     .catch(() => {
       return null
@@ -219,13 +220,25 @@ export async function initiatePaymentSession(
     context?: Record<string, unknown>
   }
 ) {
-  return sdk.store.payment
-    .initiatePaymentSession(cart, data, {}, await getAuthHeaders())
-    .then((resp) => {
-      revalidateTag("cart")
-      return resp
-    })
-    .catch(medusaError)
+  console.log("========== STOREFRONT PAYMENT SESSION INITIATION ==========")
+  console.log("Cart ID:", cart?.id)
+  console.log("Provider ID:", data?.provider_id)
+  console.log("Backend URL:", process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL)
+  
+  try {
+    const authHeaders = await getAuthHeaders()
+    const resp = await sdk.store.payment.initiatePaymentSession(cart, data, {}, authHeaders)
+    console.log("SUCCESS! Response from Medusa:", JSON.stringify(resp, null, 2))
+    revalidateTag("cart")
+    return resp
+  } catch (error: any) {
+    console.error("!!!! ERROR IN STOREFRONT INITIATE PAYMENT SESSION !!!!")
+    console.error("Error Object:", error)
+    if (error.response) {
+      console.error("Error Response Data:", error.response.data)
+    }
+    return medusaError(error)
+  }
 }
 
 export async function applyPromotions(codes: string[]) {
@@ -340,13 +353,20 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         phone: formData.get("billing_address.phone"),
       }
     await updateCart(data)
+
+    // Clear the shipping options cache since the address just changed
+    revalidateTag("shipping")
+
+    // Automatically select the first available shipping method to bypass the delivery step
+    const shippingMethods = await listCartShippingMethods(cartId)
+    if (shippingMethods && shippingMethods.length > 0) {
+      await setShippingMethod({ cartId, shippingMethodId: shippingMethods[0].id })
+    }
   } catch (e: any) {
     return e.message
   }
 
-  redirect(
-    `/${formData.get("shipping_address.country_code")}/checkout?step=delivery`
-  )
+  return null
 }
 
 export async function placeOrder() {

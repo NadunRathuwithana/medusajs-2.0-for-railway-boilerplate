@@ -66,7 +66,7 @@ const SearchBoxWrapper = ({
     // We bypass the state update if the input is focused to avoid concurrent
     // updates when typing.
     if (document.activeElement !== inputRef.current && query !== value) {
-      setValue(query)
+      setValue(query || "")
     }
     // We don't want to track when the React state value changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
