@@ -172,7 +172,7 @@ const medusaConfig = {
           resolve: "./src/modules/onepay-payment",
           id: "onepay",
           options: {
-            appId: ONEPAY_APP_ID,
+            appId: ONEPAY_APP_ID, 
             token: ONEPAY_TOKEN,
             hashSalt: ONEPAY_HASH_SALT,
             baseUrl: ONEPAY_BASE_URL,
