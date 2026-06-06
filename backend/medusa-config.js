@@ -197,7 +197,12 @@ const medusaConfig = {
         });
       }
 
-      if (paymentProviders.length === 0) return [];
+      if (paymentProviders.length === 0) {
+        console.log("No payment providers were registered. Check if environment variables are set correctly.");
+        return [];
+      }
+
+      console.log("Registered payment providers in config:", paymentProviders.map(p => p.id));
 
       return [
         {
