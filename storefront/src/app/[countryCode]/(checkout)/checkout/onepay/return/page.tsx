@@ -1,5 +1,7 @@
-import { redirect } from "next/navigation"
 import { Metadata } from "next"
+import { redirect } from "next/navigation"
+import { isRedirectError } from "next/dist/client/components/redirect-error"
+import { placeOrder } from "@lib/data/cart"
 
 export const metadata: Metadata = {
   title: "OnePay Payment",
@@ -7,6 +9,7 @@ export const metadata: Metadata = {
 }
 
 type Props = {
+  params: Promise<{ countryCode: string }>
   searchParams: Promise<{
     ipg_transaction_id?: string
     status?: string
@@ -14,57 +17,43 @@ type Props = {
   }>
 }
 
-export default async function OnepayReturnPage({ searchParams }: Props) {
-  const params = await searchParams
-  const { ipg_transaction_id, status, reference } = params
+/**
+ * OnePay redirects the customer back here after payment.
+ *
+ * IMPORTANT: Next.js redirect() throws a special NEXT_REDIRECT error internally.
+ * We must re-throw it — otherwise the redirect is swallowed and the
+ * order confirmed page never loads.
+ */
+export default async function OnepayReturnPage({ params, searchParams }: Props) {
+  const resolvedParams = await params
+  const sp = await searchParams
+  const { ipg_transaction_id, status } = sp
 
-  // Basic guard — real verification happens via webhook on backend
-  // The webhook fires before the redirect in most cases
+  // Guard: if no transaction ID, OnePay didn't send us back properly
   if (!ipg_transaction_id) {
-    redirect("/checkout?error=payment_cancelled")
+    redirect(`/${resolvedParams.countryCode}/checkout?error=payment_cancelled`)
   }
 
-  // If status param indicates failure
+  // Guard: OnePay sent back a failure status
   if (status && status !== "SUCCESS") {
-    redirect("/checkout?error=payment_failed")
+    redirect(`/${resolvedParams.countryCode}/checkout?error=payment_failed`)
   }
 
-  // Payment looks good — show order confirmation
-  // The actual order capture is handled by the webhook
-  return (
-    <div className="max-w-lg mx-auto py-16 text-center">
-      <div className="mb-6">
-        <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center">
-          <svg
-            className="w-8 h-8 text-green-600"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 13l4 4L19 7"
-            />
-          </svg>
-        </div>
-      </div>
-      <h1 className="text-2xl font-semibold mb-4">Payment Successful 🎉</h1>
-      <p className="text-gray-600 mb-2">
-        Your order is confirmed. You&apos;ll receive an email shortly.
-      </p>
-      {reference && (
-        <p className="text-sm text-gray-400 mt-2">
-          Order ref: {reference}
-        </p>
-      )}
-      <a
-        href="/account/orders"
-        className="mt-8 inline-block px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors"
-      >
-        View My Orders
-      </a>
-    </div>
-  )
+  // Complete the cart → creates the order → redirects to /order/confirmed/[id].
+  // placeOrder() internally calls redirect() which throws NEXT_REDIRECT.
+  // We MUST re-throw that so Next.js can handle the navigation.
+  try {
+    await placeOrder()
+  } catch (err: any) {
+    // Re-throw Next.js redirect/not-found errors so they propagate correctly
+    if (isRedirectError(err)) {
+      throw err
+    }
+    // Real error (e.g. cart already completed, cart not found, network error)
+    console.error("OnePay return: placeOrder error:", err?.message)
+    redirect(`/${resolvedParams.countryCode}/account/orders`)
+  }
+
+  // Unreachable — placeOrder always redirects on success
+  redirect(`/${resolvedParams.countryCode}/account/orders`)
 }

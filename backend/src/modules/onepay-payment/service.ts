@@ -138,8 +138,10 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
     const currency = currency_code.toUpperCase()
     const hash = this.generateHash(currency, onepayAmount)
 
-    // Build a unique reference from cart/session
-    const reference = `order-${(context as any).session_id ?? Date.now()}`
+    // The session_id is the payment session ID — we pass it as additionalData
+    // so the webhook callback can identify which session to capture.
+    const sessionId = (context as any).session_id ?? `fallback-${Date.now()}`
+    const reference = `order-${sessionId}`
 
     const requestBody = {
       app_id: this.options_.appId,
@@ -152,7 +154,8 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
       customer_phone_number: (context.customer as any)?.phone || "+94770000000",
       customer_email: (context.customer as any)?.email || (context as any).email || "customer@example.com",
       transaction_redirect_url: this.options_.redirectUrl,
-      additionalData: reference,
+      // Pass the session ID directly so the webhook can find the payment session.
+      additionalData: sessionId,
     }
 
     this.logger_.info(`Onepay: creating transaction for ${reference}`)
@@ -178,6 +181,7 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
         ipg_transaction_id: response.data.ipg_transaction_id,
         redirect_url: response.data.gateway.redirect_url,
         reference,
+        session_id: sessionId,
         onepay_status: "pending",
       },
     }
