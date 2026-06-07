@@ -8,7 +8,7 @@ import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
 import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
-import { isManual, isPaypal, isStripe } from "@lib/constants"
+import { isKoko, isManual, isOnepay, isPaypal, isStripe } from "@lib/constants"
 import { clx } from "@medusajs/ui"
 
 type PaymentButtonProps = {
@@ -49,7 +49,9 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     !cart.email ||
     (cart.shipping_methods?.length ?? 0) < 1
 
-  const paymentSession = cart.payment_collection?.payment_sessions?.[0]
+  const paymentSession = cart.payment_collection?.payment_sessions?.find(
+    (s) => s.status === "pending"
+  )
 
   switch (true) {
     case isStripe(paymentSession?.provider_id):
@@ -61,8 +63,14 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
         />
       )
     case isManual(paymentSession?.provider_id):
+    case isKoko(paymentSession?.provider_id):
+    case isOnepay(paymentSession?.provider_id):
       return (
-        <ManualTestPaymentButton notReady={notReady} data-testid={dataTestId} />
+        <HostedPaymentButton
+          notReady={notReady}
+          session={paymentSession as any}
+          data-testid={dataTestId}
+        />
       )
     case isPaypal(paymentSession?.provider_id):
       return (
@@ -288,6 +296,38 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
         data-testid="manual-payment-error-message"
       />
     </>
+  )
+}
+
+const HostedPaymentButton = ({
+  session,
+  notReady,
+  "data-testid": dataTestId,
+}: {
+  session: any
+  notReady: boolean
+  "data-testid"?: string
+}) => {
+  const [submitting, setSubmitting] = useState(false)
+
+  const handlePayment = () => {
+    setSubmitting(true)
+    if (session?.data?.redirect_url) {
+      window.location.href = session.data.redirect_url
+    } else {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <CustomButton
+      disabled={notReady || submitting}
+      isLoading={submitting}
+      onClick={handlePayment}
+      data-testid={dataTestId || "submit-hosted-payment-button"}
+    >
+      Proceed to Payment
+    </CustomButton>
   )
 }
 
