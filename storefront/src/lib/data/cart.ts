@@ -229,7 +229,10 @@ export async function initiatePaymentSession(
     const resp = await sdk.store.payment.initiatePaymentSession(cart, data, {}, authHeaders)
     console.log("SUCCESS! Payment session initiated for:", data?.provider_id)
     revalidateTag("cart")
-    return resp
+    // Do NOT return `resp` directly. SDK response objects may contain non-serializable 
+    // properties which causes Next.js Server Actions to crash during serialization, 
+    // throwing the "An error occurred in the Server Components render" error.
+    return { success: true }
   } catch (error: any) {
     // Do NOT re-throw here. Throwing from a server action bypasses the client
     // .catch() handler and triggers Next.js's error boundary, showing the
