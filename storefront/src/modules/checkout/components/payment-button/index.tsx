@@ -309,25 +309,34 @@ const HostedPaymentButton = ({
   "data-testid"?: string
 }) => {
   const [submitting, setSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const handlePayment = () => {
     setSubmitting(true)
-    if (session?.data?.redirect_url) {
-      window.location.href = session.data.redirect_url
+    const redirectUrl = session?.data?.redirect_url as string | undefined
+    if (redirectUrl) {
+      window.location.href = redirectUrl
     } else {
+      setErrorMessage("Payment session not ready. Please try again.")
       setSubmitting(false)
     }
   }
 
   return (
-    <CustomButton
-      disabled={notReady || submitting}
-      isLoading={submitting}
-      onClick={handlePayment}
-      data-testid={dataTestId || "submit-hosted-payment-button"}
-    >
-      Proceed to Payment
-    </CustomButton>
+    <>
+      <CustomButton
+        disabled={notReady || submitting}
+        isLoading={submitting}
+        onClick={handlePayment}
+        data-testid={dataTestId || "submit-hosted-payment-button"}
+      >
+        Proceed to Payment
+      </CustomButton>
+      <ErrorMessage
+        error={errorMessage}
+        data-testid="hosted-payment-error-message"
+      />
+    </>
   )
 }
 
