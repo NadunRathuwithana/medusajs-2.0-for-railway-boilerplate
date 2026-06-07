@@ -59,7 +59,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       const aTime = (a as any).created_at ? new Date((a as any).created_at).getTime() : 0
       const bTime = (b as any).created_at ? new Date((b as any).created_at).getTime() : 0
       return bTime - aTime
-    })
+    }) 
     .find((s) => s.status === "pending")
 
   switch (true) {
