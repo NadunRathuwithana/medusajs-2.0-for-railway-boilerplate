@@ -49,9 +49,17 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     !cart.email ||
     (cart.shipping_methods?.length ?? 0) < 1
 
-  const paymentSession = cart.payment_collection?.payment_sessions?.find(
-    (s) => s.status === "pending"
-  )
+  // Sort by created_at descending so the most recently created session is used.
+  // When switching payment providers, multiple sessions can be pending simultaneously
+  // (e.g., old pp_system_default + new pp_onepay_onepay). Without sorting, the old
+  // session (with no redirect_url) would be picked, causing "Payment session not ready".
+  const paymentSession = [...(cart.payment_collection?.payment_sessions ?? [])]
+    .sort((a, b) => {
+      const aTime = a.created_at ? new Date(a.created_at).getTime() : 0
+      const bTime = b.created_at ? new Date(b.created_at).getTime() : 0
+      return bTime - aTime
+    })
+    .find((s) => s.status === "pending")
 
   switch (true) {
     case isStripe(paymentSession?.provider_id):

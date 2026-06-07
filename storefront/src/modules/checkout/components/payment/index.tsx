@@ -75,6 +75,13 @@ const Payment = ({
         initiatePaymentSession(cart, {
           provider_id: selectedPaymentMethod,
         })
+          .then((result: any) => {
+            // initiatePaymentSession returns {error: string} on failure
+            // (instead of throwing) to avoid triggering Next.js error boundary
+            if (result?.error && isMounted) {
+              setError(result.error)
+            }
+          })
           .catch((err: any) => {
             if (isMounted) setError(err.message)
           })

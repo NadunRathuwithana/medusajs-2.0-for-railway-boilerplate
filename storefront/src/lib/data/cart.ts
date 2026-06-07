@@ -223,21 +223,24 @@ export async function initiatePaymentSession(
   console.log("========== STOREFRONT PAYMENT SESSION INITIATION ==========")
   console.log("Cart ID:", cart?.id)
   console.log("Provider ID:", data?.provider_id)
-  console.log("Backend URL:", process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL)
   
   try {
     const authHeaders = await getAuthHeaders()
     const resp = await sdk.store.payment.initiatePaymentSession(cart, data, {}, authHeaders)
-    console.log("SUCCESS! Response from Medusa:", JSON.stringify(resp, null, 2))
+    console.log("SUCCESS! Payment session initiated for:", data?.provider_id)
     revalidateTag("cart")
     return resp
   } catch (error: any) {
-    console.error("!!!! ERROR IN STOREFRONT INITIATE PAYMENT SESSION !!!!")
-    console.error("Error Object:", error)
-    if (error.response) {
-      console.error("Error Response Data:", error.response.data)
-    }
-    return medusaError(error)
+    // Do NOT re-throw here. Throwing from a server action bypasses the client
+    // .catch() handler and triggers Next.js's error boundary, showing the
+    // cryptic "An error occurred in the Server Components render" message.
+    // Instead, return a structured error so the client can handle it gracefully.
+    const message =
+      error?.message ??
+      error?.response?.data?.message ??
+      "Failed to initialize payment session"
+    console.error("[initiatePaymentSession] Error:", message, error)
+    return { error: message }
   }
 }
 
