@@ -53,10 +53,11 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   // When switching payment providers, multiple sessions can be pending simultaneously
   // (e.g., old pp_system_default + new pp_onepay_onepay). Without sorting, the old
   // session (with no redirect_url) would be picked, causing "Payment session not ready".
+  // Note: StorePaymentSession type doesn't declare created_at but the API returns it.
   const paymentSession = [...(cart.payment_collection?.payment_sessions ?? [])]
     .sort((a, b) => {
-      const aTime = a.created_at ? new Date(a.created_at).getTime() : 0
-      const bTime = b.created_at ? new Date(b.created_at).getTime() : 0
+      const aTime = (a as any).created_at ? new Date((a as any).created_at).getTime() : 0
+      const bTime = (b as any).created_at ? new Date((b as any).created_at).getTime() : 0
       return bTime - aTime
     })
     .find((s) => s.status === "pending")
