@@ -141,8 +141,12 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
 
     // The session_id is the payment session ID — we pass it as additionalData
     // so the webhook callback can identify which session to capture.
-    const sessionId = (context as any).session_id ?? `fallback-${Date.now()}`
-    const reference = `order-${sessionId}` 
+    const sessionId = (context as any).session_id ?? `${Date.now()}`
+
+    // OnePay enforces a 21-character max on the `reference` field.
+    // Medusa session IDs ("payses_01KTJ3ZEM...") are ~33 chars — take the last 21
+    // which contains the unique ULID suffix. Timestamps are 13 chars (always fine).
+    const reference = sessionId.length > 21 ? sessionId.slice(-21) : sessionId
 
     const requestBody = {
       app_id: this.options_.appId,
