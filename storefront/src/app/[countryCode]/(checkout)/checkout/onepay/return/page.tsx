@@ -10,15 +10,16 @@ export const metadata: Metadata = {
 
 type Props = {
   params: Promise<{ countryCode: string }>
-  searchParams: Promise<{
-    ipg_transaction_id?: string
-    status?: string
-    reference?: string
-  }>
+  searchParams: Promise<Record<string, string | undefined>>
 }
 
 /**
  * OnePay redirects the customer back here after payment.
+ *
+ * OnePay browser redirect sends these query params:
+ *   - transaction_id    (NOT ipg_transaction_id — that's from the session creation response)
+ *   - status_message    "SUCCESS" | "FAILED" | "CANCELLED"
+ *   - additional_data   the value we sent as additionalData (the session ID)
  *
  * IMPORTANT: Next.js redirect() throws a special NEXT_REDIRECT error internally.
  * We must re-throw it — otherwise the redirect is swallowed and the
@@ -27,19 +28,28 @@ type Props = {
 export default async function OnepayReturnPage({ params, searchParams }: Props) {
   const resolvedParams = await params
   const sp = await searchParams
-  const { ipg_transaction_id, status } = sp
+  const countryCode = resolvedParams.countryCode
 
-  // Guard: if no transaction ID, OnePay didn't send us back properly
-  if (!ipg_transaction_id) {
-    redirect(`/${resolvedParams.countryCode}/checkout?error=payment_cancelled`)
+  // Log all params OnePay sent back so we can debug if anything goes wrong
+  console.log("[OnePay Return] searchParams:", JSON.stringify(sp))
+
+  const transactionId = sp.transaction_id   // OnePay redirect uses transaction_id
+  const statusMessage = sp.status_message   // "SUCCESS" | "FAILED" | "CANCELLED"
+
+  // Guard: if no transaction_id, OnePay didn't send us back properly
+  if (!transactionId) {
+    console.error("[OnePay Return] No transaction_id received. Params:", sp)
+    redirect(`/${countryCode}/checkout?error=payment_cancelled`)
   }
 
-  // Guard: OnePay sent back a failure status
-  if (status && status !== "SUCCESS") {
-    redirect(`/${resolvedParams.countryCode}/checkout?error=payment_failed`)
+  // Guard: explicit failure from OnePay
+  if (statusMessage && statusMessage !== "SUCCESS") {
+    console.error("[OnePay Return] Payment not successful. status_message:", statusMessage)
+    redirect(`/${countryCode}/checkout?error=payment_failed`)
   }
 
-  // Complete the cart → creates the order → redirects to /order/confirmed/[id].
+  // Complete the cart → Medusa calls authorizePayment() which polls OnePay
+  // using the ipg_transaction_id stored in the payment session data.
   // placeOrder() internally calls redirect() which throws NEXT_REDIRECT.
   // We MUST re-throw that so Next.js can handle the navigation.
   try {
@@ -50,10 +60,10 @@ export default async function OnepayReturnPage({ params, searchParams }: Props) 
       throw err
     }
     // Real error (e.g. cart already completed, cart not found, network error)
-    console.error("OnePay return: placeOrder error:", err?.message)
-    redirect(`/${resolvedParams.countryCode}/account/orders`)
+    console.error("[OnePay Return] placeOrder error:", err?.message)
+    redirect(`/${countryCode}/account/orders`)
   }
 
   // Unreachable — placeOrder always redirects on success
-  redirect(`/${resolvedParams.countryCode}/account/orders`)
+  redirect(`/${countryCode}/account/orders`)
 }
