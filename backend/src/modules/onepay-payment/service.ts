@@ -141,7 +141,8 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
 
     // The session_id is the payment session ID — we pass it as additionalData
     // so the webhook callback can identify which session to capture.
-    const sessionId = (context as any).session_id ?? `${Date.now()}`
+    // In Medusa v2, the PaymentSession ID is passed in input.data.session_id
+    const sessionId = (input.data as any)?.session_id ?? (context as any).session_id ?? `${Date.now()}`
 
     // OnePay enforces a 21-character max on the `reference` field.
     // Medusa session IDs ("payses_01KTJ3ZEM...") are ~33 chars — take the last 21
@@ -402,7 +403,7 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
       return {
         action: "captured",
         data: {
-          session_id: payload.transaction_id, // matches the ipg_transaction_id we returned in initiatePayment
+          session_id: payload.additional_data, // the internal Medusa session ID (payses_...)
           amount: payload.amount,             // sometimes needed for capture
         },
       }
@@ -411,7 +412,7 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
     return {
       action: "failed",
       data: {
-        session_id: payload.transaction_id,
+        session_id: payload.additional_data,
         amount: payload.amount,
       },
     }
