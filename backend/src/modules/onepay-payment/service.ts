@@ -78,7 +78,7 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
     const raw = `${this.options_.appId}${currency}${amount}${this.options_.hashSalt}`
     return crypto.createHash("sha256").update(raw).digest("hex")
   }
-  
+
 
   /** Make a request to Onepay API */
   private async onepayRequest<T>(
@@ -142,7 +142,7 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
     // The session_id is the payment session ID — we pass it as additionalData
     // so the webhook callback can identify which session to capture.
     const sessionId = (context as any).session_id ?? `fallback-${Date.now()}`
-    const reference = `order-${sessionId}`
+    const reference = `order-${sessionId}` 
 
     const requestBody = {
       app_id: this.options_.appId,
