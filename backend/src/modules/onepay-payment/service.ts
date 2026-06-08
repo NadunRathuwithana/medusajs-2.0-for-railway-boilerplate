@@ -78,6 +78,7 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
     const raw = `${this.options_.appId}${currency}${amount}${this.options_.hashSalt}`
     return crypto.createHash("sha256").update(raw).digest("hex")
   }
+  
 
   /** Make a request to Onepay API */
   private async onepayRequest<T>(
