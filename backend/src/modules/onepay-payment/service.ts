@@ -73,9 +73,9 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
    * Formula: SHA256(app_id + currency + amount + HASH_SALT)
    * IMPORTANT: amount must be formatted to 2 decimal places as a string.
    */
-  private generateHash(currency: string, amount: number): string {
-    const amountStr = amount.toFixed(2)
-    const raw = `${this.options_.appId}${currency}${amountStr}${this.options_.hashSalt}`
+  // amount must already be the formatted string "1692.00" — same value sent in the request body.
+  private generateHash(currency: string, amount: string): string {
+    const raw = `${this.options_.appId}${currency}${amount}${this.options_.hashSalt}`
     return crypto.createHash("sha256").update(raw).digest("hex")
   }
 
@@ -130,13 +130,13 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
   ): Promise<InitiatePaymentOutput> {
     const { amount, currency_code, context } = input
 
-    // Medusa v2 uses the exact decimal amount (e.g., 2990 LKR is 2990), not cents.
-    // IMPORTANT: Must use toFixed(2) string — Onepay re-computes hash using this exact string
-    const onepayAmountStr = Number(amount).toFixed(2)  // "2990.00"
-    const onepayAmount = parseFloat(onepayAmountStr)            // for hash function
+    // OnePay requires `amount` as a STRING with exactly 2 decimal places, e.g. "1692.00".
+    // Sending a number (1692) causes "Invalid request body" — OnePay validates the JSON type.
+    // The hash formula also uses this exact string, so we use `onepayAmountStr` for both.
+    const onepayAmountStr = Number(amount).toFixed(2)  // "1692.00" — string, 2 dp
 
     const currency = currency_code.toUpperCase()
-    const hash = this.generateHash(currency, onepayAmount)
+    const hash = this.generateHash(currency, onepayAmountStr)
 
     // The session_id is the payment session ID — we pass it as additionalData
     // so the webhook callback can identify which session to capture.
@@ -145,7 +145,7 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
 
     const requestBody = {
       app_id: this.options_.appId,
-      amount: onepayAmount, // MUST be a number. JSON does not allow trailing zeros on numbers.
+      amount: onepayAmountStr,  // MUST be a string "1692.00" — OnePay validates JSON type
       currency,
       hash,
       reference,
@@ -154,7 +154,6 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
       customer_phone_number: (context.customer as any)?.phone || "+94770000000",
       customer_email: (context.customer as any)?.email || (context as any).email || "customer@example.com",
       transaction_redirect_url: this.options_.redirectUrl,
-      // Pass the session ID directly so the webhook can find the payment session.
       additionalData: sessionId,
     }
 
