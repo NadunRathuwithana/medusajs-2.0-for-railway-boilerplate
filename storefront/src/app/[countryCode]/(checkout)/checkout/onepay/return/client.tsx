@@ -32,7 +32,7 @@ export default function OnepayReturnClient({
       return
     }
 
-    if (statusMessage && statusMessage !== "SUCCESS") {
+    if (statusMessage && statusMessage.toUpperCase() !== "SUCCESS") {
       console.error("[OnePay Return] Payment not successful:", statusMessage)
       setStatus("error")
       setMessage(`Payment was not successful. OnePay status: ${statusMessage}`)
@@ -42,14 +42,18 @@ export default function OnepayReturnClient({
     // 3. Attempt to place the order
     const processOrder = async () => {
       try {
-        await placeOrder()
+        const cartRes = await placeOrder()
         // placeOrder internally redirects on success via Next.js redirect(), 
-        // so this line usually won't be reached if it succeeds.
+        // so this line usually won't be reached if it successfully places an order.
+        // If we reach here, it means placeOrder returned without redirecting (e.g. cart completion failed).
+        setStatus("error")
+        setMessage("Payment succeeded, but we couldn't complete your order. Please contact support.")
+        console.error("[OnePay Return] placeOrder resolved but did not redirect. Cart:", cartRes)
       } catch (err: any) {
         // If it's a redirect error (NEXT_REDIRECT), it means success but we can't catch it cleanly in a client component 
         // without it just navigating away, which is exactly what we want.
         // However, standard errors will be caught here:
-        if (err?.message?.includes("NEXT_REDIRECT")) {
+        if (err?.message?.includes("NEXT_REDIRECT") || err?.digest?.includes("NEXT_REDIRECT")) {
            return // let the redirect happen
         }
         console.error("[OnePay Return] placeOrder error:", err)
