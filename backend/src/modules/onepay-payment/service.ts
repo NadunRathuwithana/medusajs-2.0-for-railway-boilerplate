@@ -131,10 +131,10 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
   ): Promise<InitiatePaymentOutput> {
     const { amount, currency_code, context } = input
 
-    // OnePay requires `amount` as a STRING with exactly 2 decimal places, e.g. "1692.00".
-    // Sending a number (1692) causes "Invalid request body" — OnePay validates the JSON type.
-    // The hash formula also uses this exact string, so we use `onepayAmountStr` for both.
-    const onepayAmountStr = Number(amount).toFixed(2)  // "1692.00" — string, 2 dp
+    // OnePay expects `amount` as a number (e.g. 1692), not a string.
+    // The hash formula uses the 2dp string "1692.00" — these are separate concerns.
+    const onepayAmountStr = Number(amount).toFixed(2)  // "1692.00" — used ONLY for hash
+    const onepayAmount = parseFloat(onepayAmountStr)    // 1692     — sent in request body
 
     const currency = currency_code.toUpperCase()
     const hash = this.generateHash(currency, onepayAmountStr)
@@ -146,7 +146,7 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
 
     const requestBody = {
       app_id: this.options_.appId,
-      amount: onepayAmountStr,  // MUST be a string "1692.00" — OnePay validates JSON type
+      amount: onepayAmount,  // number: 1692 (matches OnePay example payload format)
       currency,
       hash,
       reference,
