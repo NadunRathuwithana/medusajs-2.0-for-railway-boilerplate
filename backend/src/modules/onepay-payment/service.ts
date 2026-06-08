@@ -402,8 +402,8 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
       return {
         action: "captured",
         data: {
-          session_id: payload.additional_data, // we echoed the reference here
-          amount: undefined,                   // Onepay callback doesn't include amount
+          session_id: payload.transaction_id, // matches the ipg_transaction_id we returned in initiatePayment
+          amount: payload.amount,             // sometimes needed for capture
         },
       }
     }
@@ -411,8 +411,8 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
     return {
       action: "failed",
       data: {
-        session_id: payload.additional_data,
-        amount: undefined,
+        session_id: payload.transaction_id,
+        amount: payload.amount,
       },
     }
   }

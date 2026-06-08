@@ -1,0 +1,296 @@
+[
+  {
+    "message": "Processing payment.webhook_received (priority: 100) which has 1 subscribers",
+    "severity": "info",
+    "attributes": {
+      "timestamp": "2026-06-08 19:30:25",
+      "level": "info"
+    },
+    "tags": {
+      "project": "38a6c991-2f33-401c-b229-8a96b12f5708",
+      "environment": "867e82bb-e10d-421e-87f7-0644c5ff35cc",
+      "service": "323fb004-e0ae-4123-b90d-d7f9fd79d742",
+      "deployment": "f8d08f2a-1b52-4941-9459-a457a1421133",
+      "replica": "04ee6621-19b8-46f0-94ad-fc4061d9fcc2"
+    },
+    "timestamp": "2026-06-08T19:30:28.869408789Z"
+  },
+  {
+    "message": "Onepay webhook: SUCCESS for F6UE1192C248BAC341E79",
+    "severity": "info",
+    "attributes": {
+      "timestamp": "2026-06-08 19:30:25",
+      "level": "info"
+    },
+    "tags": {
+      "project": "38a6c991-2f33-401c-b229-8a96b12f5708",
+      "environment": "867e82bb-e10d-421e-87f7-0644c5ff35cc",
+      "service": "323fb004-e0ae-4123-b90d-d7f9fd79d742",
+      "deployment": "f8d08f2a-1b52-4941-9459-a457a1421133",
+      "replica": "04ee6621-19b8-46f0-94ad-fc4061d9fcc2"
+    },
+    "timestamp": "2026-06-08T19:30:28.869413131Z"
+  },
+  {
+    "message": "An error occurred while processing payment.webhook_received:",
+    "severity": "warn",
+    "attributes": {
+      "timestamp": "2026-06-08 19:30:25",
+      "level": "warn"
+    },
+    "tags": {
+      "project": "38a6c991-2f33-401c-b229-8a96b12f5708",
+      "environment": "867e82bb-e10d-421e-87f7-0644c5ff35cc",
+      "service": "323fb004-e0ae-4123-b90d-d7f9fd79d742",
+      "deployment": "f8d08f2a-1b52-4941-9459-a457a1421133",
+      "replica": "04ee6621-19b8-46f0-94ad-fc4061d9fcc2"
+    },
+    "timestamp": "2026-06-08T19:30:28.869418240Z"
+  },
+  {
+    "message": "",
+    "severity": "warn",
+    "attributes": {
+      "timestamp": "2026-06-08 19:30:25",
+      "level": "warn"
+    },
+    "tags": {
+      "project": "38a6c991-2f33-401c-b229-8a96b12f5708",
+      "environment": "867e82bb-e10d-421e-87f7-0644c5ff35cc",
+      "service": "323fb004-e0ae-4123-b90d-d7f9fd79d742",
+      "deployment": "f8d08f2a-1b52-4941-9459-a457a1421133",
+      "replica": "04ee6621-19b8-46f0-94ad-fc4061d9fcc2"
+    },
+    "timestamp": "2026-06-08T19:30:28.869422724Z"
+  },
+  {
+    "message": "One or more subscribers of payment.webhook_received failed. Retrying...",
+    "severity": "warn",
+    "attributes": {
+      "timestamp": "2026-06-08 19:30:25",
+      "level": "warn"
+    },
+    "tags": {
+      "project": "38a6c991-2f33-401c-b229-8a96b12f5708",
+      "environment": "867e82bb-e10d-421e-87f7-0644c5ff35cc",
+      "service": "323fb004-e0ae-4123-b90d-d7f9fd79d742",
+      "deployment": "f8d08f2a-1b52-4941-9459-a457a1421133",
+      "replica": "04ee6621-19b8-46f0-94ad-fc4061d9fcc2"
+    },
+    "timestamp": "2026-06-08T19:30:28.870611158Z"
+  },
+  {
+    "message": "Processing payment.webhook_received (priority: 100) which has 1 subscribers",
+    "severity": "info",
+    "attributes": {
+      "timestamp": "2026-06-08 19:30:25",
+      "level": "info"
+    },
+    "tags": {
+      "project": "38a6c991-2f33-401c-b229-8a96b12f5708",
+      "environment": "867e82bb-e10d-421e-87f7-0644c5ff35cc",
+      "service": "323fb004-e0ae-4123-b90d-d7f9fd79d742",
+      "deployment": "f8d08f2a-1b52-4941-9459-a457a1421133",
+      "replica": "04ee6621-19b8-46f0-94ad-fc4061d9fcc2"
+    },
+    "timestamp": "2026-06-08T19:30:28.870617612Z"
+  },
+  {
+    "message": "Onepay webhook: SUCCESS for F6UE1192C248BAC341E79",
+    "severity": "info",
+    "attributes": {
+      "timestamp": "2026-06-08 19:30:25",
+      "level": "info"
+    },
+    "tags": {
+      "project": "38a6c991-2f33-401c-b229-8a96b12f5708",
+      "environment": "867e82bb-e10d-421e-87f7-0644c5ff35cc",
+      "service": "323fb004-e0ae-4123-b90d-d7f9fd79d742",
+      "deployment": "f8d08f2a-1b52-4941-9459-a457a1421133",
+      "replica": "04ee6621-19b8-46f0-94ad-fc4061d9fcc2"
+    },
+    "timestamp": "2026-06-08T19:30:28.870622424Z"
+  },
+  {
+    "message": "An error occurred while processing payment.webhook_received:",
+    "severity": "warn",
+    "attributes": {
+      "timestamp": "2026-06-08 19:30:25",
+      "level": "warn"
+    },
+    "tags": {
+      "project": "38a6c991-2f33-401c-b229-8a96b12f5708",
+      "environment": "867e82bb-e10d-421e-87f7-0644c5ff35cc",
+      "service": "323fb004-e0ae-4123-b90d-d7f9fd79d742",
+      "deployment": "f8d08f2a-1b52-4941-9459-a457a1421133",
+      "replica": "04ee6621-19b8-46f0-94ad-fc4061d9fcc2"
+    },
+    "timestamp": "2026-06-08T19:30:28.870627057Z"
+  },
+  {
+    "message": "",
+    "severity": "warn",
+    "attributes": {
+      "timestamp": "2026-06-08 19:30:25",
+      "level": "warn"
+    },
+    "tags": {
+      "project": "38a6c991-2f33-401c-b229-8a96b12f5708",
+      "environment": "867e82bb-e10d-421e-87f7-0644c5ff35cc",
+      "service": "323fb004-e0ae-4123-b90d-d7f9fd79d742",
+      "deployment": "f8d08f2a-1b52-4941-9459-a457a1421133",
+      "replica": "04ee6621-19b8-46f0-94ad-fc4061d9fcc2"
+    },
+    "timestamp": "2026-06-08T19:30:28.870631783Z"
+  },
+  {
+    "message": "One or more subscribers of payment.webhook_received failed. Retrying...",
+    "severity": "warn",
+    "attributes": {
+      "timestamp": "2026-06-08 19:30:25",
+      "level": "warn"
+    },
+    "tags": {
+      "project": "38a6c991-2f33-401c-b229-8a96b12f5708",
+      "environment": "867e82bb-e10d-421e-87f7-0644c5ff35cc",
+      "service": "323fb004-e0ae-4123-b90d-d7f9fd79d742",
+      "deployment": "f8d08f2a-1b52-4941-9459-a457a1421133",
+      "replica": "04ee6621-19b8-46f0-94ad-fc4061d9fcc2"
+    },
+    "timestamp": "2026-06-08T19:30:28.871958152Z"
+  },
+  {
+    "message": "Retrying payment.webhook_received which has 1 subscribers (1 of them failed)",
+    "severity": "info",
+    "attributes": {
+      "timestamp": "2026-06-08 19:30:25",
+      "level": "info"
+    },
+    "tags": {
+      "project": "38a6c991-2f33-401c-b229-8a96b12f5708",
+      "environment": "867e82bb-e10d-421e-87f7-0644c5ff35cc",
+      "service": "323fb004-e0ae-4123-b90d-d7f9fd79d742",
+      "deployment": "f8d08f2a-1b52-4941-9459-a457a1421133",
+      "replica": "04ee6621-19b8-46f0-94ad-fc4061d9fcc2"
+    },
+    "timestamp": "2026-06-08T19:30:28.871964304Z"
+  },
+  {
+    "message": "Onepay webhook: SUCCESS for F6UE1192C248BAC341E79",
+    "severity": "info",
+    "attributes": {
+      "timestamp": "2026-06-08 19:30:25",
+      "level": "info"
+    },
+    "tags": {
+      "project": "38a6c991-2f33-401c-b229-8a96b12f5708",
+      "environment": "867e82bb-e10d-421e-87f7-0644c5ff35cc",
+      "service": "323fb004-e0ae-4123-b90d-d7f9fd79d742",
+      "deployment": "f8d08f2a-1b52-4941-9459-a457a1421133",
+      "replica": "04ee6621-19b8-46f0-94ad-fc4061d9fcc2"
+    },
+    "timestamp": "2026-06-08T19:30:28.871970169Z"
+  },
+  {
+    "message": "An error occurred while processing payment.webhook_received:",
+    "severity": "warn",
+    "attributes": {
+      "timestamp": "2026-06-08 19:30:25",
+      "level": "warn"
+    },
+    "tags": {
+      "project": "38a6c991-2f33-401c-b229-8a96b12f5708",
+      "environment": "867e82bb-e10d-421e-87f7-0644c5ff35cc",
+      "service": "323fb004-e0ae-4123-b90d-d7f9fd79d742",
+      "deployment": "f8d08f2a-1b52-4941-9459-a457a1421133",
+      "replica": "04ee6621-19b8-46f0-94ad-fc4061d9fcc2"
+    },
+    "timestamp": "2026-06-08T19:30:28.871974352Z"
+  },
+  {
+    "message": "",
+    "severity": "warn",
+    "attributes": {
+      "timestamp": "2026-06-08 19:30:25",
+      "level": "warn"
+    },
+    "tags": {
+      "project": "38a6c991-2f33-401c-b229-8a96b12f5708",
+      "environment": "867e82bb-e10d-421e-87f7-0644c5ff35cc",
+      "service": "323fb004-e0ae-4123-b90d-d7f9fd79d742",
+      "deployment": "f8d08f2a-1b52-4941-9459-a457a1421133",
+      "replica": "04ee6621-19b8-46f0-94ad-fc4061d9fcc2"
+    },
+    "timestamp": "2026-06-08T19:30:28.871978013Z"
+  },
+  {
+    "message": "One or more subscribers of payment.webhook_received failed. Retrying...",
+    "severity": "warn",
+    "attributes": {
+      "timestamp": "2026-06-08 19:30:25",
+      "level": "warn"
+    },
+    "tags": {
+      "project": "38a6c991-2f33-401c-b229-8a96b12f5708",
+      "environment": "867e82bb-e10d-421e-87f7-0644c5ff35cc",
+      "service": "323fb004-e0ae-4123-b90d-d7f9fd79d742",
+      "deployment": "f8d08f2a-1b52-4941-9459-a457a1421133",
+      "replica": "04ee6621-19b8-46f0-94ad-fc4061d9fcc2"
+    },
+    "timestamp": "2026-06-08T19:30:28.873124538Z"
+  },
+  {
+    "message": "",
+    "severity": "info",
+    "attributes": {
+      "timestamp": "2026-06-08T19:30:30.421Z",
+      "client_ip": "152.233.15.120",
+      "request_id": "8de8f134-ce8c-4bdc-91e3-c674189953aa",
+      "http_version": "1.1",
+      "method": "GET",
+      "path": "/store/collections?limit=6&offset=0",
+      "status": 200,
+      "response_size": "374",
+      "request_size": 0,
+      "duration": 15.482,
+      "referrer": "-",
+      "user_agent": "node",
+      "level": "info"
+    },
+    "tags": {
+      "project": "38a6c991-2f33-401c-b229-8a96b12f5708",
+      "environment": "867e82bb-e10d-421e-87f7-0644c5ff35cc",
+      "service": "323fb004-e0ae-4123-b90d-d7f9fd79d742",
+      "deployment": "f8d08f2a-1b52-4941-9459-a457a1421133",
+      "replica": "04ee6621-19b8-46f0-94ad-fc4061d9fcc2"
+    },
+    "timestamp": "2026-06-08T19:30:30.426556227Z"
+  },
+  {
+    "message": "",
+    "severity": "info",
+    "attributes": {
+      "timestamp": "2026-06-08T19:30:30.424Z",
+      "client_ip": "152.233.15.120",
+      "request_id": "78f8c147-3ae0-471f-836d-dbf8b01edc73",
+      "http_version": "1.1",
+      "method": "GET",
+      "path": "/store/regions",
+      "status": 200,
+      "response_size": "505",
+      "request_size": 0,
+      "duration": 15.157,
+      "referrer": "-",
+      "user_agent": "node",
+      "level": "info"
+    },
+    "tags": {
+      "project": "38a6c991-2f33-401c-b229-8a96b12f5708",
+      "environment": "867e82bb-e10d-421e-87f7-0644c5ff35cc",
+      "service": "323fb004-e0ae-4123-b90d-d7f9fd79d742",
+      "deployment": "f8d08f2a-1b52-4941-9459-a457a1421133",
+      "replica": "04ee6621-19b8-46f0-94ad-fc4061d9fcc2"
+    },
+    "timestamp": "2026-06-08T19:30:30.426560786Z"
+  }
+]

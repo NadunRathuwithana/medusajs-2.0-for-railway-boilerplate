@@ -33,4 +33,5 @@ export type OnepayCallbackPayload = {
   status: number            // 1 = SUCCESS
   status_message: string    // "SUCCESS" | "FAILED" | "CANCELLED"
   additional_data: string   // echoed back additionalData field
+  amount: number            // transaction amount
 }
