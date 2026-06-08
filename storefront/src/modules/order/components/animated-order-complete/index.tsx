@@ -2,8 +2,19 @@
 
 import { motion, Variants } from "framer-motion"
 import { CheckCircle } from "lucide-react"
+import { XCircle, Loader2 } from "lucide-react"
 
-export default function AnimatedOrderComplete({ children }: { children: React.ReactNode }) {
+export default function AnimatedOrderComplete({ 
+  children,
+  status = "success",
+  title,
+  message
+}: { 
+  children?: React.ReactNode
+  status?: "success" | "error" | "processing"
+  title?: string
+  message?: string
+}) {
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { 
@@ -43,21 +54,41 @@ export default function AnimatedOrderComplete({ children }: { children: React.Re
           }}
           className="relative mb-6"
         >
-          <div className="absolute inset-0 bg-green-100 rounded-full animate-ping opacity-60"></div>
-          <CheckCircle className="w-24 h-24 text-green-500 relative z-10" strokeWidth={1.5} />
+          {status === "success" && (
+            <>
+              <div className="absolute inset-0 bg-green-100 rounded-full animate-ping opacity-60"></div>
+              <CheckCircle className="w-24 h-24 text-green-500 relative z-10" strokeWidth={1.5} />
+            </>
+          )}
+          {status === "error" && (
+            <>
+              <div className="absolute inset-0 bg-red-100 rounded-full animate-ping opacity-60"></div>
+              <XCircle className="w-24 h-24 text-red-500 relative z-10" strokeWidth={1.5} />
+            </>
+          )}
+          {status === "processing" && (
+            <>
+              <div className="absolute inset-0 bg-blue-100 rounded-full animate-ping opacity-60"></div>
+              <Loader2 className="w-24 h-24 text-blue-500 relative z-10 animate-spin" strokeWidth={1.5} />
+            </>
+          )}
         </motion.div>
         
         <motion.h1 
           className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 mb-4 text-center"
           variants={itemVariants}
         >
-          Thank you!
+          {title || (status === "success" ? "Thank you!" : status === "error" ? "Payment Failed" : "Processing...")}
         </motion.h1>
         <motion.p 
           className="text-lg text-gray-500 text-center max-w-md px-4"
           variants={itemVariants}
         >
-          Your order was placed successfully. We're getting it ready and will let you know when it ships.
+          {message || (status === "success" 
+            ? "Your order was placed successfully. We're getting it ready and will let you know when it ships." 
+            : status === "error"
+            ? "Unfortunately, your payment could not be processed. Please try again or use a different payment method."
+            : "Please wait while we confirm your payment and place your order...")}
         </motion.p>
       </motion.div>
 
