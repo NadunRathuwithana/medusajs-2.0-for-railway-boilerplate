@@ -111,7 +111,7 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
     } catch {
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
-        `Onepay returned non-JSON response: ${preview}`
+        `Onepay returned non-JSON response: ${rawText}`
       )
     }
 
