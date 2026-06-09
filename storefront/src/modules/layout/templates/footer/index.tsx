@@ -72,21 +72,20 @@ const TrustSection = () => {
               Fast Delivery
             </h4>
             <p className="text-xs text-gray-500 font-medium leading-relaxed max-w-[280px]">
-              Standard delivery in 2-5 days. Transparent shipping rates with no hidden fees.
+              Standard delivery in 2-5 days. Transparent shipping rates with no
+              hidden fees.
             </p>
           </div>
 
           {/* Secure Payment */}
           <div className="flex flex-col items-center text-center px-4 md:px-8 pt-8 md:pt-0">
-            <ShieldCheck
-              className="w-6 h-6 mb-4 text-bold"
-              strokeWidth={1.5}
-            />
+            <ShieldCheck className="w-6 h-6 mb-4 text-bold" strokeWidth={1.5} />
             <h4 className="text-sm font-bold capitalize tracking-wider text-bold mb-2">
               Flexible Payments
             </h4>
             <p className="text-xs text-gray-500 font-medium leading-relaxed max-w-[280px]">
-              Secure processing for Visa, Mastercard, Koko Pay & Cash on Delivery.
+              Secure processing for Visa, Mastercard, Koko Pay & Cash on
+              Delivery.
             </p>
           </div>
         </div>
@@ -145,7 +144,11 @@ export default async function Footer() {
                   rel="noopener noreferrer"
                   className="hover:opacity-80 transition-opacity"
                 >
-                  <img src="/social/facebook.png" alt="Facebook" className="w-8 h-8 object-contain" />
+                  <img
+                    src="/social/facebook.png"
+                    alt="Facebook"
+                    className="w-8 h-8 object-contain"
+                  />
                 </a>
                 <a
                   href="https://www.instagram.com/cardle_lk/"
@@ -153,7 +156,11 @@ export default async function Footer() {
                   rel="noopener noreferrer"
                   className="hover:opacity-80 transition-opacity"
                 >
-                  <img src="/social/instagram.png" alt="Instagram" className="w-8 h-8 object-contain" />
+                  <img
+                    src="/social/instagram.png"
+                    alt="Instagram"
+                    className="w-8 h-8 object-contain"
+                  />
                 </a>
                 <a
                   href="https://www.tiktok.com/@cardle.srilanka/"
@@ -161,7 +168,11 @@ export default async function Footer() {
                   rel="noopener noreferrer"
                   className="hover:opacity-80 transition-opacity"
                 >
-                  <img src="/social/tiktok.png" alt="TikTok" className="w-8 h-8 object-contain" />
+                  <img
+                    src="/social/tiktok.png"
+                    alt="TikTok"
+                    className="w-8 h-8 object-contain"
+                  />
                 </a>
                 <a
                   href="https://wa.me/94779497859"
@@ -169,7 +180,11 @@ export default async function Footer() {
                   rel="noopener noreferrer"
                   className="hover:opacity-80 transition-opacity"
                 >
-                  <img src="/social/whatsapp.png" alt="WhatsApp" className="w-8 h-8 object-contain" />
+                  <img
+                    src="/social/whatsapp.png"
+                    alt="WhatsApp"
+                    className="w-8 h-8 object-contain"
+                  />
                 </a>
               </div>
             </div>
@@ -296,9 +311,7 @@ export default async function Footer() {
 
           {/* Bottom Bar */}
           <div className="border-t border-zinc-900 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
-            <p>
-              © {new Date().getFullYear()} Cardle . All rights reserved.
-            </p>
+            <p>© {new Date().getFullYear()} Cardle . All rights reserved.</p>
             <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 font-medium">
               <LocalizedClientLink
                 href="/privacy"

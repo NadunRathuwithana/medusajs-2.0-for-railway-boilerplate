@@ -21,27 +21,15 @@ const StoreTemplate = ({
     <div className="w-full bg-white">
       {/* Hero Banner */}
       <section className="h-[90vh] w-full relative overflow-hidden bg-[#e5e5e5] flex flex-col items-center justify-center">
-        {/* Background Image */}
-        <img
-          src="https://images.unsplash.com/photo-1596526131083-e8c633c948d2?q=80&w=2574&auto=format&fit=crop"
-          alt="Cardle Store Hero Banner"
-          className="absolute inset-0 w-full h-full object-cover object-center"
-        />
-
-        {/* Hero Content */}
-        <div className="relative z-10 w-full max-w-[1440px] px-6 md:px-16 flex flex-col items-center justify-center text-center h-full pt-16">
-          <p className="text-zinc-900 mix-blend-difference text-xs md:text-base font-bold tracking-[0.3em] capitalize mb-6 drop-shadow-sm">
-            The Collection
-          </p>
-          <h1 className="text-[3.5rem] sm:text-[4.5rem] md:text-[6rem] lg:text-[8rem] font-extrabold capitalize tracking-tighter leading-[0.85] text-zinc-900 mix-blend-difference drop-shadow-sm mb-8">
-            Shop
-            <br />
-            Cardle
-          </h1>
-          <p className="text-lg sm:text-xl md:text-2xl text-zinc-900 mix-blend-difference font-medium max-w-2xl mx-auto italic drop-shadow-sm">
-            Discover the ultimate everyday carry.
-          </p>
-        </div>
+        <picture>
+          <source media="(max-width: 768px)" srcSet="/store/shopMobile.jpg" />
+          <source media="(max-width: 1024px)" srcSet="/store/shopTab.jpg" />
+          <img
+            src="/store/shopHero.jpg"
+            alt="Cardle Store Hero Banner"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+        </picture>
       </section>
 
       <div className="content-container max-w-[1440px] mx-auto px-6 md:px-16 py-12" data-testid="category-container">

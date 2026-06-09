@@ -9,74 +9,56 @@ export default function AboutPage() {
   return (
     <div className="w-full bg-white">
       {/* 1. Hero Banner */}
-      <section className="h-[90vh] w-full relative overflow-hidden bg-[#e5e5e5] flex flex-col items-center justify-center">
-        {/* Background Image */}
-        <img
-          src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=2940&auto=format&fit=crop"
-          alt="Cardle Hero Banner"
-          className="absolute inset-0 w-full h-full object-cover object-center"
-        />
-
-        {/* Hero Content */}
-        <div className="relative z-10 w-full max-w-[1440px] px-6 md:px-16 flex flex-col items-center justify-center text-center h-full pt-16">
-          <p className="text-zinc-900 mix-blend-difference text-sm md:text-base font-bold tracking-[0.3em] capitalize mb-6 drop-shadow-sm">
-            A Sri Lankan Brand
-          </p>
-          <h1 className="text-[4.5rem] md:text-[6rem] lg:text-[8rem] font-extrabold capitalize tracking-tighter leading-[0.85] text-zinc-900 mix-blend-difference drop-shadow-sm mb-8">
-            Elevating
-            <br />
-            The Everyday
-          </h1>
-          <p className="text-xl md:text-2xl text-zinc-900 mix-blend-difference font-medium max-w-2xl mx-auto italic drop-shadow-sm">
-            Redefining what one bag can do.
-          </p>
-        </div>
+      <section className="h-[90vh] w-full relative overflow-hidden bg-[#111111] flex flex-col items-center justify-center">
+        <picture>
+          <source media="(max-width: 768px)" srcSet="/about/hero-mobile.jpg" />
+          <source media="(max-width: 1024px)" srcSet="/about/hero-tab.jpg" />
+          <img
+            src="/about/aboutHero.jpg"
+            alt="Cardle Hero Banner"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+        </picture>
       </section>
 
       {/* 2. The Story Section */}
       <section className="py-24 md:py-32 px-6">
-        <div className="max-w-[1440px] mx-auto flex flex-col lg:flex-row gap-16 lg:gap-24 items-center">
-          {/* Image */}
-          <div className="group w-full lg:w-1/2 h-[500px] md:h-[700px] rounded-3xl overflow-hidden relative cursor-pointer">
+        <div className="max-w-[1440px] mx-auto flex flex-col lg:flex-row gap-12 lg:gap-16 items-center">
+          <div className="group w-full lg:w-1/2 h-[400px] md:h-[600px] rounded-3xl overflow-hidden relative cursor-pointer">
             <img
-              src="https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=1587&auto=format&fit=crop"
+              src="/about/cardle-story.jpg"
               alt="Person walking with bag"
               className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
             />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-[1500ms] pointer-events-none" />
           </div>
 
-          {/* Text Content */}
-          <div className="w-full lg:w-1/2 flex flex-col gap-8 text-lg text-gray-600 leading-relaxed font-medium">
+          <div className="w-full lg:w-1/2 flex flex-col gap-6 text-sm text-gray-600 font-medium">
             <div>
-              <h2 className="text-sm font-bold tracking-[0.2em] text-bold capitalize mb-4">
+              <h2 className="text-xs text-black font-bold tracking-[0.2em] uppercase mb-4">
                 The Cardle Story
               </h2>
-              <h3 className="text-4xl md:text-5xl font-black capitalize tracking-tighter text-bold leading-tight mb-8">
-                We live in a fast-paced world that demands we be prepared.
+              <h3 className="text-3xl text-black md:text-5xl font-bold uppercase tracking-tighter leading-tight mb-6">
+                PREPARED FOR THE FAST-PACED WORLD.
               </h3>
             </div>
 
-            <p>
-              Whether you are a dedicated university student navigating a full day
-              of lectures, a working professional commuting between meetings, or an
-              industry expert managing complex projects — you are carrying your life
-              with you.
+            <p className="leading-relaxed">
+              You are a university student with a full day of lectures. A professional 
+              hopping between meetings. Someone who just needs to get through the day 
+              without losing anything. You are carrying your whole life with you.
             </p>
-            <p>
-              Laptops, heavy textbooks, essential documents, water bottles, personal
-              items. The list of daily necessities is endless.
+            <p className="leading-relaxed">
+              Laptop, textbooks, documents, water bottle, charger, the things you 
+              always forget and then wish you had. The list never gets shorter.
             </p>
-            <p>
-              For a long time, society has accepted a flawed solution to this
-              problem. People are forced to juggle two, three, or even four
-              different bags just to get through the day. Not only is this
-              physically exhausting and inconvenient, but it completely disrupts
-              your personal style and professional image. Cluttered bags diminish
-              the polished status you work so hard to maintain.
+            <p className="leading-relaxed">
+              For too long, the answer was more bags. A tote for this, a backpack for 
+              that, a side bag just in case. It is exhausting. It looks chaotic. And 
+              it quietly undermines the put-together image you are trying to hold up.
             </p>
-            <p className="text-2xl font-black text-bold capitalize tracking-tight mt-4">
-              Cardle was born to solve this exact problem.
+            <p className="text-xl font-bold uppercase tracking-tight mt-4">
+              CARDLE WAS BUILT TO FIX THAT.
             </p>
           </div>
         </div>
@@ -92,101 +74,92 @@ export default function AboutPage() {
           />
         </div>
         <div className="relative z-10 max-w-5xl mx-auto">
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white capitalize tracking-tighter leading-tight mb-8">
-            "Why can't one bag do it all — and look impeccable while doing it?"
+          <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white uppercase tracking-tighter leading-tight mb-8">
+            "WHY CAN'T ONE BAG HOLD EVERYTHING AND STILL LOOK GOOD?"
           </h2>
-          <p className="text-xl md:text-2xl text-gray-400 font-medium">
-            We designed the ultimate solution: a singular, massive-capacity vessel
-            engineered to carry everything you need, beautifully.
+          <p className="text-sm md:text-base text-gray-400 font-medium">
+            That was the question. So we built the answer: one bag, big enough for 
+            everything you carry, made to look like it belongs somewhere expensive.
           </p>
         </div>
       </section>
 
       {/* 4. Craftsmanship & Materials */}
-      <section className="py-24 md:py-32 px-6 bg-[#f7f7f7]">
+      <section className="py-24 md:py-32 px-6 bg-white">
         <div className="max-w-[1440px] mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-16 md:mb-24">
-            <h2 className="text-sm font-bold tracking-[0.2em] text-gray-500 capitalize mb-4">
+          <div className="text-center max-w-3xl mx-auto mb-16 md:mb-20">
+            <h2 className="text-xs font-bold tracking-[0.2em] text-gray-500 uppercase mb-4">
               Zero Compromise
             </h2>
-            <h3 className="text-4xl md:text-5xl lg:text-6xl font-black capitalize tracking-tighter text-bold leading-tight">
-              Uncompromising Craftsmanship
+            <h3 className="text-3xl md:text-5xl font-bold uppercase tracking-tighter leading-tight">
+              BUILT TO LAST
             </h3>
-            <p className="text-lg text-gray-600 font-medium mt-6">
-              A bag designed to hold your entire day must be built on a foundation
-              of absolute strength. We do not compromise on the materials or the
-              process.
+            <p className="text-sm text-gray-600 font-medium mt-6">
+              A bag that carries your whole day needs to be built for exactly that. 
+              We did not cut corners on material or construction.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            {/* Box 1 */}
-            <div className="bg-white p-10 md:p-14 rounded-[2rem] flex flex-col justify-center">
-              <h4 className="text-2xl font-black capitalize tracking-tight text-bold mb-4">
-                100% Pure Premium Cotton
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <div className="bg-[#111111] text-white p-8 md:p-12 rounded-3xl flex flex-col justify-end min-h-[350px] hover:bg-[#1a1a1a] transition-colors duration-700">
+              <h4 className="text-2xl font-semibold uppercase tracking-tight text-white mb-4 leading-none">
+                PREMIUM MATERIALS
               </h4>
-              <p className="text-gray-600 font-medium leading-relaxed text-lg">
-                We exclusively use high-grade, eco-friendly cotton. Every Cardle
-                piece is environmentally conscious, exceptionally breathable, and
-                completely washable — allowing for effortless long-term use and
-                maintenance.
+              <p className="text-sm text-gray-400 font-medium leading-relaxed">
+                We use high-grade, eco-friendly canvas on every piece. It breathes 
+                well, washes clean, and holds up over years of daily use without 
+                looking worn out.
               </p>
             </div>
-            
-            {/* Image Box 1 */}
-            <div className="group h-[400px] md:h-auto rounded-[2rem] overflow-hidden relative cursor-pointer">
+
+            <div className="group h-[350px] md:h-auto rounded-3xl overflow-hidden relative cursor-pointer">
               <img
-                src="https://images.unsplash.com/photo-1596526131083-e8c633c948d2?q=80&w=2574&auto=format&fit=crop"
-                alt="Premium Cotton"
+                src="/about/premiumMaterials.jpg"
+                alt="Premium Materials"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-[1500ms] pointer-events-none" />
             </div>
 
-            {/* Image Box 2 */}
-            <div className="group h-[400px] md:h-auto rounded-[2rem] overflow-hidden relative order-4 md:order-3 cursor-pointer">
+            <div className="group h-[350px] md:h-auto rounded-3xl overflow-hidden relative order-4 md:order-3 cursor-pointer">
               <img
-                src="https://images.unsplash.com/photo-1612423284934-2850a4ea6b0f?q=80&w=2670&auto=format&fit=crop"
+                src="/about/zeroStretching.jpg"
                 alt="Craftsmanship"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-[1500ms] pointer-events-none" />
             </div>
 
-            {/* Box 2 */}
-            <div className="bg-[#111111] text-white p-10 md:p-14 rounded-[2rem] flex flex-col justify-center order-3 md:order-4">
-              <h4 className="text-2xl font-black capitalize tracking-tight mb-4">
-                Zero-Stretch Engineering
+            <div className="bg-[#111111] text-white p-8 md:p-12 rounded-3xl flex flex-col justify-end min-h-[350px] hover:bg-[#1a1a1a] transition-colors duration-700 order-3 md:order-4">
+              <h4 className="text-2xl font-semibold uppercase tracking-tight mb-4 leading-none">
+                ZERO-STRETCH ENGINEERING
               </h4>
-              <p className="text-gray-400 font-medium leading-relaxed text-lg">
-                Ordinary bags warp, sag, and lose their shape when overloaded.
-                Cardle bags are structurally designed with heavy-duty canvas weaving
-                to prevent stretching. No matter how many laptops, books, or bottles
-                you pack inside, the bag retains its architectural silhouette.
+              <p className="text-sm text-gray-400 font-medium leading-relaxed">
+                Most bags sag the moment you push them past half capacity. Cardle 
+                uses a heavy-duty canvas weave that holds its shape whether you have 
+                packed one laptop or four textbooks. The bag looks the same full as 
+                it does empty.
               </p>
             </div>
 
-            {/* Box 3 */}
-            <div className="bg-white p-10 md:p-14 rounded-[2rem] flex flex-col justify-center order-5">
-              <h4 className="text-2xl font-black capitalize tracking-tight text-bold mb-4">
-                Handcrafted with Purpose
+            <div className="bg-[#111111] text-white p-8 md:p-12 rounded-3xl flex flex-col justify-end min-h-[350px] hover:bg-[#1a1a1a] transition-colors duration-700 order-5">
+              <h4 className="text-2xl font-semibold uppercase tracking-tight mb-4 leading-none">
+                HANDCRAFTED WITH PURPOSE
               </h4>
-              <p className="text-gray-600 font-medium leading-relaxed text-lg">
-                We believe in the precision of human hands. Every single bag is
-                meticulously cut, sewn, and assembled by our dedicated craftsmen.
+              <p className="text-sm text-gray-400 font-medium leading-relaxed">
+                Every bag is cut, sewn, and assembled by hand. Not for the story, 
+                but because it genuinely produces a better result than mass production.
               </p>
             </div>
 
-            {/* Box 4 */}
-            <div className="bg-white p-10 md:p-14 rounded-[2rem] flex flex-col justify-center order-6">
-              <h4 className="text-2xl font-black capitalize tracking-tight text-bold mb-4">
-                Rigorous Quality Control
+            <div className="bg-[#111111] text-white p-8 md:p-12 rounded-3xl flex flex-col justify-end min-h-[350px] hover:bg-[#1a1a1a] transition-colors duration-700 order-6">
+              <h4 className="text-2xl font-semibold uppercase tracking-tight text-white mb-4 leading-none">
+                TESTED BEFORE IT REACHES YOU
               </h4>
-              <p className="text-gray-600 font-medium leading-relaxed text-lg">
-                Before a bag is ever packaged, it undergoes intense production trials
-                — including deep-stretch testing — to guarantee it can withstand
-                extreme daily pressure. Only after passing these demanding tests is a
-                Cardle bag sent to your hands.
+              <p className="text-sm text-gray-400 font-medium leading-relaxed">
+                Before packaging, every batch goes through stretch and load testing 
+                to make sure it handles real daily pressure. If it does not pass, 
+                it does not ship.
               </p>
             </div>
           </div>
@@ -195,53 +168,49 @@ export default function AboutPage() {
 
       {/* 5. Aesthetic Section */}
       <section className="py-24 md:py-32 px-6">
-        <div className="max-w-[1440px] mx-auto flex flex-col lg:flex-row gap-16 lg:gap-24 items-center">
-          {/* Text Content */}
-          <div className="w-full lg:w-1/2 flex flex-col gap-8 text-lg text-gray-600 leading-relaxed font-medium">
+        <div className="max-w-[1440px] mx-auto flex flex-col lg:flex-row gap-12 lg:gap-16 items-center">
+          <div className="w-full lg:w-1/2 flex flex-col gap-6 text-sm text-gray-600 font-medium">
             <div>
-              <h2 className="text-sm font-bold tracking-[0.2em] text-bold capitalize mb-4">
+              <h2 className="text-xs text-black font-bold tracking-[0.2em] uppercase mb-4">
                 The Cardle Aesthetic
               </h2>
-              <h3 className="text-4xl md:text-6xl font-black capitalize tracking-tighter text-bold leading-tight mb-8">
-                Status Meets Utility
+              <h3 className="text-3xl text-black md:text-5xl font-bold uppercase tracking-tighter leading-tight mb-6">
+                STATUS MEETS UTILITY
               </h3>
             </div>
-            
-            <p className="text-2xl text-bold font-bold">
-              Utility should never come at the expense of your aesthetic.
+
+            <p className="text-xl font-bold uppercase tracking-tight">
+              BEING PRACTICAL SHOULD NOT MEAN LOOKING LIKE IT.
             </p>
-            <p>
-              Cardle bridges the gap between a heavy-duty workhorse and a premium
-              luxury item. By utilizing clean lines, minimalist design principles,
-              and rich tactile cotton, we deliver a <strong>Quiet Luxury</strong>{" "}
-              experience.
+            <p className="leading-relaxed">
+              Cardle sits somewhere between a workhorse and a premium carry. Clean 
+              lines, no unnecessary details, materials that feel good to touch. The 
+              kind of bag that people notice without knowing why.
             </p>
-            <p>
-              A Cardle bag doesn't scream for attention — it projects{" "}
-              <strong>quiet confidence</strong>. It elevates your everyday look,
-              ensuring that even when you are carrying your heaviest load, you
-              maintain an air of premium, effortless sophistication.
+            <p className="leading-relaxed">
+              It does not try to stand out. It just looks right. Whether you are in 
+              a lecture hall, a boardroom, or an airport, it holds its own without 
+              you having to think about it.
             </p>
             <div className="mt-8 pt-8 border-t border-gray-200">
-              <p className="text-2xl font-black capitalize tracking-widest text-bold">
-                Cardle - Carry everything.<br /> Compromise nothing.
+              <p className="text-xl font-bold uppercase tracking-widest">
+                CARDLE. CARRY EVERYTHING.<br /> COMPROMISE NOTHING.
               </p>
             </div>
           </div>
 
-          {/* Image Grid */}
-          <div className="w-full lg:w-1/2 grid grid-cols-2 gap-4 md:gap-6 h-[500px] md:h-[700px]">
-            <div className="group col-span-1 rounded-3xl overflow-hidden relative mt-12 cursor-pointer">
+          <div className="w-full lg:w-1/2 grid grid-cols-2 gap-4 md:gap-6 h-[400px] md:h-[600px]">
+            <div className="group col-span-1 rounded-3xl overflow-hidden relative mt-8 md:mt-12 cursor-pointer">
               <img
-                src="https://images.unsplash.com/photo-1550426735-c33c7ce414ff?q=80&w=2671&auto=format&fit=crop"
+                src="/about/satus1.jpg"
                 alt="Aesthetic Detail 1"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-[1500ms] pointer-events-none" />
             </div>
-            <div className="group col-span-1 rounded-3xl overflow-hidden relative mb-12 cursor-pointer">
+            <div className="group col-span-1 rounded-3xl overflow-hidden relative mb-8 md:mb-12 cursor-pointer">
               <img
-                src="https://images.unsplash.com/photo-1511556532299-8f662fc26c06?q=80&w=2940&auto=format&fit=crop"
+                src="/about/status2.jpg"
                 alt="Aesthetic Detail 2"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
               />
