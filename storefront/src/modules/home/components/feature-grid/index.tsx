@@ -22,7 +22,7 @@ export default function FeatureGrid() {
         {/* Top Left Image (Spans 2 columns) */}
         <div className="group col-span-1 lg:col-span-2 h-[300px] md:h-[400px] lg:h-[450px] w-full rounded-3xl overflow-hidden relative">
           <Image
-            src="/home/uncompromising-craftmanship-cardle.jpg"
+            src="/home/cardle-uncompromising-craftsmanship.jpg"
             alt="Cardle Uncompromising Craftsmanship - Premium Everyday Carry Bag"
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 66vw"
@@ -75,7 +75,7 @@ export default function FeatureGrid() {
         {/* Bottom Right Image (Spans 2 columns) */}
         <div className="group col-span-1 lg:col-span-2 h-[300px] md:h-[400px] lg:h-[450px] w-full rounded-3xl overflow-hidden relative">
           <Image
-            src="/home/status-meets-utility.jpg"
+            src="/home/cardle-status-meets-utility-tote-bag.jpg"
             alt="Cardle Status Meets Utility - Quiet Luxury Everyday Carry Bag"
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 66vw"

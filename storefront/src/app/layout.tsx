@@ -33,20 +33,11 @@ export const metadata: Metadata = {
     title: "Cardle – Premium Cotton Tote Bags Sri Lanka",
     description:
       "Handcrafted, make-to-order cotton tote bags. Shop the Cardle collection online.",
-    images: [
-      {
-        url: "https://cardle.lk/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Cardle Premium Cotton Tote Bags Sri Lanka",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Cardle – Premium Cotton Tote Bags Sri Lanka",
     description: "Handcrafted make-to-order cotton tote bags. Shop online at cardle.lk",
-    images: ["https://cardle.lk/og-image.jpg"],
   },
   robots: {
     index: true,

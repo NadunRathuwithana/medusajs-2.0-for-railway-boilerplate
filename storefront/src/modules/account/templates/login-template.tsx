@@ -20,7 +20,7 @@ const LoginTemplate = () => {
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/cardle_login_cover.jpg"
+            src="/cardle-cotton-tote-bags-login-cover.jpg"
             alt="Cardle Luxury Carry"
             fill
             className="object-cover opacity-70 transition-transform duration-[10000ms] ease-out"

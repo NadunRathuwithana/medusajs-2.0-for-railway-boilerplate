@@ -77,7 +77,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                     {/* Header */}
                     <div className="flex items-center justify-between border-b border-zinc-800 pb-5">
                       <div>
-                        <img src="/LogoLight.png" alt="Cardle Logo" className="h-6 w-auto mb-2" />
+                        <img src="/cardle-premium-cotton-tote-bags-logo-light.png" alt="Cardle Logo" className="h-6 w-auto mb-2" />
                         <p className="text-[9px] font-bold tracking-[0.2em] text-gray-500 capitalize mt-0.5">
                           Everyday Carry
                         </p>

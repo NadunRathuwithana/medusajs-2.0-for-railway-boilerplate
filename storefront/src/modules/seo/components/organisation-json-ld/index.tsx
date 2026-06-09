@@ -4,7 +4,7 @@ export default function OrganisationJsonLd() {
     "@type": "Organization",
     name: "Cardle",
     url: "https://cardle.lk",
-    logo: "https://cardle.lk/Logo.png",
+    logo: "https://cardle.lk/cardle-premium-cotton-tote-bags-logo.png",
     description:
       "Cardle is a Sri Lankan premium cotton tote bag brand. Handcrafted, make-to-order bags delivered across Sri Lanka.",
     address: {

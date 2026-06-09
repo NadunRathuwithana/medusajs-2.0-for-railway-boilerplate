@@ -25,10 +25,10 @@ export default function CollectionTemplate({
       {/* Hero Banner */}
       <section className="h-[90vh] w-full relative overflow-hidden bg-[#e5e5e5] flex flex-col items-center justify-center">
         <picture>
-          <source media="(max-width: 768px)" srcSet="/store/shopMobile.jpg" />
-          <source media="(max-width: 1024px)" srcSet="/store/shopTab.jpg" />
+          <source media="(max-width: 768px)" srcSet="/store/buy-cotton-tote-bags-online-sri-lanka-mobile.jpg" />
+          <source media="(max-width: 1024px)" srcSet="/store/buy-cotton-tote-bags-online-sri-lanka-tablet.jpg" />
           <img
-            src="/store/shopHero.jpg"
+            src="/store/buy-cotton-tote-bags-online-sri-lanka.jpg"
             alt={`${collection.title} Hero Banner`}
             className="absolute inset-0 w-full h-full object-cover object-center"
           />

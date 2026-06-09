@@ -10,7 +10,7 @@ export default function PromoBanner() {
         className="block w-full h-[350px] md:h-[500px] lg:h-[700px] rounded-3xl overflow-hidden relative group"
       >
         <Image
-          src="/home/customize.jpg"
+          src="/home/cardle-custom-make-to-order-tote-bags.jpg"
           alt="Cardle - Bespoke Craftsmanship"
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1440px) 100vw, 1440px"

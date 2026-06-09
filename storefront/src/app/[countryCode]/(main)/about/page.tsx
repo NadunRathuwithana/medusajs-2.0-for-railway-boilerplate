@@ -11,10 +11,10 @@ export default function AboutPage() {
       {/* 1. Hero Banner */}
       <section className="h-[90vh] w-full relative overflow-hidden bg-[#111111] flex flex-col items-center justify-center">
         <picture>
-          <source media="(max-width: 768px)" srcSet="/about/hero-mobile.jpg" />
-          <source media="(max-width: 1024px)" srcSet="/about/hero-tab.jpg" />
+          <source media="(max-width: 768px)" srcSet="/about/cardle-about-premium-cotton-tote-bags-mobile.jpg" />
+          <source media="(max-width: 1024px)" srcSet="/about/cardle-about-premium-cotton-tote-bags-tablet.jpg" />
           <img
-            src="/about/aboutHero.jpg"
+            src="/about/cardle-about-premium-cotton-tote-bags.jpg"
             alt="Cardle Hero Banner"
             className="absolute inset-0 w-full h-full object-cover object-center"
           />
@@ -26,7 +26,7 @@ export default function AboutPage() {
         <div className="max-w-[1440px] mx-auto flex flex-col lg:flex-row gap-12 lg:gap-16 items-center">
           <div className="group w-full lg:w-1/2 h-[400px] md:h-[600px] rounded-3xl overflow-hidden relative cursor-pointer">
             <img
-              src="/about/cardle-story.jpg"
+              src="/about/cardle-story-handmade-tote-bags.jpg"
               alt="Person walking with bag"
               className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
             />
@@ -114,7 +114,7 @@ export default function AboutPage() {
 
             <div className="group h-[350px] md:h-auto rounded-3xl overflow-hidden relative cursor-pointer">
               <img
-                src="/about/premiumMaterials.jpg"
+                src="/about/cardle-premium-natural-cotton-materials.jpg"
                 alt="Premium Materials"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
               />
@@ -123,7 +123,7 @@ export default function AboutPage() {
 
             <div className="group h-[350px] md:h-auto rounded-3xl overflow-hidden relative order-4 md:order-3 cursor-pointer">
               <img
-                src="/about/zeroStretching.jpg"
+                src="/about/cardle-zero-stretch-engineering-tote-bag.jpg"
                 alt="Craftsmanship"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
               />
@@ -202,7 +202,7 @@ export default function AboutPage() {
           <div className="w-full lg:w-1/2 grid grid-cols-2 gap-4 md:gap-6 h-[400px] md:h-[600px]">
             <div className="group col-span-1 rounded-3xl overflow-hidden relative mt-8 md:mt-12 cursor-pointer">
               <img
-                src="/about/satus1.jpg"
+                src="/about/cardle-premium-status-tote-bag-1.jpg"
                 alt="Aesthetic Detail 1"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
               />
@@ -210,7 +210,7 @@ export default function AboutPage() {
             </div>
             <div className="group col-span-1 rounded-3xl overflow-hidden relative mb-8 md:mb-12 cursor-pointer">
               <img
-                src="/about/status2.jpg"
+                src="/about/cardle-premium-status-tote-bag-2.jpg"
                 alt="Aesthetic Detail 2"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
               />
