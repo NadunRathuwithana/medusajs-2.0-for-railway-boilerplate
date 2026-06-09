@@ -1,8 +1,8 @@
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "About Us | Cardle",
-  description: "The Cardle Story: Elevating the Everyday Carry",
+  title: "About Cardle | Sri Lanka's Make-to-Order Cotton Tote Bag Brand",
+  description: "Learn about the Cardle story. Elevating the everyday carry with zero-stretch engineering and premium materials. Cardle - Carry everything, compromise nothing.",
 }
 
 export default function AboutPage() {

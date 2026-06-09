@@ -8,10 +8,12 @@ import PromoBanner from "@modules/home/components/promo-banner"
 import { getCollectionsWithProducts } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
 
+import OrganisationJsonLd from "@modules/seo/components/organisation-json-ld"
+
 export const metadata: Metadata = {
-  title: "Medusa Next.js Starter Template",
+  title: "Cardle – Premium Cotton Tote Bags Sri Lanka | Shop Online",
   description:
-    "A performant frontend ecommerce starter template with Next.js 14 and Medusa.",
+    "Shop handcrafted cotton tote bags made to order in Sri Lanka. Free delivery available. Explore Cardle's collection of premium, sustainable bags. Order online at cardle.lk",
 }
 
 export default async function Home({
@@ -34,6 +36,7 @@ export default async function Home({
 
   return (
     <>
+      <OrganisationJsonLd />
       <Hero />
       <div className="flex flex-col gap-16 small:gap-24 py-16 small:py-24">
         <PopularProducts countryCode={countryCode} collectionHandle="popular" />
