@@ -30,7 +30,7 @@ async function logRequest(req: MedusaRequest) {
   }
 
   // Check if this is a OnePay callback and has a   transaction_id 01
-  const transactionId = req.body?.transaction_id;
+  const transactionId = (req.body as any)?.transaction_id;
   const appId = process.env.ONEPAY_APP_ID;
 
   if (transactionId && appId) {
