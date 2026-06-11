@@ -29,7 +29,7 @@ async function logRequest(req: MedusaRequest) {
     console.log("Incoming request: " + JSON.stringify(logData, null, 2));
   }
 
-  // Check if this is a OnePay callback and has a transaction_id
+  // Check if this is a OnePay callback and has a   transaction_id 01
   const transactionId = req.body?.transaction_id;
   const appId = process.env.ONEPAY_APP_ID;
 
