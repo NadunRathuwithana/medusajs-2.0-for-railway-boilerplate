@@ -17,7 +17,7 @@ async function processPaymentCollect(req: MedusaRequest) {
 
   logger.info("Incoming request to collect: " + JSON.stringify(logData, null, 2));
 
-  const transactionId = (req.body?.transaction_id || req.query?.transaction_id) as string | undefined;
+  const transactionId = ((req.body as any)?.transaction_id || req.query?.transaction_id) as string | undefined;
   const appId = process.env.ONEPAY_APP_ID;
   const onepayToken = process.env.ONEPAY_TOKEN;
 
@@ -57,7 +57,7 @@ async function processPaymentCollect(req: MedusaRequest) {
 
           if (!payment.captured_at) {
             // 1. Save transaction data
-            await paymentModuleService.updatePayments({
+            await paymentModuleService.updatePayment({
               id: payment.id,
               data: {
                 ...(payment.data || {}),
