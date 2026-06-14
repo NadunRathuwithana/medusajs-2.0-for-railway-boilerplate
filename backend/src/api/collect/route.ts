@@ -45,7 +45,7 @@ async function processPaymentCollect(req: MedusaRequest) {
         queryResult = responseData.data;
 
         // Resolve Medusa Payment Module
-        const paymentModuleService = req.scope.resolve(Modules.PAYMENT);
+        const paymentModuleService = req.scope.resolve(Modules.PAYMENT) as any;
         
         // Find matching payment session (since Payment record is only created post-capture)
         const allSessions = await paymentModuleService.listPaymentSessions({}, {
@@ -58,7 +58,7 @@ async function processPaymentCollect(req: MedusaRequest) {
           logger.info(`Found Medusa payment session with ID: ${session.id}`);
 
           // Emit the WebhookReceived event to let Medusa process it natively
-          const eventBus = req.scope.resolve(Modules.EVENT_BUS);
+          const eventBus = req.scope.resolve(Modules.EVENT_BUS) as any;
           await eventBus.emit({
             name: PaymentWebhookEvents.WebhookReceived,
             data: {
