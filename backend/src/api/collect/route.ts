@@ -47,12 +47,13 @@ async function processPaymentCollect(req: MedusaRequest) {
 
         // Resolve Medusa Payment Module
         const paymentModuleService = req.scope.resolve(Modules.PAYMENT);
-        const payments = await paymentModuleService.listPayments({
-          id: transactionId,
+        const allPayments = await paymentModuleService.listPayments({}, {
+          take: 100
         });
 
-        if (payments && payments.length > 0) {
-          const payment = payments[0];
+        const payment = allPayments.find((p: any) => p.data?.ipg_transaction_id === transactionId);
+
+        if (payment) {
           logger.info(`Found Medusa payment with ID: ${payment.id}. Current captured status: ${!!payment.captured_at}`);
 
           if (!payment.captured_at) {
