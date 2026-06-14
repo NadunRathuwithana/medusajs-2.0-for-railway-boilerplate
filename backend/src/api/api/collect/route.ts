@@ -45,6 +45,7 @@ async function logRequest(req: MedusaRequest) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": process.env.ONEPAY_TOKEN || "",
         },
         body: JSON.stringify({
           app_id: appId,
