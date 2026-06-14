@@ -62,7 +62,9 @@ export default function OnepayReturnClient({
           const existingOrderId = await checkOrderForCart()
           if (existingOrderId) {
             console.log("[OnePay Return] Order already exists (webhook completed it)!", existingOrderId)
-            // Remove the cart cookie and redirect
+            // Remove the cart cookie so a new cart is generated for the next purchase
+            const { clearCart } = await import("./actions")
+            await clearCart()
             router.push(`/${countryCode}/order/confirmed/${existingOrderId}`)
             return
           }

@@ -20,3 +20,8 @@ export async function checkOrderForCart() {
   }
   return null
 }
+
+export async function clearCart() {
+  const { removeCartId } = await import("@lib/data/cookies")
+  await removeCartId()
+}
