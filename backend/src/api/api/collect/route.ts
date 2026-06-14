@@ -1,6 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import { capturePaymentWorkflow } from "@medusajs/medusa/core-flows"
+import { ContainerRegistrationKeys, Modules, PaymentWebhookEvents } from "@medusajs/framework/utils"
 
 async function processPaymentCollect(req: MedusaRequest) {
   const logger = req.scope.resolve(ContainerRegistrationKeys.LOGGER) || console;
@@ -47,38 +46,49 @@ async function processPaymentCollect(req: MedusaRequest) {
 
         // Resolve Medusa Payment Module
         const paymentModuleService = req.scope.resolve(Modules.PAYMENT);
-        const allPayments = await paymentModuleService.listPayments({}, {
+        
+        // Find matching payment session (since Payment record is only created post-capture)
+        const allSessions = await paymentModuleService.listPaymentSessions({}, {
           take: 100
         });
 
-        const payment = allPayments.find((p: any) => p.data?.ipg_transaction_id === transactionId);
+        const session = allSessions.find((s: any) => s.data?.ipg_transaction_id === transactionId);
 
-        if (payment) {
-          logger.info(`Found Medusa payment with ID: ${payment.id}. Current captured status: ${!!payment.captured_at}`);
+        if (session) {
+          logger.info(`Found Medusa payment session with ID: ${session.id}`);
 
-          if (!payment.captured_at) {
-            // 1. Save transaction data
-            await paymentModuleService.updatePayment({
-              id: payment.id,
-              data: {
-                ...(payment.data || {}),
-                onepay_status: "success",
-                onepay_response: responseData.data,
+          // Emit the WebhookReceived event to let Medusa process it natively
+          const eventBus = req.scope.resolve(Modules.EVENT_BUS);
+          await eventBus.emit({
+            name: PaymentWebhookEvents.WebhookReceived,
+            data: {
+              provider: "pp_onepay_onepay",
+              payload: {
+                data: {
+                  ...req.body,
+                  additional_data: session.id,
+                },
+                rawData: JSON.stringify({
+                  ...req.body,
+                  additional_data: session.id,
+                }),
+                headers: req.headers as Record<string, unknown>,
               },
-            } as any);
-            logger.info(`Updated payment data for transaction: ${payment.id}`);
-
-            // 2. Update payment status of particular order / Capture payment
-            await capturePaymentWorkflow(req.scope).run({
-              input: {
-                payment_id: payment.id,
-                amount: payment.amount,
-              },
-            });
-            logger.info(`Successfully triggered capturePaymentWorkflow for payment: ${payment.id}`);
-          }
+            },
+          });
+          logger.info(`Emitted WebhookReceived event for session: ${session.id}`);
         } else {
-          logger.warn(`No payment found in Medusa matching transaction ID: ${transactionId}`);
+          // Check if already captured/completed as a Payment
+          const allPayments = await paymentModuleService.listPayments({}, {
+            take: 100
+          });
+          const payment = allPayments.find((p: any) => p.data?.ipg_transaction_id === transactionId);
+
+          if (payment) {
+            logger.info(`Payment already completed/captured for transaction ID: ${transactionId}`);
+          } else {
+            logger.warn(`No payment or payment session found in Medusa matching transaction ID: ${transactionId}`);
+          }
         }
       }
     } catch (error: any) {
