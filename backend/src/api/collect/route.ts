@@ -64,7 +64,7 @@ async function processPaymentCollect(req: MedusaRequest) {
                 onepay_status: "success",
                 onepay_response: responseData.data,
               },
-            });
+            } as any);
             logger.info(`Updated payment data for transaction: ${payment.id}`);
 
             // 2. Update payment status of particular order / Capture payment
