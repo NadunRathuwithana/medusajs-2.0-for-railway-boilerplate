@@ -102,10 +102,6 @@ const Payment = ({
     }
   }, [paymentReady, selectedPaymentMethod, activeSession, cart, paidByGiftcard])
 
-  if (!paymentReady) {
-    return null
-  }
-
   return (
     <div className="bg-white">
       <div className="flex flex-row items-center justify-between mb-6">
@@ -114,79 +110,78 @@ const Payment = ({
           {activeSession && <CheckCircleSolid className="text-green-500 w-6 h-6" />}
         </h2>
       </div>
-      <div>
+      {paymentReady ? (
         <div>
-          {!paidByGiftcard && availablePaymentMethods?.length && (
-            <>
-              <RadioGroup
-                value={selectedPaymentMethod}
-                onChange={(value: string) => setSelectedPaymentMethod(value)}
-              >
-                {availablePaymentMethods
-                  .sort((a, b) => {
-                    return a.provider_id > b.provider_id ? 1 : -1
-                  })
-                  .map((paymentMethod) => {
-                    return (
-                      <PaymentContainer
-                        paymentInfoMap={paymentInfoMap}
-                        paymentProviderId={paymentMethod.id}
-                        key={paymentMethod.id}
-                        selectedPaymentOptionId={selectedPaymentMethod}
-                      />
-                    )
-                  })}
-              </RadioGroup>
-              
-              {isLoading && (
-                <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
-                  <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-800 rounded-full animate-spin" />
-                  Loading payment options...
-                </div>
-              )}
-
-              {isStripe && stripeReady && activeSession && activeSession.provider_id === selectedPaymentMethod && (
-                <div className="mt-5 transition-all duration-150 ease-in-out">
-                  <span className="font-semibold text-bold mb-2 block">
-                    Enter your card details:
-                  </span>
-
-                  <CardElement
-                    options={useOptions as StripeCardElementOptions}
-                    onChange={(e) => {
-                      setCardBrand(
-                        e.brand &&
-                          e.brand.charAt(0).toUpperCase() + e.brand.slice(1)
+          <div>
+            {!paidByGiftcard && availablePaymentMethods?.length && (
+              <>
+                <RadioGroup
+                  value={selectedPaymentMethod}
+                  onChange={(value: string) => setSelectedPaymentMethod(value)}
+                >
+                  {availablePaymentMethods
+                    .sort((a, b) => {
+                      return a.provider_id > b.provider_id ? 1 : -1
+                    })
+                    .map((paymentMethod) => {
+                      return (
+                        <PaymentContainer
+                          paymentInfoMap={paymentInfoMap}
+                          paymentProviderId={paymentMethod.id}
+                          key={paymentMethod.id}
+                          selectedPaymentOptionId={selectedPaymentMethod}
+                        />
                       )
-                      setError(e.error?.message || null)
-                      setCardComplete(e.complete)
-                    }}
-                  />
-                </div>
-              )}
-            </>
-          )}
+                    })}
+                </RadioGroup>
+                
+                {isLoading && (
+                  <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
+                    <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-800 rounded-full animate-spin" />
+                    Loading payment options...
+                  </div>
+                )}
 
-          {paidByGiftcard && (
-            <div className="flex flex-col w-1/3">
-              <span className="font-semibold text-bold mb-2">
-                Payment method
-              </span>
-              <span
-                className="text-gray-600"
-                data-testid="payment-method-summary"
-              >
-                Gift card
-              </span>
-            </div>
-          )}
+                {isStripe && stripeReady && activeSession && activeSession.provider_id === selectedPaymentMethod && (
+                  <div className="mt-5 transition-all duration-150 ease-in-out">
+                    <span className="font-semibold text-bold mb-2 block">
+                      Enter card details:
+                    </span>
+                    <CardElement
+                      options={useOptions as StripeCardElementOptions}
+                      onChange={(e) => {
+                        setCardBrand(
+                          e.brand && e.brand !== "unknown" ? e.brand : null
+                        )
+                        setCardComplete(e.complete)
+                      }}
+                    />
+                  </div>
+                )}
+              </>
+            )}
 
-          <ErrorMessage
-            error={error}
-            data-testid="payment-method-error-message"
-          />
+            {paidByGiftcard && (
+              <div className="flex flex-col w-1/3">
+                <span className="text-gray-900 mb-1 font-medium">Payment method</span>
+                <span className="text-gray-500 text-sm">Gift card</span>
+              </div>
+            )}
+
+            <ErrorMessage
+              error={error}
+              data-testid="payment-method-error-message"
+            />
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="pb-8">
+          <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200 text-gray-500 text-[15px]">
+            Please complete the delivery step to view available payment options.
+          </div>
+        </div>
+      )}
+      
       <div className="h-px w-full bg-gray-100 my-8" />
     </div>
   )

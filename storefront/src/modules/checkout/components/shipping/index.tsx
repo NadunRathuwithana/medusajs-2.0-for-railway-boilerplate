@@ -52,10 +52,6 @@ const Shipping: React.FC<ShippingProps> = ({
   // If no address is set, we don't show the shipping options as actionable
   const isAddressSet = !!cart.shipping_address?.country_code
   
-  if (!isAddressSet) {
-    return null
-  }
-
   return (
     <div className="bg-white">
       <div className="flex flex-row items-center justify-between mb-6">
@@ -67,7 +63,8 @@ const Shipping: React.FC<ShippingProps> = ({
         </h2>
       </div>
       
-      <div data-testid="delivery-options-container">
+      {isAddressSet ? (
+        <div data-testid="delivery-options-container">
           <div className="pb-8">
             <RadioGroup value={selectedShippingMethod?.id ?? ""} onChange={set} className="flex flex-col gap-3">
               {availableShippingMethods?.map((option) => {
@@ -106,6 +103,14 @@ const Shipping: React.FC<ShippingProps> = ({
             data-testid="delivery-option-error-message"
           />
         </div>
+      ) : (
+        <div className="pb-8">
+          <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200 text-gray-500 text-[15px]">
+            Please enter your shipping address to view available delivery options.
+          </div>
+        </div>
+      )}
+      
       <div className="h-px w-full bg-gray-100 my-8" />
     </div>
   )

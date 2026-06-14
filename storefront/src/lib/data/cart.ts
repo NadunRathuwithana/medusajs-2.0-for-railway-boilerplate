@@ -99,6 +99,7 @@ export async function addToCart({
     )
     .then(() => {
       revalidateTag("cart")
+      revalidateTag("shipping")
     })
     .catch(medusaError)
 }
@@ -123,6 +124,7 @@ export async function updateLineItem({
     .updateLineItem(cartId, lineId, { quantity }, {}, await getAuthHeaders())
     .then(() => {
       revalidateTag("cart")
+      revalidateTag("shipping")
     })
     .catch(medusaError)
 }
@@ -141,9 +143,11 @@ export async function deleteLineItem(lineId: string) {
     .deleteLineItem(cartId, lineId, {}, await getAuthHeaders())
     .then(() => {
       revalidateTag("cart")
+      revalidateTag("shipping")
     })
     .catch(medusaError)
   revalidateTag("cart")
+  revalidateTag("shipping")
 }
 
 export async function enrichLineItems(
