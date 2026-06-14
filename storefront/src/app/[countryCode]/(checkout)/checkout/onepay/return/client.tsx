@@ -40,6 +40,10 @@ export default function OnepayReturnClient({
       console.error("[OnePay Return] Payment cancelled or failed:", statusMessage)
       setStatus("error")
       setMessage("Payment was cancelled or failed. Please try again.")
+      // Reset the payment session so Medusa forces a fresh OnePay link next time
+      import("./actions").then((actions) => {
+        actions.resetPaymentSession().catch(console.error)
+      })
       return
     }
 
