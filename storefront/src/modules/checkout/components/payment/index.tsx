@@ -119,7 +119,7 @@ const Payment = ({
                   value={selectedPaymentMethod}
                   onChange={(value: string) => setSelectedPaymentMethod(value)}
                 >
-                  {availablePaymentMethods
+                  {[...availablePaymentMethods]
                     .sort((a, b) => {
                       return a.provider_id > b.provider_id ? 1 : -1
                     })
