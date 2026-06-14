@@ -68,13 +68,16 @@ async function processPaymentCollect(req: MedusaRequest) {
           await eventBus.emit({
             name: PaymentWebhookEvents.WebhookReceived,
             data: {
-              provider: "pp_onepay_onepay",
+              provider: "onepay_onepay",
               payload: {
                 data: payloadData,
                 rawData: JSON.stringify(payloadData),
                 headers: req.headers as Record<string, unknown>,
               },
             },
+          }, {
+            delay: 5000,
+            attempts: 3,
           });
           logger.info(`Emitted WebhookReceived event for session: ${session.id}`);
         } else {

@@ -11,7 +11,7 @@ export async function POST(
     await eventBus.emit({
       name: PaymentWebhookEvents.WebhookReceived,
       data: {
-        provider: "pp_koko_koko",  // format: pp_{identifier}_{id}
+        provider: "koko_koko",  // Medusa prepends pp_ → pp_koko_koko
         payload: {
           data: req.body as Record<string, unknown>,
           rawData: req.rawBody || JSON.stringify(req.body),
