@@ -34,7 +34,11 @@ export default function OnepayReturnClient({
       return
     }
 
-    if (statusMessage && statusMessage.toUpperCase() !== "SUCCESS") {
+    if (
+      statusMessage && 
+      statusMessage.toUpperCase() !== "SUCCESS" && 
+      statusMessage !== "1"
+    ) {
       console.error("[OnePay Return] Payment not successful:", statusMessage)
       setStatus("error")
       setMessage(`Payment was not successful. OnePay status: ${statusMessage}`)
