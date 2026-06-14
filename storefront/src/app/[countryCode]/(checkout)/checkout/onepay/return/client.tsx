@@ -19,8 +19,8 @@ export default function OnepayReturnClient({
   const [status, setStatus] = useState<"processing" | "success" | "error">("processing")
   const [message, setMessage] = useState("Please wait while we confirm your payment and place your order...")
 
-  const transactionId = searchParams?.transaction_id
-  const statusMessage = searchParams?.status_message
+  const transactionId = searchParams?.ipg_transaction_id || searchParams?.transaction_id
+  const statusMessage = searchParams?.status || searchParams?.status_message
 
   useEffect(() => {
     // 1. Console log for the user to inspect in browser
