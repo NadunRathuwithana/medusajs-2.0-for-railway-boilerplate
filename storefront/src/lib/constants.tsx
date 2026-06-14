@@ -4,6 +4,8 @@ import { CreditCard } from "@medusajs/icons"
 import Ideal from "@modules/common/icons/ideal"
 import Bancontact from "@modules/common/icons/bancontact"
 import PayPal from "@modules/common/icons/paypal"
+import Onepay from "@modules/common/icons/onepay"
+import Koko from "@modules/common/icons/koko"
 
 /* Map of payment provider_id to their title and icon. Add in any payment providers you want to use. */
 export const paymentInfoMap: Record<
@@ -32,11 +34,11 @@ export const paymentInfoMap: Record<
   },
   pp_onepay_onepay: {
     title: "OnePay",
-    icon: <CreditCard />,
+    icon: <Onepay />,
   },
   pp_koko_koko: {
     title: "Koko (3 Instalments)",
-    icon: <CreditCard />,
+    icon: <Koko />,
   },
   // Add more payment providers here
 }

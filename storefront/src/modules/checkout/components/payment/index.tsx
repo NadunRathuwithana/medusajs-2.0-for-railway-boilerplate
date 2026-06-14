@@ -33,6 +33,13 @@ const Payment = ({
     activeSession?.provider_id ?? ""
   )
 
+  // Auto-select the first available payment method if none is selected
+  useEffect(() => {
+    if (!selectedPaymentMethod && availablePaymentMethods?.length > 0) {
+      setSelectedPaymentMethod(availablePaymentMethods[0].id)
+    }
+  }, [availablePaymentMethods, selectedPaymentMethod])
+
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()

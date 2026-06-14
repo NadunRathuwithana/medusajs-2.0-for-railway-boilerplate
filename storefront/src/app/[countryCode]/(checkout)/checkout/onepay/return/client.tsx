@@ -28,7 +28,22 @@ export default function OnepayReturnClient({
     // Log all received params for debugging
     console.log("[OnePay Return] Received ALL searchParams:", JSON.stringify(searchParams))
 
-    // We do NOT validate the URL params here.
+    const statusMessage = searchParams?.status_message?.toUpperCase() || searchParams?.status
+    
+    // Explicitly check for failure/cancellation statuses from OnePay
+    if (
+      statusMessage === "FAILED" || 
+      statusMessage === "CANCELLED" || 
+      statusMessage === "0" || 
+      statusMessage === "2"
+    ) {
+      console.error("[OnePay Return] Payment cancelled or failed:", statusMessage)
+      setStatus("error")
+      setMessage("Payment was cancelled or failed. Please try again.")
+      return
+    }
+
+    // We do NOT validate the URL params strictly for success.
     // OnePay's redirect URL params are unreliable / undocumented for browser redirect.
     // The REAL payment verification happens server-side via the webhook.
     // This page simply needs to:
