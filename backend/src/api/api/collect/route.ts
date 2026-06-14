@@ -57,6 +57,12 @@ async function processPaymentCollect(req: MedusaRequest) {
         if (session) {
           logger.info(`Found Medusa payment session with ID: ${session.id}`);
 
+          const bodyData = (req.body ?? {}) as Record<string, unknown>
+          const payloadData = {
+            ...bodyData,
+            additional_data: session.id,
+          }
+
           // Emit the WebhookReceived event to let Medusa process it natively
           const eventBus = req.scope.resolve(Modules.EVENT_BUS) as any;
           await eventBus.emit({
@@ -64,14 +70,8 @@ async function processPaymentCollect(req: MedusaRequest) {
             data: {
               provider: "pp_onepay_onepay",
               payload: {
-                data: {
-                  ...req.body,
-                  additional_data: session.id,
-                },
-                rawData: JSON.stringify({
-                  ...req.body,
-                  additional_data: session.id,
-                }),
+                data: payloadData,
+                rawData: JSON.stringify(payloadData),
                 headers: req.headers as Record<string, unknown>,
               },
             },
