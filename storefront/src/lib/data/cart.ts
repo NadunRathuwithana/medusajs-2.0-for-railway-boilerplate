@@ -146,8 +146,6 @@ export async function deleteLineItem(lineId: string) {
       revalidateTag("shipping")
     })
     .catch(medusaError)
-  revalidateTag("cart")
-  revalidateTag("shipping")
 }
 
 export async function enrichLineItems(
@@ -257,11 +255,8 @@ export async function applyPromotions(codes: string[]) {
     throw new Error("No existing cart found")
   }
 
-  await updateCart({ promo_codes: codes })
-    .then(() => {
-      revalidateTag("cart")
-    })
-    .catch(medusaError)
+  // updateCart() already calls revalidateTag("cart") internally — no need to repeat
+  await updateCart({ promo_codes: codes }).catch(medusaError)
 }
 
 export async function applyGiftCard(code: string) {
@@ -368,9 +363,15 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
     revalidateTag("shipping")
 
     // Automatically select the first available shipping method to bypass the delivery step
-    const shippingMethods = await listCartShippingMethods(cartId)
-    if (shippingMethods && shippingMethods.length > 0) {
-      await setShippingMethod({ cartId, shippingMethodId: shippingMethods[0].id })
+    try {
+      const shippingMethods = await listCartShippingMethods(cartId)
+      if (shippingMethods && shippingMethods.length > 0) {
+        await setShippingMethod({ cartId, shippingMethodId: shippingMethods[0].id })
+      }
+    } catch (shippingErr: any) {
+      // Non-fatal: address was saved successfully; shipping auto-select failed.
+      // Surface a warning but do not block the address step.
+      console.warn("[setAddresses] Shipping auto-select failed:", shippingErr?.message)
     }
   } catch (e: any) {
     return e.message

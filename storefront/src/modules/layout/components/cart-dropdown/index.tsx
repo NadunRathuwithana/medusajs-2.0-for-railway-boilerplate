@@ -205,6 +205,15 @@ const SidebarCartItem = ({ item, close }: { item: any; close: () => void }) => {
   const [optimisticQty, setOptimisticQty] = useState(item.quantity)
   const [isPending, startTransition] = useTransition()
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const latestQtyRef = useRef(item.quantity)
+
+  // Sync optimistic qty when server state arrives (and we're not mid-update)
+  useEffect(() => {
+    if (!isPending && !debounceRef.current) {
+      setOptimisticQty(item.quantity)
+    }
+    latestQtyRef.current = item.quantity
+  }, [item.quantity, isPending])
 
   const changeQuantity = (newQty: number) => {
     if (newQty < 1) return
@@ -308,10 +317,7 @@ const SidebarCartItem = ({ item, close }: { item: any; close: () => void }) => {
             >
               <Minus className="w-3.5 h-3.5" strokeWidth={2.5} />
             </button>
-            <span
-              className={`text-[13px] font-bold text-gray-900 w-5 text-center select-none transition-opacity ${isPending ? "opacity-40" : ""
-                }`}
-            >
+            <span className="text-[13px] font-bold text-gray-900 w-5 text-center select-none">
               {optimisticQty}
             </span>
             <button

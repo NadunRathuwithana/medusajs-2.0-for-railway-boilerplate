@@ -1,12 +1,10 @@
 "use client"
 
-import { Badge, Heading, Input, Label, Text, Tooltip } from "@medusajs/ui"
-import React from "react"
-import { useActionState } from "react"
+import { Badge, Heading, Input, Label, Text } from "@medusajs/ui"
+import React, { useActionState } from "react"
 
 import { applyPromotions, submitPromotionForm } from "@lib/data/cart"
 import { convertToLocale } from "@lib/util/money"
-import { InformationCircleSolid } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
 import Trash from "@modules/common/icons/trash"
 import ErrorMessage from "../error-message"
@@ -21,14 +19,14 @@ type DiscountCodeProps = {
 const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
   const [isOpen, setIsOpen] = React.useState(false)
 
-  const { items = [], promotions = [] } = cart
+  const { promotions = [] } = cart
   const removePromotionCode = async (code: string) => {
     const validPromotions = promotions.filter(
       (promotion) => promotion.code !== code
     )
 
     await applyPromotions(
-      validPromotions.filter((p) => p.code === undefined).map((p) => p.code!)
+      validPromotions.filter((p) => p.code !== undefined).map((p) => p.code!)
     )
   }
 
@@ -39,7 +37,7 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
     }
     const input = document.getElementById("promotion-input") as HTMLInputElement
     const codes = promotions
-      .filter((p) => p.code === undefined)
+      .filter((p) => p.code !== undefined)
       .map((p) => p.code!)
     codes.push(code.toString())
 
@@ -129,7 +127,7 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
                               "percentage"
                                 ? `${promotion.application_method.value}%`
                                 : convertToLocale({
-                                    amount: promotion.application_method.value,
+                                    amount: Number(promotion.application_method.value),
                                     currency_code:
                                       promotion.application_method
                                         .currency_code,

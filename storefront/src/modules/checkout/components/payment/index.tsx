@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useContext, useEffect, useMemo, useState } from "react"
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { RadioGroup } from "@headlessui/react"
 import ErrorMessage from "@modules/checkout/components/error-message"
@@ -74,18 +74,41 @@ const Payment = ({
     setError(null)
   }, [])
 
+  // Stable refs to prevent stale closure issues without adding `cart` to deps
+  const cartIdRef = useRef<string>(cart?.id)
+  const cartRef = useRef<any>(cart)
+
+  // Keep refs current on every render without causing effect re-fires
+  cartIdRef.current = cart?.id
+  cartRef.current = cart
+
+  // Guard: tracks the provider currently being initiated to prevent duplicate calls
+  const initiatingProviderRef = useRef<string | null>(null)
+
   useEffect(() => {
     let isMounted = true
+
     if (paymentReady && selectedPaymentMethod && !paidByGiftcard) {
       if (!activeSession || activeSession.provider_id !== selectedPaymentMethod) {
+        // Prevent duplicate in-flight calls for the same provider
+        if (initiatingProviderRef.current === selectedPaymentMethod) {
+          return
+        }
+
+        initiatingProviderRef.current = selectedPaymentMethod
         setIsLoading(true)
-        initiatePaymentSession(cart, {
+        setError(null)
+
+        // Use cartRef.current so we always use the latest cart without adding
+        // `cart` to the dependency array (which would re-fire on every RSC re-render)
+        initiatePaymentSession(cartRef.current, {
           provider_id: selectedPaymentMethod,
         })
           .then((result: any) => {
+            if (!isMounted) return
             // initiatePaymentSession returns {error: string} on failure
             // (instead of throwing) to avoid triggering Next.js error boundary
-            if (result?.error && isMounted) {
+            if (result?.error) {
               setError(result.error)
             }
           })
@@ -93,14 +116,24 @@ const Payment = ({
             if (isMounted) setError(err.message)
           })
           .finally(() => {
+            initiatingProviderRef.current = null
             if (isMounted) setIsLoading(false)
           })
       }
     }
+
     return () => {
       isMounted = false
     }
-  }, [paymentReady, selectedPaymentMethod, activeSession, cart, paidByGiftcard])
+    // NOTE: `cart` is intentionally NOT in the dependency array.
+    // Adding it would cause this effect to re-fire on every RSC re-render
+    // (since each render delivers a new `cart` object reference), resulting in
+    // duplicate initiatePaymentSession calls. We access the latest cart value
+    // via cartRef.current inside the effect instead.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paymentReady, selectedPaymentMethod, activeSession, paidByGiftcard])
+
+  const hasPaymentMethods = availablePaymentMethods?.length > 0
 
   return (
     <div className="bg-white">
@@ -113,50 +146,67 @@ const Payment = ({
       {paymentReady ? (
         <div>
           <div>
-            {!paidByGiftcard && availablePaymentMethods?.length && (
+            {!paidByGiftcard && (
               <>
-                <RadioGroup
-                  value={selectedPaymentMethod}
-                  onChange={(value: string) => setSelectedPaymentMethod(value)}
-                >
-                  {[...availablePaymentMethods]
-                    .sort((a, b) => {
-                      return a.provider_id > b.provider_id ? 1 : -1
-                    })
-                    .map((paymentMethod) => {
-                      return (
-                        <PaymentContainer
-                          paymentInfoMap={paymentInfoMap}
-                          paymentProviderId={paymentMethod.id}
-                          key={paymentMethod.id}
-                          selectedPaymentOptionId={selectedPaymentMethod}
-                        />
-                      )
-                    })}
-                </RadioGroup>
-                
-                {isLoading && (
-                  <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
-                    <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-800 rounded-full animate-spin" />
-                    Loading payment options...
+                {!hasPaymentMethods ? (
+                  // Payment methods fetch failed or returned empty — show retry UI
+                  <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200">
+                    <p className="text-gray-600 text-[15px] mb-3">
+                      Unable to load payment options. Please refresh the page.
+                    </p>
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="text-sm font-medium underline text-gray-800 hover:text-black"
+                    >
+                      Retry
+                    </button>
                   </div>
-                )}
+                ) : (
+                  <>
+                    <RadioGroup
+                      value={selectedPaymentMethod}
+                      onChange={(value: string) => setSelectedPaymentMethod(value)}
+                    >
+                      {[...availablePaymentMethods]
+                        .sort((a, b) => {
+                          return a.provider_id > b.provider_id ? 1 : -1
+                        })
+                        .map((paymentMethod) => {
+                          return (
+                            <PaymentContainer
+                              paymentInfoMap={paymentInfoMap}
+                              paymentProviderId={paymentMethod.id}
+                              key={paymentMethod.id}
+                              selectedPaymentOptionId={selectedPaymentMethod}
+                            />
+                          )
+                        })}
+                    </RadioGroup>
 
-                {isStripe && stripeReady && activeSession && activeSession.provider_id === selectedPaymentMethod && (
-                  <div className="mt-5 transition-all duration-150 ease-in-out">
-                    <span className="font-semibold text-bold mb-2 block">
-                      Enter card details:
-                    </span>
-                    <CardElement
-                      options={useOptions as StripeCardElementOptions}
-                      onChange={(e) => {
-                        setCardBrand(
-                          e.brand && e.brand !== "unknown" ? e.brand : null
-                        )
-                        setCardComplete(e.complete)
-                      }}
-                    />
-                  </div>
+                    {isLoading && (
+                      <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
+                        <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-800 rounded-full animate-spin" />
+                        Loading payment options...
+                      </div>
+                    )}
+
+                    {isStripe && stripeReady && activeSession && activeSession.provider_id === selectedPaymentMethod && (
+                      <div className="mt-5 transition-all duration-150 ease-in-out">
+                        <span className="font-semibold text-bold mb-2 block">
+                          Enter card details:
+                        </span>
+                        <CardElement
+                          options={useOptions as StripeCardElementOptions}
+                          onChange={(e) => {
+                            setCardBrand(
+                              e.brand && e.brand !== "unknown" ? e.brand : null
+                            )
+                            setCardComplete(e.complete)
+                          }}
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
               </>
             )}

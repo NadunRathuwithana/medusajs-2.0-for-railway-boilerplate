@@ -6,7 +6,7 @@ import { clx } from "@medusajs/ui"
 
 import Radio from "@modules/common/components/radio"
 import ErrorMessage from "@modules/checkout/components/error-message"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { setShippingMethod } from "@lib/data/cart"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
@@ -42,12 +42,23 @@ const Shipping: React.FC<ShippingProps> = ({
     setError(null)
   }, [])
 
+  // One-shot guard: auto-select fires at most once per mount.
+  // Previously isLoading was in the deps, causing a re-fire when loading finished
+  // if the RSC hadn't updated selectedShippingMethod yet — resulting in duplicate API calls.
+  const autoSelectedRef = useRef(false)
+
   // Auto-select the first shipping method if none is selected
   useEffect(() => {
-    if (availableShippingMethods?.length && !selectedShippingMethod?.id && !isLoading) {
+    if (
+      !autoSelectedRef.current &&
+      availableShippingMethods?.length &&
+      !selectedShippingMethod?.id
+    ) {
+      autoSelectedRef.current = true
       set(availableShippingMethods[0].id)
     }
-  }, [availableShippingMethods, selectedShippingMethod, isLoading])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableShippingMethods, selectedShippingMethod])
 
   // If no address is set, we don't show the shipping options as actionable
   const isAddressSet = !!cart.shipping_address?.country_code

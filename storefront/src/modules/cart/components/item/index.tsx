@@ -61,10 +61,10 @@ const Item = ({ item, type = "full" }: ItemProps) => {
 
   const { currency_code } = getPricesForVariant(item.variant) ?? {}
   
-  // Use item totals returned by Medusa v2 API
-  const originalPrice = item.original_total ?? 0
-  const currentPrice = item.total ?? 0
-  const discountTotal = item.discount_total ?? 0
+  // Calculate optimistic totals based on current optimisticQty
+  const originalPrice = ((item.original_total ?? 0) / (item.quantity || 1)) * optimisticQty
+  const currentPrice = ((item.total ?? 0) / (item.quantity || 1)) * optimisticQty
+  const discountTotal = ((item.discount_total ?? 0) / (item.quantity || 1)) * optimisticQty
   const hasReducedPrice = discountTotal > 0 || currentPrice < originalPrice
 
   const formatPrice = (amount: number) => convertToLocale({ amount, currency_code: currency_code || "USD" })
@@ -206,7 +206,7 @@ const Item = ({ item, type = "full" }: ItemProps) => {
               >
                 <Minus className="w-3.5 h-3.5" strokeWidth={2.5} />
               </button>
-              <span className={`text-[14px] font-bold text-gray-900 w-5 text-center select-none transition-opacity ${isPending ? 'opacity-40' : ''}`}>
+              <span className="text-[14px] font-bold text-gray-900 w-5 text-center select-none">
                 {optimisticQty}
               </span>
               <button
