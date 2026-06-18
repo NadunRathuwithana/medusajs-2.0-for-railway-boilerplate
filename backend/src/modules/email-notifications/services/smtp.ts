@@ -49,7 +49,7 @@ export class SmtpNotificationService extends AbstractNotificationProviderService
     this.from_ = options.from || options.user
     this.adminEmail_ = options.adminEmail || options.user
 
-    this.transporter_ = nodemailer.createTransport({
+    const transportOptions: any = {
       host: options.host,
       port: options.port,
       secure: options.secure,
@@ -59,10 +59,14 @@ export class SmtpNotificationService extends AbstractNotificationProviderService
       },
       tls: {
         rejectUnauthorized: false,
-        family: 4, // Force IPv4 to prevent IPv6 blackhole timeouts on Railway/Vercel
       },
-      ...((options.host?.includes('gmail') || options.host?.includes('google')) ? { service: 'gmail' } : {}),
-    })
+    }
+
+    if (options.host?.includes('gmail') || options.host?.includes('google')) {
+      transportOptions.service = 'gmail'
+    }
+
+    this.transporter_ = nodemailer.createTransport(transportOptions)
   }
 
   async send(
