@@ -59,9 +59,9 @@ export class SmtpNotificationService extends AbstractNotificationProviderService
       },
       tls: {
         rejectUnauthorized: false,
+        family: 4, // Force IPv4 to prevent IPv6 blackhole timeouts on Railway/Vercel
       },
       ...((options.host?.includes('gmail') || options.host?.includes('google')) ? { service: 'gmail' } : {}),
-      family: 4, // Force IPv4 to prevent IPv6 blackhole timeouts on Railway/Vercel
     })
   }
 
