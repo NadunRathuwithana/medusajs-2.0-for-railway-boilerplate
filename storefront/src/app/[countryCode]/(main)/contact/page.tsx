@@ -33,7 +33,10 @@ export default function ContactPage() {
 
       const res = await fetch(`${backendUrl}/store/contact`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+        },
         body: JSON.stringify({
           name: form.name,
           email: form.email,
