@@ -47,7 +47,7 @@ export default function ContactPage() {
         }),
       })
 
-      let data = {}
+      let data: any = {}
       try {
         const text = await res.text()
         data = text ? JSON.parse(text) : {}
