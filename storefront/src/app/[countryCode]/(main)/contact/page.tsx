@@ -2,6 +2,8 @@
 
 import { Metadata } from "next"
 import { useState, FormEvent } from "react"
+import { Select } from "@medusajs/ui"
+import { MessageSquare, CheckCircle2, AlertCircle } from "lucide-react"
 
 // Note: metadata export won't work in client components — move it to a wrapper if needed
 // For now, the metadata is defined separately below as a named export from a separate file
@@ -45,10 +47,24 @@ export default function ContactPage() {
         }),
       })
 
-      const data = await res.json()
+      let data = {}
+      try {
+        const text = await res.text()
+        data = text ? JSON.parse(text) : {}
+      } catch (err) {
+        console.error("Failed to parse response:", err)
+      }
 
       if (!res.ok) {
-        setErrorMsg(data.error || "Something went wrong. Please try again.")
+        let errMessage = "Something went wrong. Please try again."
+        if (data.message) errMessage = data.message
+        if (data.error) errMessage = data.error
+        if (data.errors) {
+          errMessage = Array.isArray(data.errors) 
+            ? data.errors.map((e: any) => e.message || e).join(", ") 
+            : typeof data.errors === 'string' ? data.errors : JSON.stringify(data.errors)
+        }
+        setErrorMsg(errMessage)
         setStatus("error")
         return
       }
@@ -56,6 +72,7 @@ export default function ContactPage() {
       setStatus("success")
       setForm({ name: "", email: "", subject: "", message: "" })
     } catch (err) {
+      console.error("Contact form error:", err)
       setErrorMsg("Network error. Please check your connection and try again.")
       setStatus("error")
     }
@@ -88,7 +105,7 @@ export default function ContactPage() {
             marginBottom: "16px",
           }}
         >
-          📬 Get In Touch
+          <MessageSquare className="w-4 h-4" /> Get In Touch
         </div>
         <h1
           style={{
@@ -118,9 +135,12 @@ export default function ContactPage() {
               borderRadius: "20px",
               padding: "48px",
               textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center"
             }}
           >
-            <div style={{ fontSize: "64px", marginBottom: "16px" }}>✅</div>
+            <CheckCircle2 className="w-16 h-16 text-green-600 mb-4" />
             <h2
               style={{ fontSize: "24px", fontWeight: 700, color: "#15803d", marginBottom: "12px" }}
             >
@@ -179,7 +199,7 @@ export default function ContactPage() {
                   gap: "8px",
                 }}
               >
-                ⚠️ {errorMsg}
+                <AlertCircle className="w-5 h-5 flex-shrink-0" /> {errorMsg}
               </div>
             )}
 
@@ -250,31 +270,34 @@ export default function ContactPage() {
                 >
                   Subject
                 </label>
-                <select
-                  id="contact-subject"
-                  name="subject"
+                <Select
                   value={form.subject}
-                  onChange={handleChange}
-                  style={{
-                    width: "100%",
-                    backgroundColor: "#f8f9fa",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "12px",
-                    padding: "12px 16px",
-                    fontSize: "14px",
-                    outline: "none",
-                    appearance: "none",
-                    cursor: "pointer",
-                    boxSizing: "border-box",
-                  }}
+                  onValueChange={(val) => setForm((prev) => ({ ...prev, subject: val }))}
                 >
-                  <option value="">Select a subject...</option>
-                  {subjects.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
+                  <Select.Trigger 
+                    id="contact-subject"
+                    style={{
+                      width: "100%",
+                      backgroundColor: "#f8f9fa",
+                      border: "1px solid #e5e7eb",
+                      borderRadius: "12px",
+                      padding: "12px 16px",
+                      fontSize: "14px",
+                      boxSizing: "border-box",
+                      height: "auto",
+                      boxShadow: "none"
+                    }}
+                  >
+                    <Select.Value placeholder="Select a subject..." />
+                  </Select.Trigger>
+                  <Select.Content style={{ zIndex: 100 }}>
+                    {subjects.map((s) => (
+                      <Select.Item key={s} value={s}>
+                        {s}
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select>
               </div>
 
               {/* Message */}
