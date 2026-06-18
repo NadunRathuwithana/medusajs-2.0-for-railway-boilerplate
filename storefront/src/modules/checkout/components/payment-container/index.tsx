@@ -22,6 +22,7 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
   disabled = false,
 }) => {
   const isDevelopment = process.env.NODE_ENV === "development"
+  const isSelected = selectedPaymentOptionId === paymentProviderId
 
   return (
     <>
@@ -30,19 +31,19 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
         value={paymentProviderId}
         disabled={disabled}
         className={clx(
-          "flex flex-col gap-y-2 text-small-regular cursor-pointer py-4 border rounded-rounded px-8 mb-2 hover:shadow-borders-interactive-with-active",
+          "flex flex-col justify-center gap-y-2 cursor-pointer p-4 border rounded-2xl transition-colors hover:bg-gray-50 focus:outline-none focus:ring-0 min-h-[64px]",
           {
-            "border-ui-border-interactive":
-              selectedPaymentOptionId === paymentProviderId,
+            "border-black bg-gray-50": isSelected,
+            "border-gray-200 bg-white": !isSelected,
           }
         )}
       >
         <div className="flex items-center justify-between ">
           <div className="flex items-center gap-x-4">
-            <Radio checked={selectedPaymentOptionId === paymentProviderId} />
-            <Text className="text-base-regular">
+            <Radio checked={isSelected} />
+            <span className="text-[15px] font-medium text-gray-900">
               {paymentInfoMap[paymentProviderId]?.title || paymentProviderId}
-            </Text>
+            </span>
             {isManual(paymentProviderId) && isDevelopment && (
               <PaymentTest className="hidden small:block" />
             )}

@@ -14,14 +14,14 @@ const Review = ({ cart }: { cart: any }) => {
 
   return (
     <div className="bg-white">
-      <div className="flex flex-row items-center justify-between mb-6">
+      <div className="flex flex-row items-center justify-between mb-3">
         <h2 className="flex flex-row text-[24px] font-bold text-bold gap-x-2 items-center">
           Review & Place Order
         </h2>
       </div>
       {previousStepsCompleted && (
         <>
-          <div className="flex items-start gap-x-1 w-full mb-6">
+          <div className="flex items-start gap-x-1 w-full mb-4">
             <div className="w-full">
               <p className="text-[14px] text-gray-500 leading-relaxed">
                 By clicking the Place Order button, you confirm that you have

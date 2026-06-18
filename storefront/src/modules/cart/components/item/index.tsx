@@ -62,8 +62,8 @@ const Item = ({ item, type = "full" }: ItemProps) => {
   const { currency_code } = getPricesForVariant(item.variant) ?? {}
   
   // Calculate optimistic totals based on current optimisticQty
-  const originalPrice = ((item.original_total ?? 0) / (item.quantity || 1)) * optimisticQty
-  const currentPrice = ((item.total ?? 0) / (item.quantity || 1)) * optimisticQty
+  const originalPrice = ((item.original_total ?? (item.unit_price * item.quantity)) / (item.quantity || 1)) * optimisticQty
+  const currentPrice = ((item.total ?? (item.unit_price * item.quantity)) / (item.quantity || 1)) * optimisticQty
   const discountTotal = ((item.discount_total ?? 0) / (item.quantity || 1)) * optimisticQty
   const hasReducedPrice = discountTotal > 0 || currentPrice < originalPrice
 
@@ -77,17 +77,22 @@ const Item = ({ item, type = "full" }: ItemProps) => {
         className="flex gap-4 items-center mb-4 group last:mb-0"
         data-testid="product-row"
       >
-        {/* Image */}
-        <LocalizedClientLink
-          href={`/products/${handle}`}
-          className="w-[64px] h-[64px] flex-shrink-0 bg-gray-50 relative rounded-lg overflow-hidden"
-        >
-          <Thumbnail
-            thumbnail={item.thumbnail ?? item.variant?.product?.thumbnail}
-            images={item.variant?.product?.images}
-            size="square"
-          />
-        </LocalizedClientLink>
+        {/* Image with Badge */}
+        <div className="relative flex-shrink-0">
+          <LocalizedClientLink
+            href={`/products/${handle}`}
+            className="w-[64px] h-[64px] bg-gray-50 relative rounded-lg overflow-hidden block border border-gray-200"
+          >
+            <Thumbnail
+              thumbnail={item.thumbnail ?? item.variant?.product?.thumbnail}
+              images={item.variant?.product?.images}
+              size="square"
+            />
+          </LocalizedClientLink>
+          <span className="absolute -top-2 -right-2 flex items-center justify-center min-w-[20px] h-[20px] px-1.5 bg-gray-900/90 text-white text-[11px] font-medium rounded-full z-10 shadow-sm leading-none backdrop-blur-sm">
+            {item.quantity}
+          </span>
+        </div>
 
         {/* Details */}
         <div className="flex flex-1 min-w-0 justify-between items-start">
@@ -103,11 +108,6 @@ const Item = ({ item, type = "full" }: ItemProps) => {
               className="text-[13px] text-gray-500 mt-0.5" 
               data-testid="product-variant" 
             />
-            
-            {/* Row 3: Qty */}
-            <span className="text-[13px] text-gray-500 mt-0.5">
-              Qty: {item.quantity}
-            </span>
           </div>
           
           {/* Price */}

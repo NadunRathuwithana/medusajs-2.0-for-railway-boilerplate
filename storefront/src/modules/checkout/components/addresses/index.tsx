@@ -46,7 +46,7 @@ const Addresses = ({
 
   return (
     <div className="bg-white">
-      <div className="flex flex-row items-center justify-between mb-6">
+      <div className="flex flex-row items-center justify-between mb-4">
         <h2 className="flex flex-row text-[24px] font-bold text-bold gap-x-2 items-center">
           Shipping Address
           {cart?.shipping_address && <CheckCircleSolid className="text-green-500 w-6 h-6" />}
@@ -54,7 +54,7 @@ const Addresses = ({
       </div>
       
       <form action={formAction} ref={formRef} onChange={debouncedSubmit}>
-          <div className="pb-8">
+          <div className="pb-5">
             <ShippingAddress
               customer={customer}
               checked={sameAsBilling}
@@ -74,7 +74,7 @@ const Addresses = ({
             <ErrorMessage error={message} data-testid="address-error-message" />
           </div>
         </form>
-      <div className="h-px w-full bg-gray-100 my-8" />
+      <div className="h-px w-full bg-gray-100 my-5" />
     </div>
   )
 }

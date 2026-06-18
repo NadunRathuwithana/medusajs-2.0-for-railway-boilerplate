@@ -1,8 +1,6 @@
 "use client"
 
 import { convertToLocale } from "@lib/util/money"
-import { InformationCircleSolid } from "@medusajs/icons"
-import { Tooltip } from "@medusajs/ui"
 import React from "react"
 
 type CartTotalsProps = {
@@ -28,55 +26,60 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
     gift_card_total,
   } = totals
 
-  return (
-    <div className="flex flex-col gap-y-4">
-      <div className="flex flex-col gap-y-3 text-[14px]">
-        <div className="flex items-center justify-between">
-          <span className="text-gray-500">Subtotal</span>
-          <span className="text-bold font-medium" data-testid="cart-subtotal">
-            {convertToLocale({ amount: subtotal ?? 0, currency_code })}
-          </span>
-        </div>
-        
-        {!!discount_total && (
-          <div className="flex items-center justify-between">
-            <span className="text-gray-500">Discount</span>
-            <span className="text-[#e11d48] font-medium" data-testid="cart-discount">
-              -{convertToLocale({ amount: discount_total ?? 0, currency_code })}
-            </span>
-          </div>
-        )}
-        
-        <div className="flex items-center justify-between">
-          <span className="text-gray-500">Shipping</span>
-          <span className="text-bold font-medium" data-testid="cart-shipping">
-            {convertToLocale({ amount: shipping_total ?? 0, currency_code })}
-          </span>
-        </div>
-        
-        <div className="flex items-center justify-between">
-          <span className="text-gray-500">Taxes</span>
-          <span className="text-bold font-medium" data-testid="cart-taxes">
-            {convertToLocale({ amount: tax_total ?? 0, currency_code })}
-          </span>
-        </div>
+  const fmt = (amount: number) => convertToLocale({ amount, currency_code })
 
-        {!!gift_card_total && (
-          <div className="flex items-center justify-between">
-            <span className="text-gray-500">Gift card</span>
-            <span className="text-[#e11d48] font-medium" data-testid="cart-gift-card-amount">
-              -{convertToLocale({ amount: gift_card_total ?? 0, currency_code })}
-            </span>
-          </div>
-        )}
+  return (
+    <div className="flex flex-col gap-y-2 text-[13px]">
+      {/* Line items */}
+      <div className="flex items-center justify-between">
+        <span className="text-gray-500">Subtotal</span>
+        <span className="text-gray-800 font-medium" data-testid="cart-subtotal">
+          {fmt(subtotal ?? 0)}
+        </span>
       </div>
 
-      <div className="h-px w-full bg-gray-100 my-2" />
-      
+      {!!discount_total && (
+        <div className="flex items-center justify-between">
+          <span className="text-green-700">Discount</span>
+          <span className="text-green-700 font-medium" data-testid="cart-discount">
+            -{fmt(discount_total)}
+          </span>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
-        <span className="text-[16px] font-bold text-bold">Total</span>
-        <span className="text-[24px] font-bold text-bold tracking-tight" data-testid="cart-total">
-          {convertToLocale({ amount: total ?? 0, currency_code })}
+        <span className="text-gray-500">Shipping</span>
+        <span className="text-gray-800 font-medium" data-testid="cart-shipping">
+          {shipping_total ? fmt(shipping_total) : (
+            <span className="text-gray-400 italic text-[12px]">Calculated at next step</span>
+          )}
+        </span>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <span className="text-gray-500">Taxes</span>
+        <span className="text-gray-800 font-medium" data-testid="cart-taxes">
+          {fmt(tax_total ?? 0)}
+        </span>
+      </div>
+
+      {!!gift_card_total && (
+        <div className="flex items-center justify-between">
+          <span className="text-green-700">Gift card</span>
+          <span className="text-green-700 font-medium" data-testid="cart-gift-card-amount">
+            -{fmt(gift_card_total)}
+          </span>
+        </div>
+      )}
+
+      {/* Total */}
+      <div className="flex items-center justify-between pt-3 mt-1 border-t border-gray-200">
+        <span className="text-[15px] font-bold text-gray-900">Total</span>
+        <span
+          className="text-[22px] font-bold text-gray-900 tracking-tight"
+          data-testid="cart-total"
+        >
+          {fmt(total ?? 0)}
         </span>
       </div>
     </div>

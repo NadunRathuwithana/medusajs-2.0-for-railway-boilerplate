@@ -1,11 +1,9 @@
 "use client"
 
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useContext, useEffect, useMemo, useRef, useState } from "react"
 import { RadioGroup } from "@headlessui/react"
 import ErrorMessage from "@modules/checkout/components/error-message"
-import { CheckCircleSolid, CreditCard } from "@medusajs/icons"
-import { Container, clx } from "@medusajs/ui"
+import { CheckCircleSolid } from "@medusajs/icons"
 import { CardElement } from "@stripe/react-stripe-js"
 import { StripeCardElementOptions } from "@stripe/stripe-js"
 
@@ -40,9 +38,6 @@ const Payment = ({
     }
   }, [availablePaymentMethods, selectedPaymentMethod])
 
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
 
   const isStripe = isStripeFunc(activeSession?.provider_id)
   const stripeReady = useContext(StripeContext)
@@ -137,7 +132,7 @@ const Payment = ({
 
   return (
     <div className="bg-white">
-      <div className="flex flex-row items-center justify-between mb-6">
+      <div className="flex flex-row items-center justify-between mb-4">
         <h2 className="flex flex-row text-[24px] font-bold text-bold gap-x-2 items-center">
           Payment
           {activeSession && <CheckCircleSolid className="text-green-500 w-6 h-6" />}
@@ -150,7 +145,7 @@ const Payment = ({
               <>
                 {!hasPaymentMethods ? (
                   // Payment methods fetch failed or returned empty — show retry UI
-                  <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200">
+                  <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
                     <p className="text-gray-600 text-[15px] mb-3">
                       Unable to load payment options. Please refresh the page.
                     </p>
@@ -166,6 +161,7 @@ const Payment = ({
                     <RadioGroup
                       value={selectedPaymentMethod}
                       onChange={(value: string) => setSelectedPaymentMethod(value)}
+                      className="flex flex-col gap-2"
                     >
                       {[...availablePaymentMethods]
                         .sort((a, b) => {
@@ -184,14 +180,14 @@ const Payment = ({
                     </RadioGroup>
 
                     {isLoading && (
-                      <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
+                      <div className="mt-3 flex items-center gap-2 text-sm text-gray-500">
                         <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-800 rounded-full animate-spin" />
                         Loading payment options...
                       </div>
                     )}
 
                     {isStripe && stripeReady && activeSession && activeSession.provider_id === selectedPaymentMethod && (
-                      <div className="mt-5 transition-all duration-150 ease-in-out">
+                      <div className="mt-4 transition-all duration-150 ease-in-out">
                         <span className="font-semibold text-bold mb-2 block">
                           Enter card details:
                         </span>
@@ -225,14 +221,13 @@ const Payment = ({
           </div>
         </div>
       ) : (
-        <div className="pb-8">
-          <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200 text-gray-500 text-[15px]">
+        <div className="pb-4">
+          <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 text-gray-500 text-[15px]">
             Please complete the delivery step to view available payment options.
           </div>
         </div>
       )}
-      
-      <div className="h-px w-full bg-gray-100 my-8" />
+      <div className="h-px w-full bg-gray-100 my-5" />
     </div>
   )
 }

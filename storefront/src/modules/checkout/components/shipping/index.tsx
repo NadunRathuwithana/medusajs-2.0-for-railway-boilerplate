@@ -65,7 +65,7 @@ const Shipping: React.FC<ShippingProps> = ({
   
   return (
     <div className="bg-white">
-      <div className="flex flex-row items-center justify-between mb-6">
+      <div className="flex flex-row items-center justify-between mb-4">
         <h2 className="flex flex-row text-[24px] font-bold text-bold gap-x-2 items-center">
           Delivery
           {cart.shipping_methods?.length ? (
@@ -76,8 +76,8 @@ const Shipping: React.FC<ShippingProps> = ({
       
       {isAddressSet ? (
         <div data-testid="delivery-options-container">
-          <div className="pb-8">
-            <RadioGroup value={selectedShippingMethod?.id ?? ""} onChange={set} className="flex flex-col gap-3">
+          <div className="pb-4">
+            <RadioGroup value={selectedShippingMethod?.id ?? ""} onChange={set} className="flex flex-col gap-2">
               {availableShippingMethods?.map((option) => {
                 const isSelected = option.id === selectedShippingMethod?.id
                 return (
@@ -86,7 +86,7 @@ const Shipping: React.FC<ShippingProps> = ({
                     value={option.id}
                     data-testid="delivery-option-radio"
                     className={clx(
-                      "flex items-center justify-between cursor-pointer p-5 border rounded-2xl transition-colors hover:bg-gray-50",
+                      "flex items-center justify-between cursor-pointer p-4 border rounded-2xl transition-colors hover:bg-gray-50 min-h-[64px]",
                       {
                         "border-black bg-gray-50": isSelected,
                         "border-gray-200 bg-white": !isSelected,
@@ -95,7 +95,10 @@ const Shipping: React.FC<ShippingProps> = ({
                   >
                     <div className="flex items-center gap-x-4">
                       <Radio checked={isSelected} />
-                      <span className="text-[15px] font-medium text-gray-900">{option.name}</span>
+                      <div className="flex flex-col">
+                        <span className="text-[15px] font-medium text-gray-900">{option.name}</span>
+                        <span className="text-[13px] text-gray-500 mt-0.5">Approx. 3-7 business days</span>
+                      </div>
                     </div>
                     <span className="text-[15px] font-bold text-gray-900">
                       {convertToLocale({
@@ -115,14 +118,14 @@ const Shipping: React.FC<ShippingProps> = ({
           />
         </div>
       ) : (
-        <div className="pb-8">
-          <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200 text-gray-500 text-[15px]">
+        <div className="pb-4">
+          <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 text-gray-500 text-[15px]">
             Please enter your shipping address to view available delivery options.
           </div>
         </div>
       )}
       
-      <div className="h-px w-full bg-gray-100 my-8" />
+      <div className="h-px w-full bg-gray-100 my-4" />
     </div>
   )
 }
