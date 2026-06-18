@@ -143,3 +143,21 @@ export const WORKER_MODE =
  * Disable Admin
  */
 export const SHOULD_DISABLE_ADMIN = process.env.MEDUSA_DISABLE_ADMIN === "true";
+
+/**
+ * (optional) SMTP Email Configuration
+ * SMTP_HOST     — SMTP server hostname (e.g. smtp.gmail.com)
+ * SMTP_PORT     — SMTP port (465 for SSL, 587 for TLS)
+ * SMTP_USER     — SMTP login username/email
+ * SMTP_PASS     — SMTP login password or app password
+ * SMTP_SECURE   — Use SSL/TLS (true for port 465)
+ * SMTP_FROM     — Sender display address (defaults to SMTP_USER)
+ * SMTP_ADMIN_EMAIL — Store admin email to receive contact form submissions
+ */
+export const SMTP_HOST = process.env.SMTP_HOST;
+export const SMTP_PORT = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 465;
+export const SMTP_USER = process.env.SMTP_USER;
+export const SMTP_PASS = process.env.SMTP_PASS;
+export const SMTP_SECURE = process.env.SMTP_SECURE === 'true';
+export const SMTP_FROM = process.env.SMTP_FROM || process.env.SMTP_USER;
+export const SMTP_ADMIN_EMAIL = process.env.SMTP_ADMIN_EMAIL || process.env.SMTP_USER;

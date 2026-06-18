@@ -7,10 +7,6 @@ import {
   DATABASE_URL,
   JWT_SECRET,
   REDIS_URL,
-  RESEND_API_KEY,
-  RESEND_FROM_EMAIL,
-  SENDGRID_API_KEY,
-  SENDGRID_FROM_EMAIL,
   SHOULD_DISABLE_ADMIN,
   STORE_CORS,
   STRIPE_API_KEY,
@@ -34,6 +30,13 @@ import {
   MINIO_BUCKET,
   MEILISEARCH_HOST,
   MEILISEARCH_ADMIN_KEY,
+  SMTP_HOST,
+  SMTP_PORT,
+  SMTP_USER,
+  SMTP_PASS,
+  SMTP_SECURE,
+  SMTP_FROM,
+  SMTP_ADMIN_EMAIL,
 } from "lib/constants";
 
 loadEnv(process.env.NODE_ENV, process.cwd());
@@ -113,40 +116,28 @@ const medusaConfig = {
           },
         ]
       : []),
-    ...((SENDGRID_API_KEY && SENDGRID_FROM_EMAIL) ||
-    (RESEND_API_KEY && RESEND_FROM_EMAIL)
+    // Notification module via SMTP — only included when SMTP credentials are set
+    ...(SMTP_HOST && SMTP_USER && SMTP_PASS
       ? [
           {
             key: Modules.NOTIFICATION,
             resolve: "@medusajs/notification",
             options: {
               providers: [
-                ...(SENDGRID_API_KEY && SENDGRID_FROM_EMAIL
-                  ? [
-                      {
-                        resolve: "@medusajs/notification-sendgrid",
-                        id: "sendgrid",
-                        options: {
-                          channels: ["email"],
-                          api_key: SENDGRID_API_KEY,
-                          from: SENDGRID_FROM_EMAIL,
-                        },
-                      },
-                    ]
-                  : []),
-                ...(RESEND_API_KEY && RESEND_FROM_EMAIL
-                  ? [
-                      {
-                        resolve: "./src/modules/email-notifications",
-                        id: "resend",
-                        options: {
-                          channels: ["email"],
-                          api_key: RESEND_API_KEY,
-                          from: RESEND_FROM_EMAIL,
-                        },
-                      },
-                    ]
-                  : []),
+                {
+                  resolve: "./src/modules/email-notifications",
+                  id: "smtp",
+                  options: {
+                    channels: ["email"],
+                    host: SMTP_HOST,
+                    port: SMTP_PORT,
+                    user: SMTP_USER,
+                    pass: SMTP_PASS,
+                    secure: SMTP_SECURE,
+                    from: SMTP_FROM || SMTP_USER,
+                    adminEmail: SMTP_ADMIN_EMAIL || SMTP_USER,
+                  },
+                },
               ],
             },
           },
