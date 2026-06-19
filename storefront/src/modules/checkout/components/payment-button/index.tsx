@@ -64,48 +64,74 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
 
   const paymentSession = pendingSessions[pendingSessions.length - 1]
 
+  const debugInfo = (
+    <div style={{ color: "red", fontSize: "12px", marginBottom: "8px" }}>
+      DEBUG - provider_id: {paymentSession?.provider_id || "undefined"}
+    </div>
+  )
+
   switch (true) {
     case isStripe(paymentSession?.provider_id):
       return (
-        <StripePaymentButton
-          notReady={notReady}
-          cart={cart}
-          data-testid={dataTestId}
-        />
+        <>
+          {debugInfo}
+          <StripePaymentButton
+            notReady={notReady}
+            cart={cart}
+            data-testid={dataTestId}
+          />
+        </>
       )
     case isKoko(paymentSession?.provider_id):
       return (
-        <KokoPaymentButton
-          notReady={notReady}
-          session={paymentSession as any}
-          data-testid={dataTestId}
-        />
+        <>
+          {debugInfo}
+          <KokoPaymentButton
+            notReady={notReady}
+            session={paymentSession as any}
+            data-testid={dataTestId}
+          />
+        </>
       )
     case isManual(paymentSession?.provider_id):
       return (
-        <ManualTestPaymentButton
-          notReady={notReady}
-          data-testid={dataTestId || "submit-order-button"}
-        />
+        <>
+          {debugInfo}
+          <ManualTestPaymentButton
+            notReady={notReady}
+            data-testid={dataTestId || "submit-order-button"}
+          />
+        </>
       )
     case isOnepay(paymentSession?.provider_id):
       return (
-        <HostedPaymentButton
-          notReady={notReady}
-          session={paymentSession as any}
-          data-testid={dataTestId}
-        />
+        <>
+          {debugInfo}
+          <HostedPaymentButton
+            notReady={notReady}
+            session={paymentSession as any}
+            data-testid={dataTestId}
+          />
+        </>
       )
     case isPaypal(paymentSession?.provider_id):
       return (
-        <PayPalPaymentButton
-          notReady={notReady}
-          cart={cart}
-          data-testid={dataTestId}
-        />
+        <>
+          {debugInfo}
+          <PayPalPaymentButton
+            notReady={notReady}
+            cart={cart}
+            data-testid={dataTestId}
+          />
+        </>
       )
     default:
-      return <CustomButton disabled>Select a payment method</CustomButton>
+      return (
+        <>
+          {debugInfo}
+          <CustomButton disabled>Select a payment method</CustomButton>
+        </>
+      )
   }
 }
 
