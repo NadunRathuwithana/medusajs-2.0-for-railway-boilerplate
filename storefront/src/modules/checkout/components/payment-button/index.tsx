@@ -71,8 +71,15 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
           data-testid={dataTestId}
         />
       )
-    case isManual(paymentSession?.provider_id):
     case isKoko(paymentSession?.provider_id):
+      return (
+        <KokoPaymentButton
+          notReady={notReady}
+          session={paymentSession as any}
+          data-testid={dataTestId}
+        />
+      )
+    case isManual(paymentSession?.provider_id):
     case isOnepay(paymentSession?.provider_id):
       return (
         <HostedPaymentButton
@@ -349,4 +356,84 @@ const HostedPaymentButton = ({
   )
 }
 
+/**
+ * KokoPaymentButton — renders a hidden HTML form and submits it to Koko.
+ *
+ * Koko's checkout flow requires a real browser-native form POST, not a fetch()
+ * call or window.location redirect. The signed form fields are built server-side
+ * in initiatePayment and stored in the payment session data.
+ */
+const KokoPaymentButton = ({
+  session,
+  notReady,
+  "data-testid": dataTestId,
+}: {
+  session: any
+  notReady: boolean
+  "data-testid"?: string
+}) => {
+  const formRef = React.useRef<HTMLFormElement>(null)
+  const [submitting, setSubmitting] = useState(false)
+
+  const formAction = session?.data?.koko_form_action as string | undefined
+  const fields = session?.data?.koko_form_fields as Record<string, string> | undefined
+
+  const handleClick = () => {
+    if (!formRef.current || !formAction || !fields) {
+      return
+    }
+    setSubmitting(true)
+    // Submit the real HTML form — Koko requires an actual browser POST,
+    // not a fetch() call, since the customer continues the flow on Koko's domain.
+    formRef.current.submit()
+  }
+
+  if (!formAction || !fields) {
+    return (
+      <p className="text-sm text-gray-500 text-center">
+        Initialising Koko checkout…
+      </p>
+    )
+  }
+
+  return (
+    <>
+      {/* Hidden auto-submitting form — mirrors Koko's own sample code pattern */}
+      <form ref={formRef} action={formAction} method="POST" style={{ display: "none" }}>
+        <input type="hidden" name="_mId" value={fields._mId} />
+        <input type="hidden" name="api_key" value={fields.api_key} />
+        <input type="hidden" name="_returnUrl" value={fields._returnUrl} />
+        <input type="hidden" name="_cancelUrl" value={fields._cancelUrl} />
+        <input type="hidden" name="_responseUrl" value={fields._responseUrl} />
+        <input type="hidden" name="_amount" value={fields._amount} />
+        <input type="hidden" name="_currency" value={fields._currency} />
+        <input type="hidden" name="_reference" value={fields._reference} />
+        <input type="hidden" name="_orderId" value={fields._orderId} />
+        <input type="hidden" name="_pluginName" value={fields._pluginName} />
+        <input type="hidden" name="_pluginVersion" value={fields._pluginVersion} />
+        <input type="hidden" name="_description" value={fields._description} />
+        <input type="hidden" name="_firstName" value={fields._firstName} />
+        <input type="hidden" name="_lastName" value={fields._lastName} />
+        <input type="hidden" name="_email" value={fields._email} />
+        {fields._mobileNo && (
+          <input type="hidden" name="_mobileNo" value={fields._mobileNo} />
+        )}
+        <input type="hidden" name="dataString" value={fields.dataString} />
+        <input type="hidden" name="signature" value={fields.signature} />
+      </form>
+
+      <CustomButton
+        onClick={handleClick}
+        disabled={notReady || submitting}
+        isLoading={submitting}
+        data-testid={dataTestId || "koko-payment-button"}
+        className="bg-[#5B2EFF] hover:bg-[#4a25d4]"
+      >
+        {submitting ? "Redirecting to Koko…" : "Pay with Koko — 3 Instalments"}
+      </CustomButton>
+    </>
+  )
+}
+
 export default PaymentButton
+
