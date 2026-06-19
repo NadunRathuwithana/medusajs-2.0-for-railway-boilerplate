@@ -52,10 +52,15 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   // When switching providers, Medusa may leave multiple sessions as "pending".
   // The store cart API appends the most recently created session to the end of the array.
   // We cannot rely solely on the data fields (since they might be cached or missing),
-  // so we take the *last* pending session.
+  // so we sort by updated_at to ensure we take the most recently modified pending session.
   const pendingSessions = (
     cart.payment_collection?.payment_sessions ?? []
-  ).filter((s: any) => s.status === "pending")
+  )
+    .filter((s: any) => s.status === "pending")
+    .sort(
+      (a: any, b: any) =>
+        new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime()
+    )
 
   const paymentSession = pendingSessions[pendingSessions.length - 1]
 

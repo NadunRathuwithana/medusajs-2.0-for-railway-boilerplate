@@ -19,9 +19,12 @@ const Payment = ({
   cart: any
   availablePaymentMethods: any[]
 }) => {
-  const pendingSessions = (cart.payment_collection?.payment_sessions ?? []).filter(
-    (paymentSession: any) => paymentSession.status === "pending"
-  )
+  const pendingSessions = (cart.payment_collection?.payment_sessions ?? [])
+    .filter((paymentSession: any) => paymentSession.status === "pending")
+    .sort(
+      (a: any, b: any) =>
+        new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime()
+    )
   const activeSession = pendingSessions[pendingSessions.length - 1]
 
   const [isLoading, setIsLoading] = useState(false)
