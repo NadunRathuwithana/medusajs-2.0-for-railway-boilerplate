@@ -140,6 +140,7 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
     this.logger_.info(`Koko: built signed order form for orderId=${orderId}`)
 
     return {
+      id: orderId,
       data: {
         koko_order_id: orderId,
         koko_form_action: `${this.options_.baseUrl}/api/merchants/orderCreate`,
@@ -316,13 +317,19 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
         action: "captured",
         data: {
           session_id: payload.orderId,
+          // Koko doesn't send amount in the _responseUrl webhook payload.
+          // The actual amount is confirmed via the orderView API poll in authorizePayment.
+          amount: 0,
         },
       }
     }
 
     return {
       action: "failed",
-      data: { session_id: payload.orderId },
+      data: {
+        session_id: payload.orderId,
+        amount: 0,
+      },
     }
   }
 
