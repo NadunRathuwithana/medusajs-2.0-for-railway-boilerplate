@@ -19,7 +19,7 @@ export async function retrieveCart() {
   }
 
   return await sdk.store.cart
-    .retrieve(cartId, { fields: "+region,+region.countries" }, { next: { tags: ["cart"] }, ...(await getAuthHeaders()) })
+    .retrieve(cartId, { fields: "+region,+region.countries,+payment_collection.payment_sessions" }, { next: { tags: ["cart"] }, ...(await getAuthHeaders()) })
     .then(({ cart }) => cart)
     .catch(() => {
       return null

@@ -19,9 +19,10 @@ const Payment = ({
   cart: any
   availablePaymentMethods: any[]
 }) => {
-  const activeSession = cart.payment_collection?.payment_sessions?.find(
+  const pendingSessions = (cart.payment_collection?.payment_sessions ?? []).filter(
     (paymentSession: any) => paymentSession.status === "pending"
   )
+  const activeSession = pendingSessions[pendingSessions.length - 1]
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

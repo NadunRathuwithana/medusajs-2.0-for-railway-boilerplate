@@ -50,19 +50,14 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     (cart.shipping_methods?.length ?? 0) < 1
 
   // When switching providers, Medusa may leave multiple sessions as "pending".
-  // We cannot sort by created_at because the store cart API doesn't include it.
-  // Instead we select the session with the richest data:
-  //   1. Koko sessions (have koko_form_fields)
-  //   2. Hosted/redirect sessions (have redirect_url, e.g. OnePay)
-  //   3. Any other pending session (Stripe, PayPal, Cash on Delivery)
+  // The store cart API appends the most recently created session to the end of the array.
+  // We cannot rely solely on the data fields (since they might be cached or missing),
+  // so we take the *last* pending session.
   const pendingSessions = (
     cart.payment_collection?.payment_sessions ?? []
   ).filter((s: any) => s.status === "pending")
 
-  const paymentSession =
-    pendingSessions.find((s: any) => (s.data as any)?.koko_form_fields) ??
-    pendingSessions.find((s: any) => (s.data as any)?.redirect_url) ??
-    pendingSessions[0]
+  const paymentSession = pendingSessions[pendingSessions.length - 1]
 
   switch (true) {
     case isStripe(paymentSession?.provider_id):
