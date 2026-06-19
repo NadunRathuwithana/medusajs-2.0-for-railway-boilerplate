@@ -49,18 +49,20 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     !cart.email ||
     (cart.shipping_methods?.length ?? 0) < 1
 
-  // Sort by created_at descending so the most recently created session is used.
-  // When switching payment providers, multiple sessions can be pending simultaneously
-  // (e.g., old pp_system_default + new pp_onepay_onepay). Without sorting, the old
-  // session (with no redirect_url) would be picked, causing "Payment session not ready".
-  // Note: StorePaymentSession type doesn't declare created_at but the API returns it.
-  const paymentSession = [...(cart.payment_collection?.payment_sessions ?? [])]
-    .sort((a, b) => {
-      const aTime = (a as any).created_at ? new Date((a as any).created_at).getTime() : 0
-      const bTime = (b as any).created_at ? new Date((b as any).created_at).getTime() : 0
-      return bTime - aTime
-    }) 
-    .find((s) => s.status === "pending")
+  // When switching providers, Medusa may leave multiple sessions as "pending".
+  // We cannot sort by created_at because the store cart API doesn't include it.
+  // Instead we select the session with the richest data:
+  //   1. Koko sessions (have koko_form_fields)
+  //   2. Hosted/redirect sessions (have redirect_url, e.g. OnePay)
+  //   3. Any other pending session (Stripe, PayPal, Cash on Delivery)
+  const pendingSessions = (
+    cart.payment_collection?.payment_sessions ?? []
+  ).filter((s: any) => s.status === "pending")
+
+  const paymentSession =
+    pendingSessions.find((s: any) => (s.data as any)?.koko_form_fields) ??
+    pendingSessions.find((s: any) => (s.data as any)?.redirect_url) ??
+    pendingSessions[0]
 
   switch (true) {
     case isStripe(paymentSession?.provider_id):
@@ -80,6 +82,12 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
         />
       )
     case isManual(paymentSession?.provider_id):
+      return (
+        <ManualTestPaymentButton
+          notReady={notReady}
+          data-testid={dataTestId || "submit-order-button"}
+        />
+      )
     case isOnepay(paymentSession?.provider_id):
       return (
         <HostedPaymentButton
@@ -277,7 +285,13 @@ const PayPalPaymentButton = ({
   }
 }
 
-const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
+const ManualTestPaymentButton = ({
+  notReady,
+  "data-testid": dataTestId,
+}: {
+  notReady: boolean
+  "data-testid"?: string
+}) => {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -293,7 +307,6 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
 
   const handlePayment = () => {
     setSubmitting(true)
-
     onPaymentCompleted()
   }
 
@@ -303,7 +316,7 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
         disabled={notReady || submitting}
         isLoading={submitting}
         onClick={handlePayment}
-        data-testid="submit-order-button"
+        data-testid={dataTestId || "submit-order-button"}
       >
         Place order
       </CustomButton>
@@ -314,6 +327,7 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
     </>
   )
 }
+
 
 const HostedPaymentButton = ({
   session,
