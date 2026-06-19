@@ -49,48 +49,85 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     !cart.email ||
     (cart.shipping_methods?.length ?? 0) < 1
 
-  // Sort by created_at descending so the most recently created session is used.
-  // When switching payment providers, multiple sessions can be pending simultaneously
-  // (e.g., old pp_system_default + new pp_onepay_onepay). Without sorting, the old
-  // session (with no redirect_url) would be picked, causing "Payment session not ready".
-  // Note: StorePaymentSession type doesn't declare created_at but the API returns it.
-  const paymentSession = [...(cart.payment_collection?.payment_sessions ?? [])]
-    .sort((a, b) => {
-      const aTime = (a as any).created_at ? new Date((a as any).created_at).getTime() : 0
-      const bTime = (b as any).created_at ? new Date((b as any).created_at).getTime() : 0
-      return bTime - aTime
-    }) 
-    .find((s) => s.status === "pending")
+  // When switching providers, Medusa may leave multiple sessions as "pending".
+  // The store cart API appends the most recently created session to the end of the array.
+  // We cannot rely solely on the data fields (since they might be cached or missing),
+  // so we sort by updated_at to ensure we take the most recently modified pending session.
+  const pendingSessions = (
+    cart.payment_collection?.payment_sessions ?? []
+  )
+    .filter((s: any) => s.status === "pending")
+    .sort(
+      (a: any, b: any) =>
+        new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime()
+    )
+
+  const paymentSession = pendingSessions[pendingSessions.length - 1]
+
+  const debugInfo = null
 
   switch (true) {
     case isStripe(paymentSession?.provider_id):
       return (
-        <StripePaymentButton
-          notReady={notReady}
-          cart={cart}
-          data-testid={dataTestId}
-        />
+        <>
+          {debugInfo}
+          <StripePaymentButton
+            notReady={notReady}
+            cart={cart}
+            data-testid={dataTestId}
+          />
+        </>
+      )
+    case isKoko(paymentSession?.provider_id):
+      return (
+        <>
+          {debugInfo}
+          <KokoPaymentButton
+            notReady={notReady}
+            session={paymentSession as any}
+            data-testid={dataTestId}
+          />
+        </>
       )
     case isManual(paymentSession?.provider_id):
-    case isKoko(paymentSession?.provider_id):
+      return (
+        <>
+          {debugInfo}
+          <ManualTestPaymentButton
+            notReady={notReady}
+            data-testid={dataTestId || "submit-order-button"}
+          />
+        </>
+      )
     case isOnepay(paymentSession?.provider_id):
       return (
-        <HostedPaymentButton
-          notReady={notReady}
-          session={paymentSession as any}
-          data-testid={dataTestId}
-        />
+        <>
+          {debugInfo}
+          <HostedPaymentButton
+            notReady={notReady}
+            session={paymentSession as any}
+            data-testid={dataTestId}
+          />
+        </>
       )
     case isPaypal(paymentSession?.provider_id):
       return (
-        <PayPalPaymentButton
-          notReady={notReady}
-          cart={cart}
-          data-testid={dataTestId}
-        />
+        <>
+          {debugInfo}
+          <PayPalPaymentButton
+            notReady={notReady}
+            cart={cart}
+            data-testid={dataTestId}
+          />
+        </>
       )
     default:
-      return <CustomButton disabled>Select a payment method</CustomButton>
+      return (
+        <>
+          {debugInfo}
+          <CustomButton disabled>Select a payment method</CustomButton>
+        </>
+      )
   }
 }
 
@@ -270,7 +307,13 @@ const PayPalPaymentButton = ({
   }
 }
 
-const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
+const ManualTestPaymentButton = ({
+  notReady,
+  "data-testid": dataTestId,
+}: {
+  notReady: boolean
+  "data-testid"?: string
+}) => {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -286,7 +329,6 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
 
   const handlePayment = () => {
     setSubmitting(true)
-
     onPaymentCompleted()
   }
 
@@ -296,7 +338,7 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
         disabled={notReady || submitting}
         isLoading={submitting}
         onClick={handlePayment}
-        data-testid="submit-order-button"
+        data-testid={dataTestId || "submit-order-button"}
       >
         Place order
       </CustomButton>
@@ -307,6 +349,7 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
     </>
   )
 }
+
 
 const HostedPaymentButton = ({
   session,
@@ -349,4 +392,91 @@ const HostedPaymentButton = ({
   )
 }
 
+/**
+ * KokoPaymentButton — renders a hidden HTML form and submits it to Koko.
+ *
+ * Koko's checkout flow requires a real browser-native form POST, not a fetch()
+ * call or window.location redirect. The signed form fields are built server-side
+ * in initiatePayment and stored in the payment session data.
+ */
+const KokoPaymentButton = ({
+  session,
+  notReady,
+  "data-testid": dataTestId,
+}: {
+  session: any
+  notReady: boolean
+  "data-testid"?: string
+}) => {
+  const formRef = React.useRef<HTMLFormElement>(null)
+  const [submitting, setSubmitting] = useState(false)
+
+  const formAction = session?.data?.koko_form_action as string | undefined
+  const fields = session?.data?.koko_form_fields as Record<string, string> | undefined
+
+  const handleClick = () => {
+    if (!formRef.current || !formAction || !fields) {
+      return
+    }
+    setSubmitting(true)
+    // Submit the real HTML form — Koko requires an actual browser POST,
+    // not a fetch() call, since the customer continues the flow on Koko's domain.
+    formRef.current.submit()
+  }
+
+  if (!formAction || !fields) {
+    return (
+      <p className="text-sm text-gray-500 text-center">
+        Initialising Koko checkout…
+      </p>
+    )
+  }
+
+  console.log("KOKO FIELDS RECEIVED IN FRONTEND:", {
+    _pluginName: fields._pluginName,
+    _pluginVersion: fields._pluginVersion,
+    _mId: fields._mId,
+    formAction
+  });
+
+  return (
+    <>
+      {/* Hidden auto-submitting form — mirrors Koko's own sample code pattern */}
+      <form ref={formRef} action={formAction} method="POST" style={{ display: "none" }}>
+        <input type="hidden" name="_mId" value={fields._mId} />
+        <input type="hidden" name="api_key" value={fields.api_key} />
+        <input type="hidden" name="_returnUrl" value={fields._returnUrl} />
+        <input type="hidden" name="_cancelUrl" value={fields._cancelUrl} />
+        <input type="hidden" name="_responseUrl" value={fields._responseUrl} />
+        <input type="hidden" name="_amount" value={fields._amount} />
+        <input type="hidden" name="_currency" value={fields._currency} />
+        <input type="hidden" name="_reference" value={fields._reference} />
+        <input type="hidden" name="_orderId" value={fields._orderId} />
+        <input type="hidden" name="_pluginName" value={fields._pluginName} />
+        <input type="hidden" name="_pluginVersion" value={fields._pluginVersion} />
+        <input type="hidden" name="_description" value={fields._description} />
+        <input type="hidden" name="_firstName" value={fields._firstName} />
+        <input type="hidden" name="_lastName" value={fields._lastName} />
+        <input type="hidden" name="_email" value={fields._email} />
+        {fields._mobileNo && (
+          <input type="hidden" name="_mobileNo" value={fields._mobileNo} />
+        )}
+        <input type="hidden" name="dataString" value={fields.dataString} />
+        <input type="hidden" name="signature" value={fields.signature} />
+      </form>
+
+      <CustomButton
+        onClick={handleClick}
+        disabled={notReady || submitting}
+        isLoading={submitting}
+        data-testid={dataTestId || "koko-payment-button"}
+        className="bg-[#5B2EFF] hover:bg-[#4a25d4]"
+      >
+        {submitting ? "Redirecting to Koko…" : "Pay with Koko — 3 Instalments"}
+      </CustomButton>
+    </>
+  )
+}
+
 export default PaymentButton
+
