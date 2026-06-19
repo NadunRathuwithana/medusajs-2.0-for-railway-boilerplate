@@ -819,7 +819,7 @@ export function KokoPaymentButton({ cart, notReady }: KokoPaymentButtonProps) {
         className="w-full py-3 px-6 bg-[#5B2EFF] text-white font-semibold rounded-lg
                    hover:opacity-90 transition-opacity disabled:opacity-50"
       >
-        {submitting ? "Redirecting to Koko…" : "Pay with Koko — 3 instalments"}
+        {submitting ? "Redirecting to Koko…" : "Pay with Koko - 3 instalments"}
       </button>
     </div>
   )

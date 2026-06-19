@@ -144,13 +144,15 @@ const StripePaymentButton = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const onPaymentCompleted = async () => {
-    await placeOrder()
-      .catch((err) => {
-        setErrorMessage(err.message)
-      })
-      .finally(() => {
-        setSubmitting(false)
-      })
+    try {
+      await placeOrder()
+    } catch (err: any) {
+      if (err?.message?.includes("NEXT_REDIRECT") || err?.digest?.startsWith("NEXT_REDIRECT")) {
+        throw err
+      }
+      setErrorMessage(err.message)
+      setSubmitting(false)
+    }
   }
 
   const stripe = useStripe()
@@ -250,13 +252,15 @@ const PayPalPaymentButton = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const onPaymentCompleted = async () => {
-    await placeOrder()
-      .catch((err) => {
-        setErrorMessage(err.message)
-      })
-      .finally(() => {
-        setSubmitting(false)
-      })
+    try {
+      await placeOrder()
+    } catch (err: any) {
+      if (err?.message?.includes("NEXT_REDIRECT") || err?.digest?.startsWith("NEXT_REDIRECT")) {
+        throw err
+      }
+      setErrorMessage(err.message)
+      setSubmitting(false)
+    }
   }
 
   const session = cart.payment_collection?.payment_sessions?.find(
@@ -318,13 +322,15 @@ const ManualTestPaymentButton = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const onPaymentCompleted = async () => {
-    await placeOrder()
-      .catch((err) => {
-        setErrorMessage(err.message)
-      })
-      .finally(() => {
-        setSubmitting(false)
-      })
+    try {
+      await placeOrder()
+    } catch (err: any) {
+      if (err?.message?.includes("NEXT_REDIRECT") || err?.digest?.startsWith("NEXT_REDIRECT")) {
+        throw err
+      }
+      setErrorMessage(err.message)
+      setSubmitting(false)
+    }
   }
 
   const handlePayment = () => {
@@ -470,9 +476,9 @@ const KokoPaymentButton = ({
         disabled={notReady || submitting}
         isLoading={submitting}
         data-testid={dataTestId || "koko-payment-button"}
-        className="bg-[#5B2EFF] hover:bg-[#4a25d4]"
+        className="bg-black hover:bg-black/90"
       >
-        {submitting ? "Redirecting to Koko…" : "Pay with Koko — 3 Instalments"}
+        {submitting ? "Redirecting to Koko…" : "Place Order"}
       </CustomButton>
     </>
   )
