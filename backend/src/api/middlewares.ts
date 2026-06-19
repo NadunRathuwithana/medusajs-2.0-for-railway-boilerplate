@@ -1,5 +1,5 @@
 import { defineMiddlewares } from "@medusajs/medusa"
-import type { MedusaRequest, MedusaResponse, MedusaNextFunction } from "@medusajs/medusa"
+import type { MedusaRequest, MedusaResponse, MedusaNextFunction } from "@medusajs/framework/http"
 
 /**
  * Parses application/x-www-form-urlencoded bodies for the Koko webhook route.
