@@ -64,11 +64,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
 
   const paymentSession = pendingSessions[pendingSessions.length - 1]
 
-  const debugInfo = (
-    <div style={{ color: "red", fontSize: "12px", marginBottom: "8px" }}>
-      DEBUG - provider_id: {paymentSession?.provider_id || "undefined"}
-    </div>
-  )
+  const debugInfo = null
 
   switch (true) {
     case isStripe(paymentSession?.provider_id):
@@ -435,6 +431,13 @@ const KokoPaymentButton = ({
       </p>
     )
   }
+
+  console.log("KOKO FIELDS RECEIVED IN FRONTEND:", {
+    _pluginName: fields._pluginName,
+    _pluginVersion: fields._pluginVersion,
+    _mId: fields._mId,
+    formAction
+  });
 
   return (
     <>
