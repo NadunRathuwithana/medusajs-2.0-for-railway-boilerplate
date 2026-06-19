@@ -66,9 +66,24 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
     }
   }
 
+
+  // ─────────────────────────────────────────────
+  // OPTIONAL: Account holder (not supported by Koko)
+  // ─────────────────────────────────────────────
+
+  /**
+   * Koko is a form-POST provider with no server-side customer accounts.
+   * Implementing a no-op silences Medusa's "does not support creating account
+   * holders" warning without affecting the payment flow.
+   */
+  async createAccountHolder(): Promise<void> {
+    // no-op
+  }
+
   // ─────────────────────────────────────────────
   // REQUIRED ABSTRACT METHODS
   // ─────────────────────────────────────────────
+
 
   /**
    * initiatePayment — builds the signed form fields for Koko's orderCreate.
