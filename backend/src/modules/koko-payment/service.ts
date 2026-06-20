@@ -336,7 +336,7 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
 
     if (payload.status === "SUCCESS") {
       return {
-        action: "captured",
+        action: "authorized",
         data: {
           session_id: medusaSessionId,
           // Koko doesn't send amount in the _responseUrl webhook payload.
