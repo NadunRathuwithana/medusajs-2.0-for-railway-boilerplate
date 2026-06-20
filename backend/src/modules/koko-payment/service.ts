@@ -360,7 +360,7 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
       }
 
       return {
-        action: "authorized",
+        action: "captured",
         data: {
           session_id: medusaSessionId,
           amount: 0,
