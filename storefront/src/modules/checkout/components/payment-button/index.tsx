@@ -478,7 +478,7 @@ const KokoPaymentButton = ({
         data-testid={dataTestId || "koko-payment-button"}
         className="bg-black hover:bg-black/90"
       >
-        {submitting ? "Redirecting to Koko…" : "Place Order"}
+        {submitting ? "Redirecting to Koko…" : "Pay with Koko"}
       </CustomButton>
     </>
   )
