@@ -101,8 +101,12 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
     const kokoAmount = (Number(amount) / 100).toFixed(2)
     const currency = currency_code.toUpperCase()
 
-    // _orderId MUST be unique per request per Koko's docs — use session + timestamp
-    const orderId = `${(context as any).session_id ?? "sess"}-${Date.now()}`
+    // In Medusa v2, the PaymentSession ID is passed in input.data.session_id
+    const sessionId = (input.data as any)?.session_id ?? (context as any).session_id ?? "sess"
+
+    // _orderId MUST be unique per request per Koko's docs — use session + timestamp.
+    // We embed the sessionId so we can extract it in the webhook callback.
+    const orderId = `${sessionId}-${Date.now()}`
     const reference = orderId
 
     const firstName = (context as any).customer?.first_name ?? "Customer"
@@ -327,11 +331,14 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
 
     this.logger_.info(`Koko webhook verified: ${payload.status} for order ${payload.orderId}`)
 
+    // Extract the REAL Medusa PaymentSession ID that we prefixed into orderId
+    const medusaSessionId = payload.orderId.split("-")[0]
+
     if (payload.status === "SUCCESS") {
       return {
         action: "captured",
         data: {
-          session_id: payload.orderId,
+          session_id: medusaSessionId,
           // Koko doesn't send amount in the _responseUrl webhook payload.
           // The actual amount is confirmed via the orderView API poll in authorizePayment.
           amount: 0,
@@ -342,7 +349,7 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
     return {
       action: "failed",
       data: {
-        session_id: payload.orderId,
+        session_id: medusaSessionId,
         amount: 0,
       },
     }
