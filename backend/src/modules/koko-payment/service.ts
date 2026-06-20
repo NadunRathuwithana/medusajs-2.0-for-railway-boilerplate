@@ -44,6 +44,10 @@ type InjectedDependencies = {
 class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
   static identifier = "koko"
 
+  // In-memory cache to bridge the race condition between webhook and authorizePayment.
+  // Stores verified statuses so we don't need to re-poll orderView immediately.
+  private static webhookCache = new Map<string, { status: string, timestamp: number }>()
+
   protected logger_: Logger
   protected options_: KokoOptions
 
@@ -183,6 +187,17 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
     }
 
     try {
+      // 1. Check if the webhook already verified this payment
+      const cached = KokoPaymentService.webhookCache.get(orderId)
+      if (cached && cached.status === "SUCCESS") {
+        this.logger_.info(`Koko authorizePayment: trusted webhook-verified SUCCESS for order ${orderId}`)
+        return {
+          data: { ...input.data, koko_status: "SUCCESS" },
+          status: "authorized",
+        }
+      }
+
+      // 2. Fallback to polling the orderView API
       const orderView = await this.callOrderView(orderId)
 
       const statusMap: Record<string, "authorized" | "pending" | "error"> = {
@@ -335,12 +350,19 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
     const medusaSessionId = payload.orderId
 
     if (payload.status === "SUCCESS") {
+      // Store the verified status in our cache so authorizePayment can use it
+      KokoPaymentService.webhookCache.set(medusaSessionId, { status: "SUCCESS", timestamp: Date.now() })
+
+      // Cleanup old entries to prevent memory leaks (keep last 1 hour)
+      const oneHourAgo = Date.now() - 3600000
+      for (const [key, value] of KokoPaymentService.webhookCache.entries()) {
+        if (value.timestamp < oneHourAgo) KokoPaymentService.webhookCache.delete(key)
+      }
+
       return {
         action: "authorized",
         data: {
           session_id: medusaSessionId,
-          // Koko doesn't send amount in the _responseUrl webhook payload.
-          // The actual amount is confirmed via the orderView API poll in authorizePayment.
           amount: 0,
         },
       }
