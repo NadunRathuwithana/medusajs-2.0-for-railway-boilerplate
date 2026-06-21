@@ -35,10 +35,17 @@ const Payment = ({
     activeSession?.provider_id ?? ""
   )
 
-  // Auto-select the first available payment method if none is selected
+  // Auto-select COD (pp_system_default) if available, otherwise fallback to the first available method
   useEffect(() => {
     if (!selectedPaymentMethod && availablePaymentMethods?.length > 0) {
-      setSelectedPaymentMethod(availablePaymentMethods[0].id)
+      const codMethod = availablePaymentMethods.find(
+        (m) => m.id === "pp_system_default"
+      )
+      if (codMethod) {
+        setSelectedPaymentMethod(codMethod.id)
+      } else {
+        setSelectedPaymentMethod(availablePaymentMethods[0].id)
+      }
     }
   }, [availablePaymentMethods, selectedPaymentMethod])
 
@@ -132,6 +139,18 @@ const Payment = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paymentReady, selectedPaymentMethod, activeSession, paidByGiftcard])
 
+  // Sync state to PaymentButton to prevent race conditions during rapid checkouts
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("payment-method-sync", {
+        detail: {
+          isLoading,
+          selectedMethod: selectedPaymentMethod,
+        },
+      })
+    )
+  }, [isLoading, selectedPaymentMethod])
+
   const hasPaymentMethods = availablePaymentMethods?.length > 0
 
   return (
@@ -169,7 +188,15 @@ const Payment = ({
                     >
                       {[...availablePaymentMethods]
                         .sort((a, b) => {
-                          return a.provider_id > b.provider_id ? 1 : -1
+                          const order = ["pp_system_default", "pp_onepay_onepay", "pp_koko_koko"]
+                          const indexA = order.indexOf(a.id)
+                          const indexB = order.indexOf(b.id)
+                          
+                          if (indexA === -1 && indexB === -1) return a.id > b.id ? 1 : -1
+                          if (indexA === -1) return 1
+                          if (indexB === -1) return -1
+                          
+                          return indexA - indexB
                         })
                         .map((paymentMethod) => {
                           return (
@@ -178,17 +205,13 @@ const Payment = ({
                               paymentProviderId={paymentMethod.id}
                               key={paymentMethod.id}
                               selectedPaymentOptionId={selectedPaymentMethod}
+                              cart={cart}
                             />
                           )
                         })}
                     </RadioGroup>
 
-                    {isLoading && (
-                      <div className="mt-3 flex items-center gap-2 text-sm text-gray-500">
-                        <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-800 rounded-full animate-spin" />
-                        Loading payment options...
-                      </div>
-                    )}
+
 
                     {isStripe && stripeReady && activeSession && activeSession.provider_id === selectedPaymentMethod && (
                       <div className="mt-4 transition-all duration-150 ease-in-out">

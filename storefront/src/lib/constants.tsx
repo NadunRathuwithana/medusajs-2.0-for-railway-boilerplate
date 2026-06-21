@@ -36,7 +36,7 @@ export const paymentInfoMap: Record<
     icon: <img src="/payment/visa_master.png" alt="Credit/ Debit Card" className="h-6 object-contain" />,
   },
   pp_koko_koko: {
-    title: "Koko Pay",
+    title: "Koko: Buy Now Pay Later",
     icon: <img src="/payment/koko.png" alt="Koko Pay" className="h-6 object-contain" />,
   },
   // Add more payment providers here

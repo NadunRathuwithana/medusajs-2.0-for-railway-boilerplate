@@ -31,15 +31,18 @@ export const listOrders = cache(async function (
     return null
   }
 
-  return sdk.store.order
-    .list(
-      { 
-        limit, 
-        offset,
-        fields: "*payment_collections.payments,*items,*items.metadata,*items.variant,*items.product" 
-      },
-      { next: { revalidate: 0, tags: ["order"] } as any, ...headers }
-    )
-    .then(({ orders }) => orders)
+  return sdk.client
+    .fetch<{ orders: any[] }>(`/store/my-orders`, {
+      method: "GET",
+      query: { limit, offset },
+      headers: headers as Record<string, string>,
+      next: { revalidate: 0, tags: ["order"] },
+    })
+    .then(({ orders }) => {
+      // Sort descending by created_at in the storefront to bypass any backend caching
+      return (orders || []).sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
+    })
     .catch((err) => medusaError(err))
 })

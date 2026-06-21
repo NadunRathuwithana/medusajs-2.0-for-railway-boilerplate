@@ -40,12 +40,12 @@ const OrderSummary = ({ order }: OrderSummaryProps) => {
           <span className="font-medium text-gray-900">{getAmount(order.shipping_total)}</span>
         </div>
 
-        {order.tax_total != null && order.tax_total > 0 && (
+        {/* {order.tax_total != null && order.tax_total > 0 && (
           <div className="flex items-center justify-between">
             <span className="text-gray-500">Taxes</span>
             <span className="font-medium text-gray-900">{getAmount(order.tax_total)}</span>
           </div>
-        )}
+        )} */}
       </div>
 
       <div className="h-px bg-gray-100" />
