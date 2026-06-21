@@ -35,10 +35,17 @@ const Payment = ({
     activeSession?.provider_id ?? ""
   )
 
-  // Auto-select the first available payment method if none is selected
+  // Auto-select COD (pp_system_default) if available, otherwise fallback to the first available method
   useEffect(() => {
     if (!selectedPaymentMethod && availablePaymentMethods?.length > 0) {
-      setSelectedPaymentMethod(availablePaymentMethods[0].id)
+      const codMethod = availablePaymentMethods.find(
+        (m) => m.id === "pp_system_default"
+      )
+      if (codMethod) {
+        setSelectedPaymentMethod(codMethod.id)
+      } else {
+        setSelectedPaymentMethod(availablePaymentMethods[0].id)
+      }
     }
   }, [availablePaymentMethods, selectedPaymentMethod])
 
@@ -169,7 +176,15 @@ const Payment = ({
                     >
                       {[...availablePaymentMethods]
                         .sort((a, b) => {
-                          return a.provider_id > b.provider_id ? 1 : -1
+                          const order = ["pp_system_default", "pp_onepay_onepay", "pp_koko_koko"]
+                          const indexA = order.indexOf(a.id)
+                          const indexB = order.indexOf(b.id)
+                          
+                          if (indexA === -1 && indexB === -1) return a.id > b.id ? 1 : -1
+                          if (indexA === -1) return 1
+                          if (indexB === -1) return -1
+                          
+                          return indexA - indexB
                         })
                         .map((paymentMethod) => {
                           return (
@@ -178,6 +193,7 @@ const Payment = ({
                               paymentProviderId={paymentMethod.id}
                               key={paymentMethod.id}
                               selectedPaymentOptionId={selectedPaymentMethod}
+                              cart={cart}
                             />
                           )
                         })}

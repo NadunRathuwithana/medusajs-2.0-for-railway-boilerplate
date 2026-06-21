@@ -6,13 +6,14 @@ import React from "react"
 import Radio from "@modules/common/components/radio"
 
 import PaymentTest from "../payment-test"
-import { isManual } from "@lib/constants"
+import { isManual, isKoko } from "@lib/constants"
 
 type PaymentContainerProps = {
   paymentProviderId: string
   selectedPaymentOptionId: string | null
   disabled?: boolean
   paymentInfoMap: Record<string, { title: string; icon: JSX.Element }>
+  cart?: any
 }
 
 const PaymentContainer: React.FC<PaymentContainerProps> = ({
@@ -20,6 +21,7 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
   selectedPaymentOptionId,
   paymentInfoMap,
   disabled = false,
+  cart,
 }) => {
   const isDevelopment = process.env.NODE_ENV === "development"
   const isSelected = selectedPaymentOptionId === paymentProviderId
@@ -41,9 +43,11 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
         <div className="flex items-center justify-between ">
           <div className="flex items-center gap-x-4">
             <Radio checked={isSelected} />
-            <span className="text-[15px] font-medium text-gray-900">
-              {paymentInfoMap[paymentProviderId]?.title || paymentProviderId}
-            </span>
+            <div className="flex flex-col">
+              <span className="text-[15px] font-medium text-gray-900">
+                {paymentInfoMap[paymentProviderId]?.title || paymentProviderId}
+              </span>
+            </div>
             {isManual(paymentProviderId) && isDevelopment && (
               <PaymentTest className="hidden small:block" />
             )}
