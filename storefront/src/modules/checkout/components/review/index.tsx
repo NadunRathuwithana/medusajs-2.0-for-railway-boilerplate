@@ -2,6 +2,7 @@
 
 import { clx } from "@medusajs/ui"
 import PaymentButton from "../payment-button"
+import { convertToLocale } from "@lib/util/money"
 
 const Review = ({ cart }: { cart: any }) => {
   const paidByGiftcard =
@@ -31,6 +32,17 @@ const Review = ({ cart }: { cart: any }) => {
               </p>
             </div>
           </div>
+
+          <div className="lg:hidden flex items-center justify-between mb-4 pt-4 border-t border-gray-100">
+            <span className="text-base font-bold text-gray-900">Total</span>
+            <span className="text-[20px] font-bold text-gray-900 tracking-tight">
+              {convertToLocale({
+                amount: cart.total ?? 0,
+                currency_code: cart.currency_code,
+              })}
+            </span>
+          </div>
+
           <PaymentButton cart={cart} data-testid="submit-order-button" />
         </>
       )}
