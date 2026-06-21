@@ -43,7 +43,7 @@ export default function PrivacyPolicyPage() {
         <section>
           <h2 className="text-2xl font-semibold text-bold mb-4">5. Contact Us</h2>
           <p>
-            For more information about our privacy practices, if you have questions, or if you would like to make a complaint, please contact us by e-mail at support@cardle.com.
+            For more information about our privacy practices, if you have questions, or if you would like to make a complaint, please contact us by e-mail at support@cardle.lk.
           </p>
         </section>
       </div>
