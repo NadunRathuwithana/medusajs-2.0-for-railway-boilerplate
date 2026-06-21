@@ -49,6 +49,9 @@ export const GET = async (
     }
   })
 
+  // Explicitly sort orders so newest is first
+  data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+
   res.json({
     orders: data,
     count: metadata?.count || data.length,
