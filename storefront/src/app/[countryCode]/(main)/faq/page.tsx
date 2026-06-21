@@ -9,7 +9,7 @@ export default function FAQPage() {
   const faqs = [
     {
       question: "Do you ship internationally?",
-      answer: "Currently, we only ship within Sri Lanka through our website. For international orders, please contact our support team at support@cardle.com to arrange a custom shipping quote."
+      answer: "Currently, we only ship within Sri Lanka through our website. For international orders, please contact our support team at support@cardle.lk to arrange a custom shipping quote."
     },
     {
       question: "How long does shipping take?",

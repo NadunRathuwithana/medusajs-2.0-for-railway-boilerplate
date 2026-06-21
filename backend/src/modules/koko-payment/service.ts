@@ -44,6 +44,10 @@ type InjectedDependencies = {
 class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
   static identifier = "koko"
 
+  // In-memory cache to bridge the race condition between webhook and authorizePayment.
+  // Stores verified statuses so we don't need to re-poll orderView immediately.
+  private static webhookCache = new Map<string, { status: string, timestamp: number }>()
+
   protected logger_: Logger
   protected options_: KokoOptions
 
@@ -101,8 +105,12 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
     const kokoAmount = (Number(amount) / 100).toFixed(2)
     const currency = currency_code.toUpperCase()
 
-    // _orderId MUST be unique per request per Koko's docs — use session + timestamp
-    const orderId = `${(context as any).session_id ?? "sess"}-${Date.now()}`
+    // In Medusa v2, the PaymentSession ID is passed in input.data.session_id
+    const sessionId = (input.data as any)?.session_id ?? (context as any).session_id ?? "sess"
+
+    // _orderId MUST be unique per request per Koko's docs.
+    // The Medusa PaymentSession ID is already unique, so we can use it directly.
+    const orderId = sessionId
     const reference = orderId
 
     const firstName = (context as any).customer?.first_name ?? "Customer"
@@ -179,6 +187,17 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
     }
 
     try {
+      // 1. Check if the webhook already verified this payment
+      const cached = KokoPaymentService.webhookCache.get(orderId)
+      if (cached && cached.status === "SUCCESS") {
+        this.logger_.info(`Koko authorizePayment: trusted webhook-verified SUCCESS for order ${orderId}`)
+        return {
+          data: { ...input.data, koko_status: "SUCCESS" },
+          status: "authorized",
+        }
+      }
+
+      // 2. Fallback to polling the orderView API
       const orderView = await this.callOrderView(orderId)
 
       const statusMap: Record<string, "authorized" | "pending" | "error"> = {
@@ -327,13 +346,23 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
 
     this.logger_.info(`Koko webhook verified: ${payload.status} for order ${payload.orderId}`)
 
+    // The orderId is exactly the Medusa PaymentSession ID
+    const medusaSessionId = payload.orderId
+
     if (payload.status === "SUCCESS") {
+      // Store the verified status in our cache so authorizePayment can use it
+      KokoPaymentService.webhookCache.set(medusaSessionId, { status: "SUCCESS", timestamp: Date.now() })
+
+      // Cleanup old entries to prevent memory leaks (keep last 1 hour)
+      const oneHourAgo = Date.now() - 3600000
+      for (const [key, value] of KokoPaymentService.webhookCache.entries()) {
+        if (value.timestamp < oneHourAgo) KokoPaymentService.webhookCache.delete(key)
+      }
+
       return {
         action: "captured",
         data: {
-          session_id: payload.orderId,
-          // Koko doesn't send amount in the _responseUrl webhook payload.
-          // The actual amount is confirmed via the orderView API poll in authorizePayment.
+          session_id: medusaSessionId,
           amount: 0,
         },
       }
@@ -342,7 +371,7 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
     return {
       action: "failed",
       data: {
-        session_id: payload.orderId,
+        session_id: medusaSessionId,
         amount: 0,
       },
     }
