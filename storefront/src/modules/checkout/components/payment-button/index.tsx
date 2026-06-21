@@ -3,7 +3,7 @@
 import { OnApproveActions, OnApproveData } from "@paypal/paypal-js"
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js"
 import { useElements, useStripe } from "@stripe/react-stripe-js"
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
 import { placeOrder } from "@lib/data/cart"
@@ -42,12 +42,16 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   cart,
   "data-testid": dataTestId,
 }) => {
-  const notReady =
-    !cart ||
-    !cart.shipping_address ||
-    !cart.billing_address ||
-    !cart.email ||
-    (cart.shipping_methods?.length ?? 0) < 1
+  const [syncState, setSyncState] = useState<{ isLoading: boolean; selectedMethod: string | null }>({
+    isLoading: false,
+    selectedMethod: null,
+  })
+
+  useEffect(() => {
+    const handleSync = (e: any) => setSyncState(e.detail)
+    window.addEventListener("payment-method-sync", handleSync)
+    return () => window.removeEventListener("payment-method-sync", handleSync)
+  }, [])
 
   // When switching providers, Medusa may leave multiple sessions as "pending".
   // The store cart API appends the most recently created session to the end of the array.
@@ -63,6 +67,18 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     )
 
   const paymentSession = pendingSessions[pendingSessions.length - 1]
+
+  const isSyncing =
+    syncState.isLoading ||
+    (syncState.selectedMethod !== null && syncState.selectedMethod !== paymentSession?.provider_id)
+
+  const notReady =
+    !cart ||
+    !cart.shipping_address ||
+    !cart.billing_address ||
+    !cart.email ||
+    (cart.shipping_methods?.length ?? 0) < 1 ||
+    isSyncing
 
   const debugInfo = null
 

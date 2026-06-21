@@ -139,6 +139,18 @@ const Payment = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paymentReady, selectedPaymentMethod, activeSession, paidByGiftcard])
 
+  // Sync state to PaymentButton to prevent race conditions during rapid checkouts
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("payment-method-sync", {
+        detail: {
+          isLoading,
+          selectedMethod: selectedPaymentMethod,
+        },
+      })
+    )
+  }, [isLoading, selectedPaymentMethod])
+
   const hasPaymentMethods = availablePaymentMethods?.length > 0
 
   return (
@@ -199,12 +211,7 @@ const Payment = ({
                         })}
                     </RadioGroup>
 
-                    {isLoading && (
-                      <div className="mt-3 flex items-center gap-2 text-sm text-gray-500">
-                        <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-800 rounded-full animate-spin" />
-                        Loading payment options...
-                      </div>
-                    )}
+
 
                     {isStripe && stripeReady && activeSession && activeSession.provider_id === selectedPaymentMethod && (
                       <div className="mt-4 transition-all duration-150 ease-in-out">
