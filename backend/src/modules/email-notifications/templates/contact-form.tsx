@@ -1,10 +1,11 @@
 import { Text, Section, Hr } from '@react-email/components'
 import * as React from 'react'
-import { Base, accentColor, textDark, textMuted } from './base'
+import { Base, textPrimary, textSecondary, borderLight } from './base'
 
 export const CONTACT_FORM = 'contact-form'
 
 export interface ContactFormTemplateProps {
+  referenceNumber: string
   senderName: string
   senderEmail: string
   subject: string
@@ -16,60 +17,54 @@ export interface ContactFormTemplateProps {
 export const isContactFormTemplateData = (data: any): data is ContactFormTemplateProps =>
   typeof data.senderName === 'string' &&
   typeof data.senderEmail === 'string' &&
-  typeof data.message === 'string'
+  typeof data.message === 'string' &&
+  typeof data.referenceNumber === 'string'
 
 export const ContactFormTemplate: React.FC<ContactFormTemplateProps> & {
   PreviewProps: ContactFormTemplateProps
-} = ({ senderName, senderEmail, subject, message, submittedAt, preview }) => {
+} = ({ referenceNumber, senderName, senderEmail, subject, message, submittedAt, preview }) => {
   return (
-    <Base preview={preview ?? `New contact form message from ${senderName}`}>
-      <Section style={{ textAlign: 'center', marginBottom: '28px' }}>
-        <Text style={{ fontSize: '42px', margin: '0 0 12px' }}>📬</Text>
+    <Base preview={preview ?? \`New contact form message: \${referenceNumber}\`}>
+      <Section style={{ marginBottom: '32px' }}>
         <Text style={{
-          fontSize: '24px',
-          fontWeight: '700',
-          color: textDark,
-          margin: '0 0 6px',
-          letterSpacing: '-0.5px',
+          fontSize: '14px',
+          fontWeight: '500',
+          color: textPrimary,
+          margin: '0 0 8px',
+          textTransform: 'uppercase',
+          letterSpacing: '1px',
         }}>
-          New Contact Form Submission
+          New Submission
         </Text>
-        <Text style={{ color: textMuted, fontSize: '14px', margin: '0' }}>
-          Someone has submitted a message via the contact form.
+        <Text style={{ color: textSecondary, fontSize: '12px', margin: '0' }}>
+          Reference: {referenceNumber}
         </Text>
       </Section>
 
+      <Hr style={{ borderColor: borderLight, margin: '0 0 24px' }} />
+
       {/* Sender Info */}
-      <Section style={{
-        backgroundColor: '#fafbff',
-        border: '1px solid #e2e8f0',
-        borderRadius: '10px',
-        padding: '20px 24px',
-        marginBottom: '24px',
-      }}>
-        <Text style={{ fontWeight: '600', fontSize: '13px', color: textMuted, margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-          Sender Details
-        </Text>
+      <Section style={{ marginBottom: '32px' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <tbody>
             <tr>
-              <td style={{ padding: '5px 0', color: textMuted, fontSize: '14px', width: '100px' }}>Name</td>
-              <td style={{ padding: '5px 0', fontWeight: '600', fontSize: '14px', color: textDark }}>{senderName}</td>
+              <td style={{ padding: '8px 0', color: textSecondary, fontSize: '12px', width: '120px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Name</td>
+              <td style={{ padding: '8px 0', fontSize: '13px', color: textPrimary }}>{senderName}</td>
             </tr>
             <tr>
-              <td style={{ padding: '5px 0', color: textMuted, fontSize: '14px' }}>Email</td>
-              <td style={{ padding: '5px 0', fontWeight: '600', fontSize: '14px', color: accentColor }}>{senderEmail}</td>
+              <td style={{ padding: '8px 0', color: textSecondary, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email</td>
+              <td style={{ padding: '8px 0', fontSize: '13px', color: textPrimary }}>{senderEmail}</td>
             </tr>
             {subject && (
               <tr>
-                <td style={{ padding: '5px 0', color: textMuted, fontSize: '14px' }}>Subject</td>
-                <td style={{ padding: '5px 0', fontWeight: '600', fontSize: '14px', color: textDark }}>{subject}</td>
+                <td style={{ padding: '8px 0', color: textSecondary, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Subject</td>
+                <td style={{ padding: '8px 0', fontSize: '13px', color: textPrimary }}>{subject}</td>
               </tr>
             )}
             {submittedAt && (
               <tr>
-                <td style={{ padding: '5px 0', color: textMuted, fontSize: '14px' }}>Submitted</td>
-                <td style={{ padding: '5px 0', fontSize: '14px', color: textMuted }}>{submittedAt}</td>
+                <td style={{ padding: '8px 0', color: textSecondary, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Date</td>
+                <td style={{ padding: '8px 0', fontSize: '13px', color: textPrimary }}>{submittedAt}</td>
               </tr>
             )}
           </tbody>
@@ -78,35 +73,34 @@ export const ContactFormTemplate: React.FC<ContactFormTemplateProps> & {
 
       {/* Message */}
       <Section style={{ marginBottom: '24px' }}>
-        <Text style={{ fontWeight: '600', fontSize: '13px', color: textMuted, margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+        <Text style={{ fontSize: '12px', color: textSecondary, margin: '0 0 16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
           Message
         </Text>
         <Section style={{
-          backgroundColor: '#f8f9fa',
-          borderLeft: `4px solid ${accentColor}`,
-          padding: '16px 20px',
-          borderRadius: '0 8px 8px 0',
+          borderLeft: \`2px solid \${borderLight}\`,
+          padding: '4px 0 4px 16px',
         }}>
-          <Text style={{ fontSize: '14px', color: textDark, margin: '0', lineHeight: '1.8', whiteSpace: 'pre-wrap' }}>
+          <Text style={{ fontSize: '14px', color: textPrimary, margin: '0', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
             {message}
           </Text>
         </Section>
       </Section>
 
-      <Hr style={{ borderColor: '#e5e7eb', margin: '0 0 20px' }} />
+      <Hr style={{ borderColor: borderLight, margin: '32px 0 24px' }} />
 
-      <Text style={{ fontSize: '13px', color: textMuted, margin: '0' }}>
-        Reply directly to this email to respond to {senderName} at {senderEmail}.
+      <Text style={{ fontSize: '12px', color: textSecondary, margin: '0' }}>
+        Reply directly to this email to respond to the customer.
       </Text>
     </Base>
   )
 }
 
 ContactFormTemplate.PreviewProps = {
+  referenceNumber: 'CF-12345',
   senderName: 'John Customer',
   senderEmail: 'john@example.com',
   subject: 'Question about my order',
-  message: 'Hi, I placed an order 3 days ago but haven\'t received a shipping confirmation yet. Could you please check the status of my order ORD-123?',
+  message: 'Hi, I placed an order 3 days ago but haven\\'t received a shipping confirmation yet. Could you please check the status of my order ORD-123?',
   submittedAt: new Date().toLocaleString(),
 }
 

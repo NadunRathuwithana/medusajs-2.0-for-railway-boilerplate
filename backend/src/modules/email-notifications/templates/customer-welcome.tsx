@@ -1,6 +1,6 @@
 import { Text, Section, Button, Hr } from '@react-email/components'
 import * as React from 'react'
-import { Base, accentColor, textDark, textMuted } from './base'
+import { Base, textPrimary, textSecondary, borderLight } from './base'
 
 export const CUSTOMER_WELCOME = 'customer-welcome'
 
@@ -16,74 +16,66 @@ export const isCustomerWelcomeTemplateData = (data: any): data is CustomerWelcom
 
 export const CustomerWelcomeTemplate: React.FC<CustomerWelcomeTemplateProps> & {
   PreviewProps: CustomerWelcomeTemplateProps
-} = ({ customerFirstName, customerEmail, shopUrl = 'https://theek.lk', preview = '🎉 Welcome to Theek.lk!' }) => {
+} = ({ customerFirstName, customerEmail, shopUrl = 'https://cardle.lk', preview = 'Welcome to Cardle' }) => {
   return (
     <Base preview={preview}>
-      {/* Welcome Hero */}
-      <Section style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <Text style={{ fontSize: '56px', margin: '0 0 12px' }}>🎉</Text>
+      <Section style={{ marginBottom: '32px' }}>
         <Text style={{
-          fontSize: '28px',
-          fontWeight: '700',
-          color: textDark,
-          margin: '0 0 8px',
-          letterSpacing: '-0.5px',
+          fontSize: '16px',
+          fontWeight: '500',
+          color: textPrimary,
+          margin: '0 0 12px',
+          letterSpacing: '1px',
+          textTransform: 'uppercase',
         }}>
-          Welcome to Theek.lk!
+          Welcome
         </Text>
-        <Text style={{ color: textMuted, fontSize: '15px', margin: '0' }}>
-          Hi {customerFirstName}, we're so excited to have you on board.
+        <Text style={{ color: textSecondary, fontSize: '13px', margin: '0', lineHeight: '1.6' }}>
+          Dear {customerFirstName}, welcome to Cardle. We are delighted to have you. Your account has been successfully created.
         </Text>
       </Section>
 
-      {/* Features */}
-      <Section style={{
-        backgroundColor: '#fafbff',
-        border: '1px solid #e2e8f0',
-        borderRadius: '10px',
-        padding: '24px',
-        marginBottom: '28px',
-      }}>
-        <Text style={{ fontWeight: '600', color: textDark, fontSize: '16px', margin: '0 0 16px' }}>
-          What you can do with your account:
+      <Hr style={{ borderColor: borderLight, margin: '0 0 32px' }} />
+
+      <Section style={{ marginBottom: '32px' }}>
+        <Text style={{ fontSize: '12px', color: textSecondary, margin: '0 0 16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          Account Details
         </Text>
-        {[
-          { icon: '🛒', text: 'Browse and shop our full catalog' },
-          { icon: '📦', text: 'Track your orders in real-time' },
-          { icon: '❤️', text: 'Save favourites to your wishlist' },
-          { icon: '🔄', text: 'Manage returns and exchanges easily' },
-        ].map(({ icon, text }, i) => (
-          <Text key={i} style={{ fontSize: '14px', color: textMuted, margin: '0 0 10px', display: 'flex' }}>
-            {icon}&nbsp;&nbsp;{text}
-          </Text>
-        ))}
+        <table style={{ width: '100%', borderCollapse: 'collapse', borderLeft: \`2px solid \${borderLight}\`, paddingLeft: '16px', display: 'block' }}>
+          <tbody>
+            <tr>
+              <td style={{ padding: '4px 0 4px 16px', color: textSecondary, fontSize: '12px', width: '120px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email</td>
+              <td style={{ padding: '4px 0', fontSize: '13px', color: textPrimary }}>{customerEmail}</td>
+            </tr>
+          </tbody>
+        </table>
       </Section>
 
-      <Hr style={{ borderColor: '#e5e7eb', margin: '0 0 28px' }} />
-
-      {/* Account Info */}
-      <Section style={{ marginBottom: '28px' }}>
-        <Text style={{ fontSize: '14px', color: textMuted, margin: '0 0 4px' }}>Your account email:</Text>
-        <Text style={{ fontSize: '15px', fontWeight: '600', color: textDark, margin: '0' }}>{customerEmail}</Text>
-      </Section>
-
-      {/* CTA */}
-      <Section style={{ textAlign: 'center' }}>
+      <Section style={{ marginTop: '24px' }}>
         <Button
           href={shopUrl}
           style={{
-            backgroundColor: accentColor,
+            backgroundColor: textPrimary,
             color: '#ffffff',
-            padding: '14px 36px',
-            borderRadius: '8px',
-            fontWeight: '600',
-            fontSize: '15px',
+            padding: '12px 24px',
+            fontSize: '12px',
+            fontWeight: '500',
+            letterSpacing: '1px',
+            textTransform: 'uppercase',
             textDecoration: 'none',
             display: 'inline-block',
           }}
         >
-          Start Shopping →
+          Explore Collection
         </Button>
+      </Section>
+
+      <Hr style={{ borderColor: borderLight, margin: '32px 0 24px' }} />
+
+      <Section>
+        <Text style={{ color: textSecondary, fontSize: '12px', margin: '0', lineHeight: '1.6' }}>
+          If you have any questions or need assistance, please reply directly to this email.
+        </Text>
       </Section>
     </Base>
   )
@@ -92,7 +84,7 @@ export const CustomerWelcomeTemplate: React.FC<CustomerWelcomeTemplateProps> & {
 CustomerWelcomeTemplate.PreviewProps = {
   customerFirstName: 'Nadun',
   customerEmail: 'nadun@example.com',
-  shopUrl: 'https://theek.lk',
+  shopUrl: 'https://cardle.lk',
 }
 
 export default CustomerWelcomeTemplate

@@ -1,4 +1,4 @@
-import { Html, Body, Container, Preview, Head, Section, Text, Hr, Img, Link } from '@react-email/components'
+import { Html, Body, Container, Preview, Head, Section, Text, Link, Hr } from '@react-email/components'
 import * as React from 'react'
 
 interface BaseProps {
@@ -6,79 +6,65 @@ interface BaseProps {
   children: React.ReactNode
 }
 
-const brandColor = '#1a1a2e'
-const accentColor = '#e94560'
-const lightGray = '#f8f9fa'
-const textDark = '#1a1a1a'
-const textMuted = '#6b7280'
+const bgLight = '#ffffff'
+const textPrimary = '#111111'
+const textSecondary = '#666666'
+const borderLight = '#eaeaea'
 
 export const Base: React.FC<BaseProps> = ({ preview, children }) => {
   return (
     <Html lang="en">
       <Head>
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap');
           * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
         `}</style>
       </Head>
-      <Preview>{preview ?? ''}</Preview>
-      <Body style={{ backgroundColor: '#f1f5f9', margin: '0', padding: '20px 0' }}>
+      <Preview>{preview ?? 'Message from Cardle'}</Preview>
+      <Body style={{ backgroundColor: '#fafafa', margin: '0', padding: '40px 0', WebkitFontSmoothing: 'antialiased' }}>
 
-        {/* Email Wrapper */}
         <Container style={{
           maxWidth: '600px',
           margin: '0 auto',
-          backgroundColor: '#ffffff',
-          borderRadius: '12px',
-          overflow: 'hidden',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+          backgroundColor: bgLight,
+          border: \`1px solid \${borderLight}\`,
         }}>
 
           {/* Header */}
           <Section style={{
-            background: `linear-gradient(135deg, ${brandColor} 0%, #16213e 100%)`,
-            padding: '32px 40px',
+            padding: '40px 40px 20px',
             textAlign: 'center',
           }}>
             <Text style={{
-              color: '#ffffff',
-              fontSize: '24px',
-              fontWeight: '700',
+              color: textPrimary,
+              fontSize: '18px',
+              fontWeight: '500',
               margin: '0',
-              letterSpacing: '-0.5px',
-            }}>
-              🛍️ Theek.lk
-            </Text>
-            <Text style={{
-              color: 'rgba(255,255,255,0.6)',
-              fontSize: '12px',
-              margin: '4px 0 0',
-              letterSpacing: '2px',
+              letterSpacing: '4px',
               textTransform: 'uppercase',
             }}>
-              Your Trusted Online Store
+              Cardle
             </Text>
           </Section>
 
           {/* Body Content */}
-          <Section style={{ padding: '40px', backgroundColor: '#ffffff' }}>
+          <Section style={{ padding: '20px 40px 40px', backgroundColor: bgLight }}>
             {children}
           </Section>
 
           {/* Footer */}
           <Section style={{
-            backgroundColor: lightGray,
-            padding: '24px 40px',
-            borderTop: '1px solid #e5e7eb',
+            backgroundColor: '#fafafa',
+            padding: '30px 40px',
+            borderTop: \`1px solid \${borderLight}\`,
             textAlign: 'center',
           }}>
-            <Text style={{ color: textMuted, fontSize: '12px', margin: '0 0 8px' }}>
-              © {new Date().getFullYear()} Theek.lk. All rights reserved.
+            <Text style={{ color: textSecondary, fontSize: '11px', margin: '0 0 8px', letterSpacing: '0.5px' }}>
+              © {new Date().getFullYear()} CARDLE. ALL RIGHTS RESERVED.
             </Text>
-            <Text style={{ color: textMuted, fontSize: '12px', margin: '0' }}>
-              If you have questions, contact us at{' '}
-              <Link href="mailto:nadunrathuwithanaproductions@gmail.com" style={{ color: accentColor, textDecoration: 'none' }}>
-                support@theek.lk
+            <Text style={{ color: textSecondary, fontSize: '11px', margin: '0', letterSpacing: '0.5px' }}>
+              <Link href="mailto:orders@cardle.lk" style={{ color: textSecondary, textDecoration: 'underline' }}>
+                orders@cardle.lk
               </Link>
             </Text>
           </Section>
@@ -89,4 +75,4 @@ export const Base: React.FC<BaseProps> = ({ preview, children }) => {
   )
 }
 
-export { brandColor, accentColor, lightGray, textDark, textMuted }
+export { bgLight, textPrimary, textSecondary, borderLight }

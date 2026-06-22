@@ -1,6 +1,6 @@
 import { Text, Section, Hr } from '@react-email/components'
 import * as React from 'react'
-import { Base, textDark, textMuted } from './base'
+import { Base, textPrimary, textSecondary, borderLight } from './base'
 
 export const ORDER_CANCELLED = 'order-cancelled'
 
@@ -17,64 +17,59 @@ export const isOrderCancelledTemplateData = (data: any): data is OrderCancelledT
 
 export const OrderCancelledTemplate: React.FC<OrderCancelledTemplateProps> & {
   PreviewProps: OrderCancelledTemplateProps
-} = ({ orderDisplayId, customerFirstName, orderTotal, cancellationReason, preview = '❌ Your order has been cancelled' }) => {
+} = ({ orderDisplayId, customerFirstName, orderTotal, cancellationReason, preview = 'Your order has been cancelled' }) => {
   return (
     <Base preview={preview}>
-      {/* Header */}
-      <Section style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <Text style={{ fontSize: '48px', margin: '0 0 12px' }}>❌</Text>
+      <Section style={{ marginBottom: '32px' }}>
         <Text style={{
-          fontSize: '26px',
-          fontWeight: '700',
-          color: textDark,
-          margin: '0 0 8px',
-          letterSpacing: '-0.5px',
+          fontSize: '16px',
+          fontWeight: '500',
+          color: textPrimary,
+          margin: '0 0 12px',
+          letterSpacing: '1px',
+          textTransform: 'uppercase',
         }}>
           Order Cancelled
         </Text>
-        <Text style={{ color: textMuted, fontSize: '15px', margin: '0' }}>
-          Hi {customerFirstName}, your order #{orderDisplayId} has been cancelled.
+        <Text style={{ color: textSecondary, fontSize: '13px', margin: '0', lineHeight: '1.6' }}>
+          Dear {customerFirstName}, your order #{orderDisplayId} has been successfully cancelled.
         </Text>
       </Section>
 
+      <Hr style={{ borderColor: borderLight, margin: '0 0 32px' }} />
+
       {/* Cancellation Info */}
-      <Section style={{
-        backgroundColor: '#fff7f7',
-        border: '1px solid #fca5a5',
-        borderRadius: '10px',
-        padding: '20px 24px',
-        marginBottom: '28px',
-      }}>
+      <Section style={{ marginBottom: '32px' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <tbody>
             <tr>
-              <td style={{ padding: '6px 0', color: textMuted, fontSize: '14px' }}>Order Number</td>
-              <td style={{ padding: '6px 0', fontWeight: '600', fontSize: '14px', textAlign: 'right' }}>#{orderDisplayId}</td>
+              <td style={{ padding: '8px 0', color: textSecondary, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Order Number</td>
+              <td style={{ padding: '8px 0', fontWeight: '500', fontSize: '13px', textAlign: 'right', color: textPrimary }}>#{orderDisplayId}</td>
             </tr>
             {orderTotal && (
               <tr>
-                <td style={{ padding: '6px 0', color: textMuted, fontSize: '14px' }}>Order Total</td>
-                <td style={{ padding: '6px 0', fontWeight: '600', fontSize: '14px', textAlign: 'right' }}>{orderTotal}</td>
+                <td style={{ padding: '8px 0', color: textSecondary, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Order Total</td>
+                <td style={{ padding: '8px 0', fontWeight: '500', fontSize: '13px', textAlign: 'right', color: textPrimary }}>{orderTotal}</td>
               </tr>
             )}
             {cancellationReason && (
               <tr>
-                <td style={{ padding: '6px 0', color: textMuted, fontSize: '14px' }}>Reason</td>
-                <td style={{ padding: '6px 0', fontWeight: '500', fontSize: '14px', textAlign: 'right', color: '#dc2626' }}>{cancellationReason}</td>
+                <td style={{ padding: '8px 0', color: textSecondary, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Reason</td>
+                <td style={{ padding: '8px 0', fontWeight: '500', fontSize: '13px', textAlign: 'right', color: textPrimary }}>{cancellationReason}</td>
               </tr>
             )}
           </tbody>
         </table>
       </Section>
 
-      <Hr style={{ borderColor: '#e5e7eb', margin: '0 0 24px' }} />
+      <Hr style={{ borderColor: borderLight, margin: '0 0 24px' }} />
 
       <Section>
-        <Text style={{ color: textMuted, fontSize: '14px', margin: '0 0 12px' }}>
-          If a payment was made, your refund will be processed within <strong>5-7 business days</strong> to your original payment method.
+        <Text style={{ color: textSecondary, fontSize: '12px', margin: '0 0 12px', lineHeight: '1.6' }}>
+          If a payment was made, your refund will be processed within 5-7 business days to your original payment method.
         </Text>
-        <Text style={{ color: textMuted, fontSize: '14px', margin: '0' }}>
-          If you believe this cancellation was a mistake or need assistance, please contact our support team.
+        <Text style={{ color: textSecondary, fontSize: '12px', margin: '0', lineHeight: '1.6' }}>
+          If you believe this cancellation was a mistake or need further assistance, please reply directly to this email.
         </Text>
       </Section>
     </Base>

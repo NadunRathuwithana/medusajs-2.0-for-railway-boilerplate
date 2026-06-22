@@ -1,6 +1,6 @@
 import { Text, Section, Hr, Button } from '@react-email/components'
 import * as React from 'react'
-import { Base, accentColor, textDark, textMuted } from './base'
+import { Base, textPrimary, textSecondary, borderLight } from './base'
 
 export const ORDER_SHIPPED = 'order-shipped'
 
@@ -26,78 +26,83 @@ export const OrderShippedTemplate: React.FC<OrderShippedTemplateProps> & {
   trackingUrl,
   carrierName,
   estimatedDelivery,
-  preview = '🚚 Your order is on the way!',
+  preview = 'Your order is on the way',
 }) => {
   return (
     <Base preview={preview}>
-      {/* Header */}
-      <Section style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <Text style={{ fontSize: '48px', margin: '0 0 12px' }}>🚚</Text>
+      <Section style={{ marginBottom: '32px' }}>
         <Text style={{
-          fontSize: '26px',
-          fontWeight: '700',
-          color: textDark,
-          margin: '0 0 8px',
-          letterSpacing: '-0.5px',
+          fontSize: '16px',
+          fontWeight: '500',
+          color: textPrimary,
+          margin: '0 0 12px',
+          letterSpacing: '1px',
+          textTransform: 'uppercase',
         }}>
-          Your Order Has Shipped!
+          Order Dispatched
         </Text>
-        <Text style={{ color: textMuted, fontSize: '15px', margin: '0' }}>
-          Hi {customerFirstName}, your order #{orderDisplayId} is on its way.
+        <Text style={{ color: textSecondary, fontSize: '13px', margin: '0', lineHeight: '1.6' }}>
+          Dear {customerFirstName}, your order #{orderDisplayId} has been dispatched and is currently on its way to you.
         </Text>
       </Section>
 
+      <Hr style={{ borderColor: borderLight, margin: '0 0 32px' }} />
+
       {/* Tracking Box */}
       {trackingNumber && (
-        <Section style={{
-          backgroundColor: '#f0fdf4',
-          border: '1px solid #86efac',
-          borderRadius: '10px',
-          padding: '20px 24px',
-          marginBottom: '28px',
-          textAlign: 'center',
-        }}>
-          <Text style={{ fontWeight: '600', fontSize: '13px', color: '#16a34a', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            Tracking Information
+        <Section style={{ marginBottom: '40px' }}>
+          <Text style={{ fontSize: '12px', color: textSecondary, margin: '0 0 16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            Tracking Details
           </Text>
-          {carrierName && (
-            <Text style={{ fontSize: '14px', color: textMuted, margin: '0 0 4px' }}>
-              Carrier: <strong>{carrierName}</strong>
-            </Text>
-          )}
-          <Text style={{ fontSize: '18px', fontWeight: '700', color: textDark, margin: '8px 0', letterSpacing: '2px' }}>
-            {trackingNumber}
-          </Text>
-          {estimatedDelivery && (
-            <Text style={{ fontSize: '13px', color: textMuted, margin: '0 0 16px' }}>
-              Estimated delivery: <strong>{estimatedDelivery}</strong>
-            </Text>
-          )}
+          <table style={{ width: '100%', borderCollapse: 'collapse', borderLeft: \`2px solid \${borderLight}\`, paddingLeft: '16px', display: 'block' }}>
+            <tbody>
+              {carrierName && (
+                <tr>
+                  <td style={{ padding: '4px 0 4px 16px', color: textSecondary, fontSize: '12px', width: '120px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Carrier</td>
+                  <td style={{ padding: '4px 0', fontSize: '13px', color: textPrimary }}>{carrierName}</td>
+                </tr>
+              )}
+              <tr>
+                <td style={{ padding: '4px 0 4px 16px', color: textSecondary, fontSize: '12px', width: '120px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Tracking No.</td>
+                <td style={{ padding: '4px 0', fontWeight: '500', fontSize: '13px', color: textPrimary, letterSpacing: '1px' }}>{trackingNumber}</td>
+              </tr>
+              {estimatedDelivery && (
+                <tr>
+                  <td style={{ padding: '4px 0 4px 16px', color: textSecondary, fontSize: '12px', width: '120px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Est. Delivery</td>
+                  <td style={{ padding: '4px 0', fontSize: '13px', color: textPrimary }}>{estimatedDelivery}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+
           {trackingUrl && (
-            <Button
-              href={trackingUrl}
-              style={{
-                backgroundColor: '#16a34a',
-                color: '#ffffff',
-                padding: '12px 28px',
-                borderRadius: '8px',
-                fontWeight: '600',
-                fontSize: '14px',
-                textDecoration: 'none',
-                display: 'inline-block',
-              }}
-            >
-              Track Your Order →
-            </Button>
+            <Section style={{ marginTop: '24px' }}>
+              <Button
+                href={trackingUrl}
+                style={{
+                  backgroundColor: textPrimary,
+                  color: '#ffffff',
+                  padding: '12px 24px',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  letterSpacing: '1px',
+                  textTransform: 'uppercase',
+                  textDecoration: 'none',
+                  display: 'inline-block',
+                }}
+              >
+                Track Shipment
+              </Button>
+            </Section>
           )}
         </Section>
       )}
 
-      <Hr style={{ borderColor: '#e5e7eb', margin: '0 0 24px' }} />
+      <Hr style={{ borderColor: borderLight, margin: '0 0 24px' }} />
 
-      <Section style={{ textAlign: 'center' }}>
-        <Text style={{ color: textMuted, fontSize: '14px', margin: '0' }}>
-          If you have any questions about your shipment, please contact our support team.
+      <Section>
+        <Text style={{ color: textSecondary, fontSize: '12px', margin: '0', lineHeight: '1.6' }}>
+          If you have any questions regarding your shipment, please reply directly to this email.
         </Text>
       </Section>
     </Base>
@@ -110,7 +115,7 @@ OrderShippedTemplate.PreviewProps = {
   trackingNumber: 'LK1234567890',
   trackingUrl: 'https://example.com/track/LK1234567890',
   carrierName: 'Sri Lanka Post',
-  estimatedDelivery: 'June 22, 2025',
+  estimatedDelivery: 'June 22, 2026',
 }
 
 export default OrderShippedTemplate

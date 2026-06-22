@@ -2,6 +2,7 @@ import { MedusaRequest, MedusaResponse } from '@medusajs/framework'
 import { Modules } from '@medusajs/framework/utils'
 import { INotificationModuleService } from '@medusajs/framework/types'
 import { EmailTemplates } from '../../../modules/email-notifications/templates'
+import { CONTACT_AUTO_REPLY } from '../../../modules/email-notifications/templates/contact-auto-reply'
 import { SMTP_ADMIN_EMAIL } from '../../../lib/constants'
 
 interface ContactFormBody {
@@ -36,6 +37,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
     const adminEmail = SMTP_ADMIN_EMAIL || process.env.SMTP_USER || 'nadunrathuwithanaproductions@gmail.com'
 
+    const referenceNumber = `CF-${Math.floor(10000 + Math.random() * 90000)}`
+
+    // 1. Internal alert
     await notificationModuleService.createNotifications({
       to: adminEmail,
       channel: 'email',
@@ -43,8 +47,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       data: {
         emailOptions: {
           replyTo: email.trim(),
-          subject: `📬 Contact Form: ${subject?.trim() || 'New Message'} — from ${name.trim()}`,
+          subject: `Contact Form [${referenceNumber}] — from ${name.trim()}`,
         },
+        referenceNumber,
         senderName: name.trim(),
         senderEmail: email.trim(),
         subject: subject?.trim() || 'General Inquiry',
@@ -58,6 +63,21 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
           minute: '2-digit',
         }),
         preview: `New message from ${name.trim()}`,
+      },
+    })
+
+    // 2. Customer auto-reply
+    await notificationModuleService.createNotifications({
+      to: email.trim(),
+      channel: 'email',
+      template: EmailTemplates.CONTACT_AUTO_REPLY,
+      data: {
+        emailOptions: {
+          replyTo: adminEmail,
+          subject: `We've received your message [${referenceNumber}]`,
+        },
+        customerName: name.trim(),
+        referenceNumber,
       },
     })
 

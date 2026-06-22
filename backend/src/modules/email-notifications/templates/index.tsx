@@ -9,6 +9,8 @@ import { OrderRefundTemplate, ORDER_REFUND, isOrderRefundTemplateData } from './
 import { CustomerWelcomeTemplate, CUSTOMER_WELCOME, isCustomerWelcomeTemplateData } from './customer-welcome'
 import { PasswordResetTemplate, PASSWORD_RESET, isPasswordResetTemplateData } from './password-reset'
 import { ContactFormTemplate, CONTACT_FORM, isContactFormTemplateData } from './contact-form'
+import { ContactAutoReplyTemplate, CONTACT_AUTO_REPLY, isContactAutoReplyTemplateData } from './contact-auto-reply'
+import { PaymentFailedTemplate, PAYMENT_FAILED, isPaymentFailedTemplateData } from './payment-failed'
 
 export const EmailTemplates = {
   INVITE_USER,
@@ -19,6 +21,8 @@ export const EmailTemplates = {
   CUSTOMER_WELCOME,
   PASSWORD_RESET,
   CONTACT_FORM,
+  CONTACT_AUTO_REPLY,
+  PAYMENT_FAILED,
 } as const
 
 export type EmailTemplateType = keyof typeof EmailTemplates
@@ -73,6 +77,18 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <ContactFormTemplate {...data} />
 
+    case EmailTemplates.CONTACT_AUTO_REPLY:
+      if (!isContactAutoReplyTemplateData(data)) {
+        throw new MedusaError(MedusaError.Types.INVALID_DATA, `Invalid data for template "${EmailTemplates.CONTACT_AUTO_REPLY}"`)
+      }
+      return <ContactAutoReplyTemplate {...data} />
+
+    case EmailTemplates.PAYMENT_FAILED:
+      if (!isPaymentFailedTemplateData(data)) {
+        throw new MedusaError(MedusaError.Types.INVALID_DATA, `Invalid data for template "${EmailTemplates.PAYMENT_FAILED}"`)
+      }
+      return <PaymentFailedTemplate {...data} />
+
     default:
       throw new MedusaError(MedusaError.Types.INVALID_DATA, `Unknown template key: "${templateKey}"`)
   }
@@ -87,4 +103,6 @@ export {
   CustomerWelcomeTemplate,
   PasswordResetTemplate,
   ContactFormTemplate,
+  ContactAutoReplyTemplate,
+  PaymentFailedTemplate,
 }
