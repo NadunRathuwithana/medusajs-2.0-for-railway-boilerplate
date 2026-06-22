@@ -40,7 +40,7 @@ export const PaymentFailedTemplate: React.FC<PaymentFailedTemplateProps> & {
       <Hr style={{ borderColor: borderLight, margin: '0 0 32px' }} />
 
       <Section style={{ marginBottom: '32px' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', borderLeft: \`2px solid \${borderLight}\`, paddingLeft: '16px', display: 'block' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', borderLeft: `2px solid ${borderLight}`, paddingLeft: '16px', display: 'block' }}>
           <tbody>
             {orderTotal && (
               <tr>

@@ -24,7 +24,7 @@ export const ContactFormTemplate: React.FC<ContactFormTemplateProps> & {
   PreviewProps: ContactFormTemplateProps
 } = ({ referenceNumber, senderName, senderEmail, subject, message, submittedAt, preview }) => {
   return (
-    <Base preview={preview ?? \`New contact form message: \${referenceNumber}\`}>
+    <Base preview={preview ?? `New contact form message: ${referenceNumber}`}>
       <Section style={{ marginBottom: '32px' }}>
         <Text style={{
           fontSize: '14px',
@@ -77,7 +77,7 @@ export const ContactFormTemplate: React.FC<ContactFormTemplateProps> & {
           Message
         </Text>
         <Section style={{
-          borderLeft: \`2px solid \${borderLight}\`,
+          borderLeft: `2px solid ${borderLight}`,
           padding: '4px 0 4px 16px',
         }}>
           <Text style={{ fontSize: '14px', color: textPrimary, margin: '0', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>

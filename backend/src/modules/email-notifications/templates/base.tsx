@@ -27,7 +27,7 @@ export const Base: React.FC<BaseProps> = ({ preview, children }) => {
           maxWidth: '600px',
           margin: '0 auto',
           backgroundColor: bgLight,
-          border: \`1px solid \${borderLight}\`,
+          border: `1px solid ${borderLight}`,
         }}>
 
           {/* Header */}
@@ -56,7 +56,7 @@ export const Base: React.FC<BaseProps> = ({ preview, children }) => {
           <Section style={{
             backgroundColor: '#fafafa',
             padding: '30px 40px',
-            borderTop: \`1px solid \${borderLight}\`,
+            borderTop: `1px solid ${borderLight}`,
             textAlign: 'center',
           }}>
             <Text style={{ color: textSecondary, fontSize: '11px', margin: '0 0 8px', letterSpacing: '0.5px' }}>

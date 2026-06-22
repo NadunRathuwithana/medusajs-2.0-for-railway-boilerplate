@@ -54,7 +54,7 @@ export const OrderShippedTemplate: React.FC<OrderShippedTemplateProps> & {
           <Text style={{ fontSize: '12px', color: textSecondary, margin: '0 0 16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
             Tracking Details
           </Text>
-          <table style={{ width: '100%', borderCollapse: 'collapse', borderLeft: \`2px solid \${borderLight}\`, paddingLeft: '16px', display: 'block' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', borderLeft: `2px solid ${borderLight}`, paddingLeft: '16px', display: 'block' }}>
             <tbody>
               {carrierName && (
                 <tr>

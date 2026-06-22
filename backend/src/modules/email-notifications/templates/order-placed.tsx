@@ -20,7 +20,7 @@ export const isOrderPlacedTemplateData = (data: any): data is OrderPlacedTemplat
   typeof data.order === 'object' && typeof data.shippingAddress === 'object'
 
 const formatCurrency = (amount: number, currency: string) => {
-  return \`\${currency?.toUpperCase() ?? ''} \${(amount / 100).toFixed(2)}\`
+  return `${currency?.toUpperCase() ?? ''} ${(amount / 100).toFixed(2)}`
 }
 
 export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
@@ -80,7 +80,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
             display: 'flex',
             justifyContent: 'space-between',
             padding: '12px 0',
-            borderTop: \`1px solid \${borderLight}\`,
+            borderTop: `1px solid ${borderLight}`,
           }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <tbody>
@@ -113,8 +113,8 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
         </Text>
         <Text style={{ margin: '0', fontSize: '13px', color: textPrimary, lineHeight: '1.6' }}>
           {shippingAddress.first_name} {shippingAddress.last_name}<br />
-          {shippingAddress.address_1}{shippingAddress.address_2 ? \`, \${shippingAddress.address_2}\` : ''}<br />
-          {shippingAddress.city}{shippingAddress.province ? \`, \${shippingAddress.province}\` : ''} {shippingAddress.postal_code}<br />
+          {shippingAddress.address_1}{shippingAddress.address_2 ? `, ${shippingAddress.address_2}` : ''}<br />
+          {shippingAddress.city}{shippingAddress.province ? `, ${shippingAddress.province}` : ''} {shippingAddress.postal_code}<br />
           {shippingAddress.country_code?.toUpperCase()}
         </Text>
       </Section>
