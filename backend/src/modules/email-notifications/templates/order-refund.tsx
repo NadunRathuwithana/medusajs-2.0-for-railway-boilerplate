@@ -1,6 +1,6 @@
 import { Text, Section, Hr } from '@react-email/components'
 import * as React from 'react'
-import { Base, textDark, textMuted } from './base'
+import { Base, textPrimary, textSecondary, borderLight } from './base'
 
 export const ORDER_REFUND = 'order-refund'
 
@@ -17,55 +17,55 @@ export const isOrderRefundTemplateData = (data: any): data is OrderRefundTemplat
 
 export const OrderRefundTemplate: React.FC<OrderRefundTemplateProps> & {
   PreviewProps: OrderRefundTemplateProps
-} = ({ orderDisplayId, customerFirstName, refundAmount, refundReason, preview = '💳 Your refund has been processed' }) => {
+} = ({ orderDisplayId, customerFirstName, refundAmount, refundReason, preview = 'Your refund has been processed' }) => {
   return (
     <Base preview={preview}>
-      <Section style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <Text style={{ fontSize: '48px', margin: '0 0 12px' }}>💳</Text>
+      <Section style={{ marginBottom: '32px' }}>
         <Text style={{
-          fontSize: '26px',
-          fontWeight: '700',
-          color: textDark,
-          margin: '0 0 8px',
-          letterSpacing: '-0.5px',
+          fontSize: '16px',
+          fontWeight: '500',
+          color: textPrimary,
+          margin: '0 0 12px',
+          letterSpacing: '1px',
+          textTransform: 'uppercase',
         }}>
           Refund Processed
         </Text>
-        <Text style={{ color: textMuted, fontSize: '15px', margin: '0' }}>
-          Hi {customerFirstName}, your refund for order #{orderDisplayId} has been processed.
+        <Text style={{ color: textSecondary, fontSize: '13px', margin: '0', lineHeight: '1.6' }}>
+          Dear {customerFirstName}, your refund for order #{orderDisplayId} has been successfully processed.
         </Text>
       </Section>
 
-      {/* Refund Info */}
-      <Section style={{
-        backgroundColor: '#f0fdf4',
-        border: '1px solid #86efac',
-        borderRadius: '10px',
-        padding: '24px',
-        marginBottom: '28px',
-        textAlign: 'center',
-      }}>
-        <Text style={{ fontSize: '13px', color: '#16a34a', fontWeight: '600', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-          Refund Amount
+      <Hr style={{ borderColor: borderLight, margin: '0 0 32px' }} />
+
+      <Section style={{ marginBottom: '32px' }}>
+        <Text style={{ fontSize: '12px', color: textSecondary, margin: '0 0 16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          Refund Details
         </Text>
-        <Text style={{ fontSize: '36px', fontWeight: '700', color: '#15803d', margin: '0 0 12px' }}>
-          {refundAmount}
-        </Text>
-        {refundReason && (
-          <Text style={{ fontSize: '13px', color: textMuted, margin: '0' }}>
-            Reason: {refundReason}
-          </Text>
-        )}
+        <table style={{ width: '100%', borderCollapse: 'collapse', borderLeft: `2px solid ${borderLight}`, paddingLeft: '16px', display: 'block' }}>
+          <tbody>
+            <tr>
+              <td style={{ padding: '4px 0 4px 16px', color: textSecondary, fontSize: '12px', width: '120px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Amount</td>
+              <td style={{ padding: '4px 0', fontSize: '13px', color: textPrimary }}>{refundAmount}</td>
+            </tr>
+            {refundReason && (
+              <tr>
+                <td style={{ padding: '4px 0 4px 16px', color: textSecondary, fontSize: '12px', width: '120px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Reason</td>
+                <td style={{ padding: '4px 0', fontSize: '13px', color: textPrimary }}>{refundReason}</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </Section>
 
-      <Hr style={{ borderColor: '#e5e7eb', margin: '0 0 24px' }} />
+      <Hr style={{ borderColor: borderLight, margin: '32px 0 24px' }} />
 
       <Section>
-        <Text style={{ color: textMuted, fontSize: '14px', margin: '0 0 12px', lineHeight: '1.7' }}>
-          Your refund of <strong>{refundAmount}</strong> has been initiated. Please allow <strong>5-7 business days</strong> for the amount to appear in your account depending on your bank or payment provider.
+        <Text style={{ color: textSecondary, fontSize: '12px', margin: '0 0 12px', lineHeight: '1.6' }}>
+          Please allow 5-7 business days for the amount to appear in your account depending on your bank or payment provider.
         </Text>
-        <Text style={{ color: textMuted, fontSize: '14px', margin: '0' }}>
-          If you have any questions about this refund, please contact our support team with your order number <strong>#{orderDisplayId}</strong>.
+        <Text style={{ color: textSecondary, fontSize: '12px', margin: '0', lineHeight: '1.6' }}>
+          If you have any questions about this refund, please reply directly to this email.
         </Text>
       </Section>
     </Base>

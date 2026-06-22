@@ -1,6 +1,6 @@
 import { Text, Section, Button, Hr } from '@react-email/components'
 import * as React from 'react'
-import { Base, accentColor, textDark, textMuted } from './base'
+import { Base, textPrimary, textSecondary, borderLight } from './base'
 
 export const PASSWORD_RESET = 'password-reset'
 
@@ -16,62 +16,54 @@ export const isPasswordResetTemplateData = (data: any): data is PasswordResetTem
 
 export const PasswordResetTemplate: React.FC<PasswordResetTemplateProps> & {
   PreviewProps: PasswordResetTemplateProps
-} = ({ customerFirstName, resetLink, expiresInMinutes = 30, preview = '🔒 Reset your Theek.lk password' }) => {
+} = ({ customerFirstName, resetLink, expiresInMinutes = 30, preview = 'Reset your Cardle password' }) => {
   return (
     <Base preview={preview}>
-      <Section style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <Text style={{ fontSize: '48px', margin: '0 0 12px' }}>🔒</Text>
+      <Section style={{ marginBottom: '32px' }}>
         <Text style={{
-          fontSize: '26px',
-          fontWeight: '700',
-          color: textDark,
-          margin: '0 0 8px',
-          letterSpacing: '-0.5px',
+          fontSize: '16px',
+          fontWeight: '500',
+          color: textPrimary,
+          margin: '0 0 12px',
+          letterSpacing: '1px',
+          textTransform: 'uppercase',
         }}>
-          Reset Your Password
+          Password Reset
         </Text>
-        <Text style={{ color: textMuted, fontSize: '15px', margin: '0' }}>
-          Hi {customerFirstName}, we received a request to reset your password.
+        <Text style={{ color: textSecondary, fontSize: '13px', margin: '0', lineHeight: '1.6' }}>
+          Dear {customerFirstName}, we received a request to reset your password.
         </Text>
       </Section>
 
-      {/* Reset Box */}
-      <Section style={{
-        backgroundColor: '#fafbff',
-        border: '1px solid #e2e8f0',
-        borderRadius: '10px',
-        padding: '28px 24px',
-        marginBottom: '28px',
-        textAlign: 'center',
-      }}>
-        <Text style={{ color: textMuted, fontSize: '14px', margin: '0 0 20px', lineHeight: '1.7' }}>
-          Click the button below to set a new password. This link expires in <strong>{expiresInMinutes} minutes</strong>.
+      <Hr style={{ borderColor: borderLight, margin: '0 0 32px' }} />
+
+      <Section style={{ marginBottom: '32px' }}>
+        <Text style={{ color: textSecondary, fontSize: '12px', margin: '0 0 20px', lineHeight: '1.6' }}>
+          Click the button below to set a new password. For security reasons, this link will expire in {expiresInMinutes} minutes.
         </Text>
         <Button
           href={resetLink}
           style={{
-            backgroundColor: accentColor,
+            backgroundColor: textPrimary,
             color: '#ffffff',
-            padding: '14px 36px',
-            borderRadius: '8px',
-            fontWeight: '600',
-            fontSize: '15px',
+            padding: '12px 24px',
+            fontSize: '12px',
+            fontWeight: '500',
+            letterSpacing: '1px',
+            textTransform: 'uppercase',
             textDecoration: 'none',
             display: 'inline-block',
           }}
         >
-          Reset Password →
+          Reset Password
         </Button>
       </Section>
 
-      <Hr style={{ borderColor: '#e5e7eb', margin: '0 0 24px' }} />
+      <Hr style={{ borderColor: borderLight, margin: '32px 0 24px' }} />
 
       <Section>
-        <Text style={{ color: textMuted, fontSize: '13px', margin: '0 0 8px' }}>
+        <Text style={{ color: textSecondary, fontSize: '12px', margin: '0 0 8px', lineHeight: '1.6' }}>
           If you didn't request a password reset, you can safely ignore this email. Your password will not change.
-        </Text>
-        <Text style={{ color: textMuted, fontSize: '13px', margin: '0' }}>
-          For security reasons, this link will expire in {expiresInMinutes} minutes. If it has expired, please request a new reset.
         </Text>
       </Section>
     </Base>
@@ -80,7 +72,7 @@ export const PasswordResetTemplate: React.FC<PasswordResetTemplateProps> & {
 
 PasswordResetTemplate.PreviewProps = {
   customerFirstName: 'Nadun',
-  resetLink: 'https://theek.lk/account/reset?token=abc123',
+  resetLink: 'https://cardle.lk/account/reset?token=abc123',
   expiresInMinutes: 30,
 }
 
