@@ -100,7 +100,7 @@ ContactFormTemplate.PreviewProps = {
   senderName: 'John Customer',
   senderEmail: 'john@example.com',
   subject: 'Question about my order',
-  message: 'Hi, I placed an order 3 days ago but haven\\'t received a shipping confirmation yet. Could you please check the status of my order ORD-123?',
+  message: "Hi, I placed an order 3 days ago but haven't received a shipping confirmation yet. Could you please check the status of my order ORD-123?",
   submittedAt: new Date().toLocaleString(),
 }
 
