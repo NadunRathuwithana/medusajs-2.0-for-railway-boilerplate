@@ -7,43 +7,50 @@ export const metadata: Metadata = {
 
 export default function ReturnsPage() {
   return (
-    <div className="py-24 max-w-3xl mx-auto px-6">
-      <h1 className="text-4xl font-bold tracking-tight mb-4">Return & Exchange Policy</h1>
-      <p className="text-gray-500 mb-12">Last updated: {new Date().toLocaleDateString()}</p>
+    <div className="py-24 max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
+      <div className="mb-16 border-b border-gray-200 pb-8">
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">Returns & Exchange Policy</h1>
+        <p className="text-gray-500 text-lg">Last updated: {new Date().toLocaleDateString()}</p>
+      </div>
       
-      <div className="flex flex-col gap-8 text-gray-700 leading-relaxed">
+      <div className="flex flex-col gap-12 text-gray-700 leading-relaxed text-lg">
         <section>
-          <h2 className="text-2xl font-semibold text-bold mb-4">1. General Return Policy</h2>
-          <p>
-            We want you to be completely satisfied with your purchase. If you are not entirely happy with your order, we're here to help. Our standard return policy lasts 30 days from the date of delivery. If 30 days have passed since you received your purchase, unfortunately, we cannot offer you a refund or exchange.
+          <p className="mb-4">
+            You have 7 days after receiving an item to request an exchange. You have to inform us via email or over the phone within 24 hours after receiving the item to get an exchange.
           </p>
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold text-bold mb-4">2. Eligibility for Returns</h2>
+          <h2 className="text-2xl font-semibold text-bold mb-4">Option 01: Exchange through Courier</h2>
+          <p className="mb-4">
+            <span className="font-semibold">Step 01:</span> You can inform us through email at onlinesales@libera.lk or call us at 0777 993 883. Let us know your need to exchange your particular item.
+          </p>
+          <p className="mb-4">
+            <span className="font-semibold">Step 02:</span> After analyzing, our Exchange Team will get back to you stating the procedure where you have to send the package back through Registered Post or a Courier Service along with the following details.
+          </p>
+          <div className="bg-gray-50 p-6 rounded-lg mb-4">
+            <p className="mb-2"><span className="font-semibold">To</span> – Cardle Online Store<br />Maspotha, Kurunegala</p>
+            <p><span className="font-semibold">From</span> – (Your Details with the order number)</p>
+          </div>
+          <p className="mb-4">
+            Post it back to us within 2 working days with the original condition along with the price tags, Please Email/WhatsApp us the Courier/Postal receipt of your exchange package.
+          </p>
           <p>
-            To be eligible for a return, your item must be unused, unwashed, and in the exact same condition that you received it. It must also be in the original packaging with all tags still attached. Any items that show signs of wear, damage, or alteration will not be accepted for return.
+            <span className="font-semibold">Step 03:</span> Once we have received the package, one of our Sales Representatives will contact you and give you the specific instructions so you can simply redeem the exchange product value from your next order.
           </p>
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold text-bold mb-4">3. Exchanges</h2>
+          <h2 className="text-2xl font-semibold text-bold mb-4">Money Back Guarantee – Exchange Policy Terms & Conditions</h2>
+          <ul className="list-disc pl-6 space-y-2 mb-4">
+            <li>If the product is unsatisfactory, it must be reported within 24 hours of receipt via email or WhatsApp to the provided number.</li>
+            <li>The item must be handed over to the courier within 2 working days in its original condition, along with the price tags.</li>
+            <li>Once the goods are received and inspected, and if they are in their original condition, a full refund will be processed within 7 days of receipt.</li>
+            <li>You can inform us via email at onlinesales@libera.lk or call/WhatsApp us at 0777 993 883.</li>
+          </ul>
+          <p className="font-semibold mb-2">Please remember…</p>
           <p>
-            If you need to exchange a product for a different size or color, please return the original item for a refund and place a new order for the desired item. We only replace items free of charge if they are defective or damaged upon arrival. If you received a defective item, please contact our support team immediately.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold text-bold mb-4">4. Non-Returnable Items</h2>
-          <p>
-            Certain types of items cannot be returned for hygiene and safety reasons. This includes gift cards, final sale items, personalized products, and intimate apparel. Please check the product description carefully before making a purchase to see if the item is final sale.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold text-bold mb-4">5. How to Initiate a Return</h2>
-          <p>
-            To initiate a return or exchange, please contact our customer support team with your order number and the reason for the return. We will provide you with a return authorization and instructions on how and where to send your package. Please note that you will be responsible for the return shipping costs, unless the return is due to our error.
+            You can not make more than one exchange request simultaneously for the same order also the price tag should be intact.
           </p>
         </section>
       </div>

@@ -40,6 +40,8 @@ import {
   SMTP_SECURE,
   SMTP_FROM,
   SMTP_ADMIN_EMAIL,
+  RESEND_API_KEY,
+  RESEND_FROM_EMAIL,
 } from "lib/constants";
 
 loadEnv(process.env.NODE_ENV, process.cwd());
@@ -119,8 +121,9 @@ const medusaConfig = {
           },
         ]
       : []),
-    // Notification module via SMTP — only included when SMTP credentials are set
-    ...(SMTP_HOST && SMTP_USER && SMTP_PASS
+    // Notification module via Resend — only included when Resend credentials are set
+    // TODO: MUST change onboarding@resend.dev to a verified cardle.lk address (e.g. orders@cardle.lk) before going live with real customers!
+    ...(RESEND_API_KEY && RESEND_FROM_EMAIL
       ? [
           {
             key: Modules.NOTIFICATION,
@@ -129,16 +132,11 @@ const medusaConfig = {
               providers: [
                 {
                   resolve: "./src/modules/email-notifications",
-                  id: "smtp",
+                  id: "resend",
                   options: {
                     channels: ["email"],
-                    host: SMTP_HOST,
-                    port: SMTP_PORT,
-                    user: SMTP_USER,
-                    pass: SMTP_PASS,
-                    secure: SMTP_SECURE,
-                    from: SMTP_FROM || SMTP_USER,
-                    adminEmail: SMTP_ADMIN_EMAIL || SMTP_USER,
+                    api_key: RESEND_API_KEY,
+                    from: RESEND_FROM_EMAIL,
                   },
                 },
               ],
