@@ -18,31 +18,17 @@ export default async function CheckoutForm({
   }
 
   const shippingMethods = await listCartShippingMethods(cart.id)
+  // listCartPaymentMethods now always returns an array (never null).
+  // An empty array means the fetch failed or no providers are configured —
+  // the <Payment> component renders its own retry UI in that case.
   const paymentMethods = await listCartPaymentMethods(cart.region?.id ?? "")
 
-  if (!shippingMethods || !paymentMethods) {
-    return null
-  }
-
   return (
-    <div>
-      <div className="w-full grid grid-cols-1 gap-y-8">
-        <div>
-          <Addresses cart={cart} customer={customer} />
-        </div>
-
-        <div>
-          <Shipping cart={cart} availableShippingMethods={shippingMethods} />
-        </div>
-
-        <div>
-          <Payment cart={cart} availablePaymentMethods={paymentMethods} />
-        </div>
-
-        <div>
-          <Review cart={cart} />
-        </div>
-      </div>
+    <div className="flex flex-col">
+      <Addresses cart={cart} customer={customer} />
+      <Shipping cart={cart} availableShippingMethods={shippingMethods} />
+      <Payment cart={cart} availablePaymentMethods={paymentMethods ?? []} />
+      <Review cart={cart} />
     </div>
   )
 }

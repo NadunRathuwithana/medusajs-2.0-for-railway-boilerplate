@@ -6,13 +6,14 @@ import React from "react"
 import Radio from "@modules/common/components/radio"
 
 import PaymentTest from "../payment-test"
-import { isManual } from "@lib/constants"
+import { isManual, isKoko } from "@lib/constants"
 
 type PaymentContainerProps = {
   paymentProviderId: string
   selectedPaymentOptionId: string | null
   disabled?: boolean
   paymentInfoMap: Record<string, { title: string; icon: JSX.Element }>
+  cart?: any
 }
 
 const PaymentContainer: React.FC<PaymentContainerProps> = ({
@@ -20,8 +21,10 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
   selectedPaymentOptionId,
   paymentInfoMap,
   disabled = false,
+  cart,
 }) => {
   const isDevelopment = process.env.NODE_ENV === "development"
+  const isSelected = selectedPaymentOptionId === paymentProviderId
 
   return (
     <>
@@ -30,19 +33,21 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
         value={paymentProviderId}
         disabled={disabled}
         className={clx(
-          "flex flex-col gap-y-2 text-small-regular cursor-pointer py-4 border rounded-rounded px-8 mb-2 hover:shadow-borders-interactive-with-active",
+          "flex flex-col justify-center gap-y-2 cursor-pointer p-4 border rounded-2xl transition-colors hover:bg-gray-50 focus:outline-none focus:ring-0 min-h-[64px]",
           {
-            "border-ui-border-interactive":
-              selectedPaymentOptionId === paymentProviderId,
+            "border-black bg-gray-50": isSelected,
+            "border-gray-200 bg-white": !isSelected,
           }
         )}
       >
         <div className="flex items-center justify-between ">
           <div className="flex items-center gap-x-4">
-            <Radio checked={selectedPaymentOptionId === paymentProviderId} />
-            <Text className="text-base-regular">
-              {paymentInfoMap[paymentProviderId]?.title || paymentProviderId}
-            </Text>
+            <Radio checked={isSelected} />
+            <div className="flex flex-col">
+              <span className="text-[15px] font-medium text-gray-900">
+                {paymentInfoMap[paymentProviderId]?.title || paymentProviderId}
+              </span>
+            </div>
             {isManual(paymentProviderId) && isDevelopment && (
               <PaymentTest className="hidden small:block" />
             )}

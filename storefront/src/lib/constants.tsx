@@ -4,6 +4,7 @@ import { CreditCard } from "@medusajs/icons"
 import Ideal from "@modules/common/icons/ideal"
 import Bancontact from "@modules/common/icons/bancontact"
 import PayPal from "@modules/common/icons/paypal"
+import { Truck } from "lucide-react"
 
 /* Map of payment provider_id to their title and icon. Add in any payment providers you want to use. */
 export const paymentInfoMap: Record<
@@ -27,16 +28,16 @@ export const paymentInfoMap: Record<
     icon: <PayPal />,
   },
   pp_system_default: {
-    title: "Manual Payment",
-    icon: <CreditCard />,
+    title: "Cash on delivery",
+    icon: <Truck className="w-5 h-5 text-gray-500" strokeWidth={1.5} />,
   },
   pp_onepay_onepay: {
-    title: "OnePay",
-    icon: <CreditCard />,
+    title: "Credit/ Debit Card",
+    icon: <img src="/payment/visa_master.png" alt="Credit/ Debit Card" className="h-6 object-contain" />,
   },
   pp_koko_koko: {
-    title: "Koko (3 Instalments)",
-    icon: <CreditCard />,
+    title: "Koko: Buy Now Pay Later",
+    icon: <img src="/payment/koko.png" alt="Koko Pay" className="h-6 object-contain" />,
   },
   // Add more payment providers here
 }

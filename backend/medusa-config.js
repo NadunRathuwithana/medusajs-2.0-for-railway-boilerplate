@@ -7,10 +7,6 @@ import {
   DATABASE_URL,
   JWT_SECRET,
   REDIS_URL,
-  RESEND_API_KEY,
-  RESEND_FROM_EMAIL,
-  SENDGRID_API_KEY,
-  SENDGRID_FROM_EMAIL,
   SHOULD_DISABLE_ADMIN,
   STORE_CORS,
   STRIPE_API_KEY,
@@ -21,12 +17,15 @@ import {
   ONEPAY_BASE_URL,
   ONEPAY_REDIRECT_URL,
   KOKO_API_KEY,
-  KOKO_API_SECRET,
   KOKO_MERCHANT_ID,
   KOKO_BASE_URL,
-  KOKO_WEBHOOK_SECRET,
-  KOKO_SUCCESS_URL,
+  KOKO_PRIVATE_KEY,
+  KOKO_PUBLIC_KEY,
+  KOKO_PLUGIN_NAME,
+  KOKO_PLUGIN_VERSION,
+  KOKO_RETURN_URL,
   KOKO_CANCEL_URL,
+  KOKO_RESPONSE_URL,
   WORKER_MODE,
   MINIO_ENDPOINT,
   MINIO_ACCESS_KEY,
@@ -34,6 +33,15 @@ import {
   MINIO_BUCKET,
   MEILISEARCH_HOST,
   MEILISEARCH_ADMIN_KEY,
+  SMTP_HOST,
+  SMTP_PORT,
+  SMTP_USER,
+  SMTP_PASS,
+  SMTP_SECURE,
+  SMTP_FROM,
+  SMTP_ADMIN_EMAIL,
+  RESEND_API_KEY,
+  RESEND_FROM_EMAIL,
 } from "lib/constants";
 
 loadEnv(process.env.NODE_ENV, process.cwd());
@@ -113,40 +121,24 @@ const medusaConfig = {
           },
         ]
       : []),
-    ...((SENDGRID_API_KEY && SENDGRID_FROM_EMAIL) ||
-    (RESEND_API_KEY && RESEND_FROM_EMAIL)
+    // Notification module via Resend — only included when Resend credentials are set
+    // TODO: MUST change onboarding@resend.dev to a verified cardle.lk address (e.g. orders@cardle.lk) before going live with real customers!
+    ...(RESEND_API_KEY && RESEND_FROM_EMAIL
       ? [
           {
             key: Modules.NOTIFICATION,
             resolve: "@medusajs/notification",
             options: {
               providers: [
-                ...(SENDGRID_API_KEY && SENDGRID_FROM_EMAIL
-                  ? [
-                      {
-                        resolve: "@medusajs/notification-sendgrid",
-                        id: "sendgrid",
-                        options: {
-                          channels: ["email"],
-                          api_key: SENDGRID_API_KEY,
-                          from: SENDGRID_FROM_EMAIL,
-                        },
-                      },
-                    ]
-                  : []),
-                ...(RESEND_API_KEY && RESEND_FROM_EMAIL
-                  ? [
-                      {
-                        resolve: "./src/modules/email-notifications",
-                        id: "resend",
-                        options: {
-                          channels: ["email"],
-                          api_key: RESEND_API_KEY,
-                          from: RESEND_FROM_EMAIL,
-                        },
-                      },
-                    ]
-                  : []),
+                {
+                  resolve: "./src/modules/email-notifications",
+                  id: "resend",
+                  options: {
+                    channels: ["email"],
+                    api_key: RESEND_API_KEY,
+                    from: RESEND_FROM_EMAIL,
+                  },
+                },
               ],
             },
           },
@@ -181,18 +173,21 @@ const medusaConfig = {
         });
       }
 
-      if (KOKO_API_KEY && KOKO_API_SECRET && KOKO_MERCHANT_ID) {
+      if (KOKO_API_KEY && KOKO_PRIVATE_KEY && KOKO_MERCHANT_ID) {
         paymentProviders.push({
           resolve: "./src/modules/koko-payment",
           id: "koko",
           options: {
-            apiKey: KOKO_API_KEY,
-            apiSecret: KOKO_API_SECRET,
-            merchantId: KOKO_MERCHANT_ID,
             baseUrl: KOKO_BASE_URL,
-            webhookSecret: KOKO_WEBHOOK_SECRET,
-            successUrl: KOKO_SUCCESS_URL,
+            merchantId: KOKO_MERCHANT_ID,
+            apiKey: KOKO_API_KEY,
+            privateKey: KOKO_PRIVATE_KEY,
+            kokoPublicKey: KOKO_PUBLIC_KEY,
+            pluginName: KOKO_PLUGIN_NAME,
+            pluginVersion: KOKO_PLUGIN_VERSION,
+            returnUrl: KOKO_RETURN_URL,
             cancelUrl: KOKO_CANCEL_URL,
+            responseUrl: KOKO_RESPONSE_URL,
           },
         });
       }

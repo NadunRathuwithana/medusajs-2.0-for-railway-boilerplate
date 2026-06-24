@@ -105,23 +105,29 @@ export const ONEPAY_BASE_URL =
 export const ONEPAY_REDIRECT_URL = process.env.ONEPAY_REDIRECT_URL;
 
 /**
- * (optional) Koko Payment Gateway credentials
- * KOKO_API_KEY      — Merchant API Key
- * KOKO_API_SECRET   — Merchant API Secret for HMAC signature
- * KOKO_MERCHANT_ID  — Merchant ID
- * KOKO_BASE_URL     — API Base URL (defaults to sandbox)
- * KOKO_WEBHOOK_SECRET — Secret for webhook signature validation
- * KOKO_SUCCESS_URL  — URL to redirect customer back after payment
- * KOKO_CANCEL_URL   — URL to redirect customer back if payment is cancelled
+ * (optional) Koko Payment Gateway credentials (v1.05 — RSA form-POST API)
+ * KOKO_API_KEY         — Merchant API Key
+ * KOKO_MERCHANT_ID     — Merchant ID (_mId)
+ * KOKO_BASE_URL        — API Base URL (QA: qaapi.paykoko.com, Prod: prodapi.paykoko.com)
+ * KOKO_PRIVATE_KEY     — PEM RSA private key used to SIGN order requests
+ * KOKO_PUBLIC_KEY      — PEM RSA public key from Koko, used to VERIFY webhook signatures
+ * KOKO_PLUGIN_NAME     — Plugin identifier (e.g. cardle-medusa)
+ * KOKO_PLUGIN_VERSION  — Plugin version (e.g. 1.0.0)
+ * KOKO_RETURN_URL      — Browser redirect after successful payment
+ * KOKO_CANCEL_URL      — Browser redirect if customer cancels
+ * KOKO_RESPONSE_URL    — Server-to-server webhook URL Koko POSTs on payment completion
  */
 export const KOKO_API_KEY = process.env.KOKO_API_KEY;
-export const KOKO_API_SECRET = process.env.KOKO_API_SECRET;
 export const KOKO_MERCHANT_ID = process.env.KOKO_MERCHANT_ID;
 export const KOKO_BASE_URL =
-  process.env.KOKO_BASE_URL || "https://api-sandbox.paykoko.com";
-export const KOKO_WEBHOOK_SECRET = process.env.KOKO_WEBHOOK_SECRET;
-export const KOKO_SUCCESS_URL = process.env.KOKO_SUCCESS_URL;
+  process.env.KOKO_BASE_URL || "https://qaapi.paykoko.com";
+export const KOKO_PRIVATE_KEY = process.env.KOKO_PRIVATE_KEY;
+export const KOKO_PUBLIC_KEY = process.env.KOKO_PUBLIC_KEY;
+export const KOKO_PLUGIN_NAME = process.env.KOKO_PLUGIN_NAME || "cardle-medusa";
+export const KOKO_PLUGIN_VERSION = process.env.KOKO_PLUGIN_VERSION || "1.0.0";
+export const KOKO_RETURN_URL = process.env.KOKO_RETURN_URL;
 export const KOKO_CANCEL_URL = process.env.KOKO_CANCEL_URL;
+export const KOKO_RESPONSE_URL = process.env.KOKO_RESPONSE_URL;
 
 /**
  * (optional) Meilisearch configuration
@@ -143,3 +149,21 @@ export const WORKER_MODE =
  * Disable Admin
  */
 export const SHOULD_DISABLE_ADMIN = process.env.MEDUSA_DISABLE_ADMIN === "true";
+
+/**
+ * (optional) SMTP Email Configuration
+ * SMTP_HOST     — SMTP server hostname (e.g. smtp.gmail.com)
+ * SMTP_PORT     — SMTP port (465 for SSL, 587 for TLS)
+ * SMTP_USER     — SMTP login username/email
+ * SMTP_PASS     — SMTP login password or app password
+ * SMTP_SECURE   — Use SSL/TLS (true for port 465)
+ * SMTP_FROM     — Sender display address (defaults to SMTP_USER)
+ * SMTP_ADMIN_EMAIL — Store admin email to receive contact form submissions
+ */
+export const SMTP_HOST = process.env.SMTP_HOST;
+export const SMTP_PORT = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 465;
+export const SMTP_USER = process.env.SMTP_USER;
+export const SMTP_PASS = process.env.SMTP_PASS;
+export const SMTP_SECURE = process.env.SMTP_PORT === '465' || process.env.SMTP_SECURE?.toLowerCase() === 'true' || process.env.SMTP_SECURE === '1';
+export const SMTP_FROM = process.env.SMTP_FROM || process.env.SMTP_USER;
+export const SMTP_ADMIN_EMAIL = process.env.SMTP_ADMIN_EMAIL || process.env.SMTP_USER;

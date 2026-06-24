@@ -9,7 +9,7 @@ export default function FAQPage() {
   const faqs = [
     {
       question: "Do you ship internationally?",
-      answer: "Currently, we only ship within Sri Lanka through our website. For international orders, please contact our support team at support@cardle.com to arrange a custom shipping quote."
+      answer: "Currently, we only ship within Sri Lanka through our website. For international orders, please contact our support team at support@cardle.lk to arrange a custom shipping quote."
     },
     {
       question: "How long does shipping take?",
@@ -46,7 +46,7 @@ export default function FAQPage() {
       <div className="mt-20 text-center p-8 bg-[#0c0c0c] text-white rounded-3xl">
         <h3 className="text-xl font-bold mb-4">Still have questions?</h3>
         <p className="text-gray-400 mb-6 text-sm">Our customer care team is available 24/7 to assist you.</p>
-        <a href="/contact" className="inline-block bg-white text-bold px-8 py-3 rounded-full text-xs font-bold capitalize tracking-wider hover:bg-gray-200 transition-colors">
+        <a href="/contact" className="inline-block bg-white text-black px-8 py-3 rounded-full text-sm font-bold tracking-wide hover:bg-gray-200 transition-colors">
           Contact Support
         </a>
       </div>

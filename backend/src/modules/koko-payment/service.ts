@@ -24,8 +24,18 @@ import type {
   WebhookActionResult,
   Logger,
 } from "@medusajs/framework/types"
-import crypto from "crypto"
-import type { KokoOptions, KokoOrderResponse, KokoWebhookPayload } from "./types"
+import {
+  buildOrderCreateDataString,
+  buildOrderViewDataString,
+  signDataString,
+  verifySignature,
+} from "./signature"
+import type {
+  KokoOptions,
+  KokoOrderCreateFields,
+  KokoOrderViewResponse,
+  KokoResponseWebhookFields,
+} from "./types"
 
 type InjectedDependencies = {
   logger: Logger
@@ -33,6 +43,10 @@ type InjectedDependencies = {
 
 class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
   static identifier = "koko"
+
+  // In-memory cache to bridge the race condition between webhook and authorizePayment.
+  // Stores verified statuses so we don't need to re-poll orderView immediately.
+  private static webhookCache = new Map<string, { status: string, timestamp: number }>()
 
   protected logger_: Logger
   protected options_: KokoOptions
@@ -42,10 +56,9 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
     this.logger_ = container.logger
     this.options_ = options
 
-    // Validate required options on startup
     const required: (keyof KokoOptions)[] = [
-      "apiKey", "apiSecret", "merchantId", "baseUrl",
-      "webhookSecret", "successUrl", "cancelUrl",
+      "baseUrl", "merchantId", "apiKey", "privateKey", "kokoPublicKey",
+      "pluginName", "pluginVersion", "returnUrl", "cancelUrl", "responseUrl",
     ]
     for (const key of required) {
       if (!options[key]) {
@@ -57,138 +70,145 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
     }
   }
 
+
   // ─────────────────────────────────────────────
-  // PRIVATE HELPERS
+  // OPTIONAL: Account holder (not supported by Koko)
   // ─────────────────────────────────────────────
 
-  /** Build HMAC-SHA256 signature for Koko API requests */
-  private buildSignature(body: object): string {
-    const payload = JSON.stringify(body)
-    return crypto
-      .createHmac("sha256", this.options_.apiSecret)
-      .update(payload)
-      .digest("hex")
-  }
-
-  /** Make an authenticated request to Koko API */
-  private async kokoRequest<T>(
-    method: "POST" | "GET",
-    path: string,
-    body?: object
-  ): Promise<T> {
-    const url = `${this.options_.baseUrl}${path}`
-    const signature = body ? this.buildSignature(body) : ""
-
-    const res = await fetch(url, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        "X-Merchant-ID": this.options_.merchantId,
-        "X-API-Key": this.options_.apiKey,
-        "X-Signature": signature,
-      },
-      body: body ? JSON.stringify(body) : undefined,
-    })
-
-    if (!res.ok) {
-      const error = await res.text()
-      this.logger_.error(`Koko API error [${res.status}]: ${error}`)
-      throw new MedusaError(
-        MedusaError.Types.UNEXPECTED_STATE,
-        `Koko API error: ${error}`
-      )
-    }
-
-    return res.json() as Promise<T>
+  /**
+   * Koko is a form-POST provider with no server-side customer accounts.
+   * Implementing a no-op silences Medusa's "does not support creating account
+   * holders" warning without affecting the payment flow.
+   */
+  async createAccountHolder(): Promise<void> {
+    // no-op
   }
 
   // ─────────────────────────────────────────────
   // REQUIRED ABSTRACT METHODS
   // ─────────────────────────────────────────────
 
+
   /**
-   * initiatePayment — called when a customer selects Koko at checkout.
-   * We create an order on Koko's side and store the redirect URL in session data.
+   * initiatePayment — builds the signed form fields for Koko's orderCreate.
+   *
+   * IMPORTANT: Koko's flow is a browser FORM POST, not a server-to-server call.
+   * We build and sign the fields here (private key never leaves the server),
+   * then return them so the storefront can render + auto-submit the hidden form.
    */
   async initiatePayment(
     input: InitiatePaymentInput
   ): Promise<InitiatePaymentOutput> {
     const { amount, currency_code, context } = input
 
-    // Build a unique merchant reference from the cart/session
-    const merchantReference = `order-${(context as any).session_id ?? Date.now()}`
+    // Medusa stores amounts in smallest unit (cents) — Koko wants "300.00" format
+    const kokoAmount = (Number(amount) / 100).toFixed(2)
+    const currency = currency_code.toUpperCase()
 
-    const requestBody = {
-      merchant_reference: merchantReference,
-      amount: Math.round(Number(amount)),       // in cents/smallest unit
-      currency: currency_code.toUpperCase(),
-      success_url: this.options_.successUrl,
-      cancel_url: this.options_.cancelUrl,
-      // Optional: pass customer info if available
-      customer: (context as any).customer
-        ? {
-            email: ((context as any).customer as any).email,
-            first_name: ((context as any).customer as any).first_name,
-            last_name: ((context as any).customer as any).last_name,
-          }
-        : undefined,
+    // In Medusa v2, the PaymentSession ID is passed in input.data.session_id
+    const sessionId = (input.data as any)?.session_id ?? (context as any).session_id ?? "sess"
+
+    // _orderId MUST be unique per request per Koko's docs.
+    // The Medusa PaymentSession ID is already unique, so we can use it directly.
+    const orderId = sessionId
+    const reference = orderId
+
+    const firstName = (context as any).customer?.first_name ?? "Customer"
+    const lastName = (context as any).customer?.last_name ?? ""
+    const email = (context as any).customer?.email ?? ""
+    const mobile = (context as any).customer?.phone ?? ""
+    const description = "Cardle order"
+
+    const dataString = buildOrderCreateDataString({
+      mId: this.options_.merchantId,
+      amount: kokoAmount,
+      currency,
+      pluginName: this.options_.pluginName,
+      pluginVersion: this.options_.pluginVersion,
+      returnUrl: this.options_.returnUrl,
+      cancelUrl: this.options_.cancelUrl,
+      orderId,
+      reference,
+      firstName,
+      lastName,
+      email,
+      description,
+      apiKey: this.options_.apiKey,
+      responseUrl: this.options_.responseUrl,
+    })
+
+    const signature = signDataString(dataString, this.options_.privateKey)
+
+    const formFields: KokoOrderCreateFields = {
+      _mId: this.options_.merchantId,
+      api_key: this.options_.apiKey,
+      _returnUrl: this.options_.returnUrl,
+      _cancelUrl: this.options_.cancelUrl,
+      _responseUrl: this.options_.responseUrl,
+      _amount: kokoAmount,
+      _currency: currency,
+      _reference: reference,
+      _orderId: orderId,
+      _pluginName: this.options_.pluginName,
+      _pluginVersion: this.options_.pluginVersion,
+      _description: description,
+      _firstName: firstName,
+      _lastName: lastName,
+      _email: email,
+      _mobileNo: mobile || undefined,
+      dataString,
+      signature,
     }
 
-    this.logger_.info(`Koko: initiating payment for ${merchantReference}`)
-    console.log("---- KOKO PAYMENT API INITIATE ----")
-    console.log("Request Body:", JSON.stringify(requestBody, null, 2))
-
-    const kokoOrder = await this.kokoRequest<KokoOrderResponse>(
-      "POST",
-      "/v1/orders",
-      requestBody
-    )
+    this.logger_.info(`Koko: built signed order form for orderId=${orderId}`)
 
     return {
-      id: kokoOrder.order_id,
+      id: orderId,
       data: {
-        koko_order_id: kokoOrder.order_id,
-        redirect_url: kokoOrder.redirect_url,
-        merchant_reference: merchantReference,
-        status: "pending",
+        koko_order_id: orderId,
+        koko_form_action: `${this.options_.baseUrl}/api/merchants/orderCreate`,
+        koko_form_fields: formFields,
+        koko_status: "pending",
       },
     }
   }
 
   /**
-   * authorizePayment — called when the customer returns from Koko checkout.
-   * At this point Koko should have already sent a webhook (handled below),
-   * but we also verify the payment status directly.
+   * authorizePayment — called when customer returns from Koko via _returnUrl.
+   * We don't fully trust the redirect params alone — confirm with orderView.
    */
   async authorizePayment(
     input: AuthorizePaymentInput
   ): Promise<AuthorizePaymentOutput> {
-    const kokoOrderId = input.data?.koko_order_id as string | undefined
+    const orderId = input.data?.koko_order_id as string | undefined
 
-    if (!kokoOrderId) {
-      return { data: input.data ?? {}, status: "error" }
+    if (!orderId) {
+      return { data: input.data ?? {}, status: "pending" }
     }
 
     try {
-      const order = await this.kokoRequest<{
-        status: string
-        order_id: string
-      }>("GET", `/v1/orders/${kokoOrderId}`)
-
-      // Map Koko status → Medusa payment status
-      const statusMap: Record<string, "authorized" | "pending" | "error"> = {
-        completed: "authorized",
-        approved: "authorized",
-        pending: "pending",
-        failed: "error",
-        cancelled: "error",
+      // 1. Check if the webhook already verified this payment
+      const cached = KokoPaymentService.webhookCache.get(orderId)
+      if (cached && cached.status === "SUCCESS") {
+        this.logger_.info(`Koko authorizePayment: trusted webhook-verified SUCCESS for order ${orderId}`)
+        return {
+          data: { ...input.data, koko_status: "SUCCESS" },
+          status: "authorized",
+        }
       }
 
-      const status = statusMap[order.status] ?? "pending"
+      // 2. Fallback to polling the orderView API
+      const orderView = await this.callOrderView(orderId)
+
+      const statusMap: Record<string, "authorized" | "pending" | "error"> = {
+        SUCCESS: "authorized",
+        PENDING: "pending",
+        FAILED: "error",
+      }
 
       return {
-        data: { ...input.data, koko_status: order.status },
-        status,
+        data: { ...input.data, koko_trn_id: orderView.trnId, koko_status: orderView.status },
+        status: statusMap[orderView.status] ?? "pending",
       }
     } catch (e: any) {
       this.logger_.error(`Koko authorizePayment error: ${e.message}`)
@@ -197,78 +217,49 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
   }
 
   /**
-   * capturePayment — Koko BNPL captures automatically on payment.completed webhook.
-   * If you need manual capture, call Koko's capture endpoint here.
+   * capturePayment — Koko auto-captures on successful payment; no-op here.
    */
   async capturePayment(
     input: CapturePaymentInput
   ): Promise<CapturePaymentOutput> {
-    const kokoOrderId = input.data?.koko_order_id as string | undefined
-
-    // If Koko auto-captures on approval, this is a no-op.
-    // If Koko supports manual capture, call: POST /v1/orders/:id/capture
-    this.logger_.info(`Koko: capturing payment for order ${kokoOrderId}`)
-
     return {
-      data: {
-        ...input.data,
-        captured_at: new Date().toISOString(),
-      },
+      data: { ...input.data, captured_at: new Date().toISOString() },
     }
   }
 
   /**
-   * refundPayment — initiate a refund via Koko API.
+   * refundPayment — Koko's developer preview docs do not expose a refund
+   * endpoint. Flag for manual processing via Koko merchant support.
    */
   async refundPayment(
     input: RefundPaymentInput
   ): Promise<RefundPaymentOutput> {
-    const kokoOrderId = input.data?.koko_order_id as string | undefined
-
-    if (!kokoOrderId) {
-      throw new MedusaError(
-        MedusaError.Types.INVALID_DATA,
-        "Koko: missing koko_order_id for refund"
-      )
-    }
-
-    await this.kokoRequest("POST", `/v1/orders/${kokoOrderId}/refund`, {
-      amount: input.amount,
-      reason: "Customer requested refund",
-    })
-
+    this.logger_.warn(
+      `Koko: refund requested for order ${input.data?.koko_order_id} — ` +
+      `amount ${input.amount}. No refund API in current docs — contact Koko support.`
+    )
     return {
       data: {
         ...input.data,
-        refunded_at: new Date().toISOString(),
+        refund_pending_manual: true,
+        refund_requested_at: new Date().toISOString(),
         refund_amount: input.amount,
       },
     }
   }
 
   /**
-   * cancelPayment — cancel an order before capture.
+   * cancelPayment — no cancel API exposed; mark locally.
+   * The customer's own _cancelUrl flow handles cancellation on Koko's side.
    */
   async cancelPayment(
     input: CancelPaymentInput
   ): Promise<CancelPaymentOutput> {
-    const kokoOrderId = input.data?.koko_order_id as string | undefined
-
-    if (kokoOrderId) {
-      try {
-        await this.kokoRequest("POST", `/v1/orders/${kokoOrderId}/cancel`, {})
-      } catch (e: any) {
-        // Log but don't throw — Medusa still needs to cancel locally
-        this.logger_.warn(`Koko: cancel failed for ${kokoOrderId}: ${e.message}`)
-      }
+    return {
+      data: { ...input.data, cancelled_at: new Date().toISOString() },
     }
-
-    return { data: { ...input.data, cancelled_at: new Date().toISOString() } }
   }
 
-  /**
-   * deletePayment — called when customer switches payment methods.
-   */
   async deletePayment(
     input: DeletePaymentInput
   ): Promise<DeletePaymentOutput> {
@@ -276,122 +267,155 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
   }
 
   /**
-   * getPaymentStatus — poll current status from Koko.
+   * getPaymentStatus — poll Koko's orderView API.
    */
   async getPaymentStatus(
     input: GetPaymentStatusInput
   ): Promise<GetPaymentStatusOutput> {
-    const kokoOrderId = input.data?.koko_order_id as string | undefined
+    const orderId = input.data?.koko_order_id as string | undefined
+    if (!orderId) return { status: "pending" }
 
-    if (!kokoOrderId) {
-      return { status: "pending" }
+    try {
+      const orderView = await this.callOrderView(orderId)
+      const statusMap: Record<string, GetPaymentStatusOutput["status"]> = {
+        SUCCESS: "captured",
+        PENDING: "pending",
+        FAILED: "error",
+      }
+      return { status: statusMap[orderView.status] ?? "pending" }
+    } catch (e: any) {
+      this.logger_.error(`Koko getPaymentStatus error: ${e.message}`)
+      return { status: "error" }
     }
-
-    const order = await this.kokoRequest<{ status: string }>(
-      "GET",
-      `/v1/orders/${kokoOrderId}`
-    )
-
-    const statusMap: Record<string, GetPaymentStatusOutput["status"]> = {
-      completed: "captured",
-      approved: "authorized",
-      pending: "pending",
-      failed: "error",
-      cancelled: "canceled",
-    }
-
-    return { status: statusMap[order.status] ?? "pending" }
   }
 
   /**
-   * updatePayment — if the cart amount changes, re-create the Koko order.
+   * updatePayment — cart amount changed; build a fresh signed form
+   * (Koko requires a unique _orderId per request anyway).
    */
   async updatePayment(
     input: UpdatePaymentInput
   ): Promise<UpdatePaymentOutput> {
-    // Cancel old Koko order and initiate a new one with updated amount
-    const oldKokoId = input.data?.koko_order_id as string | undefined
-    if (oldKokoId) {
-      try {
-        await this.kokoRequest("POST", `/v1/orders/${oldKokoId}/cancel`, {})
-      } catch (_) {
-        // Ignore if already cancelled
-      }
-    }
-
     return this.initiatePayment(input)
   }
 
-  /**
-   * retrievePayment — fetch order details from Koko.
-   */
   async retrievePayment(
     input: RetrievePaymentInput
   ): Promise<RetrievePaymentOutput> {
-    const kokoOrderId = input.data?.koko_order_id as string | undefined
+    const orderId = input.data?.koko_order_id as string | undefined
+    if (!orderId) return { data: input.data ?? {} }
 
-    if (!kokoOrderId) {
+    try {
+      const orderView = await this.callOrderView(orderId)
+      return { data: { ...input.data, koko_order_view: orderView } }
+    } catch (_) {
       return { data: input.data ?? {} }
     }
-
-    const order = await this.kokoRequest<object>(
-      "GET",
-      `/v1/orders/${kokoOrderId}`
-    )
-
-    return { data: { ...input.data, koko_order: order } }
   }
 
   /**
-   * getWebhookActionAndData — parse incoming Koko webhook events.
-   * This is called by your custom webhook route (see Step 3).
+   * getWebhookActionAndData — handle Koko's _responseUrl server callback.
+   *
+   * IMPORTANT per Koko docs: the `signature` field here is Koko's own
+   * RSA-encrypted confirmation, built from:
+   *   orderId + trnId + status
+   * and signed with KOKO's private key. We verify it using KOKO's PUBLIC
+   * key (the one they emailed you) — NOT our own private key.
    */
   async getWebhookActionAndData(data: {
     data: Record<string, unknown>
     rawData: string | Buffer
     headers: Record<string, unknown>
   }): Promise<WebhookActionResult> {
-    const { rawData, headers, data: payload } = data
+    const payload = data.data as unknown as KokoResponseWebhookFields
 
-    // ── Verify webhook signature ──
-    const receivedSig = headers["x-koko-signature"] as string | undefined
-    if (receivedSig && this.options_.webhookSecret) {
-      const expectedSig = crypto
-        .createHmac("sha256", this.options_.webhookSecret)
-        .update(typeof rawData === "string" ? rawData : rawData.toString("utf-8"))
-        .digest("hex")
+    const expectedDataString = `${payload.orderId}${payload.trnId}${payload.status}`
 
-      if (receivedSig !== expectedSig) {
-        this.logger_.warn("Koko: webhook signature mismatch — ignoring")
-        return { action: "not_supported" }
+    const isValid = verifySignature(
+      expectedDataString,
+      payload.signature,
+      this.options_.kokoPublicKey
+    )
+
+    if (!isValid) {
+      this.logger_.warn(
+        `Koko webhook: signature verification FAILED for order ${payload.orderId} — ignoring`
+      )
+      return { action: "not_supported" }
+    }
+
+    this.logger_.info(`Koko webhook verified: ${payload.status} for order ${payload.orderId}`)
+
+    // The orderId is exactly the Medusa PaymentSession ID
+    const medusaSessionId = payload.orderId
+
+    if (payload.status === "SUCCESS") {
+      // Store the verified status in our cache so authorizePayment can use it
+      KokoPaymentService.webhookCache.set(medusaSessionId, { status: "SUCCESS", timestamp: Date.now() })
+
+      // Cleanup old entries to prevent memory leaks (keep last 1 hour)
+      const oneHourAgo = Date.now() - 3600000
+      for (const [key, value] of KokoPaymentService.webhookCache.entries()) {
+        if (value.timestamp < oneHourAgo) KokoPaymentService.webhookCache.delete(key)
+      }
+
+      return {
+        action: "captured",
+        data: {
+          session_id: medusaSessionId,
+          amount: 0,
+        },
       }
     }
 
-    const event = payload as unknown as KokoWebhookPayload
-
-    this.logger_.info(`Koko webhook: ${event.event} for order ${event.order_id}`)
-
-    switch (event.event) {
-      case "payment.completed":
-        return {
-          action: "captured",
-          data: {
-            session_id: event.merchant_reference,
-            amount: event.amount,
-          },
-        }
-      case "payment.failed":
-      case "payment.cancelled":
-        return {
-          action: "failed",
-          data: {
-            session_id: event.merchant_reference,
-            amount: event.amount,
-          },
-        }
-      default:
-        return { action: "not_supported" }
+    return {
+      action: "failed",
+      data: {
+        session_id: medusaSessionId,
+        amount: 0,
+      },
     }
+  }
+
+  // ─────────────────────────────────────────────
+  // PRIVATE: Order View API call
+  // ─────────────────────────────────────────────
+
+  private async callOrderView(orderId: string): Promise<KokoOrderViewResponse> {
+    const dataString = buildOrderViewDataString({
+      mId: this.options_.merchantId,
+      pluginName: this.options_.pluginName,
+      pluginVersion: this.options_.pluginVersion,
+      orderId,
+      apiKey: this.options_.apiKey,
+    })
+
+    const signature = signDataString(dataString, this.options_.privateKey)
+
+    const body = new URLSearchParams({
+      _mId: this.options_.merchantId,
+      _pluginName: this.options_.pluginName,
+      _pluginVersion: this.options_.pluginVersion,
+      api_key: this.options_.apiKey,
+      _orderId: orderId,
+      signature,
+    })
+
+    const res = await fetch(`${this.options_.baseUrl}/api/merchants/orderView`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: body.toString(),
+    })
+
+    if (!res.ok) {
+      const errText = await res.text()
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        `Koko orderView failed [${res.status}]: ${errText}`
+      )
+    }
+
+    return res.json() as Promise<KokoOrderViewResponse>
   }
 }
 

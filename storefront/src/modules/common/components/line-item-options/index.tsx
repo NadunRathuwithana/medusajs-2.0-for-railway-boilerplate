@@ -20,7 +20,7 @@ const LineItemOptions = ({
       data-value={dataValue}
       className={clx("inline-block txt-medium text-ui-fg-subtle w-full overflow-hidden text-ellipsis", className)}
     >
-      Variant: {variant?.title}
+      {variant?.title}
     </Text>
   )
 }

@@ -11,7 +11,7 @@ export async function POST(
     await eventBus.emit({
       name: PaymentWebhookEvents.WebhookReceived,
       data: {
-        provider: "pp_onepay_onepay",
+        provider: "onepay_onepay",
         payload: {
           data: req.body as Record<string, unknown>,
           rawData: req.rawBody || JSON.stringify(req.body),

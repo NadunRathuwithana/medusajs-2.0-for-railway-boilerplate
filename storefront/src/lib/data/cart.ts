@@ -19,7 +19,7 @@ export async function retrieveCart() {
   }
 
   return await sdk.store.cart
-    .retrieve(cartId, { fields: "+region,+region.countries" }, { next: { tags: ["cart"] }, ...(await getAuthHeaders()) })
+    .retrieve(cartId, { fields: "+region,+region.countries,+payment_collection.payment_sessions" }, { next: { tags: ["cart"] }, ...(await getAuthHeaders()) })
     .then(({ cart }) => cart)
     .catch(() => {
       return null
@@ -99,6 +99,7 @@ export async function addToCart({
     )
     .then(() => {
       revalidateTag("cart")
+      revalidateTag("shipping")
     })
     .catch(medusaError)
 }
@@ -123,6 +124,7 @@ export async function updateLineItem({
     .updateLineItem(cartId, lineId, { quantity }, {}, await getAuthHeaders())
     .then(() => {
       revalidateTag("cart")
+      revalidateTag("shipping")
     })
     .catch(medusaError)
 }
@@ -141,9 +143,9 @@ export async function deleteLineItem(lineId: string) {
     .deleteLineItem(cartId, lineId, {}, await getAuthHeaders())
     .then(() => {
       revalidateTag("cart")
+      revalidateTag("shipping")
     })
     .catch(medusaError)
-  revalidateTag("cart")
 }
 
 export async function enrichLineItems(
@@ -250,14 +252,15 @@ export async function initiatePaymentSession(
 export async function applyPromotions(codes: string[]) {
   const cartId = await getCartId()
   if (!cartId) {
-    throw new Error("No existing cart found")
+    return { error: "No existing cart found" }
   }
 
-  await updateCart({ promo_codes: codes })
-    .then(() => {
-      revalidateTag("cart")
-    })
-    .catch(medusaError)
+  try {
+    await updateCart({ promo_codes: codes })
+    return { success: true }
+  } catch (error: any) {
+    return { error: error.message || "Failed to apply promotions" }
+  }
 }
 
 export async function applyGiftCard(code: string) {
@@ -309,7 +312,10 @@ export async function submitPromotionForm(
 ) {
   const code = formData.get("code") as string
   try {
-    await applyPromotions([code])
+    const res = await applyPromotions([code])
+    if (res.error) {
+      return res.error
+    }
   } catch (e: any) {
     return e.message
   }
@@ -364,9 +370,15 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
     revalidateTag("shipping")
 
     // Automatically select the first available shipping method to bypass the delivery step
-    const shippingMethods = await listCartShippingMethods(cartId)
-    if (shippingMethods && shippingMethods.length > 0) {
-      await setShippingMethod({ cartId, shippingMethodId: shippingMethods[0].id })
+    try {
+      const shippingMethods = await listCartShippingMethods(cartId)
+      if (shippingMethods && shippingMethods.length > 0) {
+        await setShippingMethod({ cartId, shippingMethodId: shippingMethods[0].id })
+      }
+    } catch (shippingErr: any) {
+      // Non-fatal: address was saved successfully; shipping auto-select failed.
+      // Surface a warning but do not block the address step.
+      console.warn("[setAddresses] Shipping auto-select failed:", shippingErr?.message)
     }
   } catch (e: any) {
     return e.message

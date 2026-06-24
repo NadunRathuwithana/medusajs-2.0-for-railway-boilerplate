@@ -90,6 +90,16 @@ export default function AnimatedOrderComplete({
             ? "Unfortunately, your payment could not be processed. Please try again or use a different payment method."
             : "Please wait while we confirm your payment and place your order...")}
         </motion.p>
+
+        {status === "success" && (
+          <motion.a
+            href="/"
+            className="mt-8 inline-flex items-center gap-2 px-8 py-3 bg-gray-900 text-white font-medium rounded-full hover:bg-gray-800 transition-colors"
+            variants={itemVariants}
+          >
+            Back to Store
+          </motion.a>
+        )}
       </motion.div>
 
       {/* The Details */}

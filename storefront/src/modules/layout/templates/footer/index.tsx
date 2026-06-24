@@ -279,10 +279,10 @@ export default async function Footer() {
                 <li>
                   <span className="text-gray-500">Email: </span>
                   <a
-                    href="mailto:support@cardle.com"
                     className="text-white hover:text-gray-300 transition-colors"
+                    href="mailto:support@cardle.lk"
                   >
-                    support@cardle.com
+                    support@cardle.lk
                   </a>
                 </li>
                 <li>

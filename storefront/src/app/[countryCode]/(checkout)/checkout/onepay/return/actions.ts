@@ -20,3 +20,30 @@ export async function checkOrderForCart() {
   }
   return null
 }
+
+export async function clearCart() {
+  const { removeCartId } = await import("@lib/data/cookies")
+  await removeCartId()
+}
+
+export async function resetPaymentSession() {
+  const cartId = await getCartId()
+  if (!cartId) return
+
+  try {
+    const authHeaders = await getAuthHeaders()
+    // Retrieve the latest cart
+    const { cart } = await sdk.store.cart.retrieve(cartId, {}, authHeaders)
+    // Reset the payment session to manual to override the failed OnePay session
+    await sdk.store.payment.initiatePaymentSession(
+      cart,
+      { provider_id: "pp_system_default" },
+      {},
+      authHeaders
+    )
+    console.log("[OnePay Return] Successfully reset payment session to manual.")
+  } catch (err) {
+    console.error("[OnePay Return] Failed to reset payment session:", err)
+  }
+}
+
