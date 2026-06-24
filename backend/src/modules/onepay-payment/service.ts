@@ -149,9 +149,9 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
     // which contains the unique ULID suffix. Timestamps are 13 chars (always fine).
     const reference = sessionId.length > 21 ? sessionId.slice(-21) : sessionId
 
-    const cust = (context.customer as any) || {}
-    const billing = (context.billing_address as any) || {}
-    const shipping = (context.shipping_address as any) || {}
+    const cust = ((context as any).customer as any) || {}
+    const billing = ((context as any).billing_address as any) || {}
+    const shipping = ((context as any).shipping_address as any) || {}
     
     const firstName = cust.first_name || billing.first_name || shipping.first_name || "Customer"
     const lastName = cust.last_name || billing.last_name || shipping.last_name || "Customer"
