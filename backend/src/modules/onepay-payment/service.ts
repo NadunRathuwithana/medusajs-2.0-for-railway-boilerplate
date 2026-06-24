@@ -163,7 +163,7 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
       amount: onepayAmount,  // number: 1692 (matches OnePay example payload format)
       currency,
       hash,
-      reference,
+      reference, 
       customer_first_name: firstName,
       customer_last_name: lastName,
       customer_phone_number: phone,
