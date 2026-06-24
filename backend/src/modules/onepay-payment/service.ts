@@ -149,14 +149,15 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
     // which contains the unique ULID suffix. Timestamps are 13 chars (always fine).
     const reference = sessionId.length > 21 ? sessionId.slice(-21) : sessionId
 
-    const cust = ((context as any).customer as any) || {}
-    const billing = ((context as any).billing_address as any) || {}
-    const shipping = ((context as any).shipping_address as any) || {}
+    const inputData = (input.data as any) || {}
+    const cust = inputData.customer || ((context as any).customer as any) || {}
+    const billing = inputData.billing_address || ((context as any).billing_address as any) || {}
+    const shipping = inputData.shipping_address || ((context as any).shipping_address as any) || {}
     
     const firstName = cust.first_name || billing.first_name || shipping.first_name || "Customer"
     const lastName = cust.last_name || billing.last_name || shipping.last_name || "Customer"
     const phone = cust.phone || billing.phone || shipping.phone || "+94770000000"
-    const email = cust.email || billing.email || shipping.email || (context as any).email || "customer@example.com"
+    const email = cust.email || billing.email || shipping.email || inputData.email || (context as any).email || "customer@example.com"
 
     const requestBody = {
       app_id: this.options_.appId,

@@ -117,7 +117,7 @@ const Payment = ({
         // `cart` to the dependency array (which would re-fire on every RSC re-render)
         initiatePaymentSession(cartRef.current, {
           provider_id: selectedPaymentMethod,
-          context: {
+          data: {
             customer: cartRef.current?.customer,
             billing_address: cartRef.current?.billing_address,
             shipping_address: cartRef.current?.shipping_address,
