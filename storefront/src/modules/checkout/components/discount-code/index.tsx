@@ -62,7 +62,9 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
       {/* Applied codes — shown as tags above the input toggle */}
       {hasPromos && (
         <div className="flex flex-wrap gap-1.5 mb-3">
-          {promotions.map((promotion) => (
+          {promotions.map((promotion) => {
+            if (!promotion) return null;
+            return (
             <div
               key={promotion.id}
               data-testid="discount-row"
@@ -92,7 +94,8 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
                 </button>
               )}
             </div>
-          ))}
+          );
+          })}
         </div>
       )}
 

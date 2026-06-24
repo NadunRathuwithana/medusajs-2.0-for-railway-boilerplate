@@ -149,16 +149,25 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
     // which contains the unique ULID suffix. Timestamps are 13 chars (always fine).
     const reference = sessionId.length > 21 ? sessionId.slice(-21) : sessionId
 
+    const cust = (context.customer as any) || {}
+    const billing = (context.billing_address as any) || {}
+    const shipping = (context.shipping_address as any) || {}
+    
+    const firstName = cust.first_name || billing.first_name || shipping.first_name || "Customer"
+    const lastName = cust.last_name || billing.last_name || shipping.last_name || "Customer"
+    const phone = cust.phone || billing.phone || shipping.phone || "+94770000000"
+    const email = cust.email || billing.email || shipping.email || (context as any).email || "customer@example.com"
+
     const requestBody = {
       app_id: this.options_.appId,
       amount: onepayAmount,  // number: 1692 (matches OnePay example payload format)
       currency,
       hash,
       reference,
-      customer_first_name: (context.customer as any)?.first_name || "Customer",
-      customer_last_name: (context.customer as any)?.last_name || "Customer",
-      customer_phone_number: (context.customer as any)?.phone || "+94770000000",
-      customer_email: (context.customer as any)?.email || (context as any).email || "customer@example.com",
+      customer_first_name: firstName,
+      customer_last_name: lastName,
+      customer_phone_number: phone,
+      customer_email: email,
       transaction_redirect_url: this.options_.redirectUrl,
       additionalData: sessionId,
     }
