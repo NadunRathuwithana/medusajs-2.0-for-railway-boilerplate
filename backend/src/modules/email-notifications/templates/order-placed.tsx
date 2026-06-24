@@ -1,6 +1,6 @@
-import { Text, Section, Hr, Button } from '@react-email/components'
+import { Text, Section, Hr, Button, Img, Row, Column } from '@react-email/components'
 import * as React from 'react'
-import { Base, textPrimary, textSecondary, borderLight } from './base'
+import { Base, textPrimary, textSecondary, borderLight, bgDark, textLight, fontFamily } from './base'
 import { OrderDTO, OrderAddressDTO } from '@medusajs/framework/types'
 
 export const ORDER_PLACED = 'order-placed'
@@ -14,6 +14,7 @@ export interface OrderPlacedTemplateProps {
   order: OrderDTO & { display_id: string; summary: { raw_current_order_total: { value: number } } }
   shippingAddress: OrderAddressDTO
   preview?: string
+  shopUrl?: string
 }
 
 export const isOrderPlacedTemplateData = (data: any): data is OrderPlacedTemplateProps =>
@@ -25,105 +26,197 @@ const formatCurrency = (amount: number, currency: string) => {
 
 export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
   PreviewProps: OrderPlacedPreviewProps
-} = ({ order, shippingAddress, preview = 'Your order has been confirmed' }) => {
+} = ({ order, shippingAddress, preview = 'Your order has been confirmed', shopUrl = 'https://storefront-production-66a1.up.railway.app' }) => {
   return (
     <Base preview={preview}>
-      <Section style={{ marginBottom: '32px' }}>
-        <Text style={{
-          fontSize: '16px',
-          fontWeight: '500',
-          color: textPrimary,
-          margin: '0 0 12px',
-          letterSpacing: '1px',
-          textTransform: 'uppercase',
+      {/* Hero Image */}
+      <Section style={{ position: 'relative', textAlign: 'center', backgroundColor: '#e5e5e5' }}>
+        <Img 
+          src={`${shopUrl}/home/cardle-uncompromising-craftsmanship.jpg`} 
+          width="600" 
+          height="300" 
+          style={{ objectFit: 'cover', display: 'block' }}
+          alt="Order Confirmed" 
+        />
+        <Section style={{ padding: '30px 20px', textAlign: 'center', backgroundColor: '#ffffff' }}>
+          <Text style={{ fontSize: '28px', fontWeight: '800', margin: '0 0 5px', color: textPrimary, textTransform: 'uppercase', letterSpacing: '1px', fontFamily }}>
+            ORDER CONFIRMED
+          </Text>
+          <Text style={{ fontSize: '13px', fontWeight: '500', margin: '0', color: textSecondary, letterSpacing: '1px', fontFamily }}>
+            THANK YOU FOR CHOOSING <span style={{ fontWeight: '800', color: textPrimary, fontFamily }}>CARDLE</span>
+          </Text>
+        </Section>
+      </Section>
+
+      <Section style={{ padding: '20px 40px 40px', backgroundColor: '#ffffff' }}>
+        <Text style={{ color: textSecondary, fontSize: '13px', margin: '0 0 24px', lineHeight: '1.6', fontFamily }}>
+          Dear {shippingAddress.first_name}, thank you for your purchase. We are carefully preparing your handcrafted tote bags and will notify you as soon as they are dispatched.
+        </Text>
+
+        {/* Order Info Card */}
+        <Section style={{ 
+          border: `1px solid ${borderLight}`, 
+          borderRadius: '12px', 
+          padding: '24px', 
+          marginBottom: '24px',
+          backgroundColor: '#fafafa'
         }}>
-          Order Confirmed
-        </Text>
-        <Text style={{ color: textSecondary, fontSize: '13px', margin: '0', lineHeight: '1.6' }}>
-          Dear {shippingAddress.first_name}, thank you for your purchase. We have received your order and will notify you once it has been dispatched.
-        </Text>
-      </Section>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily }}>
+            <tbody>
+              <tr>
+                <td style={{ padding: '6px 0', color: textSecondary, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px' }}>Order Number</td>
+                <td style={{ padding: '6px 0', fontWeight: '700', fontSize: '13px', textAlign: 'right', color: textPrimary }}>#{order.display_id}</td>
+              </tr>
+              <tr>
+                <td style={{ padding: '6px 0', color: textSecondary, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px' }}>Order Date</td>
+                <td style={{ padding: '6px 0', fontWeight: '600', fontSize: '13px', textAlign: 'right', color: textPrimary }}>
+                  {new Date(order.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: '6px 0', color: textSecondary, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px' }}>Payment Method</td>
+                <td style={{ padding: '6px 0', fontWeight: '600', fontSize: '13px', textAlign: 'right', color: textPrimary }}>
+                  {((order as any).payment_collections?.[0]?.payments?.[0]?.provider_id ?? 'Online Payment').replace(/_/g, ' ').toUpperCase()}
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: '6px 0', color: textSecondary, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px' }}>Total Amount</td>
+                <td style={{ padding: '6px 0', fontWeight: '800', fontSize: '14px', textAlign: 'right', color: '#d9534f' }}>
+                  {formatCurrency(order.summary.raw_current_order_total.value, order.currency_code)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </Section>
 
-      <Hr style={{ borderColor: borderLight, margin: '0 0 32px' }} />
+        {/* Items Section */}
+        <Section style={{ 
+          border: `1px solid ${borderLight}`, 
+          borderRadius: '12px', 
+          padding: '24px', 
+          marginBottom: '24px',
+        }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily, marginBottom: '16px' }}>
+            <tbody>
+              <tr>
+                <td>
+                  <Text style={{ fontSize: '20px', fontWeight: '700', color: textPrimary, margin: '0' }}>
+                    Order summary
+                  </Text>
+                </td>
+                <td style={{ textAlign: 'right', verticalAlign: 'bottom' }}>
+                  <Text style={{ fontSize: '14px', color: textSecondary, margin: '0' }}>
+                    {order.items?.length || 0} {(order.items?.length || 0) === 1 ? 'item' : 'items'}
+                  </Text>
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
-      {/* Order Info */}
-      <Section style={{ marginBottom: '32px' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <tbody>
-            <tr>
-              <td style={{ padding: '8px 0', color: textSecondary, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Order Number</td>
-              <td style={{ padding: '8px 0', fontWeight: '500', fontSize: '13px', textAlign: 'right', color: textPrimary }}>#{order.display_id}</td>
-            </tr>
-            <tr>
-              <td style={{ padding: '8px 0', color: textSecondary, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Order Date</td>
-              <td style={{ padding: '8px 0', fontWeight: '500', fontSize: '13px', textAlign: 'right', color: textPrimary }}>
-                {new Date(order.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-              </td>
-            </tr>
-            <tr>
-              <td style={{ padding: '8px 0', color: textSecondary, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Order Total</td>
-              <td style={{ padding: '8px 0', fontWeight: '500', fontSize: '13px', textAlign: 'right', color: textPrimary }}>
-                {formatCurrency(order.summary.raw_current_order_total.value, order.currency_code)}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </Section>
+          {order.items?.map((item, index) => (
+            <Section key={item.id ?? index} style={{ padding: '12px 0', borderTop: index === 0 ? 'none' : `1px solid ${borderLight}` }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily }}>
+                <tbody>
+                  <tr>
+                    {(item as any).thumbnail && (
+                      <td style={{ width: '76px', verticalAlign: 'middle' }}>
+                        <div style={{ position: 'relative', display: 'inline-block', width: '64px', height: '64px' }}>
+                          <Img 
+                            src={(item as any).thumbnail} 
+                            width="64" 
+                            height="64" 
+                            style={{ 
+                              borderRadius: '8px', 
+                              objectFit: 'cover',
+                              border: `1px solid ${borderLight}`,
+                              backgroundColor: '#f5f5f5',
+                              display: 'block'
+                            }} 
+                            alt={item.product_title ?? item.title} 
+                          />
+                          <span style={{
+                            position: 'absolute',
+                            top: '-8px',
+                            right: '-8px',
+                            backgroundColor: '#2d333a',
+                            color: '#ffffff',
+                            fontSize: '11px',
+                            fontWeight: '600',
+                            width: '20px',
+                            height: '20px',
+                            display: 'inline-block',
+                            borderRadius: '50%',
+                            textAlign: 'center',
+                            lineHeight: '20px',
+                            zIndex: 10
+                          }}>
+                            {item.quantity}
+                          </span>
+                        </div>
+                      </td>
+                    )}
+                    <td style={{ width: '100%', verticalAlign: 'middle', paddingLeft: (item as any).thumbnail ? '16px' : '0', paddingRight: '16px' }}>
+                      <Text style={{ margin: '0 0 6px', fontWeight: '500', fontSize: '15px', color: textPrimary, fontFamily }}>
+                        {item.product_title ?? item.title}
+                      </Text>
+                      <Text style={{ margin: '0', fontSize: '13px', color: textSecondary, fontFamily }}>
+                        {item.title}
+                      </Text>
+                    </td>
+                    <td style={{ textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                      <Text style={{ margin: '0', fontWeight: '400', fontSize: '14px', color: textPrimary, fontFamily }}>
+                        {formatCurrency((item.unit_price ?? 0) * item.quantity, order.currency_code)}
+                      </Text>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </Section>
+          ))}
+        </Section>
 
-      {/* Items */}
-      <Section style={{ marginBottom: '32px' }}>
-        <Text style={{ fontSize: '12px', color: textSecondary, margin: '0 0 16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-          Items Ordered
-        </Text>
-        {order.items?.map((item, index) => (
-          <Section key={item.id ?? index} style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            padding: '12px 0',
-            borderTop: `1px solid ${borderLight}`,
-          }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <tbody>
-                <tr>
-                  <td>
-                    <Text style={{ margin: '0', fontWeight: '500', fontSize: '13px', color: textPrimary }}>
-                      {item.product_title ?? item.title}
-                    </Text>
-                    <Text style={{ margin: '4px 0 0', fontSize: '12px', color: textSecondary }}>
-                      {item.title} × {item.quantity}
-                    </Text>
-                  </td>
-                  <td style={{ textAlign: 'right', verticalAlign: 'top' }}>
-                    <Text style={{ margin: '0', fontWeight: '500', fontSize: '13px', color: textPrimary }}>
-                      {formatCurrency((item.unit_price ?? 0) * item.quantity, order.currency_code)}
-                    </Text>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </Section>
-        ))}
-        <Hr style={{ borderColor: borderLight, margin: '0' }} />
-      </Section>
+        {/* Shipping Address Card */}
+        <Section style={{ 
+          border: `1px solid ${borderLight}`, 
+          borderRadius: '12px', 
+          padding: '24px', 
+          marginBottom: '32px',
+        }}>
+          <Text style={{ fontSize: '12px', fontWeight: '800', color: textPrimary, margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '1px', fontFamily }}>
+            Shipping Details
+          </Text>
+          <Text style={{ margin: '0', fontSize: '13px', color: textSecondary, lineHeight: '1.6', fontFamily }}>
+            <span style={{ fontWeight: '600', color: textPrimary }}>{shippingAddress.first_name} {shippingAddress.last_name}</span><br />
+            {shippingAddress.address_1}{shippingAddress.address_2 ? `, ${shippingAddress.address_2}` : ''}<br />
+            {shippingAddress.city}{shippingAddress.province ? `, ${shippingAddress.province}` : ''} {shippingAddress.postal_code}<br />
+            {shippingAddress.country_code?.toUpperCase()}
+          </Text>
+        </Section>
 
-      {/* Shipping Address */}
-      <Section style={{ marginBottom: '40px' }}>
-        <Text style={{ fontSize: '12px', color: textSecondary, margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-          Shipping To
-        </Text>
-        <Text style={{ margin: '0', fontSize: '13px', color: textPrimary, lineHeight: '1.6' }}>
-          {shippingAddress.first_name} {shippingAddress.last_name}<br />
-          {shippingAddress.address_1}{shippingAddress.address_2 ? `, ${shippingAddress.address_2}` : ''}<br />
-          {shippingAddress.city}{shippingAddress.province ? `, ${shippingAddress.province}` : ''} {shippingAddress.postal_code}<br />
-          {shippingAddress.country_code?.toUpperCase()}
-        </Text>
-      </Section>
-
-      {/* CTA */}
-      <Section style={{ textAlign: 'center' }}>
-        <Text style={{ color: textSecondary, fontSize: '12px', margin: '0 0 16px', letterSpacing: '0.5px' }}>
-          YOU WILL RECEIVE ANOTHER EMAIL WHEN YOUR ORDER SHIPS.
-        </Text>
+        {/* CTA */}
+        <Section style={{ textAlign: 'center' }}>
+          <Button
+            href={`${shopUrl}/lk/account/orders`}
+            style={{
+              backgroundColor: bgDark,
+              color: textLight,
+              padding: '14px 40px',
+              fontSize: '12px',
+              fontWeight: '700',
+              letterSpacing: '1px',
+              textTransform: 'uppercase',
+              textDecoration: 'none',
+              display: 'inline-block',
+              borderRadius: '30px',
+              fontFamily
+            }}
+          >
+            VIEW ORDER STATUS
+          </Button>
+          <Text style={{ color: textSecondary, fontSize: '11px', margin: '20px 0 0', letterSpacing: '1px', textTransform: 'uppercase', fontFamily }}>
+            YOU WILL RECEIVE ANOTHER EMAIL WHEN YOUR ORDER SHIPS.
+          </Text>
+        </Section>
       </Section>
     </Base>
   )
@@ -135,10 +228,10 @@ OrderPlacedTemplate.PreviewProps = {
     display_id: 'ORD-001',
     created_at: new Date().toISOString(),
     email: 'customer@example.com',
-    currency_code: 'USD',
+    currency_code: 'LKR',
     items: [
-      { id: 'item-1', title: 'Black', product_title: 'Classic Tote', quantity: 2, unit_price: 2500 },
-      { id: 'item-2', title: 'Natural', product_title: 'Premium Canvas Bag', quantity: 1, unit_price: 5000 },
+      { id: 'item-1', title: 'Black', product_title: 'Classic Tote', quantity: 2, unit_price: 2500, thumbnail: 'https://images.unsplash.com/photo-1544816155-12df9643f363?ixlib=rb-4.0.3&w=150&q=80' },
+      { id: 'item-2', title: 'Natural', product_title: 'Premium Canvas Bag', quantity: 1, unit_price: 5000, thumbnail: 'https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?ixlib=rb-4.0.3&w=150&q=80' },
     ],
     shipping_address: {
       first_name: 'Nadun',
@@ -160,6 +253,6 @@ OrderPlacedTemplate.PreviewProps = {
     postal_code: '00100',
     country_code: 'LK',
   },
-} as OrderPlacedPreviewProps
+} as unknown as OrderPlacedPreviewProps
 
 export default OrderPlacedTemplate

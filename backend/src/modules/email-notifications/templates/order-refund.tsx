@@ -1,6 +1,6 @@
-import { Text, Section, Hr } from '@react-email/components'
+import { Text, Section, Hr, Button, Img } from '@react-email/components'
 import * as React from 'react'
-import { Base, textPrimary, textSecondary, borderLight } from './base'
+import { Base, textPrimary, textSecondary, borderLight, bgDark, textLight, fontFamily } from './base'
 
 export const ORDER_REFUND = 'order-refund'
 
@@ -10,6 +10,7 @@ export interface OrderRefundTemplateProps {
   refundAmount: string
   refundReason?: string
   preview?: string
+  shopUrl?: string
 }
 
 export const isOrderRefundTemplateData = (data: any): data is OrderRefundTemplateProps =>
@@ -17,56 +18,97 @@ export const isOrderRefundTemplateData = (data: any): data is OrderRefundTemplat
 
 export const OrderRefundTemplate: React.FC<OrderRefundTemplateProps> & {
   PreviewProps: OrderRefundTemplateProps
-} = ({ orderDisplayId, customerFirstName, refundAmount, refundReason, preview = 'Your refund has been processed' }) => {
+} = ({ 
+  orderDisplayId, 
+  customerFirstName, 
+  refundAmount, 
+  refundReason, 
+  preview = 'Your refund has been processed',
+  shopUrl = 'https://storefront-production-66a1.up.railway.app'
+}) => {
   return (
     <Base preview={preview}>
-      <Section style={{ marginBottom: '32px' }}>
-        <Text style={{
-          fontSize: '16px',
-          fontWeight: '500',
-          color: textPrimary,
-          margin: '0 0 12px',
-          letterSpacing: '1px',
-          textTransform: 'uppercase',
+      {/* Hero Image */}
+      <Section style={{ position: 'relative', textAlign: 'center', backgroundColor: '#e5e5e5' }}>
+        <Img 
+          src="https://images.unsplash.com/photo-1590874103328-eac38a683ce7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" 
+          width="600" 
+          height="300" 
+          style={{ objectFit: 'cover', display: 'block' }}
+          alt="Refund Processed" 
+        />
+        <Section style={{ padding: '30px 20px', textAlign: 'center', backgroundColor: '#ffffff' }}>
+          <Text style={{ fontSize: '28px', fontWeight: '800', margin: '0 0 5px', color: textPrimary, textTransform: 'uppercase', letterSpacing: '1px', fontFamily }}>
+            REFUND PROCESSED
+          </Text>
+          <Text style={{ fontSize: '13px', fontWeight: '500', margin: '0', color: textSecondary, letterSpacing: '1px', fontFamily }}>
+            FUNDS ARE ON THEIR WAY BACK TO YOU
+          </Text>
+        </Section>
+      </Section>
+
+      <Section style={{ padding: '20px 40px 40px', backgroundColor: '#ffffff' }}>
+        <Text style={{ color: textSecondary, fontSize: '13px', margin: '0 0 24px', lineHeight: '1.6', fontFamily }}>
+          Dear {customerFirstName}, your refund for order <span style={{ fontWeight: '600', color: textPrimary }}>#{orderDisplayId}</span> has been successfully processed.
+          Please allow 5-7 business days for the amount to appear in your account, depending on your bank or payment provider.
+        </Text>
+
+        {/* Refund Info Card */}
+        <Section style={{ 
+          border: `1px solid ${borderLight}`, 
+          borderRadius: '12px', 
+          padding: '24px', 
+          marginBottom: '32px',
+          backgroundColor: '#fafafa'
         }}>
-          Refund Processed
-        </Text>
-        <Text style={{ color: textSecondary, fontSize: '13px', margin: '0', lineHeight: '1.6' }}>
-          Dear {customerFirstName}, your refund for order #{orderDisplayId} has been successfully processed.
-        </Text>
-      </Section>
-
-      <Hr style={{ borderColor: borderLight, margin: '0 0 32px' }} />
-
-      <Section style={{ marginBottom: '32px' }}>
-        <Text style={{ fontSize: '12px', color: textSecondary, margin: '0 0 16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-          Refund Details
-        </Text>
-        <table style={{ width: '100%', borderCollapse: 'collapse', borderLeft: `2px solid ${borderLight}`, paddingLeft: '16px', display: 'block' }}>
-          <tbody>
-            <tr>
-              <td style={{ padding: '4px 0 4px 16px', color: textSecondary, fontSize: '12px', width: '120px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Amount</td>
-              <td style={{ padding: '4px 0', fontSize: '13px', color: textPrimary }}>{refundAmount}</td>
-            </tr>
-            {refundReason && (
+          <Text style={{ fontSize: '12px', fontWeight: '800', color: textPrimary, margin: '0 0 16px', textTransform: 'uppercase', letterSpacing: '1px', fontFamily }}>
+            Refund Details
+          </Text>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily }}>
+            <tbody>
               <tr>
-                <td style={{ padding: '4px 0 4px 16px', color: textSecondary, fontSize: '12px', width: '120px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Reason</td>
-                <td style={{ padding: '4px 0', fontSize: '13px', color: textPrimary }}>{refundReason}</td>
+                <td style={{ padding: '6px 0', color: textSecondary, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px' }}>Order Number</td>
+                <td style={{ padding: '6px 0', fontWeight: '700', fontSize: '13px', textAlign: 'right', color: textPrimary }}>#{orderDisplayId}</td>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </Section>
+              <tr>
+                <td style={{ padding: '6px 0', color: textSecondary, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px' }}>Refund Amount</td>
+                <td style={{ padding: '6px 0', fontWeight: '800', fontSize: '14px', textAlign: 'right', color: '#d9534f' }}>{refundAmount}</td>
+              </tr>
+              {refundReason && (
+                <tr>
+                  <td style={{ padding: '6px 0', color: textSecondary, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px' }}>Reason</td>
+                  <td style={{ padding: '6px 0', fontWeight: '600', fontSize: '13px', textAlign: 'right', color: textPrimary }}>{refundReason}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </Section>
 
-      <Hr style={{ borderColor: borderLight, margin: '32px 0 24px' }} />
-
-      <Section>
-        <Text style={{ color: textSecondary, fontSize: '12px', margin: '0 0 12px', lineHeight: '1.6' }}>
-          Please allow 5-7 business days for the amount to appear in your account depending on your bank or payment provider.
-        </Text>
-        <Text style={{ color: textSecondary, fontSize: '12px', margin: '0', lineHeight: '1.6' }}>
-          If you have any questions about this refund, please reply directly to this email.
-        </Text>
+        {/* CTA */}
+        <Section style={{ textAlign: 'center' }}>
+          <Button
+            href={`${shopUrl}/lk/tote-bags`}
+            style={{
+              backgroundColor: bgDark,
+              color: textLight,
+              padding: '14px 40px',
+              fontSize: '12px',
+              fontWeight: '700',
+              letterSpacing: '1px',
+              textTransform: 'uppercase',
+              textDecoration: 'none',
+              display: 'inline-block',
+              borderRadius: '30px',
+              marginBottom: '20px',
+              fontFamily
+            }}
+          >
+            CONTINUE SHOPPING
+          </Button>
+          <Text style={{ color: textSecondary, fontSize: '11px', margin: '0', letterSpacing: '1px', textTransform: 'uppercase', fontFamily }}>
+            HAVE QUESTIONS? REPLY DIRECTLY TO THIS EMAIL.
+          </Text>
+        </Section>
       </Section>
     </Base>
   )

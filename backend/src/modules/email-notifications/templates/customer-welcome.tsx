@@ -1,6 +1,6 @@
-import { Text, Section, Button, Hr } from '@react-email/components'
+import { Text, Section, Button, Row, Column, Img } from '@react-email/components'
 import * as React from 'react'
-import { Base, textPrimary, textSecondary, borderLight } from './base'
+import { Base, textPrimary, textSecondary, bgDark, textLight, fontFamily } from './base'
 
 export const CUSTOMER_WELCOME = 'customer-welcome'
 
@@ -16,67 +16,124 @@ export const isCustomerWelcomeTemplateData = (data: any): data is CustomerWelcom
 
 export const CustomerWelcomeTemplate: React.FC<CustomerWelcomeTemplateProps> & {
   PreviewProps: CustomerWelcomeTemplateProps
-} = ({ customerFirstName, customerEmail, shopUrl = 'https://cardle.lk', preview = 'Welcome to Cardle' }) => {
+} = ({ customerFirstName, customerEmail, shopUrl = 'https://storefront-production-66a1.up.railway.app', preview = 'Welcome to Cardle' }) => {
   return (
     <Base preview={preview}>
-      <Section style={{ marginBottom: '32px' }}>
-        <Text style={{
-          fontSize: '16px',
-          fontWeight: '500',
-          color: textPrimary,
-          margin: '0 0 12px',
-          letterSpacing: '1px',
-          textTransform: 'uppercase',
-        }}>
-          Welcome
-        </Text>
-        <Text style={{ color: textSecondary, fontSize: '13px', margin: '0', lineHeight: '1.6' }}>
-          Dear {customerFirstName}, welcome to Cardle. We are delighted to have you. Your account has been successfully created.
-        </Text>
+      
+      {/* Hero Section */}
+      <Section style={{ position: 'relative', textAlign: 'center', backgroundColor: '#e5e5e5' }}>
+        <Img 
+          src="https://storefront-production-66a1.up.railway.app/home/cardle-premium-cotton-tote-bag-sri-lanka.jpg" 
+          width="600" 
+          height="450" 
+          style={{ objectFit: 'cover', display: 'block' }}
+          alt="Welcome to Cardle" 
+        />
+        <Section style={{ padding: '30px 20px', textAlign: 'center', backgroundColor: '#ffffff' }}>
+          <Text style={{ fontSize: '36px', fontWeight: '800', margin: '0 0 5px', color: textPrimary, textTransform: 'uppercase', letterSpacing: '1px', fontFamily }}>
+            WELCOME
+          </Text>
+          <Text style={{ fontSize: '14px', fontWeight: '500', margin: '0', color: textPrimary, letterSpacing: '2px', textTransform: 'uppercase', fontFamily }}>
+            TO THE <span style={{ fontWeight: '800', fontFamily }}>CARDLE</span> FAMMELY
+          </Text>
+        </Section>
       </Section>
 
-      <Hr style={{ borderColor: borderLight, margin: '0 0 32px' }} />
-
-      <Section style={{ marginBottom: '32px' }}>
-        <Text style={{ fontSize: '12px', color: textSecondary, margin: '0 0 16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-          Account Details
+      {/* 10% OFF Section */}
+      <Section style={{ padding: '20px 40px 40px', textAlign: 'center', backgroundColor: '#ffffff' }}>
+        <Text style={{ fontSize: '36px', fontWeight: '800', margin: '0 0 10px', color: textPrimary, textTransform: 'uppercase', letterSpacing: '-0.5px', fontFamily }}>
+          ENJOY 10% OFF
         </Text>
-        <table style={{ width: '100%', borderCollapse: 'collapse', borderLeft: `2px solid ${borderLight}`, paddingLeft: '16px', display: 'block' }}>
-          <tbody>
-            <tr>
-              <td style={{ padding: '4px 0 4px 16px', color: textSecondary, fontSize: '12px', width: '120px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email</td>
-              <td style={{ padding: '4px 0', fontSize: '13px', color: textPrimary }}>{customerEmail}</td>
-            </tr>
-          </tbody>
-        </table>
-      </Section>
-
-      <Section style={{ marginTop: '24px' }}>
+        <Text style={{ fontSize: '14px', fontWeight: '500', margin: '0 0 20px', color: textPrimary, fontFamily }}>
+          your next purchase <span style={{ color: '#d9534f', fontFamily }}>with code:</span>
+        </Text>
+        <Section style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <Text style={{ 
+            display: 'inline-block', 
+            backgroundColor: '#8ea696', 
+            borderRadius: '20px', 
+            padding: '8px 20px',
+            fontSize: '14px', 
+            fontWeight: '700', 
+            color: textLight, 
+            margin: '0', 
+            letterSpacing: '1px',
+            fontFamily
+          }}>
+            WELCOME10
+          </Text>
+        </Section>
+        <Text style={{ fontSize: '12px', color: textSecondary, margin: '0 auto 30px', lineHeight: '1.6', maxWidth: '400px', fontFamily }}>
+          Thanks for joining us, {customerFirstName}! Now that you're officially part of the family, keep an eye on your inbox for VIP early access to new arrivals, exclusive discounts, and more!
+        </Text>
         <Button
           href={shopUrl}
           style={{
-            backgroundColor: textPrimary,
-            color: '#ffffff',
-            padding: '12px 24px',
+            backgroundColor: bgDark,
+            color: textLight,
+            padding: '14px 40px',
             fontSize: '12px',
-            fontWeight: '500',
+            fontWeight: '700',
             letterSpacing: '1px',
             textTransform: 'uppercase',
             textDecoration: 'none',
             display: 'inline-block',
+            borderRadius: '30px',
+            fontFamily
           }}
         >
-          Explore Collection
+          SAVE 10% NOW
         </Button>
       </Section>
 
-      <Hr style={{ borderColor: borderLight, margin: '32px 0 24px' }} />
-
-      <Section>
-        <Text style={{ color: textSecondary, fontSize: '12px', margin: '0', lineHeight: '1.6' }}>
-          If you have any questions or need assistance, please reply directly to this email.
-        </Text>
+      {/* Fan Favorites Section */}
+      <Section style={{ padding: '0 20px 40px', backgroundColor: '#ffffff' }}>
+        <Section style={{ backgroundColor: '#f2f2f2', borderRadius: '30px', overflow: 'hidden' }}>
+          <Row>
+            <Column style={{ width: '50%', padding: '30px 40px', verticalAlign: 'middle' }}>
+              <Text style={{ fontSize: '18px', fontWeight: '800', margin: '0 0 4px', color: textPrimary, fontFamily }}>
+                CARDLE
+              </Text>
+              <Text style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 16px', color: textPrimary, fontFamily }}>
+                <span style={{ color: '#d9534f', fontFamily }}>fan</span> favorites
+              </Text>
+              <Text style={{ fontSize: '12px', color: textSecondary, margin: '0 0 24px', lineHeight: '1.6', fontFamily }}>
+                These popular picks have 'add-to-cart' energy.
+              </Text>
+              <Button
+                href={`${shopUrl}/best-sellers`}
+                style={{
+                  backgroundColor: bgDark,
+                  color: textLight,
+                  padding: '12px 24px',
+                  fontSize: '10px',
+                  fontWeight: '700',
+                  letterSpacing: '1px',
+                  textTransform: 'uppercase',
+                  textDecoration: 'none',
+                  display: 'inline-block',
+                  borderRadius: '30px',
+                  fontFamily
+                }}
+              >
+                SHOP BEST SELLERS
+              </Button>
+            </Column>
+            <Column style={{ width: '50%', verticalAlign: 'middle' }}>
+              <Img 
+                src="https://storefront-production-66a1.up.railway.app/store/buy-cotton-tote-bags-online-sri-lanka.jpg" 
+                width="300" 
+                height="300" 
+                style={{ objectFit: 'cover', display: 'block' }}
+                alt="Fan favorites tote bag" 
+              />
+            </Column>
+          </Row>
+        </Section>
       </Section>
+
+
+
     </Base>
   )
 }
@@ -84,7 +141,7 @@ export const CustomerWelcomeTemplate: React.FC<CustomerWelcomeTemplateProps> & {
 CustomerWelcomeTemplate.PreviewProps = {
   customerFirstName: 'Nadun',
   customerEmail: 'nadun@example.com',
-  shopUrl: 'https://cardle.lk',
+  shopUrl: 'https://storefront-production-66a1.up.railway.app',
 }
 
 export default CustomerWelcomeTemplate

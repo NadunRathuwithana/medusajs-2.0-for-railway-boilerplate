@@ -1,6 +1,6 @@
-import { Text, Section, Hr } from '@react-email/components'
+import { Text, Section, Hr, Img } from '@react-email/components'
 import * as React from 'react'
-import { Base, textPrimary, textSecondary, borderLight } from './base'
+import { Base, textPrimary, textSecondary, borderLight, fontFamily } from './base'
 
 export const CONTACT_FORM = 'contact-form'
 
@@ -25,72 +25,85 @@ export const ContactFormTemplate: React.FC<ContactFormTemplateProps> & {
 } = ({ referenceNumber, senderName, senderEmail, subject, message, submittedAt, preview }) => {
   return (
     <Base preview={preview ?? `New contact form message: ${referenceNumber}`}>
-      <Section style={{ marginBottom: '32px' }}>
+      <Section style={{ padding: '30px 40px 10px', backgroundColor: '#ffffff', textAlign: 'center' }}>
         <Text style={{
-          fontSize: '14px',
-          fontWeight: '500',
+          fontSize: '20px',
+          fontWeight: '800',
           color: textPrimary,
           margin: '0 0 8px',
           textTransform: 'uppercase',
           letterSpacing: '1px',
+          fontFamily
         }}>
-          New Submission
+          NEW SUBMISSION
         </Text>
-        <Text style={{ color: textSecondary, fontSize: '12px', margin: '0' }}>
-          Reference: {referenceNumber}
+        <Text style={{ color: textSecondary, fontSize: '11px', margin: '0', textTransform: 'uppercase', letterSpacing: '1px', fontFamily }}>
+          REFERENCE: <span style={{ fontWeight: '700', color: textPrimary }}>{referenceNumber}</span>
         </Text>
       </Section>
 
-      <Hr style={{ borderColor: borderLight, margin: '0 0 24px' }} />
-
-      {/* Sender Info */}
-      <Section style={{ marginBottom: '32px' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <tbody>
-            <tr>
-              <td style={{ padding: '8px 0', color: textSecondary, fontSize: '12px', width: '120px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Name</td>
-              <td style={{ padding: '8px 0', fontSize: '13px', color: textPrimary }}>{senderName}</td>
-            </tr>
-            <tr>
-              <td style={{ padding: '8px 0', color: textSecondary, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email</td>
-              <td style={{ padding: '8px 0', fontSize: '13px', color: textPrimary }}>{senderEmail}</td>
-            </tr>
-            {subject && (
-              <tr>
-                <td style={{ padding: '8px 0', color: textSecondary, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Subject</td>
-                <td style={{ padding: '8px 0', fontSize: '13px', color: textPrimary }}>{subject}</td>
-              </tr>
-            )}
-            {submittedAt && (
-              <tr>
-                <td style={{ padding: '8px 0', color: textSecondary, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Date</td>
-                <td style={{ padding: '8px 0', fontSize: '13px', color: textPrimary }}>{submittedAt}</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </Section>
-
-      {/* Message */}
-      <Section style={{ marginBottom: '24px' }}>
-        <Text style={{ fontSize: '12px', color: textSecondary, margin: '0 0 16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-          Message
-        </Text>
-        <Section style={{
-          borderLeft: `2px solid ${borderLight}`,
-          padding: '4px 0 4px 16px',
+      <Section style={{ padding: '20px 40px 40px', backgroundColor: '#ffffff' }}>
+        {/* Sender Info Card */}
+        <Section style={{ 
+          border: `1px solid ${borderLight}`, 
+          borderRadius: '12px', 
+          padding: '24px', 
+          marginBottom: '24px',
+          backgroundColor: '#fafafa'
         }}>
-          <Text style={{ fontSize: '14px', color: textPrimary, margin: '0', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+          <Text style={{ fontSize: '12px', fontWeight: '800', color: textPrimary, margin: '0 0 16px', textTransform: 'uppercase', letterSpacing: '1px', fontFamily }}>
+            Sender Details
+          </Text>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily }}>
+            <tbody>
+              <tr>
+                <td style={{ padding: '6px 0', color: textSecondary, fontSize: '11px', width: '120px', textTransform: 'uppercase', letterSpacing: '1px' }}>Name</td>
+                <td style={{ padding: '6px 0', fontSize: '13px', fontWeight: '600', color: textPrimary }}>{senderName}</td>
+              </tr>
+              <tr>
+                <td style={{ padding: '6px 0', color: textSecondary, fontSize: '11px', width: '120px', textTransform: 'uppercase', letterSpacing: '1px' }}>Email</td>
+                <td style={{ padding: '6px 0', fontSize: '13px', fontWeight: '600', color: textPrimary }}>
+                  <a href={`mailto:${senderEmail}`} style={{ color: textPrimary, textDecoration: 'underline' }}>{senderEmail}</a>
+                </td>
+              </tr>
+              {subject && (
+                <tr>
+                  <td style={{ padding: '6px 0', color: textSecondary, fontSize: '11px', width: '120px', textTransform: 'uppercase', letterSpacing: '1px' }}>Subject</td>
+                  <td style={{ padding: '6px 0', fontSize: '13px', fontWeight: '600', color: textPrimary }}>{subject}</td>
+                </tr>
+              )}
+              {submittedAt && (
+                <tr>
+                  <td style={{ padding: '6px 0', color: textSecondary, fontSize: '11px', width: '120px', textTransform: 'uppercase', letterSpacing: '1px' }}>Date</td>
+                  <td style={{ padding: '6px 0', fontSize: '13px', fontWeight: '500', color: textPrimary }}>{submittedAt}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </Section>
+
+        {/* Message Card */}
+        <Section style={{ 
+          border: `1px solid ${borderLight}`, 
+          borderRadius: '12px', 
+          padding: '24px', 
+          marginBottom: '32px',
+          backgroundColor: '#ffffff'
+        }}>
+          <Text style={{ fontSize: '12px', fontWeight: '800', color: textPrimary, margin: '0 0 16px', textTransform: 'uppercase', letterSpacing: '1px', fontFamily }}>
+            Message
+          </Text>
+          <Text style={{ fontSize: '14px', color: textSecondary, margin: '0', lineHeight: '1.8', whiteSpace: 'pre-wrap', fontFamily }}>
             {message}
           </Text>
         </Section>
+
+        <Hr style={{ borderColor: borderLight, margin: '0 0 24px' }} />
+
+        <Text style={{ fontSize: '11px', color: textSecondary, margin: '0', textTransform: 'uppercase', letterSpacing: '1px', textAlign: 'center', fontFamily }}>
+          REPLY DIRECTLY TO THIS EMAIL TO RESPOND TO THE CUSTOMER.
+        </Text>
       </Section>
-
-      <Hr style={{ borderColor: borderLight, margin: '32px 0 24px' }} />
-
-      <Text style={{ fontSize: '12px', color: textSecondary, margin: '0' }}>
-        Reply directly to this email to respond to the customer.
-      </Text>
     </Base>
   )
 }

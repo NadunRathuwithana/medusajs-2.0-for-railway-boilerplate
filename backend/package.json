@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@medusajs/test-utils": "2.13.6",
-    "@react-email/preview-server": "^5.1.0",
+    "@react-email/preview-server": "^5.2.11",
     "@swc/core": "1.5.7",
     "@swc/jest": "^0.2.39",
     "@types/babel__traverse": "^7.28.0",
