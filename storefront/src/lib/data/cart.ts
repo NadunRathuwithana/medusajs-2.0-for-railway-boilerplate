@@ -252,11 +252,15 @@ export async function initiatePaymentSession(
 export async function applyPromotions(codes: string[]) {
   const cartId = await getCartId()
   if (!cartId) {
-    throw new Error("No existing cart found")
+    return { error: "No existing cart found" }
   }
 
-  // updateCart() already calls revalidateTag("cart") internally — no need to repeat
-  await updateCart({ promo_codes: codes }).catch(medusaError)
+  try {
+    await updateCart({ promo_codes: codes })
+    return { success: true }
+  } catch (error: any) {
+    return { error: error.message || "Failed to apply promotions" }
+  }
 }
 
 export async function applyGiftCard(code: string) {
@@ -308,7 +312,10 @@ export async function submitPromotionForm(
 ) {
   const code = formData.get("code") as string
   try {
-    await applyPromotions([code])
+    const res = await applyPromotions([code])
+    if (res.error) {
+      return res.error
+    }
   } catch (e: any) {
     return e.message
   }

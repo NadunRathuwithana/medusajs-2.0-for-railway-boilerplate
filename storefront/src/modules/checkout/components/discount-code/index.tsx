@@ -18,28 +18,38 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [inputValue, setInputValue] = useState("")
   const [isPending, startTransition] = useTransition()
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   const { promotions = [] } = cart
 
   const removePromotionCode = (code: string) => {
+    setErrorMsg(null)
     startTransition(async () => {
       const remaining = promotions
         .filter((p) => p.code !== code && p.code !== undefined)
         .map((p) => p.code!)
-      await applyPromotions(remaining)
+      const res = await applyPromotions(remaining)
+      if (res?.error) {
+        setErrorMsg(res.error)
+      }
     })
   }
 
   const addPromotionCode = () => {
     const code = inputValue.trim()
     if (!code) return
+    setErrorMsg(null)
     startTransition(async () => {
       const existing = promotions
         .filter((p) => p.code !== undefined)
         .map((p) => p.code!)
-      await applyPromotions([...existing, code])
-      setInputValue("")
-      setIsOpen(false)
+      const res = await applyPromotions([...existing, code])
+      if (res?.error) {
+        setErrorMsg(res.error)
+      } else {
+        setInputValue("")
+        setIsOpen(false)
+      }
     })
   }
 
@@ -136,7 +146,7 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
           </form>
 
           <ErrorMessage
-            error={message}
+            error={errorMsg || message}
             data-testid="discount-error-message"
           />
         </div>
