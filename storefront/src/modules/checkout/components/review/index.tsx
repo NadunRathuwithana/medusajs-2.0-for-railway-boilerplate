@@ -13,6 +13,11 @@ const Review = ({ cart }: { cart: any }) => {
     cart.shipping_methods.length > 0 &&
     (cart.payment_collection || paidByGiftcard)
 
+  const paymentReady =
+    (cart?.shipping_methods?.length ?? 0) !== 0 || paidByGiftcard
+
+  const missingDetails = !cart?.billing_address?.first_name || !cart?.email
+
   return (
     <div className="bg-white">
       <div className="flex flex-row items-center justify-between mb-3">
@@ -20,6 +25,21 @@ const Review = ({ cart }: { cart: any }) => {
           Review & Place Order
         </h2>
       </div>
+
+      {paymentReady && missingDetails && (
+        <div className="mb-4 flex items-start gap-x-3 rounded-xl bg-orange-50 p-4 border border-orange-200">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-orange-500 shrink-0 mt-0.5">
+            <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clipRule="evenodd" />
+          </svg>
+          <div>
+            <h3 className="text-sm font-semibold text-orange-800">Action Required</h3>
+            <p className="text-sm text-orange-700 mt-1">
+              Please complete your billing details (Name and Email) before proceeding.
+            </p>
+          </div>
+        </div>
+      )}
+
       {previousStepsCompleted && (
         <>
           <div className="flex items-start gap-x-1 w-full mb-4">

@@ -105,7 +105,7 @@ const Payment = ({
         const b = cartRef.current?.billing_address || cartRef.current?.shipping_address
         const email = cartRef.current?.email
         if (!b?.first_name || !email) {
-          setError("Please complete your billing details (Name and Email) before proceeding.")
+          // Validation error will be shown beautifully in the Review component
           return
         }
 
