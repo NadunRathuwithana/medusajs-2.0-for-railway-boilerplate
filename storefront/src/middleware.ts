@@ -88,6 +88,27 @@ async function getCountryCode(
  * Middleware to handle region selection and onboarding status.
  */
 export async function middleware(request: NextRequest) {
+  const hasAccess = request.cookies.get("storefront_access")?.value === "1"
+  const isComingSoon = request.nextUrl.pathname.startsWith("/coming-soon")
+
+  if (!hasAccess && !isComingSoon) {
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = "/coming-soon"
+    redirectUrl.search = ""
+    return NextResponse.redirect(redirectUrl, 307)
+  }
+
+  if (isComingSoon && hasAccess) {
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = "/"
+    redirectUrl.search = ""
+    return NextResponse.redirect(redirectUrl, 307)
+  }
+
+  if (isComingSoon) {
+    return NextResponse.next()
+  }
+
   const searchParams = request.nextUrl.searchParams
   const isOnboarding = searchParams.get("onboarding") === "true"
   const cartId = searchParams.get("cart_id")
