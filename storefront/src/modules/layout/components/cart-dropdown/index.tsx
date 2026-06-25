@@ -36,7 +36,7 @@ const CartDropdown = ({
       return acc + item.quantity
     }, 0) || 0
 
-  const subtotal = (cartState?.subtotal ?? 0) - (cartState?.discount_total ?? 0)
+  const subtotal = (cartState?.item_subtotal ?? (cartState?.subtotal ? cartState.subtotal - (cartState?.shipping_total ?? 0) : 0)) - (cartState?.discount_total ?? 0)
   const itemRef = useRef<number>(totalItems || 0)
   const pathname = usePathname()
 

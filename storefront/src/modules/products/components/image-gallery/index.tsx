@@ -10,31 +10,22 @@ type ImageGalleryProps = {
   images: HttpTypes.StoreProductImage[]
 }
 
-const ImageGallery = ({ images }: ImageGalleryProps) => {
+const ImageGallery = ({ images: initialImages }: ImageGalleryProps) => {
+  // Sort images so that the one with metadata.view === "front" is first
+  const images = [...initialImages].sort((a, b) => {
+    const aView = (a as any).metadata?.view
+    const bView = (b as any).metadata?.view
+    if (aView === "front" && bView !== "front") return -1
+    if (bView === "front" && aView !== "front") return 1
+    return 0
+  })
+
   const [activeIndex, setActiveIndex] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [fullscreenIndex, setFullscreenIndex] = useState(0)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => { setMounted(true) }, [])
-
-  useEffect(() => {
-    const handleUpdateImage = (e: Event) => {
-      const customEvent = e as CustomEvent<string>
-      const imageUrl = customEvent.detail
-      if (!imageUrl) return
-      
-      const index = images.findIndex((img) => img.url === imageUrl)
-      if (index !== -1 && index !== activeIndex) {
-        setActiveIndex(index)
-      }
-    }
-
-    window.addEventListener("updateImage", handleUpdateImage)
-    return () => {
-      window.removeEventListener("updateImage", handleUpdateImage)
-    }
-  }, [images, activeIndex])
 
   if (!images || images.length === 0) return null
 

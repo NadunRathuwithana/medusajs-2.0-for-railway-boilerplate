@@ -4,7 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useState, useRef, useEffect } from "react"
 import { clx } from "@medusajs/ui"
 import { SortOptions } from "../refinement-list/sort-products"
-import { ListFilter } from "lucide-react"
+import { ListFilter, ChevronDown } from "lucide-react"
 
 const sortOptions = [
   { value: "most_relevant", label: "Most relevant" },
@@ -93,7 +93,12 @@ export default function SortDropdown({ sortBy }: { sortBy: SortOptions }) {
           className="hidden sm:inline-flex items-center justify-between gap-3 px-6 py-2.5 rounded-full border border-black text-sm font-semibold tracking-wide bg-white text-bold hover:bg-gray-50 transition-colors duration-200 min-w-[160px]"
         >
           <span>{activeOption.label}</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-black flex-shrink-0" />
+          <ChevronDown 
+            className={clx(
+              "w-4 h-4 transition-transform duration-200 flex-shrink-0",
+              isOpen ? "rotate-180" : ""
+            )} 
+          />
         </button>
       </div>
 

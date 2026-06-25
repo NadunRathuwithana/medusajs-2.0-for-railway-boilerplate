@@ -7,6 +7,7 @@ type CartTotalsProps = {
   totals: {
     total?: number | null
     subtotal?: number | null
+    item_subtotal?: number | null
     tax_total?: number | null
     shipping_total?: number | null
     discount_total?: number | null
@@ -20,6 +21,7 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
     currency_code,
     total,
     subtotal,
+    item_subtotal,
     tax_total,
     shipping_total,
     discount_total,
@@ -28,13 +30,16 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
 
   const fmt = (amount: number) => convertToLocale({ amount, currency_code })
 
+  // Calculate pre-shipping subtotal
+  const displaySubtotal = item_subtotal ?? (subtotal ? subtotal - (shipping_total ?? 0) : 0)
+
   return (
     <div className="flex flex-col gap-y-2 text-[13px]">
       {/* Line items */}
       <div className="flex items-center justify-between">
         <span className="text-gray-500">Subtotal</span>
         <span className="text-gray-800 font-medium" data-testid="cart-subtotal">
-          {fmt(subtotal ?? 0)}
+          {fmt(displaySubtotal)}
         </span>
       </div>
 
