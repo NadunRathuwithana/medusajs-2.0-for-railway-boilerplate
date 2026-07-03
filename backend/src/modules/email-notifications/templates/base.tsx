@@ -15,6 +15,8 @@ const textLight = '#ffffff'
 
 const fontFamily = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
 
+const baseUrl = process.env.STORE_URL || 'http://localhost:8000'
+
 export const Base: React.FC<BaseProps> = ({ preview, children }) => {
   return (
     <Html lang="en">
@@ -37,16 +39,16 @@ export const Base: React.FC<BaseProps> = ({ preview, children }) => {
           <Section style={{ padding: '20px 30px', textAlign: 'center' }}>
             <Row>
               <Column style={{ width: '25%', textAlign: 'left' }}>
-                <Link href="https://storefront-production-66a1.up.railway.app/lk">
-                  <Img src="https://storefront-production-66a1.up.railway.app/cardle-premium-cotton-tote-bags-logo.png" width="100" alt="Cardle Logo" style={{ display: 'block' }} />
+                <Link href={`${baseUrl}/lk`}>
+                  <Img src={`${baseUrl}/cardle-premium-cotton-tote-bags-logo.png`} width="100" alt="Cardle Logo" style={{ display: 'block' }} />
                 </Link>
               </Column>
               <Column style={{ width: '75%', textAlign: 'right' }}>
                 <Text style={{ margin: '0', fontSize: '9px', fontWeight: '500', letterSpacing: '1px', fontFamily }}>
-                  <Link href="https://storefront-production-66a1.up.railway.app/lk/tote-bags" style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>TOTE BAGS</Link> |
-                  <Link href="https://storefront-production-66a1.up.railway.app/lk/best-sellers" style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>BEST SELLERS</Link> |
-                  <Link href="https://storefront-production-66a1.up.railway.app/lk/new" style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>NEW ARRIVALS</Link> |
-                  <Link href="https://storefront-production-66a1.up.railway.app/lk/custom" style={{ color: textPrimary, textDecoration: 'none', margin: '0 0 0 6px', fontFamily }}>CUSTOM</Link>
+                  <Link href={`${baseUrl}/lk/tote-bags`} style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>TOTE BAGS</Link> |
+                  <Link href={`${baseUrl}/lk/best-sellers`} style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>BEST SELLERS</Link> |
+                  <Link href={`${baseUrl}/lk/new`} style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>NEW ARRIVALS</Link> |
+                  <Link href={`${baseUrl}/lk/custom`} style={{ color: textPrimary, textDecoration: 'none', margin: '0 0 0 6px', fontFamily }}>CUSTOM</Link>
                 </Text>
               </Column>
             </Row>

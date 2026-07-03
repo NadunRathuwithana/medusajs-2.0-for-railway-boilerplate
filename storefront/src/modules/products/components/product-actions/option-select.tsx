@@ -42,8 +42,10 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
             const matchingVariant = variants.find((variant) => 
               variant.options?.some((opt) => opt.value === v && opt.option?.title?.toLowerCase() === "color")
             )
-            // Use variant metadata image if available, else thumbnail
-            if (matchingVariant?.thumbnail) {
+            // Use variant image if available, else thumbnail
+            if (matchingVariant?.images?.[0]?.url) {
+              imageUrl = matchingVariant.images[0].url
+            } else if (matchingVariant?.thumbnail) {
               imageUrl = matchingVariant.thumbnail
             }
           }

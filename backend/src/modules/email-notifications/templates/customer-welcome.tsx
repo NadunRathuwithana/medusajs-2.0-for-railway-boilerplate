@@ -16,14 +16,14 @@ export const isCustomerWelcomeTemplateData = (data: any): data is CustomerWelcom
 
 export const CustomerWelcomeTemplate: React.FC<CustomerWelcomeTemplateProps> & {
   PreviewProps: CustomerWelcomeTemplateProps
-} = ({ customerFirstName, customerEmail, shopUrl = 'https://storefront-production-66a1.up.railway.app', preview = 'Welcome to Cardle' }) => {
+} = ({ customerFirstName, customerEmail, shopUrl = process.env.STORE_URL || 'http://localhost:8000', preview = 'Welcome to Cardle' }) => {
   return (
     <Base preview={preview}>
       
       {/* Hero Section */}
       <Section style={{ position: 'relative', textAlign: 'center', backgroundColor: '#e5e5e5' }}>
         <Img 
-          src="https://storefront-production-66a1.up.railway.app/home/cardle-premium-cotton-tote-bag-sri-lanka.jpg" 
+          src={`${shopUrl}/home/cardle-premium-cotton-tote-bag-sri-lanka.jpg`} 
           width="600" 
           height="450" 
           style={{ objectFit: 'cover', display: 'block' }}
@@ -121,8 +121,8 @@ export const CustomerWelcomeTemplate: React.FC<CustomerWelcomeTemplateProps> & {
             </Column>
             <Column style={{ width: '50%', verticalAlign: 'middle' }}>
               <Img 
-                src="https://storefront-production-66a1.up.railway.app/store/buy-cotton-tote-bags-online-sri-lanka.jpg" 
-                width="300" 
+                src={`${shopUrl}/store/buy-cotton-tote-bags-online-sri-lanka.jpg`} 
+                width="240" 
                 height="300" 
                 style={{ objectFit: 'cover', display: 'block' }}
                 alt="Fan favorites tote bag" 
@@ -141,7 +141,7 @@ export const CustomerWelcomeTemplate: React.FC<CustomerWelcomeTemplateProps> & {
 CustomerWelcomeTemplate.PreviewProps = {
   customerFirstName: 'Nadun',
   customerEmail: 'nadun@example.com',
-  shopUrl: 'https://storefront-production-66a1.up.railway.app',
+  shopUrl: process.env.STORE_URL || 'http://localhost:8000',
 }
 
 export default CustomerWelcomeTemplate

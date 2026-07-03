@@ -70,7 +70,7 @@ export default function ProductCard({
     product.thumbnail,
     ...(product.images?.map((i) => i.url) || []),
   ].filter(Boolean) as string[]
-  const uniqueImages = Array.from(new Set(allImages))
+  const uniqueImages = Array.from(new Set(allImages)).slice(0, 2)
 
   useEffect(() => {
     let interval: NodeJS.Timeout

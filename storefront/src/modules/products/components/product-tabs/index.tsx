@@ -41,8 +41,42 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
 
 const DescriptionTab = ({ product }: ProductTabsProps) => {
   return (
-    <div className="text-sm text-gray-500 py-6 whitespace-pre-line leading-relaxed">
-      {product.description || "No description available for this product."}
+    <div className="py-6">
+      <div className="text-sm text-gray-500 whitespace-pre-line leading-relaxed mb-6">
+        {product.description || "No description available for this product."}
+      </div>
+
+      {(product.width || product.height || product.length || product.weight) && (
+        <div className="border-t border-gray-100 pt-6">
+          <h3 className="text-sm font-semibold mb-4 text-gray-900">Product Dimensions</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-y-4 gap-x-4 text-sm">
+            {product.width && (
+              <div className="flex flex-col">
+                <span className="text-gray-400 font-medium text-xs">Width</span>
+                <span className="font-medium text-gray-900 mt-0.5">{product.width} cm</span>
+              </div>
+            )}
+            {product.height && (
+              <div className="flex flex-col">
+                <span className="text-gray-400 font-medium text-xs">Height</span>
+                <span className="font-medium text-gray-900 mt-0.5">{product.height} cm</span>
+              </div>
+            )}
+            {product.length && (
+              <div className="flex flex-col">
+                <span className="text-gray-400 font-medium text-xs">Length</span>
+                <span className="font-medium text-gray-900 mt-0.5">{product.length} cm</span>
+              </div>
+            )}
+            {product.weight && (
+              <div className="flex flex-col">
+                <span className="text-gray-400 font-medium text-xs">Weight</span>
+                <span className="font-medium text-gray-900 mt-0.5">{product.weight} g</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

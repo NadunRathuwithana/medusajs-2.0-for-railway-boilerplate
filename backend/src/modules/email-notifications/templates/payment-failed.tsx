@@ -26,7 +26,7 @@ export const PaymentFailedTemplate: React.FC<PaymentFailedTemplateProps> & {
   errorMessage, 
   checkoutUrl, 
   preview = 'Action required for your payment',
-  shopUrl = 'https://storefront-production-66a1.up.railway.app'
+  shopUrl = process.env.STORE_URL || 'http://localhost:8000'
 }) => {
   return (
     <Base preview={preview}>
@@ -121,7 +121,7 @@ PaymentFailedTemplate.PreviewProps = {
   customerFirstName: 'Nadun',
   orderTotal: 'LKR 1,500.00',
   errorMessage: 'Insufficient funds or card declined.',
-  checkoutUrl: 'https://storefront-production-66a1.up.railway.app/checkout',
+  checkoutUrl: (process.env.STORE_URL || 'http://localhost:8000') + '/checkout',
 }
 
 export default PaymentFailedTemplate

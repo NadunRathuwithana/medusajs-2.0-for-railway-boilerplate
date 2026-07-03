@@ -22,7 +22,7 @@ export const PasswordResetTemplate: React.FC<PasswordResetTemplateProps> & {
   resetLink, 
   expiresInMinutes = 30, 
   preview = 'Reset your Cardle password',
-  shopUrl = 'https://storefront-production-66a1.up.railway.app'
+  shopUrl = process.env.STORE_URL || 'http://localhost:8000'
 }) => {
   return (
     <Base preview={preview}>
@@ -84,7 +84,7 @@ export const PasswordResetTemplate: React.FC<PasswordResetTemplateProps> & {
 
 PasswordResetTemplate.PreviewProps = {
   customerFirstName: 'Nadun',
-  resetLink: 'https://storefront-production-66a1.up.railway.app/account/reset?token=abc123',
+  resetLink: (process.env.STORE_URL || 'http://localhost:8000') + '/account/reset?token=abc123',
   expiresInMinutes: 30,
 }
 

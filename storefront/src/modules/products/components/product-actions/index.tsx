@@ -2,7 +2,7 @@
 
 import { Button } from "@medusajs/ui"
 import { isEqual } from "lodash"
-import { useParams } from "next/navigation"
+import { useParams, useSearchParams, useRouter, usePathname } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import { useIntersection } from "@lib/hooks/use-in-view"
@@ -37,14 +37,31 @@ export default function ProductActions({
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
   const countryCode = useParams().countryCode as string
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
 
-  // If there is only 1 variant, preselect the options
+  // Initialize options from URL or default to 1 variant
   useEffect(() => {
     if (product.variants?.length === 1) {
       const variantOptions = optionsAsKeymap(product.variants[0].options)
       setOptions(variantOptions ?? {})
+    } else if (searchParams) {
+      const initialOptions: Record<string, string> = {}
+      let hasParams = false
+      product.options?.forEach((opt) => {
+        const title = opt.title?.toLowerCase()
+        const value = searchParams.get(title || "")
+        if (value) {
+          initialOptions[opt.title!] = value
+          hasParams = true
+        }
+      })
+      if (hasParams) {
+        setOptions((prev) => ({ ...prev, ...initialOptions }))
+      }
     }
-  }, [product.variants])
+  }, [product.variants, product.options, searchParams])
 
   const selectedVariant = useMemo(() => {
     if (!product.variants || product.variants.length === 0) {
@@ -63,6 +80,13 @@ export default function ProductActions({
       ...prev,
       [title]: value,
     }))
+
+    // Sync to URL
+    if (title.toLowerCase() === "color") {
+      const current = new URLSearchParams(Array.from(searchParams?.entries() || []))
+      current.set(title.toLowerCase(), value)
+      router.replace(`${pathname}?${current.toString()}`, { scroll: false })
+    }
   }
 
   // update main image when variant changes
