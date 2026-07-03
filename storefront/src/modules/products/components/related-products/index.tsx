@@ -9,13 +9,8 @@ type RelatedProductsProps = {
 }
 
 type StoreProductParamsWithTags = HttpTypes.StoreProductParams & {
-  tags?: string[]
   is_giftcard?: boolean
   collection_id?: string[]
-}
-
-type StoreProductWithTags = HttpTypes.StoreProduct & {
-  tags?: { value: string }[]
 }
 
 export default async function RelatedProducts({
@@ -36,12 +31,7 @@ export default async function RelatedProducts({
   if (product.collection_id) {
     queryParams.collection_id = [product.collection_id]
   }
-  const productWithTags = product as StoreProductWithTags
-  if (productWithTags.tags) {
-    queryParams.tags = productWithTags.tags
-      .map((t) => t.value)
-      .filter(Boolean) as string[]
-  }
+
   queryParams.is_giftcard = false
 
   let products: HttpTypes.StoreProduct[] = []
