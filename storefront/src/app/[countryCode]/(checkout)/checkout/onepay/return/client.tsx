@@ -10,10 +10,12 @@ import { checkOrderForCart } from "./actions"
 
 export default function OnepayReturnClient({ 
   searchParams, 
-  countryCode 
+  countryCode,
+  isLoggedIn,
 }: { 
   searchParams: any, 
   countryCode: string 
+  isLoggedIn: boolean
 }) {
   const router = useRouter()
   const [status, setStatus] = useState<"processing" | "success" | "error">("processing")
@@ -114,7 +116,7 @@ export default function OnepayReturnClient({
       <AnimatedOrderComplete status={status} message={message}>
         {status === "error" && (
           <div className="flex flex-col items-center gap-3 mt-6">
-            <Button onClick={() => router.push(`/${countryCode}/account/orders`)}>
+            <Button onClick={() => router.push(`/${countryCode}/account${isLoggedIn ? '/orders' : ''}`)}>
               Check My Orders
             </Button>
             <Button variant="secondary" onClick={() => router.push(`/${countryCode}/checkout`)}>

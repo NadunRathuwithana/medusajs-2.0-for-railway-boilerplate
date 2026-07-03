@@ -83,6 +83,7 @@ export default function ProductActions({
 
     // Sync to URL
     if (title.toLowerCase() === "color") {
+      window.dispatchEvent(new CustomEvent("variantChange", { detail: { color: value } }))
       const current = new URLSearchParams(Array.from(searchParams?.entries() || []))
       current.set(title.toLowerCase(), value)
       router.replace(`${pathname}?${current.toString()}`, { scroll: false })

@@ -68,9 +68,9 @@ export default function ProductCard({
 
   const allImages = [
     product.thumbnail,
-    ...(product.images?.map((i) => i.url) || []),
+    ...(product.variants?.map((v) => v.thumbnail || (v as any).images?.[0]?.url) || []),
   ].filter(Boolean) as string[]
-  const uniqueImages = Array.from(new Set(allImages)).slice(0, 2)
+  const uniqueImages = Array.from(new Set(allImages))
 
   useEffect(() => {
     let interval: NodeJS.Timeout

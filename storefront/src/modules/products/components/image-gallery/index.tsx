@@ -13,13 +13,29 @@ type ImageGalleryProps = {
 
 const ImageGallery = ({ product }: ImageGalleryProps) => {
   const searchParams = useSearchParams()
-  const selectedColor = searchParams?.get("color")
+  const urlColor = searchParams?.get("color")
+
+  const [optimisticColor, setOptimisticColor] = useState<string | null>(null)
+
+  useEffect(() => {
+    setOptimisticColor(urlColor)
+  }, [urlColor])
+
+  useEffect(() => {
+    const handleVariantChange = (e: CustomEvent) => {
+      setOptimisticColor(e.detail.color)
+    }
+    window.addEventListener("variantChange", handleVariantChange as EventListener)
+    return () => window.removeEventListener("variantChange", handleVariantChange as EventListener)
+  }, [])
+
+  const selectedColor = optimisticColor || urlColor
 
   const activeVariant = selectedColor 
     ? product.variants?.find((v) => 
         v.options?.some((opt) => opt.value === selectedColor && opt.option?.title?.toLowerCase() === "color")
       )
-    : null
+    : product.variants?.[0]
     
   const initialImages = activeVariant?.images?.length ? activeVariant.images : (product.images || [])
 
@@ -41,6 +57,12 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => { setMounted(true) }, [])
+
+  // Reset active image index when the active variant changes
+  useEffect(() => {
+    setActiveIndex(0)
+    setFullscreenIndex(0)
+  }, [activeVariant?.id])
 
   if (!images || images.length === 0) return null
 
