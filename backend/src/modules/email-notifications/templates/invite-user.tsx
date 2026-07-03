@@ -94,7 +94,7 @@ export const InviteUserEmail = ({
 }
 
 InviteUserEmail.PreviewProps = {
-  inviteLink: 'https://storefront-production-66a1.up.railway.app/app/invite?token=abc123ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd'
+  inviteLink: (process.env.STORE_URL || 'http://localhost:8000') + '/app/invite?token=abc123ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd'
 } as InviteUserEmailProps
 
 export default InviteUserEmail

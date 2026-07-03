@@ -33,7 +33,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         data-testid="product-container"
       >
         <div className="w-full lg:w-[55%] relative lg:sticky lg:top-24 h-fit animate-fade-in-right" style={{ animationDelay: "100ms", animationFillMode: "both" }}>
-          <ImageGallery images={product?.images || []} />
+          <ImageGallery product={product} />
         </div>
         
         <div className="flex flex-col w-full lg:w-[45%] py-4 gap-y-8 animate-fade-in-top" style={{ animationDelay: "200ms", animationFillMode: "both" }}>

@@ -5,12 +5,27 @@ import Image from "next/image"
 import { useState, useEffect } from "react"
 import { createPortal } from "react-dom"
 import { clx } from "@medusajs/ui"
+import { useSearchParams } from "next/navigation"
 
 type ImageGalleryProps = {
-  images: HttpTypes.StoreProductImage[]
+  product: HttpTypes.StoreProduct
 }
 
-const ImageGallery = ({ images: initialImages }: ImageGalleryProps) => {
+const ImageGallery = ({ product }: ImageGalleryProps) => {
+  const searchParams = useSearchParams()
+  const selectedColor = searchParams?.get("color")
+
+  const activeVariant = selectedColor 
+    ? product.variants?.find((v) => 
+        v.options?.some((opt) => opt.value === selectedColor && opt.option?.title?.toLowerCase() === "color")
+      )
+    : null
+    
+  const initialImages = activeVariant?.images?.length ? activeVariant.images : (product.images || [])
+
+  // Note: For consistency, the first image in every variant's image set should ideally 
+  // use the same framing/background (studio shot, ¾ angle) so the gallery doesn't visually jump.
+  
   // Sort images so that the one with metadata.view === "front" is first
   const images = [...initialImages].sort((a, b) => {
     const aView = (a as any).metadata?.view
@@ -189,7 +204,7 @@ const ImageGallery = ({ images: initialImages }: ImageGalleryProps) => {
         }
       `}</style>
 
-      <div className="flex flex-col gap-4 w-full" style={{ animation: "galleryEnter 0.4s ease-out forwards" }}>
+      <div key={activeVariant?.id || 'default'} className="flex flex-col gap-4 w-full" style={{ animation: "galleryEnter 0.4s ease-out forwards" }}>
         {/* Main Image */}
         <div
           className="relative w-full aspect-[4/5] md:aspect-auto md:h-[600px] lg:h-[700px] rounded-3xl overflow-hidden bg-gray-100 cursor-zoom-in group"

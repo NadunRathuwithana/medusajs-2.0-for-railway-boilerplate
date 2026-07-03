@@ -26,7 +26,7 @@ const formatCurrency = (amount: number, currency: string) => {
 
 export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
   PreviewProps: OrderPlacedPreviewProps
-} = ({ order, shippingAddress, preview = 'Your order has been confirmed', shopUrl = 'https://storefront-production-66a1.up.railway.app' }) => {
+} = ({ order, shippingAddress, preview = 'Your order has been confirmed', shopUrl = process.env.STORE_URL || 'http://localhost:8000' }) => {
   return (
     <Base preview={preview}>
       {/* Hero Image */}

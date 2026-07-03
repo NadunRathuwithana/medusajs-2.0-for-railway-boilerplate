@@ -24,7 +24,7 @@ export const OrderRefundTemplate: React.FC<OrderRefundTemplateProps> & {
   refundAmount, 
   refundReason, 
   preview = 'Your refund has been processed',
-  shopUrl = 'https://storefront-production-66a1.up.railway.app'
+  shopUrl = process.env.STORE_URL || 'http://localhost:8000'
 }) => {
   return (
     <Base preview={preview}>
