@@ -44,14 +44,25 @@ export default async function RelatedProducts({
   }
   queryParams.is_giftcard = false
 
-  const products = await getProductsList({
-    queryParams,
-    countryCode,
-  }).then(({ response }) => {
-    return response.products.filter(
+  let products: HttpTypes.StoreProduct[] = []
+
+  try {
+    const response = await getProductsList({
+      queryParams,
+      countryCode,
+    })
+    
+    products = response.response.products.filter(
       (responseProduct) => responseProduct.id !== product.id
     )
-  })
+  } catch (error: any) {
+    console.error(
+      `[RelatedProducts] Error fetching related products for ${product.id} with params:`,
+      JSON.stringify(queryParams),
+      error.message || error
+    )
+    products = []
+  }
 
   if (!products.length) {
     return null

@@ -101,6 +101,14 @@ const Payment = ({
           return
         }
 
+        // Add basic validation for required customer fields
+        const b = cartRef.current?.billing_address || cartRef.current?.shipping_address
+        const email = cartRef.current?.email
+        if (!b?.first_name || !email) {
+          // Validation error will be shown beautifully in the Review component
+          return
+        }
+
         initiatingProviderRef.current = selectedPaymentMethod
         setIsLoading(true)
         setError(null)
@@ -109,6 +117,12 @@ const Payment = ({
         // `cart` to the dependency array (which would re-fire on every RSC re-render)
         initiatePaymentSession(cartRef.current, {
           provider_id: selectedPaymentMethod,
+          data: {
+            customer: cartRef.current?.customer,
+            billing_address: cartRef.current?.billing_address,
+            shipping_address: cartRef.current?.shipping_address,
+            email: cartRef.current?.email,
+          }
         })
           .then((result: any) => {
             if (!isMounted) return
