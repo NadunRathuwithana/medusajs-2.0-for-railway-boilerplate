@@ -10,6 +10,7 @@ import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-relat
 import { notFound } from "next/navigation"
 import ProductActionsWrapper from "./product-actions-wrapper"
 import { HttpTypes } from "@medusajs/types"
+import BackButton from "@modules/common/components/back-button"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
@@ -28,6 +29,9 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
   return (
     <>
+      <div className="content-container max-w-[1440px] mx-auto px-6 md:px-16 pt-6 pb-2 relative z-10">
+        <BackButton />
+      </div>
       <div
         className="content-container flex flex-col lg:flex-row gap-8 lg:gap-16 py-8 relative max-w-[1440px] mx-auto px-6 md:px-16 animate-fade-in-top"
         data-testid="product-container"

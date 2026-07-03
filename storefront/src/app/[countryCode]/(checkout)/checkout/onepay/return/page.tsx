@@ -14,9 +14,12 @@ type Props = {
 /**
  * OnePay redirects the customer back here after payment.
  */
+import { getCustomer } from "@lib/data/customer"
+
 export default async function OnepayReturnPage({ params, searchParams }: Props) {
   const resolvedParams = await params
   const sp = await searchParams
+  const customer = await getCustomer()
 
-  return <OnepayReturnClient searchParams={sp} countryCode={resolvedParams.countryCode} />
+  return <OnepayReturnClient searchParams={sp} countryCode={resolvedParams.countryCode} isLoggedIn={!!customer} />
 }

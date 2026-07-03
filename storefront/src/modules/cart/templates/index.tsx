@@ -4,6 +4,7 @@ import EmptyCartMessage from "../components/empty-cart-message"
 import SignInPrompt from "../components/sign-in-prompt"
 import Divider from "@modules/common/components/divider"
 import { HttpTypes } from "@medusajs/types"
+import BackButton from "@modules/common/components/back-button"
 
 const CartTemplate = ({
   cart,
@@ -15,6 +16,9 @@ const CartTemplate = ({
   return (
     <div className="py-12 md:py-24 bg-[#fafafa] min-h-screen">
       <div className="content-container max-w-[1140px] mx-auto" data-testid="cart-container">
+        <div className="mb-6">
+          <BackButton />
+        </div>
         {cart?.items?.length ? (
           <div className="flex flex-col lg:flex-row gap-12">
             <div className="flex flex-col flex-1 gap-y-8">

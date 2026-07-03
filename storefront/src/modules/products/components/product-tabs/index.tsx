@@ -64,7 +64,7 @@ const DescriptionTab = ({ product }: ProductTabsProps) => {
             )}
             {product.length && (
               <div className="flex flex-col">
-                <span className="text-gray-400 font-medium text-xs">Length</span>
+                <span className="text-gray-400 font-medium text-xs">Depth</span>
                 <span className="font-medium text-gray-900 mt-0.5">{product.length} cm</span>
               </div>
             )}

@@ -8,6 +8,7 @@ import MobileCheckoutSummary from "@modules/checkout/components/mobile-checkout-
 import { enrichLineItems, retrieveCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { getCustomer } from "@lib/data/customer"
+import BackButton from "@modules/common/components/back-button"
 
 export const metadata: Metadata = {
   title: "Checkout",
@@ -34,6 +35,9 @@ export default async function Checkout() {
   return (
     <div className="bg-[#fafafa] min-h-screen py-12 md:py-24">
       <div className="content-container max-w-[1140px] mx-auto">
+        <div className="mb-6">
+          <BackButton />
+        </div>
         <MobileCheckoutSummary cart={cart} />
         
         <div className="flex flex-col lg:flex-row gap-12">
