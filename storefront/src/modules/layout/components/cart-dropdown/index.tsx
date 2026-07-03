@@ -216,7 +216,7 @@ const SidebarCartItem = ({ item, close }: { item: any; close: () => void }) => {
   }, [item.quantity, isPending])
 
   const changeQuantity = (newQty: number) => {
-    if (newQty < 1) return
+    if (newQty < 1 || newQty > 20) return
     setOptimisticQty(newQty)
 
     if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -322,7 +322,8 @@ const SidebarCartItem = ({ item, close }: { item: any; close: () => void }) => {
             </span>
             <button
               onClick={() => changeQuantity(optimisticQty + 1)}
-              className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-bold transition-all"
+              className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-bold transition-all disabled:opacity-40"
+              disabled={optimisticQty >= 20}
             >
               <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
             </button>

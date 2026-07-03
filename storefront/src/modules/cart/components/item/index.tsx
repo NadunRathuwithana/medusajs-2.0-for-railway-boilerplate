@@ -37,7 +37,7 @@ const Item = ({ item, type = "full" }: ItemProps) => {
   const { handle } = item.variant?.product ?? {}
 
   const changeQuantity = (quantity: number) => {
-    if (quantity < 1) return
+    if (quantity < 1 || quantity > 20) return
     setError(null)
     setOptimisticQty(quantity)
 
@@ -211,7 +211,8 @@ const Item = ({ item, type = "full" }: ItemProps) => {
               </span>
               <button
                 onClick={() => changeQuantity(optimisticQty + 1)}
-                className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-bold transition-all"
+                className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-bold transition-all disabled:opacity-40"
+                disabled={optimisticQty >= 20}
               >
                 <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
               </button>
