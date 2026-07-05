@@ -15,6 +15,7 @@ import { addToCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { getProductPrice } from "@lib/util/get-product-price"
 import KokoWidget from "./koko-widget"
+import { isKoko } from "@lib/constants"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -152,6 +153,10 @@ export default function ProductActions({
 
         {/* Koko Pay Widget */}
         {(() => {
+          // Only show if Koko is enabled as a payment provider for this region
+          const isKokoEnabled = region?.payment_providers?.some((p) => isKoko(p.id))
+          if (!isKokoEnabled) return null
+
           const { cheapestPrice, variantPrice } = getProductPrice({
             product,
             variantId: selectedVariant?.id,
