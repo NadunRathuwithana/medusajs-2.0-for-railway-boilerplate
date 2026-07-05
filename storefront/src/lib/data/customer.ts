@@ -188,3 +188,61 @@ export const updateCustomerAddress = async (
       return { success: false, error: err.toString() }
     })
 }
+
+export async function requestPasswordReset(_currentState: unknown, formData: FormData) {
+  const email = formData.get("email") as string
+  
+  let success = false
+  try {
+    await sdk.auth.resetPassword("customer", "emailpass", {
+      identifier: email,
+    })
+    success = true
+  } catch (error: any) {
+    return error.toString()
+  }
+
+  if (success) {
+    return "SUCCESS"
+  }
+}
+
+export async function resetPassword(_currentState: unknown, formData: FormData) {
+  const password = formData.get("password") as string
+  const token = formData.get("token") as string
+  const email = formData.get("email") as string
+
+  let success = false
+  try {
+    await sdk.auth.updateProvider(
+      "customer",
+      "emailpass",
+      { password },
+      token
+    )
+    
+    // Automatically log in the user after a successful password reset
+    const loginToken = await sdk.auth.login("customer", "emailpass", {
+      email,
+      password,
+    })
+
+    const tokenValue = typeof loginToken === 'string' ? loginToken : loginToken.location
+    const cookiesStore = await cookies()
+    cookiesStore.set("_medusa_jwt", tokenValue, {
+      maxAge: 60 * 60 * 24 * 7,
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    })
+
+    revalidateTag("customer")
+    success = true
+  } catch (error: any) {
+    return error.toString()
+  }
+
+  if (success) {
+    return "SUCCESS"
+  }
+}

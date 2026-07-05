@@ -24,16 +24,16 @@ export const OrderRefundTemplate: React.FC<OrderRefundTemplateProps> & {
   refundAmount, 
   refundReason, 
   preview = 'Your refund has been processed',
-  shopUrl = process.env.STORE_URL || 'http://localhost:8000'
+  shopUrl = process.env.STORE_URL || 'https://cardle.lk'
 }) => {
   return (
     <Base preview={preview}>
       {/* Hero Image */}
       <Section style={{ position: 'relative', textAlign: 'center', backgroundColor: '#e5e5e5' }}>
         <Img 
-          src="https://images.unsplash.com/photo-1590874103328-eac38a683ce7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" 
+          src={`${shopUrl}/email/hero2.jpg`} 
           width="600" 
-          height="300" 
+          height="400" 
           style={{ objectFit: 'cover', display: 'block' }}
           alt="Refund Processed" 
         />

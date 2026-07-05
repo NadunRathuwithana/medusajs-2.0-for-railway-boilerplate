@@ -35,7 +35,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
     const notificationModuleService: INotificationModuleService = req.scope.resolve(Modules.NOTIFICATION)
 
-    const adminEmail = SMTP_ADMIN_EMAIL || process.env.SMTP_USER || 'nadunrathuwithanaproductions@gmail.com'
+    const adminEmail = SMTP_ADMIN_EMAIL || process.env.SMTP_USER || 'hello@cardle.lk'
 
     const referenceNumber = `CF-${Math.floor(10000 + Math.random() * 90000)}`
 

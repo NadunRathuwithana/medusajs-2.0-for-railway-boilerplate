@@ -15,7 +15,7 @@ const textLight = '#ffffff'
 
 const fontFamily = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
 
-const baseUrl = process.env.STORE_URL || 'http://localhost:8000'
+const baseUrl = process.env.STORE_URL || 'https://cardle.lk'
 
 export const Base: React.FC<BaseProps> = ({ preview, children }) => {
   return (
@@ -45,10 +45,9 @@ export const Base: React.FC<BaseProps> = ({ preview, children }) => {
               </Column>
               <Column style={{ width: '75%', textAlign: 'right' }}>
                 <Text style={{ margin: '0', fontSize: '9px', fontWeight: '500', letterSpacing: '1px', fontFamily }}>
-                  <Link href={`${baseUrl}/lk/tote-bags`} style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>TOTE BAGS</Link> |
-                  <Link href={`${baseUrl}/lk/best-sellers`} style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>BEST SELLERS</Link> |
-                  <Link href={`${baseUrl}/lk/new`} style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>NEW ARRIVALS</Link> |
-                  <Link href={`${baseUrl}/lk/custom`} style={{ color: textPrimary, textDecoration: 'none', margin: '0 0 0 6px', fontFamily }}>CUSTOM</Link>
+                  <Link href={`${baseUrl}/lk/store`} style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>TOTE BAGS</Link> |
+                  <Link href={`${baseUrl}/lk/store`} style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>BEST SELLERS</Link> |
+                  <Link href={`${baseUrl}/lk/store`} style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>NEW ARRIVALS</Link>
                 </Text>
               </Column>
             </Row>
@@ -95,22 +94,14 @@ export const Base: React.FC<BaseProps> = ({ preview, children }) => {
             </Text>
             {/* Social Icons Placeholder */}
             <Section style={{ textAlign: 'center', marginBottom: '30px' }}>
-              <Link href="#" style={{ margin: '0 10px', display: 'inline-block' }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                </svg>
+              <Link href="https://www.facebook.com/profile.php?id=61585796349137" style={{ margin: '0 10px', display: 'inline-block' }}>
+                <Img src={`${baseUrl}/social/facebook.png`} width="30" height="30" alt="Facebook" />
               </Link>
-              <Link href="#" style={{ margin: '0 10px', display: 'inline-block' }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                </svg>
+              <Link href="https://www.instagram.com/cardle_lk/?hl=en" style={{ margin: '0 10px', display: 'inline-block' }}>
+                <Img src={`${baseUrl}/social/instagram.png`} width="30" height="30" alt="Instagram" />
               </Link>
-              <Link href="#" style={{ margin: '0 10px', display: 'inline-block' }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="#ffffff" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.95v5.25c-.01 3.99-3.4 7.42-7.39 7.41-3.99-.01-7.4-3.4-7.41-7.4-.01-4 3.4-7.42 7.4-7.41 1.05.01 2.08.26 3.03.73v4.21c-.81-.46-1.74-.69-2.67-.67-2.18.04-3.98 1.84-3.95 4.02.04 2.18 1.85 3.98 4.04 3.94 2.18-.04 3.97-1.85 3.93-4.04V.02h-1.06z"/>
-                </svg>
+              <Link href="https://www.tiktok.com/@cardle.srilanka" style={{ margin: '0 10px', display: 'inline-block' }}>
+                <Img src={`${baseUrl}/social/tiktok.png`} width="30" height="30" alt="TikTok" />
               </Link>
             </Section>
             
@@ -119,12 +110,6 @@ export const Base: React.FC<BaseProps> = ({ preview, children }) => {
             </Text>
             <Text style={{ color: '#888888', fontSize: '10px', margin: '0 0 20px', fontFamily }}>
               Sri Lanka
-            </Text>
-
-            <Text style={{ margin: '0', fontSize: '10px', fontWeight: '500', letterSpacing: '1px', fontFamily }}>
-               <Link href="#" style={{ color: textLight, textDecoration: 'none', margin: '0 6px', fontFamily }}>CONTACT</Link> |
-               <Link href="#" style={{ color: textLight, textDecoration: 'none', margin: '0 6px', fontFamily }}>ABOUT</Link> |
-               <Link href="#" style={{ color: textLight, textDecoration: 'none', margin: '0 0 0 6px', fontFamily }}>UNSUBSCRIBE</Link>
             </Text>
           </Section>
 

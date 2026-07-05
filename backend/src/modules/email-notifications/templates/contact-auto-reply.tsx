@@ -19,7 +19,7 @@ export const ContactAutoReplyTemplate: React.FC<ContactAutoReplyTemplateData> = 
   customerName,
   referenceNumber,
   preview = 'We have received your message',
-  shopUrl = process.env.STORE_URL || 'http://localhost:8000'
+  shopUrl = process.env.STORE_URL || 'https://cardle.lk'
 }) => {
   return (
     <Base preview={preview}>

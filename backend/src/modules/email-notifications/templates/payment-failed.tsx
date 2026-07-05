@@ -26,19 +26,22 @@ export const PaymentFailedTemplate: React.FC<PaymentFailedTemplateProps> & {
   errorMessage, 
   checkoutUrl, 
   preview = 'Action required for your payment',
-  shopUrl = process.env.STORE_URL || 'http://localhost:8000'
+  shopUrl = process.env.STORE_URL || 'https://cardle.lk'
 }) => {
   return (
     <Base preview={preview}>
       {/* Hero Image */}
       <Section style={{ position: 'relative', textAlign: 'center', backgroundColor: '#e5e5e5' }}>
-        <Img 
-          src="https://images.unsplash.com/photo-1590874103328-eac38a683ce7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" 
-          width="600" 
-          height="300" 
-          style={{ objectFit: 'cover', display: 'block' }}
-          alt="Payment Failed" 
-        />
+        <Section style={{ padding: '60px 0', textAlign: 'center', backgroundColor: '#ffffff' }}>
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ margin: '0 auto', display: 'block' }}>
+            <circle cx="60" cy="60" r="60" fill="#F3F4F6"/>
+            <circle cx="60" cy="60" r="45" fill="#111111"/>
+            <rect x="38" y="46" width="44" height="28" rx="4" stroke="#FFFFFF" strokeWidth="2.5"/>
+            <line x1="38" y1="56" x2="82" y2="56" stroke="#FFFFFF" strokeWidth="2.5"/>
+            <circle cx="82" cy="38" r="14" fill="#EF4444" stroke="#FAFAFA" strokeWidth="3"/>
+            <path d="M77 33L87 43M87 33L77 43" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round"/>
+          </svg>
+        </Section>
         <Section style={{ padding: '30px 20px', textAlign: 'center', backgroundColor: '#ffffff' }}>
           <Text style={{ fontSize: '28px', fontWeight: '800', margin: '0 0 5px', color: textPrimary, textTransform: 'uppercase', letterSpacing: '1px', fontFamily }}>
             PAYMENT FAILED
@@ -121,7 +124,7 @@ PaymentFailedTemplate.PreviewProps = {
   customerFirstName: 'Nadun',
   orderTotal: 'LKR 1,500.00',
   errorMessage: 'Insufficient funds or card declined.',
-  checkoutUrl: (process.env.STORE_URL || 'http://localhost:8000') + '/checkout',
+  checkoutUrl: (process.env.STORE_URL || 'https://cardle.lk') + '/checkout',
 }
 
 export default PaymentFailedTemplate

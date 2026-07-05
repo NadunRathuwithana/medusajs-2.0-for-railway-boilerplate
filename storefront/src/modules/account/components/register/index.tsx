@@ -86,17 +86,17 @@ const Register = ({ setCurrentView }: Props) => {
         <p className="text-[11px] leading-relaxed text-gray-400 font-medium mt-4">
           By creating an account, you agree to Cardle&apos;s{" "}
           <LocalizedClientLink
-            href="/content/privacy-policy"
+            href="/privacy"
             className="text-bold hover:text-gray-700 underline font-bold"
           >
             Privacy Policy
           </LocalizedClientLink>{" "}
           and{" "}
           <LocalizedClientLink
-            href="/content/terms-of-use"
+            href="/terms"
             className="text-bold hover:text-gray-700 underline font-bold"
           >
-            Terms of Use
+            Terms of Service
           </LocalizedClientLink>
           .
         </p>

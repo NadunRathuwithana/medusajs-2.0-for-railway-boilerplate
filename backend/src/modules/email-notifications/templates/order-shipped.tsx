@@ -28,16 +28,16 @@ export const OrderShippedTemplate: React.FC<OrderShippedTemplateProps> & {
   carrierName,
   estimatedDelivery,
   preview = 'Your order is on the way',
-  shopUrl = process.env.STORE_URL || 'http://localhost:8000'
+  shopUrl = process.env.STORE_URL || 'https://cardle.lk'
 }) => {
   return (
     <Base preview={preview}>
       {/* Hero Image */}
       <Section style={{ position: 'relative', textAlign: 'center', backgroundColor: '#e5e5e5' }}>
         <Img 
-          src={`${shopUrl}/home/cardle-status-meets-utility-tote-bag.jpg`} 
+          src={`${shopUrl}/email/hero2.jpg`} 
           width="600" 
-          height="300" 
+          height="400" 
           style={{ objectFit: 'cover', display: 'block' }}
           alt="Order Dispatched" 
         />

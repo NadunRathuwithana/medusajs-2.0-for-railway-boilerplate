@@ -16,14 +16,15 @@ export const isCustomerWelcomeTemplateData = (data: any): data is CustomerWelcom
 
 export const CustomerWelcomeTemplate: React.FC<CustomerWelcomeTemplateProps> & {
   PreviewProps: CustomerWelcomeTemplateProps
-} = ({ customerFirstName, customerEmail, shopUrl = process.env.STORE_URL || 'http://localhost:8000', preview = 'Welcome to Cardle' }) => {
+} = ({ customerFirstName, customerEmail, shopUrl = process.env.STORE_URL || 'https://cardle.lk', preview = 'Welcome to Cardle' }) => {
   return (
     <Base preview={preview}>
       
       {/* Hero Section */}
       <Section style={{ position: 'relative', textAlign: 'center', backgroundColor: '#e5e5e5' }}>
         <Img 
-          src={`${shopUrl}/home/cardle-premium-cotton-tote-bag-sri-lanka.jpg`} 
+          src={`${shopUrl}/email/hero1.jpg`} 
+          // src={`http://localhost:8000/email/hero1.jpg`} 
           width="600" 
           height="450" 
           style={{ objectFit: 'cover', display: 'block' }}
@@ -34,7 +35,7 @@ export const CustomerWelcomeTemplate: React.FC<CustomerWelcomeTemplateProps> & {
             WELCOME
           </Text>
           <Text style={{ fontSize: '14px', fontWeight: '500', margin: '0', color: textPrimary, letterSpacing: '2px', textTransform: 'uppercase', fontFamily }}>
-            TO THE <span style={{ fontWeight: '800', fontFamily }}>CARDLE</span> FAMMELY
+            TO THE <span style={{ fontWeight: '800', fontFamily }}>CARDLE</span> FAMILY
           </Text>
         </Section>
       </Section>
@@ -88,26 +89,26 @@ export const CustomerWelcomeTemplate: React.FC<CustomerWelcomeTemplateProps> & {
 
       {/* Fan Favorites Section */}
       <Section style={{ padding: '0 20px 40px', backgroundColor: '#ffffff' }}>
-        <Section style={{ backgroundColor: '#f2f2f2', borderRadius: '30px', overflow: 'hidden' }}>
+        <Section style={{ backgroundColor: '#F8F7F4', borderRadius: '30px', overflow: 'hidden' }}>
           <Row>
-            <Column style={{ width: '50%', padding: '30px 40px', verticalAlign: 'middle' }}>
-              <Text style={{ fontSize: '18px', fontWeight: '800', margin: '0 0 4px', color: textPrimary, fontFamily }}>
-                CARDLE
+            <Column style={{ width: '50%', padding: '40px 30px', verticalAlign: 'middle' }}>
+              <Text style={{ fontSize: '10px', fontWeight: '600', margin: '0 0 8px', color: '#888888', letterSpacing: '2px', textTransform: 'uppercase', fontFamily }}>
+                Curated Picks
               </Text>
-              <Text style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 16px', color: textPrimary, fontFamily }}>
-                <span style={{ color: '#d9534f', fontFamily }}>fan</span> favorites
+              <Text style={{ fontSize: '26px', fontWeight: '400', margin: '0 0 16px', color: '#111111', fontFamily, letterSpacing: '-0.5px' }}>
+                <span style={{ fontWeight: '800' }}>Fan</span> Favorites
               </Text>
-              <Text style={{ fontSize: '12px', color: textSecondary, margin: '0 0 24px', lineHeight: '1.6', fontFamily }}>
-                These popular picks have 'add-to-cart' energy.
+              <Text style={{ fontSize: '13px', color: '#555555', margin: '0 0 30px', lineHeight: '1.6', fontFamily }}>
+                These signature styles have absolute "add-to-cart" energy. Discover the pieces everyone is talking about.
               </Text>
               <Button
-                href={`${shopUrl}/best-sellers`}
+                href={`https://cardle.lk/lk/store`}
                 style={{
-                  backgroundColor: bgDark,
-                  color: textLight,
+                  backgroundColor: '#111111',
+                  color: '#ffffff',
                   padding: '12px 24px',
-                  fontSize: '10px',
-                  fontWeight: '700',
+                  fontSize: '11px',
+                  fontWeight: '600',
                   letterSpacing: '1px',
                   textTransform: 'uppercase',
                   textDecoration: 'none',
@@ -116,15 +117,16 @@ export const CustomerWelcomeTemplate: React.FC<CustomerWelcomeTemplateProps> & {
                   fontFamily
                 }}
               >
-                SHOP BEST SELLERS
+                Shop Now
               </Button>
             </Column>
-            <Column style={{ width: '50%', verticalAlign: 'middle' }}>
+            <Column style={{ width: '50%', verticalAlign: 'middle', padding: '0' }}>
               <Img 
-                src={`${shopUrl}/store/buy-cotton-tote-bags-online-sri-lanka.jpg`} 
-                width="240" 
-                height="300" 
-                style={{ objectFit: 'cover', display: 'block' }}
+                src={`${shopUrl}/email/fav.jpg`}
+                // src={`http://localhost:8000/email/fav.jpg`} 
+                width="280" 
+                height="380" 
+                style={{ objectFit: 'cover', display: 'block', borderRadius: '0 30px 30px 0' }}
                 alt="Fan favorites tote bag" 
               />
             </Column>
@@ -141,7 +143,7 @@ export const CustomerWelcomeTemplate: React.FC<CustomerWelcomeTemplateProps> & {
 CustomerWelcomeTemplate.PreviewProps = {
   customerFirstName: 'Nadun',
   customerEmail: 'nadun@example.com',
-  shopUrl: process.env.STORE_URL || 'http://localhost:8000',
+  shopUrl: process.env.STORE_URL || 'https://cardle.lk',
 }
 
 export default CustomerWelcomeTemplate

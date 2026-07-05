@@ -4,10 +4,7 @@ import React, { useState } from "react"
 import Eye from "@modules/common/icons/eye"
 import EyeOff from "@modules/common/icons/eye-off"
 
-type InputProps = Omit<
-  Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
-  "placeholder"
-> & {
+type InputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> & {
   label: string
   errors?: Record<string, unknown>
   touched?: Record<string, unknown>

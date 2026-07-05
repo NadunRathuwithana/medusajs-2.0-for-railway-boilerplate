@@ -21,12 +21,12 @@ export default async function customerCreatedHandler({
       template: EmailTemplates.CUSTOMER_WELCOME,
       data: {
         emailOptions: {
-          replyTo: 'nadunrathuwithanaproductions@gmail.com',
-          subject: '🎉 Welcome to Theek.lk!',
+          replyTo: 'hello@cardle.lk',
+          subject: 'Welcome to Cardle!',
         },
         customerFirstName: customer.first_name ?? 'Customer',
         customerEmail: customer.email,
-        shopUrl: process.env.NEXT_PUBLIC_BASE_URL || 'https://theek.lk',
+        shopUrl: process.env.NEXT_PUBLIC_BASE_URL || 'https://cardle.lk',
         preview: 'Welcome! Your account has been created.',
       },
     })

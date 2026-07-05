@@ -13,6 +13,9 @@ import MobileActions from "./mobile-actions"
 import ProductPrice from "../product-price"
 import { addToCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
+import { getProductPrice } from "@lib/util/get-product-price"
+import KokoWidget from "./koko-widget"
+import { isKoko } from "@lib/constants"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -147,6 +150,33 @@ export default function ProductActions({
         <div className="-mt-4">
           <ProductPrice product={product} variant={selectedVariant} />
         </div>
+
+        {/* Koko Pay Widget */}
+        {(() => {
+          // Only show if Koko is enabled as a payment provider for this region
+          // Fallback to true if payment_providers is undefined (e.g. not fetched yet)
+          const isKokoEnabled = region?.payment_providers 
+            ? region.payment_providers.some((p) => isKoko(p.id))
+            : true
+            
+          if (!isKokoEnabled) return null
+
+          const { cheapestPrice, variantPrice } = getProductPrice({
+            product,
+            variantId: selectedVariant?.id,
+          })
+          const selectedPrice = selectedVariant ? variantPrice : cheapestPrice
+
+          if (selectedPrice?.calculated_price_number) {
+            return (
+              <KokoWidget 
+                price={selectedPrice.calculated_price_number} 
+                currencyCode={selectedPrice.currency_code} 
+              />
+            )
+          }
+          return null
+        })()}
 
         {/* Options */}
         <div>

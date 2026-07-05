@@ -4,10 +4,12 @@ import { useState } from "react"
 import Image from "next/image"
 import Register from "@modules/account/components/register"
 import Login from "@modules/account/components/login"
+import ForgotPassword from "@modules/account/components/forgot-password"
 
 export enum LOGIN_VIEW {
   SIGN_IN = "sign-in",
   REGISTER = "register",
+  FORGOT_PASSWORD = "forgot-password",
 }
 
 const LoginTemplate = () => {
@@ -34,8 +36,10 @@ const LoginTemplate = () => {
         <div className="w-full max-w-[420px] transition-all duration-300 animate-in fade-in duration-500">
           {currentView === "sign-in" ? (
             <Login setCurrentView={setCurrentView} />
-          ) : (
+          ) : currentView === "register" ? (
             <Register setCurrentView={setCurrentView} />
+          ) : (
+            <ForgotPassword setCurrentView={setCurrentView} />
           )}
         </div>
       </div>

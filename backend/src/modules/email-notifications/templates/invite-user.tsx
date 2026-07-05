@@ -7,6 +7,7 @@ export const INVITE_USER = 'invite-user'
 export interface InviteUserEmailProps {
   inviteLink: string
   preview?: string
+  shopUrl?: string
 }
 
 export const isInviteUserData = (data: any): data is InviteUserEmailProps =>
@@ -15,15 +16,17 @@ export const isInviteUserData = (data: any): data is InviteUserEmailProps =>
 export const InviteUserEmail = ({
   inviteLink,
   preview = `You've been invited to Cardle Admin`,
+  shopUrl = process.env.STORE_URL || 'https://cardle.lk',
 }: InviteUserEmailProps) => {
   return (
     <Base preview={preview}>
       {/* Hero Image */}
       <Section style={{ position: 'relative', textAlign: 'center', backgroundColor: '#e5e5e5' }}>
         <Img 
-          src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" 
+          src={`${shopUrl}/email/hero2.jpg`} 
+          // src={`http://localhost:8000/email/hero2.jpg`}
           width="600" 
-          height="200" 
+          height="400" 
           style={{ objectFit: 'cover', display: 'block' }}
           alt="Admin Invitation" 
         />
@@ -94,7 +97,7 @@ export const InviteUserEmail = ({
 }
 
 InviteUserEmail.PreviewProps = {
-  inviteLink: (process.env.STORE_URL || 'http://localhost:8000') + '/app/invite?token=abc123ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd'
+  inviteLink: (process.env.STORE_URL || 'https://cardle.lk') + '/app/invite?token=abc123ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd'
 } as InviteUserEmailProps
 
 export default InviteUserEmail
