@@ -154,7 +154,11 @@ export default function ProductActions({
         {/* Koko Pay Widget */}
         {(() => {
           // Only show if Koko is enabled as a payment provider for this region
-          const isKokoEnabled = region?.payment_providers?.some((p) => isKoko(p.id))
+          // Fallback to true if payment_providers is undefined (e.g. not fetched yet)
+          const isKokoEnabled = region?.payment_providers 
+            ? region.payment_providers.some((p) => isKoko(p.id))
+            : true
+            
           if (!isKokoEnabled) return null
 
           const { cheapestPrice, variantPrice } = getProductPrice({
