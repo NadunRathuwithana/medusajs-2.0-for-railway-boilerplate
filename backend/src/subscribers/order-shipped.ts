@@ -1,5 +1,5 @@
 import { Modules } from '@medusajs/framework/utils'
-import { INotificationModuleService } from '@medusajs/framework/types'
+import { INotificationModuleService, IOrderModuleService } from '@medusajs/framework/types'
 import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
 import { EmailTemplates } from '../modules/email-notifications/templates'
 
@@ -12,11 +12,14 @@ export default async function orderShippedHandler({
   container,
 }: SubscriberArgs<any>) {
   const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
+  const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
+  const fulfillmentModuleService: any = container.resolve(Modules.FULFILLMENT)
 
   try {
-    // data.order contains the order, data.fulfillment contains the fulfillment details
-    const order = data.order
-    const fulfillment = data.fulfillment
+    const order = await orderModuleService.retrieveOrder(data.order_id, {
+      relations: ['shipping_address'],
+    })
+    const fulfillment = await fulfillmentModuleService.retrieveFulfillment(data.fulfillment_id)
 
     if (!order?.email) {
       console.warn('[Email] No email on order for shipped event, skipping')
@@ -36,7 +39,7 @@ export default async function orderShippedHandler({
           replyTo: 'hello@cardle.lk',
           subject: `🚚 Your Order #${order.display_id} Has Shipped!`,
         },
-        orderDisplayId: order.display_id,
+        orderDisplayId: String(order.display_id),
         customerFirstName: order.shipping_address?.first_name ?? 'Customer',
         trackingNumber,
         trackingUrl,

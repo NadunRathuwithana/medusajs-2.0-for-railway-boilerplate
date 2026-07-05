@@ -30,7 +30,7 @@ export default async function orderCancelledHandler({
           replyTo: 'hello@cardle.lk',
           subject: `❌ Order #${order.display_id} Cancelled`,
         },
-        orderDisplayId: order.display_id,
+        orderDisplayId: String(order.display_id),
         customerFirstName: order.shipping_address?.first_name ?? 'Customer',
         orderTotal,
         preview: `Your order #${order.display_id} has been cancelled.`,

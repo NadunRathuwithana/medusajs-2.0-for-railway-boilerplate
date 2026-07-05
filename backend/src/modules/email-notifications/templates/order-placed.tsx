@@ -196,7 +196,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
         {/* CTA */}
         <Section style={{ textAlign: 'center' }}>
           <Button
-            href={`${shopUrl}/lk/account/orders`}
+            href={`${shopUrl}/account/orders`}
             style={{
               backgroundColor: bgDark,
               color: textLight,

@@ -15,14 +15,15 @@ export default async function passwordResetHandler({
   const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
 
   try {
-    const { email, token, first_name } = data
+    const { entity_id: email, token, metadata } = data
+    const first_name = metadata?.first_name || 'Customer'
 
     if (!email || !token) {
       console.warn('[Email] Missing email or token in password reset event')
       return
     }
 
-    const storeFrontUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://theek.lk'
+    const storeFrontUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cardle.lk'
     const resetLink = `${storeFrontUrl}/account/reset-password?token=${token}&email=${encodeURIComponent(email)}`
 
     await notificationModuleService.createNotifications({
@@ -32,7 +33,7 @@ export default async function passwordResetHandler({
       data: {
         emailOptions: {
           replyTo: 'hello@cardle.lk',
-          subject: '🔒 Reset Your Theek.lk Password',
+          subject: '🔒 Reset Your Cardle.lk Password',
         },
         customerFirstName: first_name ?? 'Customer',
         resetLink,

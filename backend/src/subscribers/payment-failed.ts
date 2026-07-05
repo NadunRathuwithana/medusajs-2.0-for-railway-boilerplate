@@ -47,7 +47,7 @@ export default async function paymentFailedHandler({
           replyTo: 'hello@cardle.lk', // Cardle standard transactional sender
           subject: `Action Required: Payment failed for Order #${order.display_id}`,
         },
-        orderDisplayId: order.display_id,
+        orderDisplayId: String(order.display_id),
         customerFirstName: order.shipping_address?.first_name ?? 'Customer',
         orderTotal,
         errorMessage: 'The payment for your order could not be processed.',
