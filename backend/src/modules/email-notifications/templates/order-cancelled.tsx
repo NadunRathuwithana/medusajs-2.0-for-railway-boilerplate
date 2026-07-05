@@ -24,19 +24,21 @@ export const OrderCancelledTemplate: React.FC<OrderCancelledTemplateProps> & {
   orderTotal, 
   cancellationReason, 
   preview = 'Your order has been cancelled',
-  shopUrl = process.env.STORE_URL || 'http://localhost:8000'
+  shopUrl = process.env.STORE_URL || 'https://cardle.lk'
 }) => {
   return (
     <Base preview={preview}>
       {/* Hero Image */}
       <Section style={{ position: 'relative', textAlign: 'center', backgroundColor: '#e5e5e5' }}>
-        <Img 
-          src="https://images.unsplash.com/photo-1590874103328-eac38a683ce7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" 
-          width="600" 
-          height="300" 
-          style={{ objectFit: 'cover', display: 'block' }}
-          alt="Order Cancelled" 
-        />
+        <Section style={{ padding: '60px 0', textAlign: 'center', backgroundColor: '#ffffff' }}>
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ margin: '0 auto', display: 'block' }}>
+            <circle cx="60" cy="60" r="60" fill="#F3F4F6"/>
+            <circle cx="60" cy="60" r="45" fill="#111111"/>
+            <path d="M46 50H74L77 78H43L46 50Z" stroke="#FFFFFF" strokeWidth="2.5" strokeLinejoin="round"/>
+            <path d="M52 50V42C52 37.5817 55.5817 34 60 34C64.4183 34 68 37.5817 68 42V50" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round"/>
+            <path d="M54 58L66 70M66 58L54 70" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round"/>
+          </svg>
+        </Section>
         <Section style={{ padding: '30px 20px', textAlign: 'center', backgroundColor: '#ffffff' }}>
           <Text style={{ fontSize: '28px', fontWeight: '800', margin: '0 0 5px', color: textPrimary, textTransform: 'uppercase', letterSpacing: '1px', fontFamily }}>
             ORDER CANCELLED

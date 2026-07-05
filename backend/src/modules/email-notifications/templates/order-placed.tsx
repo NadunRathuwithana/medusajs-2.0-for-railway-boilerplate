@@ -21,20 +21,20 @@ export const isOrderPlacedTemplateData = (data: any): data is OrderPlacedTemplat
   typeof data.order === 'object' && typeof data.shippingAddress === 'object'
 
 const formatCurrency = (amount: number, currency: string) => {
-  return `${currency?.toUpperCase() ?? ''} ${(amount / 100).toFixed(2)}`
+  return `${currency?.toUpperCase() ?? ''} ${Number(amount).toFixed(2)}`
 }
 
 export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
   PreviewProps: OrderPlacedPreviewProps
-} = ({ order, shippingAddress, preview = 'Your order has been confirmed', shopUrl = process.env.STORE_URL || 'http://localhost:8000' }) => {
+} = ({ order, shippingAddress, preview = 'Your order has been confirmed', shopUrl = process.env.STORE_URL || 'https://cardle.lk' }) => {
   return (
     <Base preview={preview}>
       {/* Hero Image */}
       <Section style={{ position: 'relative', textAlign: 'center', backgroundColor: '#e5e5e5' }}>
         <Img 
-          src={`${shopUrl}/home/cardle-uncompromising-craftsmanship.jpg`} 
+          src={`${shopUrl}/email/hero2.jpg`} 
           width="600" 
-          height="300" 
+          height="400" 
           style={{ objectFit: 'cover', display: 'block' }}
           alt="Order Confirmed" 
         />

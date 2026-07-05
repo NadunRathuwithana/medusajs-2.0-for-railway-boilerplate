@@ -33,7 +33,7 @@ export default async function orderShippedHandler({
       template: EmailTemplates.ORDER_SHIPPED,
       data: {
         emailOptions: {
-          replyTo: 'nadunrathuwithanaproductions@gmail.com',
+          replyTo: 'hello@cardle.lk',
           subject: `🚚 Your Order #${order.display_id} Has Shipped!`,
         },
         orderDisplayId: order.display_id,

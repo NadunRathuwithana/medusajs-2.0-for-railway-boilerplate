@@ -17,8 +17,8 @@ export default async function orderCancelledHandler({
 
     if (!order?.email) return
 
-    const total = order.summary
-      ? `${order.currency_code?.toUpperCase() ?? ''} ${((order.summary as any).raw_current_order_total?.value ?? 0) / 100}`
+    const orderTotal = order?.summary
+      ? `${order.currency_code?.toUpperCase() ?? ''} ${Number((order.summary as any).raw_current_order_total?.value ?? 0).toFixed(2)}`
       : undefined
 
     await notificationModuleService.createNotifications({
@@ -27,12 +27,12 @@ export default async function orderCancelledHandler({
       template: EmailTemplates.ORDER_CANCELLED,
       data: {
         emailOptions: {
-          replyTo: 'nadunrathuwithanaproductions@gmail.com',
+          replyTo: 'hello@cardle.lk',
           subject: `❌ Order #${order.display_id} Cancelled`,
         },
         orderDisplayId: order.display_id,
         customerFirstName: order.shipping_address?.first_name ?? 'Customer',
-        orderTotal: total,
+        orderTotal,
         preview: `Your order #${order.display_id} has been cancelled.`,
       },
     })

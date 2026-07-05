@@ -24,7 +24,7 @@ export default async function orderPlacedHandler({
       template: EmailTemplates.ORDER_PLACED,
       data: {
         emailOptions: {
-          replyTo: 'nadunrathuwithanaproductions@gmail.com',
+          replyTo: 'hello@cardle.lk',
           subject: `✅ Order Confirmed — #${order.display_id}`,
         },
         order,

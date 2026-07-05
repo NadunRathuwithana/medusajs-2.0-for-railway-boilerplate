@@ -102,7 +102,7 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
     const { amount, currency_code, context } = input
 
     // Medusa stores amounts in smallest unit (cents) — Koko wants "300.00" format
-    const kokoAmount = (Number(amount) / 100).toFixed(2)
+    const kokoAmount = Number(amount).toFixed(2)
     const currency = currency_code.toUpperCase()
 
     // In Medusa v2, the PaymentSession ID is passed in input.data.session_id

@@ -31,7 +31,7 @@ export default async function passwordResetHandler({
       template: EmailTemplates.PASSWORD_RESET,
       data: {
         emailOptions: {
-          replyTo: 'nadunrathuwithanaproductions@gmail.com',
+          replyTo: 'hello@cardle.lk',
           subject: '🔒 Reset Your Theek.lk Password',
         },
         customerFirstName: first_name ?? 'Customer',

@@ -31,7 +31,7 @@ export default async function paymentFailedHandler({
     }
 
     const formatCurrency = (amount: number, currency: string) => {
-      return `${currency?.toUpperCase() ?? ''} ${(amount / 100).toFixed(2)}`
+      return `${currency?.toUpperCase() ?? ''} ${Number(amount).toFixed(2)}`
     }
 
     const orderTotal = order.summary?.raw_current_order_total?.value 
@@ -44,7 +44,7 @@ export default async function paymentFailedHandler({
       template: EmailTemplates.PAYMENT_FAILED,
       data: {
         emailOptions: {
-          replyTo: 'orders@cardle.lk', // Cardle standard transactional sender
+          replyTo: 'hello@cardle.lk', // Cardle standard transactional sender
           subject: `Action Required: Payment failed for Order #${order.display_id}`,
         },
         orderDisplayId: order.display_id,

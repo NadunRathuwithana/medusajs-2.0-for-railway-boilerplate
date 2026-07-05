@@ -122,7 +122,7 @@ const medusaConfig = {
         ]
       : []),
     // Notification module via Resend — only included when Resend credentials are set
-    // TODO: MUST change onboarding@resend.dev to a verified cardle.lk address (e.g. orders@cardle.lk) before going live with real customers!
+    // TODO: MUST change onboarding@resend.dev to a verified cardle.lk address (e.g. hello@cardle.lk) before going live with real customers!
     ...(RESEND_API_KEY && RESEND_FROM_EMAIL
       ? [
           {
