@@ -13,6 +13,8 @@ import MobileActions from "./mobile-actions"
 import ProductPrice from "../product-price"
 import { addToCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
+import { getProductPrice } from "@lib/util/get-product-price"
+import KokoWidget from "./koko-widget"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -147,6 +149,25 @@ export default function ProductActions({
         <div className="-mt-4">
           <ProductPrice product={product} variant={selectedVariant} />
         </div>
+
+        {/* Koko Pay Widget */}
+        {(() => {
+          const { cheapestPrice, variantPrice } = getProductPrice({
+            product,
+            variantId: selectedVariant?.id,
+          })
+          const selectedPrice = selectedVariant ? variantPrice : cheapestPrice
+
+          if (selectedPrice?.calculated_price_number) {
+            return (
+              <KokoWidget 
+                price={selectedPrice.calculated_price_number} 
+                currencyCode={selectedPrice.currency_code} 
+              />
+            )
+          }
+          return null
+        })()}
 
         {/* Options */}
         <div>
