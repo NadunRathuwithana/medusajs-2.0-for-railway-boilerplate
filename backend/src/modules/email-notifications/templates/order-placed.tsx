@@ -24,6 +24,14 @@ const formatCurrency = (amount: number, currency: string) => {
   return `${currency?.toUpperCase() ?? ''} ${Number(amount).toFixed(2)}`
 }
 
+const getPaymentMethodName = (providerId: string) => {
+  if (!providerId) return 'Online Payment'
+  if (providerId.includes('system_default')) return 'Cash on Delivery'
+  if (providerId.includes('onepay')) return 'Visa / Mastercard'
+  if (providerId.includes('koko')) return 'Koko Pay'
+  return providerId.replace(/_/g, ' ').toUpperCase()
+}
+
 export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
   PreviewProps: OrderPlacedPreviewProps
 } = ({ order, shippingAddress, preview = 'Your order has been confirmed', shopUrl = process.env.STORE_URL || 'https://cardle.lk' }) => {
@@ -76,13 +84,50 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
               <tr>
                 <td style={{ padding: '6px 0', color: textSecondary, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px' }}>Payment Method</td>
                 <td style={{ padding: '6px 0', fontWeight: '600', fontSize: '13px', textAlign: 'right', color: textPrimary }}>
-                  {((order as any).payment_collections?.[0]?.payments?.[0]?.provider_id ?? 'Online Payment').replace(/_/g, ' ').toUpperCase()}
+                  {getPaymentMethodName((order as any).payment_collections?.[0]?.payments?.[0]?.provider_id)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <Hr style={{ borderColor: borderLight, margin: '16px 0' }} />
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily }}>
+            <tbody>
+              <tr>
+                <td style={{ padding: '4px 0', color: textSecondary, fontSize: '12px' }}>Item Subtotal</td>
+                <td style={{ padding: '4px 0', fontWeight: '500', fontSize: '13px', textAlign: 'right', color: textPrimary }}>
+                  {formatCurrency((order as any).item_subtotal ?? (order as any).summary?.raw_current_item_total?.value ?? 0, order.currency_code)}
                 </td>
               </tr>
               <tr>
-                <td style={{ padding: '6px 0', color: textSecondary, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px' }}>Total Amount</td>
-                <td style={{ padding: '6px 0', fontWeight: '800', fontSize: '14px', textAlign: 'right', color: '#d9534f' }}>
-                  {formatCurrency(order.summary.raw_current_order_total.value, order.currency_code)}
+                <td style={{ padding: '4px 0', color: textSecondary, fontSize: '12px' }}>Shipping</td>
+                <td style={{ padding: '4px 0', fontWeight: '500', fontSize: '13px', textAlign: 'right', color: textPrimary }}>
+                  {formatCurrency((order as any).shipping_total ?? (order as any).summary?.raw_current_shipping_total?.value ?? 0, order.currency_code)}
+                </td>
+              </tr>
+              {(((order as any).discount_total ?? (order as any).summary?.raw_current_discount_total?.value ?? 0) > 0) && (
+                <tr>
+                  <td style={{ padding: '4px 0', color: '#16a34a', fontSize: '12px' }}>Discount</td>
+                  <td style={{ padding: '4px 0', fontWeight: '500', fontSize: '13px', textAlign: 'right', color: '#16a34a' }}>
+                    - {formatCurrency((order as any).discount_total ?? (order as any).summary?.raw_current_discount_total?.value ?? 0, order.currency_code)}
+                  </td>
+                </tr>
+              )}
+              <tr>
+                <td style={{ padding: '8px 0 0', color: textPrimary, fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' }}>Total Amount</td>
+                <td style={{ padding: '8px 0 0', fontWeight: '800', fontSize: '15px', textAlign: 'right', color: '#d9534f' }}>
+                  {formatCurrency((order as any).total ?? (order as any).summary?.raw_current_order_total?.value ?? 0, order.currency_code)}
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: '4px 0 0', color: textSecondary, fontSize: '12px' }}>Paid Total</td>
+                <td style={{ padding: '4px 0 0', fontWeight: '500', fontSize: '13px', textAlign: 'right', color: textSecondary }}>
+                  {formatCurrency(0, order.currency_code)}
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: '4px 0 0', color: textPrimary, fontSize: '12px', fontWeight: '600' }}>Outstanding Amount</td>
+                <td style={{ padding: '4px 0 0', fontWeight: '700', fontSize: '13px', textAlign: 'right', color: textPrimary }}>
+                  {formatCurrency((order as any).total ?? (order as any).summary?.raw_current_order_total?.value ?? 0, order.currency_code)}
                 </td>
               </tr>
             </tbody>
@@ -229,6 +274,11 @@ OrderPlacedTemplate.PreviewProps = {
     created_at: new Date().toISOString(),
     email: 'customer@example.com',
     currency_code: 'LKR',
+    payment_collections: [{ payments: [{ provider_id: 'pp_onepay_onepay' }] }],
+    discount_total: 500,
+    item_subtotal: 10000,
+    shipping_total: 500,
+    total: 10000,
     items: [
       { id: 'item-1', title: 'Black', product_title: 'Classic Tote', quantity: 2, unit_price: 2500, thumbnail: 'https://images.unsplash.com/photo-1544816155-12df9643f363?ixlib=rb-4.0.3&w=150&q=80' },
       { id: 'item-2', title: 'Natural', product_title: 'Premium Canvas Bag', quantity: 1, unit_price: 5000, thumbnail: 'https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?ixlib=rb-4.0.3&w=150&q=80' },
@@ -242,7 +292,12 @@ OrderPlacedTemplate.PreviewProps = {
       postal_code: '00100',
       country_code: 'LK',
     },
-    summary: { raw_current_order_total: { value: 10000 } },
+    summary: { 
+      raw_current_order_total: { value: 10000 },
+      raw_current_discount_total: { value: 500 },
+      raw_current_item_total: { value: 10000 },
+      raw_current_shipping_total: { value: 500 }
+    },
   },
   shippingAddress: {
     first_name: 'Nadun',

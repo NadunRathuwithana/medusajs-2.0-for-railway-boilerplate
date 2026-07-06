@@ -91,7 +91,7 @@ export const OrderCancelledTemplate: React.FC<OrderCancelledTemplateProps> & {
         {/* CTA */}
         <Section style={{ textAlign: 'center' }}>
           <Button
-            href={`${shopUrl}/lk/tote-bags`}
+            href={`${shopUrl}/store`}
             style={{
               backgroundColor: bgDark,
               color: textLight,

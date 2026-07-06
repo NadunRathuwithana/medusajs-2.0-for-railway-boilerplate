@@ -87,7 +87,7 @@ export const OrderRefundTemplate: React.FC<OrderRefundTemplateProps> & {
         {/* CTA */}
         <Section style={{ textAlign: 'center' }}>
           <Button
-            href={`${shopUrl}/lk/tote-bags`}
+            href={`${shopUrl}/store`}
             style={{
               backgroundColor: bgDark,
               color: textLight,
