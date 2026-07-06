@@ -102,9 +102,10 @@ const Payment = ({
         }
 
         // Add basic validation for required customer fields
-        const b = cartRef.current?.billing_address || cartRef.current?.shipping_address
+        // Must match Review component's missingDetails logic
+        const billingFirstName = cartRef.current?.billing_address?.first_name
         const email = cartRef.current?.email
-        if (!b?.first_name || !email) {
+        if (!billingFirstName || !email) {
           // Validation error will be shown beautifully in the Review component
           return
         }
@@ -151,7 +152,7 @@ const Payment = ({
     // duplicate initiatePaymentSession calls. We access the latest cart value
     // via cartRef.current inside the effect instead.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paymentReady, selectedPaymentMethod, activeSession, paidByGiftcard])
+  }, [paymentReady, cart?.updated_at, selectedPaymentMethod, activeSession, paidByGiftcard])
 
   // Sync state to PaymentButton to prevent race conditions during rapid checkouts
   useEffect(() => {
