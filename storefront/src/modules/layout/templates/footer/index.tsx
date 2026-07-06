@@ -288,10 +288,10 @@ export default async function Footer() {
                 <li>
                   <span className="text-gray-500">Phone: </span>
                   <a
-                    href="tel:+94777993883"
+                    href="tel:+94779497859"
                     className="text-white hover:text-gray-300 transition-colors font-medium"
                   >
-                    +94 777 993 883
+                    +94 77 949 7859 
                   </a>
                 </li>
                 <li className="mt-4 pt-4 border-t border-zinc-900">

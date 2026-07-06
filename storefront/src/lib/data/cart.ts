@@ -82,13 +82,13 @@ export async function addToCart({
     throw new Error("Missing variant ID when adding to cart")
   }
 
-  const cart = await getOrSetCart(countryCode)
+  let cart = await getOrSetCart(countryCode)
   if (!cart) {
     throw new Error("Error retrieving or creating cart")
   }
 
-  await sdk.store.cart
-    .createLineItem(
+  try {
+    await sdk.store.cart.createLineItem(
       cart.id,
       {
         variant_id: variantId,
@@ -97,11 +97,28 @@ export async function addToCart({
       {},
       await getAuthHeaders()
     )
-    .then(() => {
-      revalidateTag("cart")
-      revalidateTag("shipping")
-    })
-    .catch(medusaError)
+    revalidateTag("cart")
+    revalidateTag("shipping")
+  } catch (error: any) {
+    const errorMsg = error?.message || error?.response?.data?.message || ""
+    if (errorMsg.includes("customer_email") && errorMsg.includes("promotion")) {
+      console.warn("Cart is poisoned by a stuck promotion. Clearing cart and retrying...")
+      await removeCartId()
+      cart = await getOrSetCart(countryCode)
+      if (cart) {
+        await sdk.store.cart.createLineItem(
+          cart.id,
+          { variant_id: variantId, quantity },
+          {},
+          await getAuthHeaders()
+        )
+        revalidateTag("cart")
+        revalidateTag("shipping")
+        return
+      }
+    }
+    medusaError(error)
+  }
 }
 
 export async function updateLineItem({
@@ -259,7 +276,15 @@ export async function applyPromotions(codes: string[]) {
     await updateCart({ promo_codes: codes })
     return { success: true }
   } catch (error: any) {
-    return { error: error.message || "Failed to apply promotions" }
+    let errorMessage = error.message || "We couldn't apply that promotion right now."
+    if (errorMessage.includes("customer_email") && errorMessage.includes("required")) {
+      errorMessage = "Please enter your email address before applying this promo code."
+    } else if (errorMessage.toLowerCase().includes("invalid") || errorMessage.toLowerCase().includes("not found")) {
+      errorMessage = "This promo code doesn't seem to be valid. Please check and try again."
+    } else if (errorMessage.toLowerCase().includes("already applied")) {
+      errorMessage = "This promo code is already applied to your cart."
+    }
+    return { error: errorMessage }
   }
 }
 

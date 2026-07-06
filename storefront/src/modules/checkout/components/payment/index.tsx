@@ -1,6 +1,6 @@
 "use client"
 
-import { useContext, useEffect, useMemo, useRef, useState } from "react"
+import { useContext, useEffect, useMemo, useRef, useState, useTransition } from "react"
 import { RadioGroup } from "@headlessui/react"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { CheckCircleSolid } from "@medusajs/icons"
@@ -8,9 +8,9 @@ import { CardElement } from "@stripe/react-stripe-js"
 import { StripeCardElementOptions } from "@stripe/stripe-js"
 
 import PaymentContainer from "@modules/checkout/components/payment-container"
-import { isStripe as isStripeFunc, paymentInfoMap } from "@lib/constants"
+import { isStripe as isStripeFunc, paymentInfoMap, getPaymentPromoInfo, getAllPaymentPromoCodes } from "@lib/constants"
 import { StripeContext } from "@modules/checkout/components/payment-wrapper"
-import { initiatePaymentSession } from "@lib/data/cart"
+import { initiatePaymentSession, applyPromotions } from "@lib/data/cart"
 
 const Payment = ({
   cart,
@@ -79,6 +79,67 @@ const Payment = ({
   useEffect(() => {
     setError(null)
   }, [])
+
+  const [isPendingPromotions, startTransition] = useTransition()
+
+  // Track the last successfully requested promo codes to prevent infinite loops
+  const lastAttemptedCodesRef = useRef<string | null>(null)
+
+  // Handle automatic payment promotions
+  useEffect(() => {
+    if (!selectedPaymentMethod || !cart) return
+
+    const promoInfo = getPaymentPromoInfo(selectedPaymentMethod)
+    const codeToAdd = promoInfo.code
+    
+    // Normalize codes to uppercase for safe comparison
+    const allPaymentCodesUpper = getAllPaymentPromoCodes().map(c => c.toUpperCase())
+    const currentCodes = (cart.promotions || []).map((p: any) => p.code).filter(Boolean)
+    
+    // Filter out all known payment codes to preserve user's own promos (e.g., SITEWIDE10)
+    // Compare in uppercase to prevent case-mismatches from keeping the code stuck
+    const nonPaymentCodes = currentCodes.filter(
+      (c: string) => !allPaymentCodesUpper.includes(c.toUpperCase())
+    )
+    
+    // Build target codes array
+    const targetCodes = [...nonPaymentCodes]
+    if (codeToAdd) {
+      // Check if we already have it (case-insensitive)
+      const hasCode = targetCodes.some(c => c.toUpperCase() === codeToAdd.toUpperCase())
+      if (!hasCode) {
+        targetCodes.push(codeToAdd)
+      }
+    }
+
+    // Check if targetCodes differ from currentCodes (case-insensitive check)
+    const targetSorted = [...targetCodes].map(c => c.toUpperCase()).sort()
+    const currentSorted = [...currentCodes].map(c => c.toUpperCase()).sort()
+    
+    const hasChanged = targetSorted.length !== currentSorted.length || 
+      targetSorted.some((val, i) => val !== currentSorted[i])
+      
+    // Create a string representation to check if we already attempted this exact sync
+    const targetCodesString = targetSorted.join(",")
+
+    // Only apply if it actually changed AND we haven't already attempted this exact state.
+    // This strictly prevents infinite loops if the Medusa server drops the update or delays it.
+    if (hasChanged && lastAttemptedCodesRef.current !== targetCodesString) {
+      lastAttemptedCodesRef.current = targetCodesString
+      startTransition(() => {
+        applyPromotions(targetCodes).then((res) => {
+          if (res?.error) {
+            console.error("Failed to apply payment promo:", res.error)
+            // If it failed (e.g. missing email), reset the ref so it can be retried later
+            lastAttemptedCodesRef.current = null
+          }
+        }).catch((err) => {
+          console.error(err)
+          lastAttemptedCodesRef.current = null
+        })
+      })
+    }
+  }, [selectedPaymentMethod, cart?.promotions])
 
   // Stable refs to prevent stale closure issues without adding `cart` to deps
   const cartIdRef = useRef<string>(cart?.id)

@@ -4,6 +4,7 @@ import { useMemo } from "react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
+import { paymentInfoMap } from "@lib/constants"
 
 type OrderCardProps = {
   order: HttpTypes.StoreOrder
@@ -55,6 +56,14 @@ const OrderCard = ({ order }: OrderCardProps) => {
             <span>
               {numberOfLines} {numberOfLines === 1 ? "item" : "items"}
             </span>
+            {order.payment_collections?.[0]?.payments?.[0]?.provider_id && (
+              <>
+                <span>•</span>
+                <span>
+                  {paymentInfoMap[order.payment_collections[0].payments[0].provider_id]?.title || order.payment_collections[0].payments[0].provider_id}
+                </span>
+              </>
+            )}
           </div>
         </div>
 

@@ -81,3 +81,40 @@ export const noDivisionCurrencies = [
   "xdr",
   "xau",
 ]
+
+export const getPaymentPromoInfo = (providerId: string) => {
+  if (providerId?.startsWith("pp_stripe_")) {
+    return {
+      code: process.env.NEXT_PUBLIC_PROMO_STRIPE_CODE,
+      tag: process.env.NEXT_PUBLIC_PROMO_STRIPE_TAG
+    }
+  }
+  if (providerId?.startsWith("pp_onepay")) {
+    return {
+      code: process.env.NEXT_PUBLIC_PROMO_ONEPAY_CODE,
+      tag: process.env.NEXT_PUBLIC_PROMO_ONEPAY_TAG
+    }
+  }
+  if (providerId?.startsWith("pp_koko")) {
+    return {
+      code: process.env.NEXT_PUBLIC_PROMO_KOKO_CODE,
+      tag: process.env.NEXT_PUBLIC_PROMO_KOKO_TAG
+    }
+  }
+  if (providerId?.startsWith("pp_system_default")) {
+    return {
+      code: process.env.NEXT_PUBLIC_PROMO_MANUAL_CODE,
+      tag: process.env.NEXT_PUBLIC_PROMO_MANUAL_TAG
+    }
+  }
+  return { code: undefined, tag: undefined }
+}
+
+export const getAllPaymentPromoCodes = () => {
+  return [
+    process.env.NEXT_PUBLIC_PROMO_STRIPE_CODE,
+    process.env.NEXT_PUBLIC_PROMO_ONEPAY_CODE,
+    process.env.NEXT_PUBLIC_PROMO_KOKO_CODE,
+    process.env.NEXT_PUBLIC_PROMO_MANUAL_CODE
+  ].filter(Boolean) as string[]
+}
