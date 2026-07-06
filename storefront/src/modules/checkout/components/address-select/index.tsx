@@ -97,7 +97,6 @@ const AddressSelect = ({
                           {address.postal_code}, {address.city}
                         </span>
                         <span>
-                          {address.province && `${address.province}, `}
                           {address.country_code?.toUpperCase()}
                         </span>
                       </div>
