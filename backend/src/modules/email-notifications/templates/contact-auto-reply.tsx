@@ -26,11 +26,11 @@ export const ContactAutoReplyTemplate: React.FC<ContactAutoReplyTemplateData> = 
       {/* Hero Image */}
       <Section style={{ position: 'relative', textAlign: 'center', backgroundColor: '#e5e5e5' }}>
         <Img 
-          src="https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" 
+          src={`${shopUrl}/email/hero2.jpg`}
           width="600" 
-          height="200" 
+          height="300" 
           style={{ objectFit: 'cover', display: 'block' }}
-          alt="Contact Received" 
+          alt="Message Received" 
         />
         <Section style={{ padding: '30px 20px', textAlign: 'center', backgroundColor: '#ffffff' }}>
           <Text style={{ fontSize: '24px', fontWeight: '800', margin: '0 0 5px', color: textPrimary, textTransform: 'uppercase', letterSpacing: '1px', fontFamily }}>

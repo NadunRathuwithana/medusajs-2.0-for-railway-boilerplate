@@ -41,45 +41,56 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       console.warn("[Contact Form] Notification module is not configured in this environment.")
     }
 
-    const adminEmail = SMTP_ADMIN_EMAIL || process.env.SMTP_USER || 'hello@cardle.lk'
+    const SUPPORT_EMAIL = 'support@cardle.lk'
     const referenceNumber = `CF-${Math.floor(10000 + Math.random() * 90000)}`
+    const contactEmailData = {
+      emailOptions: {
+        replyTo: email.trim(),
+        subject: `Contact Form [${referenceNumber}] — from ${name.trim()}`,
+      },
+      referenceNumber,
+      senderName: name.trim(),
+      senderEmail: email.trim(),
+      subject: subject?.trim() || 'General Inquiry',
+      message: message.trim(),
+      submittedAt: new Date().toLocaleString('en-US', {
+        timeZone: 'Asia/Colombo',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      preview: `New message from ${name.trim()}`,
+    }
 
     if (notificationModuleService) {
-      // 1. Internal alert
+      // 1. Internal alert → admin inbox
       await notificationModuleService.createNotifications({
         to: adminEmail,
         channel: 'email',
         template: EmailTemplates.CONTACT_FORM,
-        data: {
-          emailOptions: {
-            replyTo: email.trim(),
-            subject: `Contact Form [${referenceNumber}] — from ${name.trim()}`,
-          },
-          referenceNumber,
-          senderName: name.trim(),
-          senderEmail: email.trim(),
-          subject: subject?.trim() || 'General Inquiry',
-          message: message.trim(),
-          submittedAt: new Date().toLocaleString('en-US', {
-            timeZone: 'Asia/Colombo',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-          }),
-          preview: `New message from ${name.trim()}`,
-        },
+        data: contactEmailData,
       })
 
-      // 2. Customer auto-reply
+      // 2. CC support@cardle.lk (only if it's different from adminEmail)
+      if (adminEmail !== SUPPORT_EMAIL) {
+        await notificationModuleService.createNotifications({
+          to: SUPPORT_EMAIL,
+          channel: 'email',
+          template: EmailTemplates.CONTACT_FORM,
+          data: contactEmailData,
+        })
+      }
+
+      // 3. Customer auto-reply
       await notificationModuleService.createNotifications({
         to: email.trim(),
         channel: 'email',
         template: EmailTemplates.CONTACT_AUTO_REPLY,
         data: {
           emailOptions: {
-            replyTo: adminEmail,
+            replyTo: SUPPORT_EMAIL,
             subject: `We've received your message [${referenceNumber}]`,
           },
           customerName: name.trim(),
