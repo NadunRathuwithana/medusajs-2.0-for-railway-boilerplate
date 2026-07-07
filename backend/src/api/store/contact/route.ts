@@ -2,8 +2,7 @@ import { MedusaRequest, MedusaResponse } from '@medusajs/framework'
 import { Modules } from '@medusajs/framework/utils'
 import { INotificationModuleService } from '@medusajs/framework/types'
 import { EmailTemplates } from '../../../modules/email-notifications/templates'
-import { CONTACT_AUTO_REPLY } from '../../../modules/email-notifications/templates/contact-auto-reply'
-import { SMTP_ADMIN_EMAIL } from '../../../lib/constants'
+import { ADMIN_EMAIL } from '../../../lib/constants'
 
 interface ContactFormBody {
   name: string
@@ -67,14 +66,14 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     if (notificationModuleService) {
       // 1. Internal alert → admin inbox
       await notificationModuleService.createNotifications({
-        to: SMTP_ADMIN_EMAIL,
+        to: ADMIN_EMAIL,
         channel: 'email',
         template: EmailTemplates.CONTACT_FORM,
         data: contactEmailData,
       })
 
-      // 2. CC support@cardle.lk (only if it's different from adminEmail)
-      if (SMTP_ADMIN_EMAIL !== SUPPORT_EMAIL) {
+      // 2. CC support@cardle.lk (only if it's different from admin email)
+      if (ADMIN_EMAIL !== SUPPORT_EMAIL) {
         await notificationModuleService.createNotifications({
           to: SUPPORT_EMAIL,
           channel: 'email',
