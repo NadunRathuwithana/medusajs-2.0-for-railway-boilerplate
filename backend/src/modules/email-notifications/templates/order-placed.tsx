@@ -104,14 +104,23 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                   {formatCurrency((order as any).shipping_total ?? (order as any).summary?.raw_current_shipping_total?.value ?? 0, order.currency_code)}
                 </td>
               </tr>
-              {(((order as any).discount_total ?? (order as any).summary?.raw_current_discount_total?.value ?? 0) > 0) && (
-                <tr>
-                  <td style={{ padding: '4px 0', color: '#16a34a', fontSize: '12px' }}>Discount</td>
-                  <td style={{ padding: '4px 0', fontWeight: '500', fontSize: '13px', textAlign: 'right', color: '#16a34a' }}>
-                    - {formatCurrency((order as any).discount_total ?? (order as any).summary?.raw_current_discount_total?.value ?? 0, order.currency_code)}
-                  </td>
-                </tr>
-              )}
+              {(() => {
+                const discountVal =
+                  (order as any).discount_total ??
+                  (order as any).discount_subtotal ??
+                  (order as any).promotion_total ??
+                  (order as any).summary?.discount_total ??
+                  (order as any).summary?.raw_discount_total?.value ??
+                  (order as any).summary?.raw_current_discount_total?.value ?? 0
+                return discountVal > 0 ? (
+                  <tr>
+                    <td style={{ padding: '4px 0', color: '#16a34a', fontSize: '12px' }}>Discount</td>
+                    <td style={{ padding: '4px 0', fontWeight: '500', fontSize: '13px', textAlign: 'right', color: '#16a34a' }}>
+                      - {formatCurrency(discountVal, order.currency_code)}
+                    </td>
+                  </tr>
+                ) : null
+              })()}
               <tr>
                 <td style={{ padding: '8px 0 0', color: textPrimary, fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' }}>Total Amount</td>
                 <td style={{ padding: '8px 0 0', fontWeight: '800', fontSize: '15px', textAlign: 'right', color: '#d9534f' }}>

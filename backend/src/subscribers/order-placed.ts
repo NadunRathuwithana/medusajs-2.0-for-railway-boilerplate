@@ -11,7 +11,7 @@ export default async function orderPlacedHandler({
   const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
 
   const order = await orderModuleService.retrieveOrder(data.id, {
-    relations: ['items', 'summary', 'shipping_address'],
+    relations: ['items', 'summary', 'shipping_address', 'payment_collections', 'payment_collections.payments'],
   })
   const shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(
     order.shipping_address.id
@@ -25,7 +25,7 @@ export default async function orderPlacedHandler({
       data: {
         emailOptions: {
           replyTo: 'hello@cardle.lk',
-          subject: `✅ Order Confirmed — #${order.display_id}`,
+          subject: `Order Confirmed — #${order.display_id}`,
         },
         order,
         shippingAddress,
