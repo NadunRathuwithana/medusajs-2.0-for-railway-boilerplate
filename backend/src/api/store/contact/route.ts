@@ -67,14 +67,14 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     if (notificationModuleService) {
       // 1. Internal alert → admin inbox
       await notificationModuleService.createNotifications({
-        to: adminEmail,
+        to: SMTP_ADMIN_EMAIL,
         channel: 'email',
         template: EmailTemplates.CONTACT_FORM,
         data: contactEmailData,
       })
 
       // 2. CC support@cardle.lk (only if it's different from adminEmail)
-      if (adminEmail !== SUPPORT_EMAIL) {
+      if (SMTP_ADMIN_EMAIL !== SUPPORT_EMAIL) {
         await notificationModuleService.createNotifications({
           to: SUPPORT_EMAIL,
           channel: 'email',
