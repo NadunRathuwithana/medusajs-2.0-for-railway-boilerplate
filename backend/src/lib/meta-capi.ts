@@ -1,4 +1,4 @@
-import bizSdk from 'facebook-nodejs-business-sdk'
+import * as bizSdk from 'facebook-nodejs-business-sdk'
 import crypto from 'crypto'
 
 const accessToken = process.env.META_CONVERSIONS_API_ACCESS_TOKEN
