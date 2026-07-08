@@ -209,7 +209,7 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
                 }
               )}
             >
-              <Image src={image.url} alt={`Thumb ${index + 1}`} fill sizes="64px" style={{ objectFit: "cover" }} />
+              <Image src={image.url} alt={`Thumb ${index + 1}`} title={`Product image ${index + 1}`} fill sizes="64px" style={{ objectFit: "cover" }} />
             </button>
           ))}
         </div>
@@ -282,7 +282,7 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
                   }
                 )}
               >
-                <Image src={image.url} alt={`Thumbnail ${index + 1}`} fill sizes="96px" style={{ objectFit: "cover" }} />
+                <Image src={image.url} alt={`Thumbnail ${index + 1}`} title={`Product image ${index + 1}`} fill sizes="96px" style={{ objectFit: "cover" }} />
               </button>
             ))}
           </div>

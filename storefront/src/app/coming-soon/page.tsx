@@ -26,7 +26,7 @@ export default function ComingSoonPage() {
       {/* Background Image */}
       <div 
         className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: 'url("/coming-soon.jpg")' }}
+        style={{ backgroundImage: 'url("/cardle-premium-cotton-totes-coming-soon.jpg")' }}
       />
       
       <div className="relative z-10 w-full max-w-2xl flex flex-col items-center text-center mt-[-5vh]">
@@ -35,6 +35,7 @@ export default function ComingSoonPage() {
           <Image 
             src="/cardle-premium-cotton-tote-bags-logo.png" 
             alt="Cardle Logo" 
+            title="Cardle Logo"
             width={200} 
             height={80} 
             className="h-auto w-auto max-h-24 object-contain"

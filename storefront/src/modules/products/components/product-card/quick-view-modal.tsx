@@ -156,7 +156,7 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
                 idx === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
               )}
             >
-              <Image src={src} alt={product.title} fill className="object-cover object-center" />
+              <Image src={src} alt={product.title} title={product.title} fill className="object-cover object-center" />
             </div>
           ))}
 

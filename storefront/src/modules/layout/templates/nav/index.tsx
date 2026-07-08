@@ -44,7 +44,7 @@ export default async function Nav() {
               className="flex items-center justify-center"
               data-testid="nav-store-link"
             >
-              <img src="/cardle-premium-cotton-tote-bags-logo.png" alt="Logo" className="h-6 w-auto" />
+              <img src="/cardle-premium-cotton-tote-bags-logo.png" alt="Cardle Premium Cotton Tote Bags Logo" title="Cardle Premium Cotton Tote Bags Logo" className="h-6 w-auto" />
             </LocalizedClientLink>
           </div>
 

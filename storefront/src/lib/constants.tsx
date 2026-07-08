@@ -33,11 +33,11 @@ export const paymentInfoMap: Record<
   },
   pp_onepay_onepay: {
     title: "Credit/ Debit Card",
-    icon: <img src="/payment/visa_master.png" alt="Credit/ Debit Card" className="h-6 object-contain" />,
+    icon: <img src="/payment/visa-mastercard-accepted.png" alt="Visa Mastercard accepted" title="Visa Mastercard accepted" className="h-6 object-contain" />,
   },
   pp_koko_koko: {
     title: "Koko: Buy Now Pay Later",
-    icon: <img src="/payment/koko.png" alt="Koko Pay" className="h-6 object-contain" />,
+    icon: <img src="/payment/koko-pay-sri-lanka-accepted.png" alt="Koko Pay Sri Lanka accepted" title="Koko Pay Sri Lanka accepted" className="h-6 object-contain" />,
   },
   // Add more payment providers here
 }
