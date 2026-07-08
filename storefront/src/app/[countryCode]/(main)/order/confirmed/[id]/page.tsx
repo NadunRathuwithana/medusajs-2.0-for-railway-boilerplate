@@ -30,11 +30,18 @@ export const metadata: Metadata = {
   description: "You purchase was successful",
 }
 
+import PurchaseTracker from "@components/analytics/PurchaseTracker"
+
 export default async function OrderConfirmedPage({ params }: Props) {
   const order = await getOrder(params.id)
   if (!order) {
     return notFound()
   }
 
-  return <OrderCompletedTemplate order={order} />
+  return (
+    <>
+      <PurchaseTracker order={order} />
+      <OrderCompletedTemplate order={order} />
+    </>
+  )
 }

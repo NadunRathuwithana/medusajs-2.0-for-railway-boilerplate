@@ -2,6 +2,7 @@ import { Modules } from '@medusajs/framework/utils'
 import { INotificationModuleService, IOrderModuleService } from '@medusajs/framework/types'
 import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
 import { EmailTemplates } from '../modules/email-notifications/templates'
+import { sendPurchaseEvent } from '../lib/meta-capi'
 
 export default async function orderPlacedHandler({
   event: { data },
@@ -16,6 +17,13 @@ export default async function orderPlacedHandler({
   const shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(
     order.shipping_address.id
   )
+
+  try {
+    // Send Meta Conversions API event
+    await sendPurchaseEvent(order)
+  } catch (error) {
+    console.error('[Meta CAPI] Error:', error)
+  }
 
   try {
     await notificationModuleService.createNotifications({

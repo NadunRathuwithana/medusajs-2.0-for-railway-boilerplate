@@ -52,10 +52,15 @@ export const metadata: Metadata = {
   },
 }
 
+import MetaPixel from "@components/analytics/MetaPixel"
+import GoogleAnalytics from "@components/analytics/GoogleAnalytics"
+
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en" data-mode="light">
       <body suppressHydrationWarning>
+        <MetaPixel />
+        <GoogleAnalytics />
         <main className="relative">{props.children}</main>
       </body>
     </html>

@@ -28,12 +28,15 @@ const fetchCart = async () => {
   return cart
 }
 
+import CheckoutTracker from "@components/analytics/CheckoutTracker"
+
 export default async function Checkout() {
   const cart = await fetchCart()
   const customer = await getCustomer()
 
   return (
     <div className="bg-[#fafafa] min-h-screen py-12 md:py-24">
+      <CheckoutTracker cart={cart} />
       <div className="content-container max-w-[1140px] mx-auto">
         <div className="mb-6">
           <BackButton />

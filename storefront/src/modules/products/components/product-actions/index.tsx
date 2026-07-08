@@ -32,6 +32,8 @@ const optionsAsKeymap = (variantOptions: any) => {
   }, {})
 }
 
+import { trackAddToCart, trackViewContent } from "@lib/analytics/track"
+
 export default function ProductActions({
   product,
   region,
@@ -43,6 +45,17 @@ export default function ProductActions({
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
+
+  // Track ViewContent on mount
+  useEffect(() => {
+    const { cheapestPrice } = getProductPrice({ product })
+    trackViewContent({
+      id: product.id!,
+      name: product.title!,
+      price: cheapestPrice?.calculated_price_number || 0,
+      currency: (cheapestPrice?.currency_code || region.currency_code).toUpperCase(),
+    })
+  }, [product, region.currency_code])
 
   // Initialize options from URL or default to 1 variant
   useEffect(() => {
@@ -132,6 +145,20 @@ export default function ProductActions({
     if (!selectedVariant?.id) return null
 
     setIsAdding(true)
+
+    // Track AddToCart
+    const { cheapestPrice, variantPrice } = getProductPrice({
+      product,
+      variantId: selectedVariant?.id,
+    })
+    const selectedPrice = selectedVariant ? variantPrice : cheapestPrice
+    trackAddToCart({
+      id: selectedVariant.id,
+      name: `${product.title} - ${selectedVariant.title}`,
+      price: selectedPrice?.calculated_price_number || 0,
+      quantity: 1,
+      currency: (selectedPrice?.currency_code || region.currency_code).toUpperCase(),
+    })
 
     await addToCart({
       variantId: selectedVariant.id,
