@@ -35,6 +35,7 @@ export default async function orderPlacedHandler({
       "tax_total",
       "original_total",
       "items.*",
+      "items.adjustments.*",
       "summary.*",
       "shipping_methods.*",
       "shipping_address.*",

@@ -132,7 +132,7 @@ const Overview = ({ customer, orders }: OverviewProps) => {
                     {/* Thumbnail */}
                     <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0">
                       {thumb ? (
-                        <img src={thumb} alt={item.title || "Order item"} title={item.title || "Order item"} className="w-full h-full object-cover object-center" />
+                        <img src={thumb} alt={order.items?.[0]?.title || "Order item"} title={order.items?.[0]?.title || "Order item"} className="w-full h-full object-cover object-center" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-300">
                           <Package size={22} />

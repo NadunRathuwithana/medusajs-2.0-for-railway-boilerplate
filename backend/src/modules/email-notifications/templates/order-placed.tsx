@@ -47,16 +47,34 @@ const getShippingTotal = (order: any): number => {
   )
 }
 
-/** Resolve discount total */
+/** Resolve discount total: checks all known MedusaJS v2 fields, item adjustments, and math fallback */
 const getDiscountTotal = (order: any): number => {
-  return (
+  // 1. Try top-level named fields (may be 0 even when discount exists in v2)
+  const topLevel =
     order.discount_total ??
     order.discount_subtotal ??
     order.promotion_total ??
     order.summary?.raw_current_discount_total?.value ??
-    order.summary?.raw_discount_total?.value ??
-    0
-  )
+    order.summary?.raw_discount_total?.value
+
+  if (topLevel != null && topLevel > 0) return topLevel
+
+  // 2. Sum item-level adjustments (promotions/discounts applied per line item)
+  const itemAdjustmentTotal = order.items?.reduce((sum: number, item: any) => {
+    const adj = item.adjustments?.reduce((s: number, a: any) => s + (a.amount ?? 0), 0) ?? 0
+    return sum + adj
+  }, 0) ?? 0
+
+  if (itemAdjustmentTotal > 0) return itemAdjustmentTotal
+
+  // 3. Math fallback: subtotal - item_total (difference = discount applied)
+  const subtotal = order.item_subtotal ?? order.subtotal ?? 0
+  const itemTotal = order.item_total ?? 0
+  if (subtotal > 0 && itemTotal > 0 && subtotal > itemTotal) {
+    return subtotal - itemTotal
+  }
+
+  return 0
 }
 
 const getPaymentMethodName = (providerId: string) => {
