@@ -1,4 +1,4 @@
-import { Modules } from "@medusajs/framework/utils";
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
 import {
   INotificationModuleService,
   IOrderModuleService,
@@ -15,7 +15,7 @@ export default async function orderPlacedHandler({
   try {
     notificationModuleService = container.resolve(Modules.NOTIFICATION);
   } catch (err) {}
-  const query = container.resolve(Modules.QUERY);
+  const query = container.resolve(ContainerRegistrationKeys.QUERY);
   const { data: [order] } = await query.graph({
     entity: "order",
     filters: { id: data.id },
