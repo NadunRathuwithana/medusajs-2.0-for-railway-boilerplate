@@ -24,6 +24,41 @@ const formatCurrency = (amount: number, currency: string) => {
   return `${currency?.toUpperCase() ?? ''} ${Number(amount).toFixed(2)}`
 }
 
+/** Resolve item subtotal: tries every field MedusaJS v2 may use, then falls back to summing items */
+const getItemSubtotal = (order: any): number => {
+  return (
+    order.item_subtotal ??
+    order.subtotal ??
+    order.summary?.raw_current_item_subtotal?.value ??
+    order.summary?.raw_current_item_total?.value ??
+    order.items?.reduce((sum: number, item: any) => sum + (item.unit_price ?? 0) * (item.quantity ?? 1), 0) ??
+    0
+  )
+}
+
+/** Resolve shipping total: tries named fields, then sums shipping_methods */
+const getShippingTotal = (order: any): number => {
+  return (
+    order.shipping_total ??
+    order.shipping_subtotal ??
+    order.summary?.raw_current_shipping_total?.value ??
+    order.shipping_methods?.reduce((sum: number, m: any) => sum + (m.total ?? m.amount ?? 0), 0) ??
+    0
+  )
+}
+
+/** Resolve discount total */
+const getDiscountTotal = (order: any): number => {
+  return (
+    order.discount_total ??
+    order.discount_subtotal ??
+    order.promotion_total ??
+    order.summary?.raw_current_discount_total?.value ??
+    order.summary?.raw_discount_total?.value ??
+    0
+  )
+}
+
 const getPaymentMethodName = (providerId: string) => {
   if (!providerId) return 'Online Payment'
   if (providerId.includes('system_default')) return 'Cash on Delivery'
@@ -95,23 +130,17 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
               <tr>
                 <td style={{ padding: '4px 0', color: textSecondary, fontSize: '12px' }}>Item Subtotal</td>
                 <td style={{ padding: '4px 0', fontWeight: '500', fontSize: '13px', textAlign: 'right', color: textPrimary }}>
-                  {formatCurrency((order as any).item_subtotal ?? (order as any).summary?.raw_current_item_total?.value ?? 0, order.currency_code)}
+                  {formatCurrency(getItemSubtotal(order), order.currency_code)}
                 </td>
               </tr>
               <tr>
                 <td style={{ padding: '4px 0', color: textSecondary, fontSize: '12px' }}>Shipping</td>
                 <td style={{ padding: '4px 0', fontWeight: '500', fontSize: '13px', textAlign: 'right', color: textPrimary }}>
-                  {formatCurrency((order as any).shipping_total ?? (order as any).summary?.raw_current_shipping_total?.value ?? 0, order.currency_code)}
+                  {formatCurrency(getShippingTotal(order), order.currency_code)}
                 </td>
               </tr>
               {(() => {
-                const discountVal =
-                  (order as any).discount_total ??
-                  (order as any).discount_subtotal ??
-                  (order as any).promotion_total ??
-                  (order as any).summary?.discount_total ??
-                  (order as any).summary?.raw_discount_total?.value ??
-                  (order as any).summary?.raw_current_discount_total?.value ?? 0
+                const discountVal = getDiscountTotal(order)
                 return discountVal > 0 ? (
                   <tr>
                     <td style={{ padding: '4px 0', color: '#16a34a', fontSize: '12px' }}>Discount</td>
