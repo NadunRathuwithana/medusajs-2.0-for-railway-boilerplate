@@ -27,7 +27,7 @@ type NotificationEmailOptions = Omit<
  * Service to handle email notifications using the Resend API.
  */
 export class ResendNotificationService extends AbstractNotificationProviderService {
-  static identifier = "RESEND_NOTIFICATION_SERVICE"
+  static identifier = "resend"
   protected config_: ResendServiceConfig // Configuration for Resend API
   protected logger_: Logger // Logger for error and event logging
   protected resend: Resend // Instance of the Resend API client

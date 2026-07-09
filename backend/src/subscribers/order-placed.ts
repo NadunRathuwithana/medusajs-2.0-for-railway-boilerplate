@@ -8,7 +8,10 @@ export default async function orderPlacedHandler({
   event: { data },
   container,
 }: SubscriberArgs<any>) {
-  const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
+  let notificationModuleService: INotificationModuleService | undefined;
+  try {
+    notificationModuleService = container.resolve(Modules.NOTIFICATION);
+  } catch (err) {}
   const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
 
   const order = await orderModuleService.retrieveOrder(data.id, {
@@ -26,7 +29,7 @@ export default async function orderPlacedHandler({
   }
 
   try {
-    await notificationModuleService.createNotifications({
+    if (notificationModuleService) await notificationModuleService.createNotifications({
       to: order.email,
       channel: 'email',
       template: EmailTemplates.ORDER_PLACED,

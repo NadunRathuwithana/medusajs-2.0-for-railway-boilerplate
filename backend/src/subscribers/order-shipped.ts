@@ -11,7 +11,10 @@ export default async function orderShippedHandler({
   event: { data },
   container,
 }: SubscriberArgs<any>) {
-  const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
+  let notificationModuleService: INotificationModuleService | undefined;
+  try {
+    notificationModuleService = container.resolve(Modules.NOTIFICATION);
+  } catch (err) {}
   const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
   const fulfillmentModuleService: any = container.resolve(Modules.FULFILLMENT)
 
@@ -30,7 +33,7 @@ export default async function orderShippedHandler({
     const trackingNumber = trackingLinks[0]?.tracking_number ?? fulfillment?.tracking_number
     const trackingUrl = trackingLinks[0]?.url
 
-    await notificationModuleService.createNotifications({
+    if (notificationModuleService) await notificationModuleService.createNotifications({
       to: order.email,
       channel: 'email',
       template: EmailTemplates.ORDER_SHIPPED,

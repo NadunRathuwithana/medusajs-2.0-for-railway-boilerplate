@@ -7,7 +7,10 @@ export default async function orderCancelledHandler({
   event: { data },
   container,
 }: SubscriberArgs<any>) {
-  const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
+  let notificationModuleService: INotificationModuleService | undefined;
+  try {
+    notificationModuleService = container.resolve(Modules.NOTIFICATION);
+  } catch (err) {}
   const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
 
   try {
@@ -21,7 +24,7 @@ export default async function orderCancelledHandler({
       ? `${order.currency_code?.toUpperCase() ?? ''} ${Number((order.summary as any).raw_current_order_total?.value ?? 0).toFixed(2)}`
       : undefined
 
-    await notificationModuleService.createNotifications({
+    if (notificationModuleService) await notificationModuleService.createNotifications({
       to: order.email,
       channel: 'email',
       template: EmailTemplates.ORDER_CANCELLED,
