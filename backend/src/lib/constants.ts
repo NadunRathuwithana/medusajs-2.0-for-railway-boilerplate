@@ -176,4 +176,5 @@ export const SMTP_ADMIN_EMAIL = process.env.SMTP_ADMIN_EMAIL || process.env.SMTP
 export const ADMIN_EMAIL =
   process.env.ADMIN_EMAIL ||
   process.env.SMTP_ADMIN_EMAIL ||
-  process.env.SMTP_USER;
+  process.env.SMTP_USER ||
+  "admin@cardle.lk";
