@@ -64,25 +64,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     }
 
     if (notificationModuleService) {
-      // 1. Internal alert → admin inbox
-      await notificationModuleService.createNotifications({
-        to: ADMIN_EMAIL,
-        channel: 'email',
-        template: EmailTemplates.CONTACT_FORM,
-        data: contactEmailData,
-      })
-
-      // 2. CC support@cardle.lk (only if it's different from admin email)
-      if (ADMIN_EMAIL !== SUPPORT_EMAIL) {
-        await notificationModuleService.createNotifications({
-          to: SUPPORT_EMAIL,
-          channel: 'email',
-          template: EmailTemplates.CONTACT_FORM,
-          data: contactEmailData,
-        })
-      }
-
-      // 3. Customer auto-reply
+      // 1. Customer auto-reply — send immediately so customer gets a fast response
       await notificationModuleService.createNotifications({
         to: email.trim(),
         channel: 'email',
@@ -96,6 +78,28 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
           referenceNumber,
         },
       })
+
+      // Wait 3 seconds to respect Resend's rate limit (2 req/sec) before sending admin emails
+      await new Promise((resolve) => setTimeout(resolve, 3000))
+
+      // 2. Internal alert → admin inbox
+      await notificationModuleService.createNotifications({
+        to: ADMIN_EMAIL,
+        channel: 'email',
+        template: EmailTemplates.CONTACT_FORM,
+        data: contactEmailData,
+      })
+
+      // 3. CC support@cardle.lk (only if it's different from admin email)
+      if (ADMIN_EMAIL !== SUPPORT_EMAIL) {
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        await notificationModuleService.createNotifications({
+          to: SUPPORT_EMAIL,
+          channel: 'email',
+          template: EmailTemplates.CONTACT_FORM,
+          data: contactEmailData,
+        })
+      }
     } else {
       console.log(`[Contact Form] Mocked success (No notification module): ${name} - ${message}`)
     }
