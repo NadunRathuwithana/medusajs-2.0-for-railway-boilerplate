@@ -8,28 +8,68 @@ export default async function orderPlacedHandler({
   event: { data },
   container,
 }: SubscriberArgs<any>) {
-  let notificationModuleService: INotificationModuleService | undefined;
-  try {
-    notificationModuleService = container.resolve(Modules.NOTIFICATION);
-  } catch (err) {}
-  const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
+  console.log('[order.placed] Handler triggered, orderId:', data?.id)
 
-  const order = await orderModuleService.retrieveOrder(data.id, {
-    relations: ['items', 'summary', 'shipping_address', 'payment_collections', 'payment_collections.payments'],
-  })
-  const shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(
-    order.shipping_address.id
-  )
+  // Step 1: Resolve services safely
+  let notificationModuleService: INotificationModuleService | undefined
+  let orderModuleService: IOrderModuleService | undefined
 
   try {
-    // Send Meta Conversions API event
+    orderModuleService = container.resolve(Modules.ORDER)
+  } catch (err) {
+    console.error('[order.placed] Could not resolve Order module:', err)
+    return
+  }
+
+  try {
+    notificationModuleService = container.resolve(Modules.NOTIFICATION)
+  } catch (err) {
+    console.warn('[order.placed] Notification module not available — emails will be skipped')
+  }
+
+  // Step 2: Fetch order
+  let order: any
+  try {
+    order = await orderModuleService!.retrieveOrder(data.id, {
+      relations: ['items', 'summary', 'shipping_address', 'payment_collections', 'payment_collections.payments'],
+    })
+    console.log('[order.placed] Order retrieved:', order?.display_id, 'email:', order?.email)
+  } catch (err) {
+    console.error('[order.placed] Failed to retrieve order:', err)
+    return
+  }
+
+  // Step 3: Fetch shipping address (optional — gracefully degrade if unavailable)
+  let shippingAddress: any = order.shipping_address ?? null
+  if (order.shipping_address?.id) {
+    try {
+      shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(
+        order.shipping_address.id
+      )
+    } catch (err) {
+      console.warn('[order.placed] Could not retrieve full shipping address, using embedded data:', (err as any)?.message)
+    }
+  }
+
+  // Step 4: Meta CAPI event
+  try {
     await sendPurchaseEvent(order)
   } catch (error) {
     console.error('[Meta CAPI] Error:', error)
   }
 
+  // Step 5: Send confirmation email
+  if (!notificationModuleService) {
+    console.warn('[order.placed] Skipping email — no notification provider configured')
+    return
+  }
+  if (!order.email) {
+    console.warn('[order.placed] Skipping email — order has no email address')
+    return
+  }
+
   try {
-    if (notificationModuleService) await notificationModuleService.createNotifications({
+    await notificationModuleService.createNotifications({
       to: order.email,
       channel: 'email',
       template: EmailTemplates.ORDER_PLACED,
@@ -43,6 +83,7 @@ export default async function orderPlacedHandler({
         preview: 'Thank you for your order!',
       },
     })
+    console.log('[order.placed] Confirmation email sent to', order.email)
   } catch (error) {
     console.error('[Email] Error sending order confirmation:', error)
   }
