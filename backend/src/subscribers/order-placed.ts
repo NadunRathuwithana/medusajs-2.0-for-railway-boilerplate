@@ -15,20 +15,27 @@ export default async function orderPlacedHandler({
   try {
     notificationModuleService = container.resolve(Modules.NOTIFICATION);
   } catch (err) {}
-  const orderModuleService: IOrderModuleService = container.resolve(
-    Modules.ORDER,
-  );
-
-  const order = await orderModuleService.retrieveOrder(data.id, {
-    relations: [
-      "items",
-      "summary",
-      "shipping_address",
-      "payment_collections",
-      "payment_collections.payments",
+  const query = container.resolve(Modules.QUERY);
+  const { data: [order] } = await query.graph({
+    entity: "order",
+    filters: { id: data.id },
+    fields: [
+      "*",
+      "items.*",
+      "shipping_address.*",
+      "billing_address.*",
+      "customer.*",
+      "payment_collections.*",
+      "payment_collections.payments.*",
     ],
   });
-  const shippingAddress = order.shipping_address;
+
+  if (!order) {
+    console.error(`[Order Placed] Order not found for id: ${data.id}`);
+    return;
+  }
+
+  const shippingAddress = order.shipping_address || {};
 
   try {
     // Send Meta Conversions API event
