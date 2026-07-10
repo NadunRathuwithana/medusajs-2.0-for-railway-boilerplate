@@ -174,18 +174,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                   {formatCurrency((order as any).total ?? (order as any).summary?.raw_current_order_total?.value ?? 0, order.currency_code)}
                 </td>
               </tr>
-              <tr>
-                <td style={{ padding: '4px 0 0', color: textSecondary, fontSize: '12px' }}>Paid Total</td>
-                <td style={{ padding: '4px 0 0', fontWeight: '500', fontSize: '13px', textAlign: 'right', color: textSecondary }}>
-                  {formatCurrency(0, order.currency_code)}
-                </td>
-              </tr>
-              <tr>
-                <td style={{ padding: '4px 0 0', color: textPrimary, fontSize: '12px', fontWeight: '600' }}>Outstanding Amount</td>
-                <td style={{ padding: '4px 0 0', fontWeight: '700', fontSize: '13px', textAlign: 'right', color: textPrimary }}>
-                  {formatCurrency((order as any).total ?? (order as any).summary?.raw_current_order_total?.value ?? 0, order.currency_code)}
-                </td>
-              </tr>
+
             </tbody>
           </table>
         </Section>

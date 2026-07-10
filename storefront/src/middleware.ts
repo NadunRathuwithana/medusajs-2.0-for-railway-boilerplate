@@ -88,24 +88,49 @@ async function getCountryCode(
  * Middleware to handle region selection and onboarding status.
  */
 export async function middleware(request: NextRequest) {
-  const hasAccess = request.cookies.get("storefront_access")?.value === "1"
-  const isComingSoon = request.nextUrl.pathname.startsWith("/coming-soon")
+  const isMaintenanceModeEnv = process.env.NEXT_PUBLIC_ENABLE_MAINTENANCE_MODE === "true" || process.env.ENABLE_MAINTENANCE_MODE === "true"
+  const isComingSoonEnv = process.env.NEXT_PUBLIC_ENABLE_COMING_SOON === "true" || process.env.ENABLE_COMING_SOON === "true"
 
-  if (!hasAccess && !isComingSoon) {
+  const hasAccess = request.cookies.get("storefront_access")?.value === "1"
+  const isMaintenancePath = request.nextUrl.pathname.startsWith("/maintenance")
+  const isComingSoonPath = request.nextUrl.pathname.startsWith("/coming-soon")
+
+  if (isMaintenanceModeEnv && !hasAccess && !isMaintenancePath) {
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = "/maintenance"
+    redirectUrl.search = ""
+    return NextResponse.redirect(redirectUrl, 307)
+  }
+
+  if (isComingSoonEnv && !isMaintenanceModeEnv && !hasAccess && !isComingSoonPath) {
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = "/coming-soon"
     redirectUrl.search = ""
     return NextResponse.redirect(redirectUrl, 307)
   }
 
-  if (isComingSoon && hasAccess) {
+  if (hasAccess && (isMaintenancePath || isComingSoonPath)) {
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = "/"
     redirectUrl.search = ""
     return NextResponse.redirect(redirectUrl, 307)
   }
 
-  if (isComingSoon) {
+  if (!isMaintenanceModeEnv && isMaintenancePath) {
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = "/"
+    redirectUrl.search = ""
+    return NextResponse.redirect(redirectUrl, 307)
+  }
+
+  if (!isComingSoonEnv && isComingSoonPath) {
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = "/"
+    redirectUrl.search = ""
+    return NextResponse.redirect(redirectUrl, 307)
+  }
+
+  if (isMaintenancePath || isComingSoonPath) {
     return NextResponse.next()
   }
 
