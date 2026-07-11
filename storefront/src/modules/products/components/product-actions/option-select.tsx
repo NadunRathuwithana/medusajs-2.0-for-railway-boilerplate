@@ -72,7 +72,7 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
                       "border-2 border-black scale-105 shadow-md": v === current,
                       "border border-gray-200 hover:border-gray-300": v !== current,
                     })}>
-                      <Image src={imageUrl} alt={v || "Color"} fill className="object-cover" sizes="56px" />
+                      <Image src={imageUrl} alt={v || "Color"} title={v || "Color swatch"} fill className="object-cover" sizes="56px" />
                     </div>
                     <span className={clx("text-xs font-medium", {
                       "text-black": v === current,

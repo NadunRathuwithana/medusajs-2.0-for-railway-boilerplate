@@ -39,15 +39,15 @@ export const Base: React.FC<BaseProps> = ({ preview, children }) => {
           <Section style={{ padding: '20px 30px', textAlign: 'center' }}>
             <Row>
               <Column style={{ width: '25%', textAlign: 'left' }}>
-                <Link href={`${baseUrl}/lk`}>
+                <Link href={`${baseUrl}`}>
                   <Img src={`${baseUrl}/cardle-premium-cotton-tote-bags-logo.png`} width="100" alt="Cardle Logo" style={{ display: 'block' }} />
                 </Link>
               </Column>
               <Column style={{ width: '75%', textAlign: 'right' }}>
                 <Text style={{ margin: '0', fontSize: '9px', fontWeight: '500', letterSpacing: '1px', fontFamily }}>
-                  <Link href={`${baseUrl}/lk/store`} style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>TOTE BAGS</Link> |
-                  <Link href={`${baseUrl}/lk/store`} style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>BEST SELLERS</Link> |
-                  <Link href={`${baseUrl}/lk/store`} style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>NEW ARRIVALS</Link>
+                  <Link href={`${baseUrl}/store`} style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>TOTE BAGS</Link> |
+                  <Link href={`${baseUrl}/store`} style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>BEST SELLERS</Link> |
+                  <Link href={`${baseUrl}/store`} style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>NEW ARRIVALS</Link>
                 </Text>
               </Column>
             </Row>

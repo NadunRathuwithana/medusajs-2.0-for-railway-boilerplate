@@ -16,7 +16,7 @@ export default async function userInviteHandler({
   const invite = await userModuleService.retrieveInvite(data.id)
 
   try {
-    await notificationModuleService.createNotifications({
+    if (notificationModuleService) await notificationModuleService.createNotifications({
       to: invite.email,
       channel: 'email',
       template: EmailTemplates.INVITE_USER,

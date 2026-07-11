@@ -17,8 +17,9 @@ export default function KokoWidget({
         or 3 X <span className="font-bold">{convertToLocale({ amount: installment, currency_code: currencyCode })}</span> with
       </span>
       <img 
-        src="/payment/koko.png" 
-        alt="Koko Pay" 
+        src="/payment/koko-pay-sri-lanka-accepted.png" 
+        alt="Koko Pay Sri Lanka" 
+        title="Koko Pay Sri Lanka"
         className="h-[16px] object-contain ml-1 translate-y-[-1px]"
       />
     </div>

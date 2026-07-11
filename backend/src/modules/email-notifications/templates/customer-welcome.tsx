@@ -102,7 +102,7 @@ export const CustomerWelcomeTemplate: React.FC<CustomerWelcomeTemplateProps> & {
                 These signature styles have absolute "add-to-cart" energy. Discover the pieces everyone is talking about.
               </Text>
               <Button
-                href={`https://cardle.lk/lk/store`}
+                href={`https://cardle.lk/store`}
                 style={{
                   backgroundColor: '#111111',
                   color: '#ffffff',

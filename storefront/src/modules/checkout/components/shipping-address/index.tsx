@@ -47,8 +47,8 @@ const ShippingAddress = ({
         "shipping_address.company": address?.company || "",
         "shipping_address.postal_code": address?.postal_code || "",
         "shipping_address.city": address?.city || "",
-        "shipping_address.country_code": address?.country_code || "",
-        "shipping_address.province": address?.province || "",
+        "shipping_address.country_code":
+          address?.country_code?.toLowerCase() || "",
         "shipping_address.phone": address?.phone || "",
       }))
 
@@ -162,15 +162,6 @@ const ShippingAddress = ({
           onChange={handleChange}
           required
           data-testid="shipping-country-select"
-        />
-        <Input
-          label="State / Province"
-          name="shipping_address.province"
-          autoComplete="address-level1"
-          value={formData["shipping_address.province"] || ""}
-          onChange={handleChange}
-          required
-          data-testid="shipping-province-input"
         />
       </div>
       <div className="my-8">

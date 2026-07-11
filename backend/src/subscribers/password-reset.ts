@@ -12,7 +12,10 @@ export default async function passwordResetHandler({
   event: { data },
   container,
 }: SubscriberArgs<any>) {
-  const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
+  let notificationModuleService: INotificationModuleService | undefined;
+  try {
+    notificationModuleService = container.resolve(Modules.NOTIFICATION);
+  } catch (err) {}
 
   try {
     const { entity_id: email, token, metadata } = data
@@ -26,7 +29,7 @@ export default async function passwordResetHandler({
     const storeFrontUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cardle.lk'
     const resetLink = `${storeFrontUrl}/account/reset-password?token=${token}&email=${encodeURIComponent(email)}`
 
-    await notificationModuleService.createNotifications({
+    if (notificationModuleService) await notificationModuleService.createNotifications({
       to: email,
       channel: 'email',
       template: EmailTemplates.PASSWORD_RESET,

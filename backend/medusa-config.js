@@ -144,6 +144,33 @@ const medusaConfig = {
           },
         ]
       : []),
+    // Notification module via SMTP/Nodemailer — only included when SMTP credentials are set
+    ...(!RESEND_API_KEY && SMTP_HOST && SMTP_USER && SMTP_PASS
+      ? [
+          {
+            key: Modules.NOTIFICATION,
+            resolve: "@medusajs/notification",
+            options: {
+              providers: [
+                {
+                  resolve: "./src/modules/email-notifications",
+                  id: "smtp",
+                  options: {
+                    channels: ["email"],
+                    host: SMTP_HOST,
+                    port: SMTP_PORT,
+                    user: SMTP_USER,
+                    pass: SMTP_PASS,
+                    secure: SMTP_SECURE,
+                    from: SMTP_FROM,
+                    adminEmail: SMTP_ADMIN_EMAIL,
+                  },
+                },
+              ],
+            },
+          },
+        ]
+      : []),
     // Payment providers (Stripe + OnePay) — only included when env vars are set
     ...(() => {
       const paymentProviders = [];

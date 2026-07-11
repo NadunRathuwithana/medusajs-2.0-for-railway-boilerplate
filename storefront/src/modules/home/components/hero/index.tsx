@@ -1,25 +1,36 @@
+import Image from "next/image"
+
 const Hero = () => {
   return (
     <div className="h-[90vh] w-full relative overflow-hidden bg-[#e5e5e5] flex flex-col items-center justify-center">
       {/* Mobile Background Image (< 768px) */}
-      <img
+      <Image
         src="/home/cardle-premium-cotton-tote-bag-sri-lanka-mobile.jpg"
-        alt="Hero Background Mobile"
-        className="block md:hidden absolute inset-0 w-full h-full object-cover object-top"
+        alt="Cardle handcrafted cotton tote bags – shop Sri Lanka's premium make-to-order bags"
+        fill
+        sizes="100vw"
+        className="block md:hidden object-cover object-top"
+        priority
       />
 
       {/* Tablet Background Image (768px – 1023px) */}
-      <img
+      <Image
         src="/home/cardle-premium-cotton-tote-bag-sri-lanka-tablet.jpg"
-        alt="Hero Background Tablet"
-        className="hidden md:block lg:hidden absolute inset-0 w-full h-full object-cover object-top"
+        alt="Cardle premium canvas tote bags handcrafted in Sri Lanka"
+        fill
+        sizes="100vw"
+        className="hidden md:block lg:hidden object-cover object-top"
+        priority
       />
 
       {/* Desktop Background Image (1024px+) */}
-      <img
+      <Image
         src="/home/cardle-premium-cotton-tote-bag-sri-lanka.jpg"
-        alt="Hero Background Desktop"
-        className="hidden lg:block absolute inset-0 w-full h-full object-cover object-top"
+        alt="Cardle premium canvas tote bags handcrafted in Sri Lanka – make to order"
+        fill
+        sizes="100vw"
+        className="hidden lg:block object-cover object-top"
+        priority
       />
     </div>
   )

@@ -7,7 +7,10 @@ export default async function paymentFailedHandler({
   event: { data },
   container,
 }: SubscriberArgs<any>) {
-  const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
+  let notificationModuleService: INotificationModuleService | undefined;
+  try {
+    notificationModuleService = container.resolve(Modules.NOTIFICATION);
+  } catch (err) {}
   
   // Note: Depending on Medusa v2.0 exact payload for 'payment.failed', we might need to resolve the order.
   // We assume 'data' contains { id } mapping to the payment or order.
@@ -38,7 +41,7 @@ export default async function paymentFailedHandler({
       ? formatCurrency(order.summary.raw_current_order_total.value, order.currency_code)
       : undefined
 
-    await notificationModuleService.createNotifications({
+    if (notificationModuleService) await notificationModuleService.createNotifications({
       to: order.email,
       channel: 'email',
       template: EmailTemplates.PAYMENT_FAILED,

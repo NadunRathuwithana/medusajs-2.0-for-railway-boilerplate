@@ -7,7 +7,10 @@ export default async function customerCreatedHandler({
   event: { data },
   container,
 }: SubscriberArgs<any>) {
-  const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
+  let notificationModuleService: INotificationModuleService | undefined;
+  try {
+    notificationModuleService = container.resolve(Modules.NOTIFICATION);
+  } catch (err) {}
   const customerModuleService: ICustomerModuleService = container.resolve(Modules.CUSTOMER)
 
   try {
@@ -15,7 +18,7 @@ export default async function customerCreatedHandler({
 
     if (!customer?.email) return
 
-    await notificationModuleService.createNotifications({
+    if (notificationModuleService) await notificationModuleService.createNotifications({
       to: customer.email,
       channel: 'email',
       template: EmailTemplates.CUSTOMER_WELCOME,

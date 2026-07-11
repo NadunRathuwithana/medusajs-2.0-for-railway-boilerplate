@@ -8,6 +8,7 @@ import Items from "@modules/order/components/items"
 import OrderDetails from "@modules/order/components/order-details"
 import OrderSummary from "@modules/order/components/order-summary"
 import ShippingDetails from "@modules/order/components/shipping-details"
+import PaymentDetails from "@modules/order/components/payment-details"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 
@@ -51,8 +52,9 @@ const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = ({
       >
         <OrderDetails order={order} showStatus />
         <Items items={order.items} />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 gap-5">
           <ShippingDetails order={order} />
+          <PaymentDetails order={order} />
           <OrderSummary order={order} />
         </div>
         <Help />

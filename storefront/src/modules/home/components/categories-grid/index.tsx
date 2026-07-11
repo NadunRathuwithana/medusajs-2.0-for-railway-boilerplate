@@ -33,7 +33,8 @@ export default function CategoriesGrid() {
           >
             <img 
               src={cat.image} 
-              alt={cat.title} 
+              alt={cat.title}
+              title={cat.title}
               className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors duration-300" />

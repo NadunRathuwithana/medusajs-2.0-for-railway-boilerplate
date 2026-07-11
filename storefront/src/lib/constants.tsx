@@ -33,11 +33,11 @@ export const paymentInfoMap: Record<
   },
   pp_onepay_onepay: {
     title: "Credit/ Debit Card",
-    icon: <img src="/payment/visa_master.png" alt="Credit/ Debit Card" className="h-6 object-contain" />,
+    icon: <img src="/payment/visa-mastercard-accepted.png" alt="Visa Mastercard accepted" title="Visa Mastercard accepted" className="h-6 object-contain" />,
   },
   pp_koko_koko: {
     title: "Koko: Buy Now Pay Later",
-    icon: <img src="/payment/koko.png" alt="Koko Pay" className="h-6 object-contain" />,
+    icon: <img src="/payment/koko-pay-sri-lanka-accepted.png" alt="Koko Pay Sri Lanka accepted" title="Koko Pay Sri Lanka accepted" className="h-6 object-contain" />,
   },
   // Add more payment providers here
 }
@@ -81,3 +81,40 @@ export const noDivisionCurrencies = [
   "xdr",
   "xau",
 ]
+
+export const getPaymentPromoInfo = (providerId: string) => {
+  if (providerId?.startsWith("pp_stripe_")) {
+    return {
+      code: process.env.NEXT_PUBLIC_PROMO_STRIPE_CODE,
+      tag: process.env.NEXT_PUBLIC_PROMO_STRIPE_TAG
+    }
+  }
+  if (providerId?.startsWith("pp_onepay")) {
+    return {
+      code: process.env.NEXT_PUBLIC_PROMO_ONEPAY_CODE,
+      tag: process.env.NEXT_PUBLIC_PROMO_ONEPAY_TAG
+    }
+  }
+  if (providerId?.startsWith("pp_koko")) {
+    return {
+      code: process.env.NEXT_PUBLIC_PROMO_KOKO_CODE,
+      tag: process.env.NEXT_PUBLIC_PROMO_KOKO_TAG
+    }
+  }
+  if (providerId?.startsWith("pp_system_default")) {
+    return {
+      code: process.env.NEXT_PUBLIC_PROMO_MANUAL_CODE,
+      tag: process.env.NEXT_PUBLIC_PROMO_MANUAL_TAG
+    }
+  }
+  return { code: undefined, tag: undefined }
+}
+
+export const getAllPaymentPromoCodes = () => {
+  return [
+    process.env.NEXT_PUBLIC_PROMO_STRIPE_CODE,
+    process.env.NEXT_PUBLIC_PROMO_ONEPAY_CODE,
+    process.env.NEXT_PUBLIC_PROMO_KOKO_CODE,
+    process.env.NEXT_PUBLIC_PROMO_MANUAL_CODE
+  ].filter(Boolean) as string[]
+}

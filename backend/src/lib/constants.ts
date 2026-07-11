@@ -1,4 +1,4 @@
-import { loadEnv } from "@medusajs/framework/utils";
+import { loadEnv } from "@medusajs/utils";
 
 import { assertValue } from "utils/assert-value";
 
@@ -167,3 +167,14 @@ export const SMTP_PASS = process.env.SMTP_PASS;
 export const SMTP_SECURE = process.env.SMTP_PORT === '465' || process.env.SMTP_SECURE?.toLowerCase() === 'true' || process.env.SMTP_SECURE === '1';
 export const SMTP_FROM = process.env.SMTP_FROM || process.env.SMTP_USER;
 export const SMTP_ADMIN_EMAIL = process.env.SMTP_ADMIN_EMAIL || process.env.SMTP_USER;
+
+/**
+ * ADMIN_EMAIL — Store admin inbox for receiving contact form submissions.
+ * Provider-agnostic: works with both Resend and SMTP.
+ * Set ADMIN_EMAIL in your environment variables.
+ */
+export const ADMIN_EMAIL =
+  process.env.ADMIN_EMAIL ||
+  process.env.SMTP_ADMIN_EMAIL ||
+  process.env.SMTP_USER ||
+  "admin@cardle.lk";

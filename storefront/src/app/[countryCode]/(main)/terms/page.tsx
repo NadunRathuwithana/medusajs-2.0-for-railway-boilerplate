@@ -1,8 +1,13 @@
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Terms of Service",
-  description: "Terms of Service for Cardle",
+  title: "Terms of Service | Cardle",
+  description:
+    "Read Cardle's terms of service governing use of our website and purchase of handcrafted cotton tote bags. Applies to all visitors and buyers on cardle.lk.",
+  robots: {
+    index: false,
+    follow: true,
+  },
 }
 
 export default function TermsPage() {

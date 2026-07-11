@@ -33,7 +33,7 @@ type NotificationEmailOptions = {
  * Renders React Email templates to HTML and delivers via SMTP.
  */
 export class SmtpNotificationService extends AbstractNotificationProviderService {
-  static identifier = 'smtp-notification'
+  static identifier = 'smtp'
 
   protected logger_: Logger
   protected transporter_: Transporter

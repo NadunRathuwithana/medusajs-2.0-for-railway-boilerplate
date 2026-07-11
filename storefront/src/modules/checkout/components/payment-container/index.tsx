@@ -6,7 +6,7 @@ import React from "react"
 import Radio from "@modules/common/components/radio"
 
 import PaymentTest from "../payment-test"
-import { isManual, isKoko } from "@lib/constants"
+import { isManual, isKoko, getPaymentPromoInfo } from "@lib/constants"
 
 type PaymentContainerProps = {
   paymentProviderId: string
@@ -44,8 +44,13 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
           <div className="flex items-center gap-x-4">
             <Radio checked={isSelected} />
             <div className="flex flex-col">
-              <span className="text-[15px] font-medium text-gray-900">
+              <span className="text-[15px] font-medium text-gray-900 flex items-center gap-2">
                 {paymentInfoMap[paymentProviderId]?.title || paymentProviderId}
+                {getPaymentPromoInfo(paymentProviderId).tag && (
+                  <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    {getPaymentPromoInfo(paymentProviderId).tag}
+                  </span>
+                )}
               </span>
             </div>
             {isManual(paymentProviderId) && isDevelopment && (
