@@ -15,8 +15,9 @@ export default function AboutPage() {
           <source media="(max-width: 1024px)" srcSet="/about/cardle-about-premium-cotton-tote-bags-tablet.jpg" />
           <img
             src="/about/cardle-about-premium-cotton-tote-bags.jpg"
-            alt="Cardle Hero Banner"
+            alt="Cardle handcrafted cotton tote bags – the Cardle story, made in Sri Lanka"
             className="absolute inset-0 w-full h-full object-cover object-center"
+            loading="eager"
           />
         </picture>
       </section>
@@ -27,7 +28,7 @@ export default function AboutPage() {
           <div className="group w-full lg:w-1/2 h-[400px] md:h-[600px] rounded-3xl overflow-hidden relative cursor-pointer">
             <img
               src="/about/cardle-story-handmade-tote-bags.jpg"
-              alt="Person walking with bag"
+              alt="Handmade Cardle cotton tote bag crafted with natural canvas in Sri Lanka"
               className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
             />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-[1500ms] pointer-events-none" />
@@ -115,7 +116,7 @@ export default function AboutPage() {
             <div className="group h-[350px] md:h-auto rounded-3xl overflow-hidden relative cursor-pointer">
               <img
                 src="/about/cardle-premium-natural-cotton-materials.jpg"
-                alt="Premium Materials"
+                alt="Premium 100% natural cotton canvas used in every Cardle tote bag"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-[1500ms] pointer-events-none" />
@@ -124,7 +125,7 @@ export default function AboutPage() {
             <div className="group h-[350px] md:h-auto rounded-3xl overflow-hidden relative order-4 md:order-3 cursor-pointer">
               <img
                 src="/about/cardle-zero-stretch-engineering-tote-bag.jpg"
-                alt="Craftsmanship"
+                alt="Cardle zero-stretch canvas engineering – bag holds shape under full load"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-[1500ms] pointer-events-none" />
@@ -203,7 +204,7 @@ export default function AboutPage() {
             <div className="group col-span-1 rounded-3xl overflow-hidden relative mt-8 md:mt-12 cursor-pointer">
               <img
                 src="/about/cardle-premium-status-tote-bag-1.jpg"
-                alt="Aesthetic Detail 1"
+                alt="Cardle premium cotton tote bag – clean design that looks right anywhere"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-[1500ms] pointer-events-none" />
@@ -211,7 +212,7 @@ export default function AboutPage() {
             <div className="group col-span-1 rounded-3xl overflow-hidden relative mb-8 md:mb-12 cursor-pointer">
               <img
                 src="/about/cardle-premium-status-tote-bag-2.jpg"
-                alt="Aesthetic Detail 2"
+                alt="Cardle canvas tote bag – status meets utility, handcrafted in Sri Lanka"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-[1500ms] pointer-events-none" />

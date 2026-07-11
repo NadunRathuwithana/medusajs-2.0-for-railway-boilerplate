@@ -1,8 +1,12 @@
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Return & Exchange Policy",
-  description: "Return and Exchange Policy for Cardle",
+  title: "Return & Exchange Policy | Cardle",
+  description:
+    "Cardle's 7-day return and exchange policy for handcrafted cotton tote bags. Learn how to request an exchange, conditions that apply, and how to reach our team.",
+  alternates: {
+    canonical: "https://cardle.lk/returns",
+  },
 }
 
 export default function ReturnsPage() {

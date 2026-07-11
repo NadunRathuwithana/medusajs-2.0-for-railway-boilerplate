@@ -1,8 +1,12 @@
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Shipping Policy",
-  description: "Shipping Policy for Cardle",
+  title: "Shipping Policy – Cardle Sri Lanka",
+  description:
+    "Cardle delivers island-wide across Sri Lanka in 2–7 business days for LKR 300. Learn about our dispatch process, tracking, order cancellations and delivery terms.",
+  alternates: {
+    canonical: "https://cardle.lk/shipping",
+  },
 }
 
 export default function ShippingPolicyPage() {

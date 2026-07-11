@@ -1,8 +1,13 @@
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description: "Privacy Policy for Cardle",
+  title: "Privacy Policy | Cardle",
+  description:
+    "Cardle's privacy policy explains how we collect, use, and protect your personal data when you shop at cardle.lk. Your information is never sold to third parties.",
+  robots: {
+    index: false,
+    follow: true,
+  },
 }
 
 export default function PrivacyPolicyPage() {

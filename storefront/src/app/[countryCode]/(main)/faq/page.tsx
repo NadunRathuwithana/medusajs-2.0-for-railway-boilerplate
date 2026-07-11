@@ -1,8 +1,13 @@
 import { Metadata } from "next"
+import FAQJsonLd from "@modules/seo/components/faq-json-ld"
 
 export const metadata: Metadata = {
-  title: "Frequently Asked Questions",
-  description: "FAQ for Cardle",
+  title: "FAQ – Cardle Tote Bags | Shipping, Returns & Care",
+  description:
+    "Find answers to common questions about Cardle's handcrafted cotton tote bags — shipping times, returns, materials, care instructions and more.",
+  alternates: {
+    canonical: "https://cardle.lk/faq",
+  },
 }
 
 export default function FAQPage() {
@@ -30,7 +35,9 @@ export default function FAQPage() {
   ]
 
   return (
-    <div className="py-24 max-w-3xl mx-auto px-6">
+    <>
+      <FAQJsonLd faqs={faqs} />
+      <div className="py-24 max-w-3xl mx-auto px-6">
       <h1 className="text-4xl font-bold tracking-tight mb-4 text-center">Frequently Asked Questions</h1>
       <p className="text-gray-500 mb-16 text-center">Have a question? We're here to help.</p>
       
@@ -50,6 +57,7 @@ export default function FAQPage() {
           Contact Support
         </a>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

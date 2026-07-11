@@ -1,9 +1,8 @@
 import { MetadataRoute } from "next"
-import { getBaseURL } from "@lib/util/env"
+
+const BASE_URL = "https://cardle.lk"
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = getBaseURL()
-
   return {
     rules: [
       {
@@ -14,11 +13,15 @@ export default function robots(): MetadataRoute.Robots {
           "/checkout/",
           "/account/",
           "/cart",
-          "/_next/",
           "/admin/",
         ],
       },
-      // Allow AI crawlers explicitly (important for AEO)
+      // Allow image crawler explicitly (important for image SEO)
+      {
+        userAgent: "Googlebot-Image",
+        allow: "/",
+      },
+      // Allow AI crawlers explicitly (AEO — Answer Engine Optimisation)
       {
         userAgent: "GPTBot",
         allow: "/",
@@ -35,11 +38,17 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/", "/checkout/", "/account/"],
       },
       {
-        userAgent: "Googlebot-Image",
+        userAgent: "Google-Extended",
         allow: "/",
+        disallow: ["/api/", "/checkout/", "/account/"],
+      },
+      // Block common scraper bots that aren't useful
+      {
+        userAgent: "CCBot",
+        disallow: "/",
       },
     ],
-    sitemap: `${baseUrl}/sitemap.xml`,
-    host: baseUrl,
+    sitemap: `${BASE_URL}/sitemap.xml`,
+    host: BASE_URL,
   }
 }

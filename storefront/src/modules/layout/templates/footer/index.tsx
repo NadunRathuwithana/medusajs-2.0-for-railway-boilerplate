@@ -1,6 +1,7 @@
 import { getCollectionsList } from "@lib/data/collections"
 import { Text } from "@medusajs/ui"
 import { Headset, Package, ShieldCheck } from "lucide-react"
+import Image from "next/image"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
@@ -144,9 +145,11 @@ export default async function Footer() {
                   rel="noopener noreferrer"
                   className="hover:opacity-80 transition-opacity"
                 >
-                  <img
+                  <Image
                     src="/social/facebook.png"
                     alt="Facebook"
+                    width={32}
+                    height={32}
                     className="w-8 h-8 object-contain"
                   />
                 </a>
@@ -156,9 +159,11 @@ export default async function Footer() {
                   rel="noopener noreferrer"
                   className="hover:opacity-80 transition-opacity"
                 >
-                  <img
+                  <Image
                     src="/social/instagram.png"
                     alt="Instagram"
+                    width={32}
+                    height={32}
                     className="w-8 h-8 object-contain"
                   />
                 </a>
@@ -168,9 +173,11 @@ export default async function Footer() {
                   rel="noopener noreferrer"
                   className="hover:opacity-80 transition-opacity"
                 >
-                  <img
+                  <Image
                     src="/social/tiktok.png"
                     alt="TikTok"
+                    width={32}
+                    height={32}
                     className="w-8 h-8 object-contain"
                   />
                 </a>
@@ -180,9 +187,11 @@ export default async function Footer() {
                   rel="noopener noreferrer"
                   className="hover:opacity-80 transition-opacity"
                 >
-                  <img
+                  <Image
                     src="/social/whatsapp.png"
                     alt="WhatsApp"
+                    width={32}
+                    height={32}
                     className="w-8 h-8 object-contain"
                   />
                 </a>

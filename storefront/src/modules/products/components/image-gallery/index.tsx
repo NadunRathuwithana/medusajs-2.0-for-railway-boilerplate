@@ -168,7 +168,7 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
           >
             <Image
               src={image.url}
-              alt={`Product image ${index + 1}`}
+              alt={`${product.title} – view ${index + 1} of ${images.length} | Cardle`}
               fill
               sizes="100vw"
               style={{ objectFit: "contain", transform: index === fullscreenIndex ? "scale(1)" : "scale(0.97)", transition: "transform 0.4s ease-out" }}
@@ -209,7 +209,7 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
                 }
               )}
             >
-              <Image src={image.url} alt={`Thumb ${index + 1}`} title={`Product image ${index + 1}`} fill sizes="64px" style={{ objectFit: "cover" }} />
+              <Image src={image.url} alt={`${product.title} – thumbnail ${index + 1}`} title={`${product.title} – view ${index + 1}`} fill sizes="64px" style={{ objectFit: "cover" }} />
             </button>
           ))}
         </div>
@@ -246,7 +246,7 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
               <Image
                 src={image.url}
                 priority={index === 0}
-                alt={`Product image ${index + 1}`}
+                alt={`${product.title} – image ${index + 1} | Cardle`}
                 fill
                 sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
                 style={{ objectFit: "cover", transition: "transform 0.4s ease" }}
@@ -282,7 +282,7 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
                   }
                 )}
               >
-                <Image src={image.url} alt={`Thumbnail ${index + 1}`} title={`Product image ${index + 1}`} fill sizes="96px" style={{ objectFit: "cover" }} />
+                <Image src={image.url} alt={`${product.title} – thumbnail ${index + 1}`} title={`${product.title} – view ${index + 1}`} fill sizes="96px" style={{ objectFit: "cover" }} />
               </button>
             ))}
           </div>
