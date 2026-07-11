@@ -127,7 +127,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
         <form action={formAction}>
           <Modal.Body>
             <div className="flex flex-col gap-y-4 pt-2 max-h-[55vh] overflow-y-auto pr-2">
-              <div className="grid grid-cols-2 gap-x-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
                 <Input
                   label="First name"
                   name="first_name"
@@ -160,7 +160,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
                 defaultValue={address.address_2 || undefined}
                 data-testid="address-2-input"
               />
-              <div className="grid grid-cols-[144px_1fr] gap-x-4">
+              <div className="grid grid-cols-1 sm:grid-cols-[144px_1fr] gap-x-4 gap-y-4">
                 <Input
                   label="Postal code"
                   name="postal_code"

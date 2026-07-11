@@ -44,9 +44,7 @@ export default function ShippingPolicyPage() {
           </p>
           <p className="mb-4">
             Orders placed on Saturday and Sunday will be processed on the
-            following Monday. You will receive an email notification when your
-            order is dispatched from our warehouse, complete with package
-            tracking details. It’s important to note that shipping time is an
+            following Monday. It’s important to note that shipping time is an
             estimate starting from the date of shipping, not the order date, and
             may be prolonged due to issues like an invalid address or contact
             number.
@@ -108,7 +106,7 @@ export default function ShippingPolicyPage() {
           <p className="mb-4">
             To initiate the cancellation of an order, please reach out to us via
             our hotline or send a message on our Messenger/WhatsApp within an
-            8-hour window from the time of placing the order. Cancellations can
+            24-hour window from the time of placing the order. Cancellations can
             only be processed before the order is dispatched.
           </p>
           <p className="mb-4">

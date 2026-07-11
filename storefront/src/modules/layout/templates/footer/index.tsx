@@ -335,16 +335,10 @@ export default async function Footer() {
                 Terms of service
               </LocalizedClientLink>
               <LocalizedClientLink
-                href="/refunds"
-                className="hover:text-white transition-colors"
-              >
-                Refund policy
-              </LocalizedClientLink>
-              <LocalizedClientLink
                 href="/returns"
                 className="hover:text-white transition-colors"
               >
-                Return & Exchange policy
+                Return/ Refunds and Exchange Policy
               </LocalizedClientLink>
               <LocalizedClientLink
                 href="/shipping"

@@ -38,89 +38,6 @@ const AccountNav = ({
 
   return (
     <>
-      <div>
-      <div className="small:hidden bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-8" data-testid="mobile-account-nav">
-        {route !== `/${countryCode}/account` ? (
-          <LocalizedClientLink
-            href="/account"
-            className="flex items-center gap-x-2 text-small-regular py-2 text-gray-700 hover:text-gray-900 transition-colors"
-            data-testid="account-main-link"
-          >
-            <>
-              <ChevronDown className="transform rotate-90" />
-              <span className="font-medium">Account Dashboard</span>
-            </>
-          </LocalizedClientLink>
-        ) : (
-          <>
-            <div className="text-xl-semi mb-6 px-4 pt-2">
-              Hello, <span className="font-semibold">{customer?.first_name}</span>
-            </div>
-            <div className="text-base-regular">
-              <ul className="flex flex-col gap-y-2">
-                <li>
-                  <LocalizedClientLink
-                    href="/account/profile"
-                    className="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 transition-colors"
-                    data-testid="profile-link"
-                  >
-                    <>
-                      <div className="flex items-center gap-x-3 text-gray-700">
-                        <User size={20} />
-                        <span className="font-medium">Profile</span>
-                      </div>
-                      <ChevronDown className="transform -rotate-90 text-gray-400" />
-                    </>
-                  </LocalizedClientLink>
-                </li>
-                <li>
-                  <LocalizedClientLink
-                    href="/account/addresses"
-                    className="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 transition-colors"
-                    data-testid="addresses-link"
-                  >
-                    <>
-                      <div className="flex items-center gap-x-3 text-gray-700">
-                        <MapPin size={20} />
-                        <span className="font-medium">Addresses</span>
-                      </div>
-                      <ChevronDown className="transform -rotate-90 text-gray-400" />
-                    </>
-                  </LocalizedClientLink>
-                </li>
-                <li>
-                  <LocalizedClientLink
-                    href="/account/orders"
-                    className="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 transition-colors"
-                    data-testid="orders-link"
-                  >
-                    <div className="flex items-center gap-x-3 text-gray-700">
-                      <Package size={20} />
-                      <span className="font-medium">Orders</span>
-                    </div>
-                    <ChevronDown className="transform -rotate-90 text-gray-400" />
-                  </LocalizedClientLink>
-                </li>
-                <li className="mt-2 pt-2 border-t border-gray-100">
-                  <button
-                    type="button"
-                    className="flex items-center justify-between p-4 rounded-xl hover:bg-red-50 text-red-600 transition-colors w-full"
-                    onClick={() => setShowLogout(true)}
-                    data-testid="logout-button"
-                  >
-                    <div className="flex items-center gap-x-3">
-                      <ArrowRightOnRectangle />
-                      <span className="font-medium">Log out</span>
-                    </div>
-                    <ChevronDown className="transform -rotate-90 text-red-300" />
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </>
-        )}
-      </div>
-      
       <div className="hidden small:block" data-testid="account-nav">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
           <div className="pb-6 mb-6 border-b border-gray-100">
@@ -184,35 +101,34 @@ const AccountNav = ({
           </div>
         </div>
       </div>
-    </div>
-    
-    <Modal isOpen={showLogout} close={() => setShowLogout(false)}>
-      <Modal.Title>Confirm Log Out</Modal.Title>
-      <Modal.Body>
-        <p className="text-gray-600 text-base mb-2">
-          Are you sure you want to log out of your account? 
-        </p>
-        <p className="text-gray-500 text-sm">
-          You will need to sign back in to access your orders and profile.
-        </p>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button
-          variant="secondary"
-          onClick={() => setShowLogout(false)}
-          className="rounded-full px-6 py-2 bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200 font-medium transition-colors"
-        >
-          Cancel
-        </Button>
-        <Button
-          onClick={handleLogout}
-          isLoading={isLoggingOut}
-          className="rounded-full px-6 py-2 bg-red-600 text-white hover:bg-red-700 border border-red-600 font-medium transition-colors"
-        >
-          Log Out
-        </Button>
-      </Modal.Footer>
-    </Modal>
+
+      <Modal isOpen={showLogout} close={() => setShowLogout(false)}>
+        <Modal.Title>Confirm Log Out</Modal.Title>
+        <Modal.Body>
+          <p className="text-gray-600 text-base mb-2">
+            Are you sure you want to log out of your account?
+          </p>
+          <p className="text-gray-500 text-sm">
+            You will need to sign back in to access your orders and profile.
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowLogout(false)}
+            className="rounded-full px-6 py-2 bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200 font-medium transition-colors"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleLogout}
+            isLoading={isLoggingOut}
+            className="rounded-full px-6 py-2 bg-red-600 text-white hover:bg-red-700 border border-red-600 font-medium transition-colors"
+          >
+            Log Out
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   )
 }

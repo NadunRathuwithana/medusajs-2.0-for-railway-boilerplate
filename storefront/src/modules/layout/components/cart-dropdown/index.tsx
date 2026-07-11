@@ -289,7 +289,7 @@ const SidebarCartItem = ({ item, close }: { item: any; close: () => void }) => {
         </div>
 
         {/* Price & Quantity */}
-        <div className="flex items-center justify-between mt-auto">
+        <div className="flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between mt-auto gap-2 sm:gap-0">
           {/* Price */}
           <div className="flex items-center gap-2 text-[14px]">
             {hasReducedPrice ? (

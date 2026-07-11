@@ -40,7 +40,7 @@ const Register = ({ setCurrentView }: Props) => {
       <form className="w-full flex flex-col gap-y-4" action={formAction}>
         <input type="hidden" name="countryCode" value={countryCode as string} />
         <div className="flex flex-col w-full gap-y-3.5">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="First name"
               name="first_name"
