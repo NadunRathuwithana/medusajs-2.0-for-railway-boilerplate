@@ -20,14 +20,22 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
           </LocalizedClientLink>
         )}
 
-        {/* Product title */}
-        <Heading
-          level="h1"
-          className="text-3xl md:text-4xl lg:text-[40px] font-semibold text-ui-fg-base tracking-tight"
-          data-testid="product-title"
-        >
-          {product.title}
-        </Heading>
+        {/* Product title and subtitle */}
+        <div className="flex flex-col gap-y-2">
+          <Heading
+            level="h1"
+            className="text-3xl md:text-4xl lg:text-[40px] font-semibold text-ui-fg-base tracking-tight"
+            data-testid="product-title"
+          >
+            {product.title}
+          </Heading>
+
+          {product.subtitle && (
+            <p className="text-lg text-gray-500" data-testid="product-subtitle">
+              {product.subtitle}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   )
