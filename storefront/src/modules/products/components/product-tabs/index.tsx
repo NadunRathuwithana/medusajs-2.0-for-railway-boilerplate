@@ -21,6 +21,13 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
     },
   ]
 
+  if (product.tags && product.tags.length > 0) {
+    tabs.push({
+      label: "Tags",
+      component: <TagsTab product={product} />,
+    })
+  }
+
   return (
     <div className="w-full mt-4">
       <Accordion type="multiple" defaultValue={["Description & Fit"]}>
@@ -138,6 +145,23 @@ const ShippingInfoTab = ({ product }: ProductTabsProps) => {
             <span className="text-sm font-semibold text-bold mt-0.5">{estimatedArrival}</span>
           </div>
         </div>
+      </div>
+    </div>
+  )
+}
+
+const TagsTab = ({ product }: ProductTabsProps) => {
+  return (
+    <div className="py-6">
+      <div className="flex flex-wrap gap-2">
+        {product.tags?.map((tag) => (
+          <span
+            key={tag.id}
+            className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium capitalize tracking-wide"
+          >
+            {tag.value}
+          </span>
+        ))}
       </div>
     </div>
   )
