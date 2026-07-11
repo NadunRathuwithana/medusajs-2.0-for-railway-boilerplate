@@ -239,14 +239,11 @@ export async function initiatePaymentSession(
     data?: Record<string, unknown>
   }
 ) {
-  console.log("========== STOREFRONT PAYMENT SESSION INITIATION ==========")
-  console.log("Cart ID:", cart?.id)
-  console.log("Provider ID:", data?.provider_id)
-  
+
   try {
     const authHeaders = await getAuthHeaders()
     const resp = await sdk.store.payment.initiatePaymentSession(cart, data, {}, authHeaders)
-    console.log("SUCCESS! Payment session initiated for:", data?.provider_id)
+
     revalidateTag("cart")
     // Do NOT return `resp` directly. SDK response objects may contain non-serializable 
     // properties which causes Next.js Server Actions to crash during serialization, 

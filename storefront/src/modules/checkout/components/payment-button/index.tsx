@@ -454,12 +454,7 @@ const KokoPaymentButton = ({
     )
   }
 
-  console.log("KOKO FIELDS RECEIVED IN FRONTEND:", {
-    _pluginName: fields._pluginName,
-    _pluginVersion: fields._pluginVersion,
-    _mId: fields._mId,
-    formAction
-  });
+
 
   return (
     <>
