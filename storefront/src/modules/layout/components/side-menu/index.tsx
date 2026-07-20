@@ -78,9 +78,6 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                     <div className="flex items-center justify-between border-b border-zinc-800 pb-5">
                       <div>
                         <img src="/cardle-premium-cotton-tote-bags-logo-light.png" alt="Cardle Premium Cotton Tote Bags Logo" title="Cardle Premium Cotton Tote Bags Logo" className="h-6 w-auto mb-2" />
-                        <p className="text-[9px] font-bold tracking-[0.2em] text-gray-500 capitalize mt-0.5">
-                          Everyday Carry
-                        </p>
                       </div>
                       <button
                         data-testid="close-menu-button"
@@ -92,7 +89,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                     </div>
 
                     {/* Staggered Navigation Links */}
-                    <ul className="flex flex-col gap-6 items-start justify-start my-8">
+                    <ul className="flex flex-col gap-6 items-start justify-start mt-8 mb-auto">
                       {Object.entries(SideMenuItems).map(([name, href], index) => {
                         return (
                           <li

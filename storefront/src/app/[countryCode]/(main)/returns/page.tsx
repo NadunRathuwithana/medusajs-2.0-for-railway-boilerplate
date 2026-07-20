@@ -1,9 +1,9 @@
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Return & Exchange Policy | Cardle",
+  title: "Return/ Refunds and Exchange Policy | Cardle",
   description:
-    "Cardle's 7-day return and exchange policy for handcrafted cotton tote bags. Learn how to request an exchange, conditions that apply, and how to reach our team.",
+    "Cardle's 7-day return, refund and exchange policy for handcrafted cotton tote bags. Learn how to request an exchange or refund, conditions that apply, and how to reach our team.",
   alternates: {
     canonical: "https://cardle.lk/returns",
   },
@@ -14,7 +14,7 @@ export default function ReturnsPage() {
     <div className="py-24 max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
       <div className="mb-16 border-b border-gray-200 pb-8">
         <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
-          Returns & Exchange Policy
+          Return/ Refunds and Exchange Policy
         </h1>
         <p className="text-gray-500 text-lg">
           Last updated: {new Date().toLocaleDateString()}

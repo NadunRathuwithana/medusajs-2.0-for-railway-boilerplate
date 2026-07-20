@@ -41,7 +41,7 @@ export async function resetPaymentSession() {
       {},
       authHeaders
     )
-    console.log("[OnePay Return] Successfully reset payment session to manual.")
+
   } catch (err) {
     console.error("[OnePay Return] Failed to reset payment session:", err)
   }

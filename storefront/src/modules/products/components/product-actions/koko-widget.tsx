@@ -20,7 +20,7 @@ export default function KokoWidget({
         src="/payment/koko-pay-sri-lanka-accepted.png" 
         alt="Koko Pay Sri Lanka" 
         title="Koko Pay Sri Lanka"
-        className="h-[16px] object-contain ml-1 translate-y-[-1px]"
+        className="h-6 object-contain ml-1 translate-y-[-1px]"
       />
     </div>
   )

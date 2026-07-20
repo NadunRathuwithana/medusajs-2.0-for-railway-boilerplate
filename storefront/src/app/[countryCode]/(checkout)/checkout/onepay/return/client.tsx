@@ -27,8 +27,7 @@ export default function OnepayReturnClient({
     if (hasRun.current) return
     hasRun.current = true
 
-    // Log all received params for debugging
-    console.log("[OnePay Return] Received ALL searchParams:", JSON.stringify(searchParams))
+
 
     const statusMessage = searchParams?.status_message?.toUpperCase() || searchParams?.status
     
@@ -61,13 +60,13 @@ export default function OnepayReturnClient({
       const MAX_RETRIES = 8
       
       for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-        console.log(`[OnePay Return] Attempt ${attempt}/${MAX_RETRIES}`)
+
         
         try {
           // First: check if the webhook already completed the order
           const existingOrderId = await checkOrderForCart()
           if (existingOrderId) {
-            console.log("[OnePay Return] Order already exists (webhook completed it)!", existingOrderId)
+
             // Remove the cart cookie so a new cart is generated for the next purchase
             const { clearCart } = await import("./actions")
             await clearCart()
@@ -90,7 +89,7 @@ export default function OnepayReturnClient({
         } catch (err: any) {
           // NEXT_REDIRECT is thrown by Next.js redirect() — it means SUCCESS!
           if (err?.digest?.startsWith?.("NEXT_REDIRECT") || err?.message?.includes?.("NEXT_REDIRECT")) {
-            console.log("[OnePay Return] placeOrder triggered redirect (success!)")
+
             return // Let the redirect happen
           }
           console.warn(`[OnePay Return] placeOrder error on attempt ${attempt}:`, err?.message || err)
@@ -98,7 +97,7 @@ export default function OnepayReturnClient({
 
         // Wait before retrying — give the webhook time to process
         const waitMs = attempt <= 3 ? 2000 : 3000
-        console.log(`[OnePay Return] Waiting ${waitMs}ms before retry...`)
+
         await new Promise(res => setTimeout(res, waitMs))
       }
 

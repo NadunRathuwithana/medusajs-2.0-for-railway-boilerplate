@@ -21,6 +21,7 @@ type ProductActionsProps = {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
   disabled?: boolean
+  isKokoEnabled?: boolean
 }
 
 const optionsAsKeymap = (variantOptions: any) => {
@@ -38,6 +39,7 @@ export default function ProductActions({
   product,
   region,
   disabled,
+  isKokoEnabled,
 }: ProductActionsProps) {
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
@@ -180,12 +182,6 @@ export default function ProductActions({
 
         {/* Koko Pay Widget */}
         {(() => {
-          // Only show if Koko is enabled as a payment provider for this region
-          // Fallback to true if payment_providers is undefined (e.g. not fetched yet)
-          const isKokoEnabled = region?.payment_providers 
-            ? region.payment_providers.some((p) => isKoko(p.id))
-            : true
-            
           if (!isKokoEnabled) return null
 
           const { cheapestPrice, variantPrice } = getProductPrice({

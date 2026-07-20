@@ -10,26 +10,32 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
   return (
     <div id="product-info">
       <div className="flex flex-col gap-y-4">
-        {product.collection ? (
+        {/* Collection badge */}
+        {product.collection && (
           <LocalizedClientLink
             href={`/collections/${product.collection.handle}`}
-            className="px-4 py-1.5 border border-gray-200 rounded-full text-xs font-medium w-fit hover:bg-gray-50 transition-colors"
+            className="px-4 py-1.5 border border-gray-200 rounded-full text-xs font-medium w-fit hover:bg-gray-50 transition-colors text-gray-600"
           >
             {product.collection.title}
           </LocalizedClientLink>
-        ) : (
-          <span className="px-4 py-1.5 border border-gray-200 rounded-full text-xs font-medium w-fit">
-            Fashion
-          </span>
         )}
-        
-        <Heading
-          level="h1"
-          className="text-3xl md:text-4xl lg:text-[40px] font-semibold text-ui-fg-base tracking-tight"
-          data-testid="product-title"
-        >
-          {product.title}
-        </Heading>
+
+        {/* Product title and subtitle */}
+        <div className="flex flex-col gap-y-2">
+          <Heading
+            level="h1"
+            className="text-3xl md:text-4xl lg:text-[40px] font-semibold text-ui-fg-base tracking-tight"
+            data-testid="product-title"
+          >
+            {product.title}
+          </Heading>
+
+          {product.subtitle && (
+            <p className="text-lg text-gray-500" data-testid="product-subtitle">
+              {product.subtitle}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   )

@@ -27,8 +27,7 @@ export default function KokoReturnClient({
     if (hasRun.current) return
     hasRun.current = true
 
-    // Log all received params for debugging
-    console.log("[Koko Return] Received ALL searchParams:", JSON.stringify(searchParams))
+
 
     const isSuccess = searchParams?.status === "SUCCESS"
     
@@ -55,13 +54,13 @@ export default function KokoReturnClient({
       const MAX_RETRIES = 8
       
       for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-        console.log(`[Koko Return] Attempt ${attempt}/${MAX_RETRIES}`)
+
         
         try {
           // First: check if the webhook already completed the order
           const existingOrderId = await checkOrderForCart()
           if (existingOrderId) {
-            console.log("[Koko Return] Order already exists (webhook completed it)!", existingOrderId)
+
             // Remove the cart cookie so a new cart is generated for the next purchase
             const { clearCart } = await import("./actions")
             await clearCart()
@@ -84,7 +83,7 @@ export default function KokoReturnClient({
         } catch (err: any) {
           // NEXT_REDIRECT is thrown by Next.js redirect() — it means SUCCESS!
           if (err?.digest?.startsWith?.("NEXT_REDIRECT") || err?.message?.includes?.("NEXT_REDIRECT")) {
-            console.log("[Koko Return] placeOrder triggered redirect (success!)")
+
             return // Let the redirect happen
           }
           console.warn(`[Koko Return] placeOrder error on attempt ${attempt}:`, err?.message || err)
@@ -92,7 +91,7 @@ export default function KokoReturnClient({
 
         // Wait before retrying — give the webhook time to process
         const waitMs = attempt <= 3 ? 2000 : 3000
-        console.log(`[Koko Return] Waiting ${waitMs}ms before retry...`)
+
         await new Promise(res => setTimeout(res, waitMs))
       }
 

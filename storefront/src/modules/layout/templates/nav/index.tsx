@@ -22,7 +22,7 @@ export default async function Nav() {
             <div className="hidden small:flex items-center gap-x-6 h-full">
               <LocalizedClientLink
                 href="/store"
-                className="hover:text-ui-fg-base capitalize font-medium"
+                className="text-ui-fg-base hover:text-zinc-900 capitalize font-semibold text-sm transition-colors"
               >
                 Store
               </LocalizedClientLink>
