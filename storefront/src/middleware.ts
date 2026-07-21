@@ -174,12 +174,22 @@ export async function middleware(request: NextRequest) {
   // If a cart_id is in the params, we set it as a cookie and redirect to the checkout.
   if (cartId && !cartIdCookie) {
     response = NextResponse.redirect(`${redirectUrl}`, 307)
-    response.cookies.set("_medusa_cart_id", cartId, { maxAge: 60 * 60 * 24 })
+    response.cookies.set("_medusa_cart_id", cartId, {
+      maxAge: 60 * 60 * 24,
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    })
   }
 
   // Set a cookie to indicate that we're onboarding. This is used to show the onboarding flow.
   if (isOnboarding) {
-    response.cookies.set("_medusa_onboarding", "true", { maxAge: 60 * 60 * 24 })
+    response.cookies.set("_medusa_onboarding", "true", {
+      maxAge: 60 * 60 * 24,
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    })
   }
 
   return response

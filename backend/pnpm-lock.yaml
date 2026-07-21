@@ -31,7 +31,7 @@ importers:
         specifier: 2.13.6
         version: 2.13.6(@medusajs/cli@2.13.6(@types/node@20.19.25))(@types/node@20.19.25)(ioredis@5.8.2)(vite@5.4.21(@types/node@20.19.25))(zod@3.25.76)
       '@medusajs/icons':
-        specifier: latest
+        specifier: 2.17.2
         version: 2.17.2(react@18.3.1)
       '@medusajs/medusa':
         specifier: 2.13.6
@@ -43,7 +43,7 @@ importers:
         specifier: 2.13.6
         version: 2.13.6(@medusajs/framework@2.13.6(@medusajs/cli@2.13.6(@types/node@20.19.25))(@types/node@20.19.25)(ioredis@5.8.2)(vite@5.4.21(@types/node@20.19.25))(zod@3.25.76))
       '@medusajs/ui':
-        specifier: latest
+        specifier: 4.1.19
         version: 4.1.19(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
       '@medusajs/utils':
         specifier: 2.13.6
@@ -63,6 +63,9 @@ importers:
       facebook-nodejs-business-sdk:
         specifier: ^24.0.1
         version: 24.0.1
+      ioredis:
+        specifier: 5.8.2
+        version: 5.8.2
       medusajs-launch-utils:
         specifier: 0.0.18
         version: 0.0.18

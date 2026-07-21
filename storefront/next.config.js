@@ -70,7 +70,62 @@ const nextConfig = {
   },
   serverRuntimeConfig: {
     port: process.env.PORT || 3000
-  }
+  },
+  async headers() {
+    // CSP is shipped as Report-Only: the checkout flow depends on Stripe
+    // Elements/PayPal iframes and a Koko hidden-form POST to a gateway domain
+    // that can change between QA/prod, and this can't be verified against a
+    // live payment sandbox from here. Report-Only logs violations to the
+    // console without blocking anything, so it's safe to ship now — flip
+    // reportOnly to false only after confirming a real checkout (all 3
+    // payment methods) shows no CSP violations in the browser console.
+    const cspDirectives = [
+      "default-src 'self'",
+      "base-uri 'self'",
+      "object-src 'none'",
+      "frame-ancestors 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://connect.facebook.net https://js.stripe.com https://www.paypal.com https://www.paypalobjects.com",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https: http://localhost:*",
+      "font-src 'self' data:",
+      "connect-src 'self' https: wss:",
+      "frame-src https://js.stripe.com https://hooks.stripe.com https://www.paypal.com https://www.sandbox.paypal.com",
+    ]
+
+    const securityHeaders = [
+      {
+        key: "Content-Security-Policy-Report-Only",
+        value: cspDirectives.join("; "),
+      },
+      {
+        key: "Strict-Transport-Security",
+        value: "max-age=63072000; includeSubDomains; preload",
+      },
+      {
+        key: "X-Frame-Options",
+        value: "SAMEORIGIN",
+      },
+      {
+        key: "X-Content-Type-Options",
+        value: "nosniff",
+      },
+      {
+        key: "Referrer-Policy",
+        value: "strict-origin-when-cross-origin",
+      },
+      {
+        key: "Permissions-Policy",
+        value: "camera=(), microphone=(), geolocation=()",
+      },
+    ]
+
+    return [
+      {
+        source: "/:path*",
+        headers: securityHeaders,
+      },
+    ]
+  },
 }
 
 module.exports = withBundleAnalyzer(nextConfig)

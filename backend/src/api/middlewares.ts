@@ -1,5 +1,6 @@
 import { defineMiddlewares } from "@medusajs/medusa"
 import type { MedusaRequest, MedusaResponse, MedusaNextFunction } from "@medusajs/framework/http"
+import { rateLimit } from "../lib/rate-limit"
 
 /**
  * Parses application/x-www-form-urlencoded bodies for the Koko webhook route.
@@ -39,7 +40,32 @@ export default defineMiddlewares({
     },
     {
       matcher: "/webhooks/koko",
-      middlewares: [parseKokoWebhookBody],
+      middlewares: [
+        parseKokoWebhookBody,
+        // Generous limit — this is server-to-server gateway traffic, possibly
+        // sharing a source IP across many merchants, not end-user traffic.
+        // The real trust boundary is the RSA signature check inside
+        // getWebhookActionAndData, this just guards against junk-request floods.
+        rateLimit({ windowMs: 60_000, max: 60, keyPrefix: "webhook-koko" }),
+      ],
+    },
+    {
+      matcher: "/webhooks/onepay",
+      middlewares: [
+        rateLimit({ windowMs: 60_000, max: 60, keyPrefix: "webhook-onepay" }),
+      ],
+    },
+    {
+      matcher: "/store/contact",
+      middlewares: [
+        rateLimit({ windowMs: 15 * 60_000, max: 5, keyPrefix: "contact" }),
+      ],
+    },
+    {
+      matcher: "/store/carts/:id/complete",
+      middlewares: [
+        rateLimit({ windowMs: 60_000, max: 10, keyPrefix: "cart-complete" }),
+      ],
     },
   ],
 })
