@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext } from "react"
+import React, { createContext, useContext, useMemo } from "react"
 
 interface ModalContext {
   close: () => void
@@ -14,14 +14,10 @@ interface ModalProviderProps {
 }
 
 export const ModalProvider = ({ children, close }: ModalProviderProps) => {
+  const value = useMemo(() => ({ close }), [close])
+
   return (
-    <ModalContext.Provider
-      value={{
-        close,
-      }}
-    >
-      {children}
-    </ModalContext.Provider>
+    <ModalContext.Provider value={value}>{children}</ModalContext.Provider>
   )
 }
 

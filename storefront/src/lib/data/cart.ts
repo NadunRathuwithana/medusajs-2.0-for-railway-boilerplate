@@ -213,6 +213,23 @@ export const enrichLineItems = cache(async function enrichLineItems(
   return enrichedItems
 })
 
+// Single source of truth for "the current cart with enriched line items" —
+// previously copy-pasted (with slightly different null-handling) in the cart
+// page, checkout page, and the nav's CartButton.
+export const getCart = cache(async function getCart() {
+  const cart = await retrieveCart()
+
+  if (!cart) {
+    return null
+  }
+
+  if (cart.items?.length) {
+    cart.items = await enrichLineItems(cart.items, cart.region_id!)
+  }
+
+  return cart
+})
+
 export async function setShippingMethod({
   cartId,
   shippingMethodId,

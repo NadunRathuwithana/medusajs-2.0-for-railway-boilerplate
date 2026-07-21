@@ -5,8 +5,7 @@ import Wrapper from "@modules/checkout/components/payment-wrapper"
 import CheckoutForm from "@modules/checkout/templates/checkout-form"
 import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
 import MobileCheckoutSummary from "@modules/checkout/components/mobile-checkout-summary"
-import { enrichLineItems, retrieveCart } from "@lib/data/cart"
-import { HttpTypes } from "@medusajs/types"
+import { getCart } from "@lib/data/cart"
 import { getCustomer } from "@lib/data/customer"
 import BackButton from "@modules/common/components/back-button"
 
@@ -14,24 +13,14 @@ export const metadata: Metadata = {
   title: "Checkout",
 }
 
-const fetchCart = async () => {
-  const cart = await retrieveCart()
-  if (!cart) {
-    return notFound()
-  }
-
-  if (cart?.items?.length) {
-    const enrichedItems = await enrichLineItems(cart?.items, cart?.region_id!)
-    cart.items = enrichedItems as HttpTypes.StoreCartLineItem[]
-  }
-
-  return cart
-}
-
 import CheckoutTracker from "@components/analytics/CheckoutTracker"
 
 export default async function Checkout() {
-  const cart = await fetchCart()
+  const cart = await getCart()
+  if (!cart) {
+    notFound()
+  }
+
   const customer = await getCustomer()
 
   return (
