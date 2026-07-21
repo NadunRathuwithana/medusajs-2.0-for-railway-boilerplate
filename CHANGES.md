@@ -93,6 +93,13 @@ Ran axe-core (via Playwright) against staging instead of guessing from code — 
 - Built abandoned-cart detection and recovery email from scratch (nothing existed before): an hourly job querying idle carts (3+ hours, not older than 7 days) with items and an email on file, sending via a new `ABANDONED_CART` template, using Redis to avoid re-sending to the same cart for 30 days.
 - **Investigated, no changes needed** (reported instead of guessing): checkout form friction was already well-implemented (minimal required fields, correct `autoComplete` hints throughout, inline error handling with no full-page reloads anywhere). OnePay always live-checks payment status so it doesn't have Koko's race. COD has no external async confirmation, so the whole webhook-race bug class doesn't apply to it.
 
+## Phase 13 — Third-party script governance (`34c5c0b`)
+Inventory: GA4 and Meta Pixel are the only third-party scripts anywhere in the storefront (no chat/review widgets, no external fonts). Per the Phase 1 Lighthouse audit, these contributed measurably to PDP's TBT: gtag.js scripting 297ms (163KB, ~66KB unused), fbevents.js scripting 354ms (103KB, ~37KB unused).
+
+Both libraries have a documented queuing mechanism (`dataLayer.push` / `n.queue.push`) that makes calls safe before the real script has loaded — that's exactly why their official base snippets are written the way they are. Deferred the actual library fetch/parse to `strategy="lazyOnload"` for both, without losing any tracked events, keeping the lightweight bootstrap (which defines `gtag()`/`fbq()`) on `afterInteractive`. GA4 already had this split structurally; Meta Pixel's official snippet bundles bootstrap + script-injection together, so split it into two Scripts — verified in isolation that `fbq()` calls still queue correctly against the reduced bootstrap.
+
+**Not done**: didn't attempt Partytown (web worker offload) — real compatibility risk with Meta Pixel's DOM manipulation that can't be verified without live browser testing against a real Pixel ID.
+
 ---
 
-*Phases 13–14 (third-party scripts, CI/CD) are in progress and will be appended here as they complete.*
+*Phase 14 (CI/CD recommendations) is in progress and will be appended here.*
