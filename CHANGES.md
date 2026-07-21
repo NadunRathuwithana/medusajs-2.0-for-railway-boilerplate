@@ -100,6 +100,23 @@ Both libraries have a documented queuing mechanism (`dataLayer.push` / `n.queue.
 
 **Not done**: didn't attempt Partytown (web worker offload) — real compatibility risk with Meta Pixel's DOM manipulation that can't be verified without live browser testing against a real Pixel ID.
 
+## Phase 14 — CI/CD & testing (`8236070`)
+Per your earlier choice, no pipeline files were created (no CI exists today, and I don't know your Railway deploy setup) — documented recommendations in `docs/ci-cd-recommendations.md` instead.
+
+**Important finding**: the existing Playwright E2E suite (`storefront/e2e/`) looks like real checkout coverage, but it references generic Medusa demo products ("Sweatshirt", "Sweatpants", "FakeEx Standard" shipping) and its payment step is just `submitPaymentButton` → `submitOrderButton` with no interaction with a payment method selector at all — it predates the Koko/OnePay integration and doesn't exercise any of the store's 3 real payment methods. Good coverage of checkout *mechanics*, no actual signal on payment correctness.
+
+Documented: an example GitHub Actions workflow (build, Lighthouse CI, Playwright), Lighthouse budget thresholds based on the Phase 1 baseline, what new Playwright tests are needed for Koko/OnePay/COD specifically (plus a lighter Jest-level webhook-idempotency regression test protecting the Phase 12 fix), and how to gate merges on payment-code paths via branch protection.
+
 ---
 
-*Phase 14 (CI/CD recommendations) is in progress and will be appended here.*
+## Summary
+
+All 14 phases across this session (audit → speed → images → mobile → SEO → analytics → state, then security → caching → monitoring → accessibility → checkout hardening → third-party scripts → CI/CD) are committed on `fine-tune-branch`. The highest-severity findings, in order of what would have caused real damage if unaddressed:
+
+1. **Hardcoded plaintext credentials** gating the entire site's public/private state (Phase 8)
+2. **A public, unauthenticated endpoint that could trigger real payment capture** (Phase 8)
+3. **Non-distributed locking**, meaning the last-unit-in-stock race condition wasn't actually safe on a multi-instance deployment despite Medusa's core already having the right mechanism in place (Phase 12)
+4. **`sharp` disabled** would have silently broken all product image optimization in production the moment Phase 3's changes deployed (caught in Phase 10)
+5. A **double-fired GA4 page_view** inflating every session's initial pageview count by 2x (Phase 6)
+
+Still waiting on you: Cloudflare API token/zone ID (Phases 8-9, documented recommendations ready to apply once provided), and a decision on monitoring service accounts (Sentry DSN, uptime monitor) to activate the scaffolding already wired up in Phase 10.
