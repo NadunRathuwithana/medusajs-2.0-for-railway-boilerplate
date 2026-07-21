@@ -31,6 +31,7 @@ import {
   signDataString,
   verifySignature,
 } from "./signature"
+import { getRedisClient } from "../../lib/redis"
 import type {
   KokoOptions,
   KokoOrderCreateFields,
@@ -45,9 +46,44 @@ type InjectedDependencies = {
 class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
   static identifier = "koko"
 
-  // In-memory cache to bridge the race condition between webhook and authorizePayment.
-  // Stores verified statuses so we don't need to re-poll orderView immediately.
-  private static webhookCache = new Map<string, { status: string, timestamp: number }>()
+  // Redis-backed cache bridging the race condition between the webhook and
+  // the browser-redirect authorizePayment call. Previously an in-memory
+  // static Map, which only worked correctly on a single backend instance —
+  // on Railway (or any multi-instance/restart deployment) the webhook could
+  // land on a different process than the one later handling authorizePayment,
+  // silently missing the cache and falling through to a live orderView poll
+  // every time (slower, and one more thing that could fail under load).
+  // Falls back to that same live-poll path if Redis isn't configured.
+  private static readonly WEBHOOK_CACHE_TTL_SECONDS = 3600
+  private static webhookCacheKey(orderId: string) {
+    return `koko:webhook-verified:${orderId}`
+  }
+
+  private async setWebhookVerified(orderId: string, status: string): Promise<void> {
+    const redis = getRedisClient()
+    if (!redis) return
+    try {
+      await redis.set(
+        KokoPaymentService.webhookCacheKey(orderId),
+        status,
+        "EX",
+        KokoPaymentService.WEBHOOK_CACHE_TTL_SECONDS
+      )
+    } catch (e: any) {
+      this.logger_.error(`Koko: failed to write webhook cache for order ${orderId}: ${e.message}`)
+    }
+  }
+
+  private async getWebhookVerified(orderId: string): Promise<string | null> {
+    const redis = getRedisClient()
+    if (!redis) return null
+    try {
+      return await redis.get(KokoPaymentService.webhookCacheKey(orderId))
+    } catch (e: any) {
+      this.logger_.error(`Koko: failed to read webhook cache for order ${orderId}: ${e.message}`)
+      return null
+    }
+  }
 
   protected logger_: Logger
   protected options_: KokoOptions
@@ -189,8 +225,8 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
 
     try {
       // 1. Check if the webhook already verified this payment
-      const cached = KokoPaymentService.webhookCache.get(orderId)
-      if (cached && cached.status === "SUCCESS") {
+      const cachedStatus = await this.getWebhookVerified(orderId)
+      if (cachedStatus === "SUCCESS") {
         this.logger_.info(`Koko authorizePayment: trusted webhook-verified SUCCESS for order ${orderId}`)
         return {
           data: { ...input.data, koko_status: "SUCCESS" },
@@ -366,14 +402,10 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
     const medusaSessionId = payload.orderId
 
     if (payload.status === "SUCCESS") {
-      // Store the verified status in our cache so authorizePayment can use it
-      KokoPaymentService.webhookCache.set(medusaSessionId, { status: "SUCCESS", timestamp: Date.now() })
-
-      // Cleanup old entries to prevent memory leaks (keep last 1 hour)
-      const oneHourAgo = Date.now() - 3600000
-      for (const [key, value] of KokoPaymentService.webhookCache.entries()) {
-        if (value.timestamp < oneHourAgo) KokoPaymentService.webhookCache.delete(key)
-      }
+      // Store the verified status in Redis (TTL handles cleanup automatically)
+      // so authorizePayment can use it, even if it's handled by a different
+      // backend instance than the one that received this webhook.
+      await this.setWebhookVerified(medusaSessionId, "SUCCESS")
 
       return {
         action: "captured",

@@ -122,6 +122,33 @@ const medusaConfig = {
               },
             },
           },
+          // Without this, Modules.LOCKING falls back to its default
+          // in-memory provider — fine for serializing concurrent requests
+          // within one process, but NOT distributed: on a horizontally
+          // scaled deployment (multiple backend instances/replicas), two
+          // concurrent buyers hitting the last unit of stock on *different*
+          // instances would each acquire their own separate in-memory lock
+          // and could both succeed, overselling. Medusa's core
+          // reserveInventoryStep already wraps inventory reservation in
+          // Modules.LOCKING (see @medusajs/core-flows/cart/steps/reserve-inventory) —
+          // this just makes that lock actually distributed, using the same
+          // Redis instance already provisioned above.
+          {
+            key: Modules.LOCKING,
+            resolve: "@medusajs/locking",
+            options: {
+              providers: [
+                {
+                  resolve: "@medusajs/locking-redis",
+                  id: "locking-redis",
+                  is_default: true,
+                  options: {
+                    redisUrl: REDIS_URL,
+                  },
+                },
+              ],
+            },
+          },
         ]
       : []),
     // Notification module via Resend — only included when Resend credentials are set

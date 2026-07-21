@@ -11,6 +11,7 @@ import { PasswordResetTemplate, PASSWORD_RESET, isPasswordResetTemplateData } fr
 import { ContactFormTemplate, CONTACT_FORM, isContactFormTemplateData } from './contact-form'
 import { ContactAutoReplyTemplate, CONTACT_AUTO_REPLY, isContactAutoReplyTemplateData } from './contact-auto-reply'
 import { PaymentFailedTemplate, PAYMENT_FAILED, isPaymentFailedTemplateData } from './payment-failed'
+import { AbandonedCartTemplate, ABANDONED_CART, isAbandonedCartTemplateData } from './abandoned-cart'
 
 export const EmailTemplates = {
   INVITE_USER,
@@ -23,6 +24,7 @@ export const EmailTemplates = {
   CONTACT_FORM,
   CONTACT_AUTO_REPLY,
   PAYMENT_FAILED,
+  ABANDONED_CART,
 } as const
 
 export type EmailTemplateType = keyof typeof EmailTemplates
@@ -89,6 +91,12 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <PaymentFailedTemplate {...data} />
 
+    case EmailTemplates.ABANDONED_CART:
+      if (!isAbandonedCartTemplateData(data)) {
+        throw new MedusaError(MedusaError.Types.INVALID_DATA, `Invalid data for template "${EmailTemplates.ABANDONED_CART}"`)
+      }
+      return <AbandonedCartTemplate {...data} />
+
     default:
       throw new MedusaError(MedusaError.Types.INVALID_DATA, `Unknown template key: "${templateKey}"`)
   }
@@ -105,4 +113,5 @@ export {
   ContactFormTemplate,
   ContactAutoReplyTemplate,
   PaymentFailedTemplate,
+  AbandonedCartTemplate,
 }

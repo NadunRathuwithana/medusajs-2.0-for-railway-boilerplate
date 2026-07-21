@@ -1,22 +1,5 @@
-import Redis from "ioredis"
 import type { MedusaRequest, MedusaResponse, MedusaNextFunction } from "@medusajs/framework/http"
-
-// Shared connection reused across all rate-limited routes — one Redis client
-// for the process, not one per request/middleware instance.
-let redisClient: Redis | null = null
-function getRedisClient(): Redis | null {
-  if (!process.env.REDIS_URL) return null
-  if (!redisClient) {
-    redisClient = new Redis(process.env.REDIS_URL, {
-      maxRetriesPerRequest: 1,
-      lazyConnect: true,
-    })
-    redisClient.on("error", (err) => {
-      console.error("[rate-limit] Redis connection error:", err.message)
-    })
-  }
-  return redisClient
-}
+import { getRedisClient } from "./redis"
 
 function getClientIp(req: MedusaRequest): string {
   const forwarded = req.headers["x-forwarded-for"]

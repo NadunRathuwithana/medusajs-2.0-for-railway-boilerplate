@@ -29,6 +29,8 @@
     "@medusajs/framework": "2.13.6",
     "@medusajs/utils": "2.13.6",
     "@medusajs/icons": "2.17.2",
+    "@medusajs/locking": "2.13.6",
+    "@medusajs/locking-redis": "2.13.6",
     "@medusajs/medusa": "2.13.6",
     "@medusajs/notification-sendgrid": "^2.13.6",
     "@medusajs/payment-stripe": "2.13.6",
