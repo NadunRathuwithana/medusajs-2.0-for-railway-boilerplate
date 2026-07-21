@@ -2,29 +2,7 @@
 
 import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
-
-const MAX_ATTEMPTS = 5
-const WINDOW_MS = 15 * 60 * 1000 // 15 minutes
-
-// In-memory sliding-window limiter. This gate is a single low-traffic splash
-// page on one storefront instance — if the storefront ever scales to multiple
-// instances, this needs to move to a shared store (e.g. Redis) like the
-// backend's rate limiting does.
-const attempts = new Map<string, number[]>()
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now()
-  const recent = (attempts.get(ip) || []).filter((t) => now - t < WINDOW_MS)
-  recent.push(now)
-  attempts.set(ip, recent)
-
-  // Bound memory growth from distinct IPs hammering the endpoint.
-  if (attempts.size > 10000) {
-    attempts.clear()
-  }
-
-  return recent.length > MAX_ATTEMPTS
-}
+import { isRateLimited } from "@lib/util/rate-limit"
 
 export async function submitLogin(formData: FormData) {
   const headersList = await headers()
@@ -33,7 +11,7 @@ export async function submitLogin(formData: FormData) {
     headersList.get("x-real-ip") ||
     "unknown"
 
-  if (isRateLimited(ip)) {
+  if (isRateLimited(`coming-soon-login:${ip}`, { windowMs: 15 * 60 * 1000, max: 5 })) {
     return { error: "Too many attempts. Please try again later." }
   }
 

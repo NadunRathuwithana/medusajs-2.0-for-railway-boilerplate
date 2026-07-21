@@ -178,3 +178,13 @@ export const ADMIN_EMAIL =
   process.env.SMTP_ADMIN_EMAIL ||
   process.env.SMTP_USER ||
   "admin@cardle.lk";
+
+/**
+ * STOREFRONT_URL     — base URL of the Next.js storefront, used to call its
+ *                       /api/revalidate endpoint when product/collection/
+ *                       category data changes (see subscribers/storefront-revalidate.ts).
+ * REVALIDATE_SECRET  — shared secret, must match the storefront's own
+ *                       REVALIDATE_SECRET env var.
+ */
+export const STOREFRONT_URL = process.env.STOREFRONT_URL;
+export const REVALIDATE_SECRET = process.env.REVALIDATE_SECRET;
