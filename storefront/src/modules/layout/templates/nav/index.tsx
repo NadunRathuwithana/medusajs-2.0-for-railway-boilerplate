@@ -64,6 +64,7 @@ export default async function Nav() {
                 className="hover:text-ui-fg-base flex items-center gap-2"
                 href="/account"
                 data-testid="nav-account-link"
+                aria-label="Account"
               >
                 <User className="h-5 w-5" strokeWidth={1.5} />
               </LocalizedClientLink>
@@ -74,6 +75,7 @@ export default async function Nav() {
                   className="hover:text-ui-fg-base flex items-center gap-2 relative px-2.5 -mx-2.5"
                   href="/cart"
                   data-testid="nav-cart-link"
+                  aria-label="Cart"
                 >
                   <ShoppingBag className="w-5 h-5" strokeWidth={1.5} />
                 </LocalizedClientLink>

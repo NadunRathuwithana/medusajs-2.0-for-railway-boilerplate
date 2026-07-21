@@ -17,7 +17,7 @@ const MobileCheckoutSummary = ({ cart }: { cart: any }) => {
     <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-6 lg:hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-5 bg-gray-50 hover:bg-gray-100 transition-colors focus:outline-none"
+        className="w-full flex items-center justify-between p-5 bg-gray-50 hover:bg-gray-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-inset"
       >
         <div className="flex items-center gap-2 text-gray-800 font-medium text-[13px]">
           <ShoppingCart className="w-4 h-4 text-gray-500" />

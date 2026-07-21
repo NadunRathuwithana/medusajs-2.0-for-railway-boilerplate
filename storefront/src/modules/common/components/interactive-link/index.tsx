@@ -21,10 +21,14 @@ const InteractiveLink = ({
       onClick={onClick}
       {...props}
     >
-      <Text className="text-ui-fg-interactive">{children}</Text>
+      {/* text-ui-fg-interactive (Medusa UI's design token, #60A5FA) measures
+          ~2.5:1 on a white background — fails WCAG AA's 4.5:1 for normal
+          text. Using a darker blue here instead of touching the shared
+          --fg-interactive CSS variable, which other @medusajs/ui components
+          may rely on in different (possibly dark) contexts. */}
+      <Text className="text-blue-700">{children}</Text>
       <ArrowUpRightMini
-        className="group-hover:rotate-45 ease-in-out duration-150"
-        color="var(--fg-interactive)"
+        className="group-hover:rotate-45 ease-in-out duration-150 text-blue-700"
       />
     </LocalizedClientLink>
   )

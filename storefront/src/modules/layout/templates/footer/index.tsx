@@ -60,7 +60,7 @@ const TrustSection = () => {
             <h4 className="text-sm font-bold capitalize tracking-wider text-bold mb-2">
               Customer Care
             </h4>
-            <p className="text-xs text-gray-500 font-medium leading-relaxed max-w-[280px]">
+            <p className="text-xs text-gray-600 font-medium leading-relaxed max-w-[280px]">
               Available 24/7 via live support or email to guide your everyday
               carry.
             </p>
@@ -72,7 +72,7 @@ const TrustSection = () => {
             <h4 className="text-sm font-bold capitalize tracking-wider text-bold mb-2">
               Fast Delivery
             </h4>
-            <p className="text-xs text-gray-500 font-medium leading-relaxed max-w-[280px]">
+            <p className="text-xs text-gray-600 font-medium leading-relaxed max-w-[280px]">
               Standard delivery in 2-5 days. Transparent shipping rates with no
               hidden fees.
             </p>
@@ -84,7 +84,7 @@ const TrustSection = () => {
             <h4 className="text-sm font-bold capitalize tracking-wider text-bold mb-2">
               Flexible Payments
             </h4>
-            <p className="text-xs text-gray-500 font-medium leading-relaxed max-w-[280px]">
+            <p className="text-xs text-gray-600 font-medium leading-relaxed max-w-[280px]">
               Secure processing for Visa, Mastercard, Koko Pay & Cash on
               Delivery.
             </p>
@@ -286,7 +286,7 @@ export default async function Footer() {
               </h4>
               <ul className="flex flex-col gap-3 text-[13px] text-gray-400 font-medium">
                 <li>
-                  <span className="text-gray-500">Email: </span>
+                  <span className="text-gray-400">Email: </span>
                   <a
                     className="text-white hover:text-gray-300 transition-colors"
                     href="mailto:hello@cardle.lk"
@@ -295,7 +295,7 @@ export default async function Footer() {
                   </a>
                 </li>
                 <li>
-                  <span className="text-gray-500">Phone: </span>
+                  <span className="text-gray-400">Phone: </span>
                   <a
                     href="tel:+94779497859"
                     className="text-white hover:text-gray-300 transition-colors font-medium"
@@ -304,7 +304,7 @@ export default async function Footer() {
                   </a>
                 </li>
                 <li className="mt-4 pt-4 border-t border-zinc-900">
-                  <span className="block text-[11px] font-bold text-gray-500 tracking-wider capitalize mb-1">
+                  <span className="block text-[11px] font-bold text-gray-400 tracking-wider capitalize mb-1">
                     Office Hours
                   </span>
                   <span className="text-xs text-gray-400 block">
@@ -319,7 +319,7 @@ export default async function Footer() {
           </div>
 
           {/* Bottom Bar */}
-          <div className="border-t border-zinc-900 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
+          <div className="border-t border-zinc-900 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-400">
             <p>© {new Date().getFullYear()} Cardle . All rights reserved.</p>
             <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 font-medium">
               <LocalizedClientLink

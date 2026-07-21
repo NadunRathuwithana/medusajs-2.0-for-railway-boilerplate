@@ -58,6 +58,7 @@ const CartDropdown = ({
         className="hover:text-ui-fg-base flex items-center h-full px-2.5 -mx-2.5"
         onClick={open}
         data-testid="nav-cart-link"
+        aria-label={totalItems > 0 ? `Cart, ${totalItems} item${totalItems === 1 ? "" : "s"}` : "Cart"}
       >
         <div className="relative flex items-center justify-center">
           <ShoppingBag className="w-5 h-5 text-gray-800" strokeWidth={1.5} />
