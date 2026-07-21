@@ -29,7 +29,7 @@ export default function PopularSlider({
         {viewAllLink && (
           <LocalizedClientLink
             href="/store"
-            className="text-bold hover:text-gray-600 transition-colors capitalize font-medium text-sm whitespace-nowrap hidden sm:block bg-zinc-100 py-2 px-4 rounded-full"
+            className="text-bold hover:text-gray-600 transition-colors capitalize font-medium text-sm whitespace-nowrap hidden sm:flex items-center min-h-[44px] bg-zinc-100 py-2 px-4 rounded-full"
           >
             View All
           </LocalizedClientLink>

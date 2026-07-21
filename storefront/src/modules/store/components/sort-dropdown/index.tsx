@@ -81,7 +81,7 @@ export default function SortDropdown({ sortBy }: { sortBy: SortOptions }) {
         {/* Mobile Icon Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="sm:hidden flex items-center justify-center w-10 h-10 rounded-full border border-black bg-white text-black hover:bg-gray-50 transition-colors duration-200"
+          className="sm:hidden flex items-center justify-center w-11 h-11 rounded-full border border-black bg-white text-black hover:bg-gray-50 transition-colors duration-200"
           aria-label="Sort options"
         >
           <ListFilter className="w-4 h-4" />
@@ -90,7 +90,7 @@ export default function SortDropdown({ sortBy }: { sortBy: SortOptions }) {
         {/* Desktop Text Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="hidden sm:inline-flex items-center justify-between gap-3 px-6 py-2.5 rounded-full border border-black text-sm font-semibold tracking-wide bg-white text-bold hover:bg-gray-50 transition-colors duration-200 min-w-[160px]"
+          className="hidden sm:inline-flex items-center justify-between gap-3 px-6 py-3 min-h-[44px] rounded-full border border-black text-sm font-semibold tracking-wide bg-white text-bold hover:bg-gray-50 transition-colors duration-200 min-w-[160px]"
         >
           <span>{activeOption.label}</span>
           <ChevronDown 

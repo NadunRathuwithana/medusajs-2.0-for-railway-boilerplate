@@ -55,7 +55,7 @@ const CartDropdown = ({
   return (
     <div className="h-full z-50">
       <button
-        className="hover:text-ui-fg-base flex items-center h-full"
+        className="hover:text-ui-fg-base flex items-center h-full px-2.5 -mx-2.5"
         onClick={open}
         data-testid="nav-cart-link"
       >
@@ -309,10 +309,10 @@ const SidebarCartItem = ({ item, close }: { item: any; close: () => void }) => {
           </div>
 
           {/* Quantity Pill */}
-          <div className="flex items-center justify-between bg-white border border-gray-200 rounded-full px-1 py-1 w-[90px] shadow-sm">
+          <div className="flex items-center justify-between bg-white border border-gray-200 rounded-full px-1 py-1 w-[118px] shadow-sm">
             <button
               onClick={() => changeQuantity(optimisticQty - 1)}
-              className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-bold transition-all disabled:opacity-40"
+              className="w-11 h-11 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-bold transition-all disabled:opacity-40"
               disabled={optimisticQty <= 1}
             >
               <Minus className="w-3.5 h-3.5" strokeWidth={2.5} />
@@ -322,7 +322,7 @@ const SidebarCartItem = ({ item, close }: { item: any; close: () => void }) => {
             </span>
             <button
               onClick={() => changeQuantity(optimisticQty + 1)}
-              className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-bold transition-all disabled:opacity-40"
+              className="w-11 h-11 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-bold transition-all disabled:opacity-40"
               disabled={optimisticQty >= 20}
             >
               <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />

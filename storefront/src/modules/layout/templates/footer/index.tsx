@@ -143,7 +143,7 @@ export default async function Footer() {
                   href="https://www.facebook.com/people/Cardlelk/61585796349137/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:opacity-80 transition-opacity"
+                  className="hover:opacity-80 transition-opacity p-1.5 -m-1.5"
                 >
                   <Image
                     src="/social/facebook.png"
@@ -157,7 +157,7 @@ export default async function Footer() {
                   href="https://www.instagram.com/cardle_lk/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:opacity-80 transition-opacity"
+                  className="hover:opacity-80 transition-opacity p-1.5 -m-1.5"
                 >
                   <Image
                     src="/social/instagram.png"
@@ -171,7 +171,7 @@ export default async function Footer() {
                   href="https://www.tiktok.com/@cardle.srilanka/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:opacity-80 transition-opacity"
+                  className="hover:opacity-80 transition-opacity p-1.5 -m-1.5"
                 >
                   <Image
                     src="/social/tiktok.png"
@@ -185,7 +185,7 @@ export default async function Footer() {
                   href="https://wa.me/94779497859"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:opacity-80 transition-opacity"
+                  className="hover:opacity-80 transition-opacity p-1.5 -m-1.5"
                 >
                   <Image
                     src="/social/whatsapp.png"
@@ -209,7 +209,7 @@ export default async function Footer() {
                     <li key={c.id}>
                       <LocalizedClientLink
                         href={`/collections/${c.handle}`}
-                        className="hover:text-white transition-colors"
+                        className="hover:text-white transition-colors inline-block py-2.5 -my-2.5"
                       >
                         {c.title}
                       </LocalizedClientLink>
@@ -220,7 +220,7 @@ export default async function Footer() {
                     <li>
                       <LocalizedClientLink
                         href="/store"
-                        className="hover:text-white transition-colors"
+                        className="hover:text-white transition-colors inline-block py-2.5 -my-2.5"
                       >
                         Totes & Bags
                       </LocalizedClientLink>
@@ -228,7 +228,7 @@ export default async function Footer() {
                     <li>
                       <LocalizedClientLink
                         href="/store"
-                        className="hover:text-white transition-colors"
+                        className="hover:text-white transition-colors inline-block py-2.5 -my-2.5"
                       >
                         Backpacks
                       </LocalizedClientLink>
@@ -236,7 +236,7 @@ export default async function Footer() {
                     <li>
                       <LocalizedClientLink
                         href="/store"
-                        className="hover:text-white transition-colors"
+                        className="hover:text-white transition-colors inline-block py-2.5 -my-2.5"
                       >
                         Custom Personalisation
                       </LocalizedClientLink>
@@ -255,7 +255,7 @@ export default async function Footer() {
                 {/* <li>
                   <LocalizedClientLink
                     href="/about"
-                    className="hover:text-white transition-colors"
+                    className="hover:text-white transition-colors inline-block py-2.5 -my-2.5"
                   >
                     About Us
                   </LocalizedClientLink>
@@ -263,7 +263,7 @@ export default async function Footer() {
                 <li>
                   <LocalizedClientLink
                     href="/contact"
-                    className="hover:text-white transition-colors"
+                    className="hover:text-white transition-colors inline-block py-2.5 -my-2.5"
                   >
                     Contact
                   </LocalizedClientLink>
@@ -271,7 +271,7 @@ export default async function Footer() {
                 <li>
                   <LocalizedClientLink
                     href="/faq"
-                    className="hover:text-white transition-colors"
+                    className="hover:text-white transition-colors inline-block py-2.5 -my-2.5"
                   >
                     FAQ
                   </LocalizedClientLink>
@@ -324,25 +324,25 @@ export default async function Footer() {
             <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 font-medium">
               <LocalizedClientLink
                 href="/privacy"
-                className="hover:text-white transition-colors"
+                className="hover:text-white transition-colors inline-block py-2.5 -my-2.5"
               >
                 Privacy policy
               </LocalizedClientLink>
               <LocalizedClientLink
                 href="/terms"
-                className="hover:text-white transition-colors"
+                className="hover:text-white transition-colors inline-block py-2.5 -my-2.5"
               >
                 Terms of service
               </LocalizedClientLink>
               <LocalizedClientLink
                 href="/returns"
-                className="hover:text-white transition-colors"
+                className="hover:text-white transition-colors inline-block py-2.5 -my-2.5"
               >
                 Return/ Refunds and Exchange Policy
               </LocalizedClientLink>
               <LocalizedClientLink
                 href="/shipping"
-                className="hover:text-white transition-colors"
+                className="hover:text-white transition-colors inline-block py-2.5 -my-2.5"
               >
                 Shipping policy
               </LocalizedClientLink>

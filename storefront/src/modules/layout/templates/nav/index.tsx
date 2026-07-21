@@ -41,7 +41,7 @@ export default async function Nav() {
           <div className="flex items-center h-full">
             <LocalizedClientLink
               href="/"
-              className="flex items-center justify-center"
+              className="flex items-center justify-center p-2.5 -m-2.5"
               data-testid="nav-store-link"
             >
               <Image src="/cardle-premium-cotton-tote-bags-logo.png" alt="Cardle Premium Cotton Tote Bags Logo" title="Cardle Premium Cotton Tote Bags Logo" width={80} height={24} className="h-6 w-auto" priority />
@@ -71,7 +71,7 @@ export default async function Nav() {
             <Suspense
               fallback={
                 <LocalizedClientLink
-                  className="hover:text-ui-fg-base flex items-center gap-2 relative"
+                  className="hover:text-ui-fg-base flex items-center gap-2 relative px-2.5 -mx-2.5"
                   href="/cart"
                   data-testid="nav-cart-link"
                 >

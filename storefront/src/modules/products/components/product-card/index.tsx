@@ -51,7 +51,7 @@ function AddToCartBtn({ product, onOpenModal }: { product: HttpTypes.StoreProduc
     <button
       onClick={handleAddToCart}
       disabled={isAdding || (!hasOptions && (!product.variants || product.variants.length === 0))}
-      className="w-full lg:w-auto bg-[#111111] text-white px-4 sm:px-6 py-3 rounded-full text-xs font-bold tracking-widest capitalize hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+      className="w-full lg:w-auto min-h-[44px] bg-[#111111] text-white px-4 sm:px-6 py-3 rounded-full text-xs font-bold tracking-widest capitalize hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
     >
       {isAdding ? "Adding..." : hasOptions ? "Options" : "Add to Cart"}
     </button>
@@ -185,7 +185,7 @@ export default function ProductCard({
           ) : (
             <button
               disabled
-              className="w-full lg:w-auto bg-zinc-100 text-zinc-400 border border-zinc-200 px-4 sm:px-6 py-2.5 rounded-full text-xs font-bold tracking-widest capitalize cursor-not-allowed select-none whitespace-nowrap"
+              className="w-full lg:w-auto min-h-[44px] bg-zinc-100 text-zinc-400 border border-zinc-200 px-4 sm:px-6 py-2.5 rounded-full text-xs font-bold tracking-widest capitalize cursor-not-allowed select-none whitespace-nowrap"
             >
               Unavailable
             </button>
