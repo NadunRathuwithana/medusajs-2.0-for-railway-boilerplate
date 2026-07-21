@@ -48,8 +48,13 @@ export default function ProductActions({
   const router = useRouter()
   const pathname = usePathname()
 
-  // Track ViewContent on mount
+  // Track ViewContent on mount (guarded against StrictMode double-invoke and
+  // re-renders where a parent passes a new `product` object for the same page view)
+  const viewTracked = useRef<string | null>(null)
   useEffect(() => {
+    if (viewTracked.current === product.id) return
+    viewTracked.current = product.id ?? null
+
     const { cheapestPrice } = getProductPrice({ product })
     trackViewContent({
       id: product.id!,

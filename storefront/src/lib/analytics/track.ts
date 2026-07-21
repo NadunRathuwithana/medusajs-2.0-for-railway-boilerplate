@@ -31,6 +31,44 @@ export const trackViewContent = (product: { id: string; name: string; price: num
   }
 }
 
+export const trackViewItemList = (list: {
+  listId: string
+  listName: string
+  items: { id: string; name: string; price?: number; currency?: string }[]
+}) => {
+  if (!isClient || !list.items.length) return
+
+  if (window.gtag) {
+    window.gtag("event", "view_item_list", {
+      item_list_id: list.listId,
+      item_list_name: list.listName,
+      items: list.items.map((item, index) => ({
+        item_id: item.id,
+        item_name: item.name,
+        price: item.price,
+        index,
+      })),
+    })
+  }
+}
+
+export const trackSearch = (search: { term: string; resultsCount?: number }) => {
+  if (!isClient || !search.term) return
+
+  if (window.fbq) {
+    window.fbq("track", "Search", {
+      search_string: search.term,
+      content_type: "product",
+    })
+  }
+
+  if (window.gtag) {
+    window.gtag("event", "search", {
+      search_term: search.term,
+    })
+  }
+}
+
 export const trackAddToCart = (item: { id: string; name: string; price: number; quantity: number; currency: string }) => {
   if (!isClient) return
 

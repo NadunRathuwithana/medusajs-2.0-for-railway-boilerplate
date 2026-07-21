@@ -37,9 +37,11 @@ export default function GoogleAnalytics() {
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', '${GA_MEASUREMENT_ID}', {
-              page_path: window.location.pathname,
-            });
+            // Note: no 'config' call with page_path here — the useEffect above
+            // fires it (including for the initial page) so there's a single
+            // source of truth for page_view instead of double-counting the
+            // first load.
+            gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: false });
           `,
         }}
       />
