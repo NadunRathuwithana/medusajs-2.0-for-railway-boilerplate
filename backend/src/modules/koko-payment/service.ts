@@ -2,6 +2,7 @@ import {
   AbstractPaymentProvider,
   MedusaError,
 } from "@medusajs/framework/utils"
+import { Sentry } from "../../lib/sentry"
 import type {
   AuthorizePaymentInput,
   AuthorizePaymentOutput,
@@ -212,6 +213,10 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
       }
     } catch (e: any) {
       this.logger_.error(`Koko authorizePayment error: ${e.message}`)
+      Sentry.captureException(e, {
+        tags: { payment_provider: "koko", operation: "authorizePayment" },
+        extra: { orderId },
+      })
       return { data: input.data ?? {}, status: "error" }
     }
   }
@@ -285,6 +290,10 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
       return { status: statusMap[orderView.status] ?? "pending" }
     } catch (e: any) {
       this.logger_.error(`Koko getPaymentStatus error: ${e.message}`)
+      Sentry.captureException(e, {
+        tags: { payment_provider: "koko", operation: "getPaymentStatus" },
+        extra: { orderId },
+      })
       return { status: "error" }
     }
   }
@@ -341,6 +350,13 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
       this.logger_.warn(
         `Koko webhook: signature verification FAILED for order ${payload.orderId} — ignoring`
       )
+      // Worth alerting on: either a Koko public-key misconfiguration, or a
+      // forged webhook attempt against a real order ID.
+      Sentry.captureMessage("Koko webhook signature verification failed", {
+        level: "warning",
+        tags: { payment_provider: "koko", operation: "getWebhookActionAndData" },
+        extra: { orderId: payload.orderId, status: payload.status },
+      })
       return { action: "not_supported" }
     }
 

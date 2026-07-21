@@ -1,4 +1,5 @@
 const checkEnvVariables = require("./check-env-variables")
+const { withSentryConfig } = require("@sentry/nextjs")
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
   enabled: process.env.ANALYZE === "true",
 })
@@ -128,4 +129,21 @@ const nextConfig = {
   },
 }
 
-module.exports = withBundleAnalyzer(nextConfig)
+module.exports = withSentryConfig(withBundleAnalyzer(nextConfig), {
+  // Scaffolding — sourcemap upload silently no-ops without these until set:
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: true,
+  widenClientFileUpload: true,
+  webpack: {
+    treeshake: {
+      removeDebugLogging: true,
+    },
+    automaticVercelMonitors: false,
+  },
+  // We already have our own CSP; Sentry's tunnel route would need adding to
+  // connect-src if enabled later (not needed while ad-blocker evasion isn't a
+  // priority for a payment gateway's own outbound calls).
+  tunnelRoute: undefined,
+})

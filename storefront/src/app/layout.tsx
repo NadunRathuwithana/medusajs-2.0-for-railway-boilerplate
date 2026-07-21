@@ -54,6 +54,7 @@ export const metadata: Metadata = {
 
 import MetaPixel from "@components/analytics/MetaPixel"
 import GoogleAnalytics from "@components/analytics/GoogleAnalytics"
+import WebVitalsReporter from "@components/analytics/WebVitalsReporter"
 import { Suspense } from "react"
 
 export default function RootLayout(props: { children: React.ReactNode }) {
@@ -63,6 +64,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         <Suspense fallback={null}>
           <MetaPixel />
           <GoogleAnalytics />
+          <WebVitalsReporter />
         </Suspense>
         <main className="relative">{props.children}</main>
       </body>

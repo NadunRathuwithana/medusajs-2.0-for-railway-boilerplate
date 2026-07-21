@@ -43,6 +43,9 @@ import {
   RESEND_API_KEY,
   RESEND_FROM_EMAIL,
 } from "lib/constants";
+// Imported for its side effect (Sentry.init) — must run as early as
+// possible, before any subscriber/API-route/workflow code that might throw.
+import "./src/lib/sentry";
 
 loadEnv(process.env.NODE_ENV, process.cwd());
 

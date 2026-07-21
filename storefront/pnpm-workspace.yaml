@@ -1,3 +1,7 @@
 packages: []
 allowBuilds:
-  sharp: false
+  '@sentry/cli': true
+  # Was `false` from when images.unoptimized:true meant sharp was never used
+  # (Phase 3 removed that flag to enable real image optimization — Next.js
+  # needs sharp's native binary in production or /_next/image requests fail).
+  sharp: true
