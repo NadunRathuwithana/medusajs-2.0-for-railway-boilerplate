@@ -66,6 +66,15 @@ Mapped routing, data fetching, state management, image usage, SEO/metadata, and 
 - Extracted a shared in-memory rate-limit utility (storefront) reused by both the coming-soon login and the new revalidate endpoint.
 - Documented (not yet applied — needs `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ZONE_ID`) the Cloudflare WAF and edge-cache-rule recommendations in `docs/cloudflare-recommendations.md`.
 
+## Phase 10 — Monitoring & observability (`981495a`)
+**Critical fix found along the way:** `storefront/pnpm-workspace.yaml` had `sharp`'s build explicitly disabled (`allowBuilds.sharp: false`), left over from when `images.unoptimized: true` meant sharp was never invoked. Phase 3 removed that flag to enable real image optimization, but Next.js requires sharp's native binary in production for `/_next/image` — every optimized-image request would likely have failed once deployed. Fixed: flipped to `true`, added `sharp` as an explicit dependency, verified it loads and hoists correctly.
+
+- Real User Monitoring: `WebVitalsReporter` using Next's `useReportWebVitals`, sending real visitor Core Web Vitals to GA4 (not hosted on Vercel, so Vercel Analytics isn't an option; GA4 is already wired up).
+- Sentry added to both storefront (`@sentry/nextjs`, client/server/edge) and backend (`@sentry/node`, initialized as early as possible in `medusa-config.js`). Both no-op safely without a DSN.
+- Added `Sentry.captureException` to the Koko/OnePay webhook routes and payment service error paths, alongside structured (JSON) console logging with orderId/transaction context.
+- Added a deep health-check endpoint (`backend /health-deep`) that actually exercises DB and Redis connections, for whichever uptime monitor gets configured later.
+- **Not done (flagged)**: actual uptime-monitor account setup and alert routing — needs you to pick a service and point it at `/health-deep`.
+
 ---
 
-*Phases 10–14 (monitoring, accessibility, checkout hardening, third-party scripts, CI/CD) are in progress and will be appended here as they complete.*
+*Phases 11–14 (accessibility, checkout hardening, third-party scripts, CI/CD) are in progress and will be appended here as they complete.*
