@@ -59,6 +59,13 @@ Mapped routing, data fetching, state management, image usage, SEO/metadata, and 
 **Still pending / needs your input:**
 - Cloudflare WAF/cache rules — waiting on `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ZONE_ID`.
 
+## Phase 9 — Caching & CDN (`240fa3f`)
+- Product/collection/category fetches were tag-based but had no time-based revalidate, and the only `revalidateTag()` calls anywhere were for the storefront's own cart/customer mutations — an admin editing a product directly in Medusa admin had no trigger to invalidate the storefront's cache at all.
+- Added `POST /api/revalidate` on the storefront (rate-limited, secret-protected) and a backend subscriber (`storefront-revalidate.ts`) listening for product/variant/collection/category create/update/delete events that calls it with the right tag(s). No-ops with a warning if unconfigured.
+- Added a 1-hour safety-net `revalidate` alongside the existing tags on all products/collections/categories fetches, matching the `revalidate: 3600` convention already used elsewhere (middleware.ts region cache, sitemap.ts) — in case the webhook trigger ever fails silently.
+- Extracted a shared in-memory rate-limit utility (storefront) reused by both the coming-soon login and the new revalidate endpoint.
+- Documented (not yet applied — needs `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ZONE_ID`) the Cloudflare WAF and edge-cache-rule recommendations in `docs/cloudflare-recommendations.md`.
+
 ---
 
-*Phases 9–14 (caching/CDN, monitoring, accessibility, checkout hardening, third-party scripts, CI/CD) are in progress and will be appended here as they complete.*
+*Phases 10–14 (monitoring, accessibility, checkout hardening, third-party scripts, CI/CD) are in progress and will be appended here as they complete.*
