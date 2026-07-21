@@ -4,11 +4,15 @@ import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
+import dynamic from "next/dynamic"
 import { addToCart } from "@lib/data/cart"
 import { getProductPrice } from "@lib/util/get-product-price"
 import { clx } from "@medusajs/ui"
-import QuickViewModal from "./quick-view-modal"
 import { convertToLocale } from "@lib/util/money"
+
+const QuickViewModal = dynamic(() => import("./quick-view-modal"), {
+  ssr: false,
+})
 
 function AddToCartBtn({ product, onOpenModal }: { product: HttpTypes.StoreProduct, onOpenModal: () => void }) {
   const [isAdding, setIsAdding] = useState(false)

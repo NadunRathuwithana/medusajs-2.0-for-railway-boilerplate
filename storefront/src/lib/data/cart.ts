@@ -3,15 +3,16 @@
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
 import { HttpTypes } from "@medusajs/types"
-import { omit } from "lodash"
+import omit from "lodash/omit"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
+import { cache } from "react"
 import { getAuthHeaders, getCartId, removeCartId, setCartId } from "./cookies"
 import { getProductsById } from "./products"
 import { getRegion } from "./regions"
 import { listCartShippingMethods } from "./fulfillment"
 
-export async function retrieveCart() {
+export const retrieveCart = cache(async function retrieveCart() {
   const cartId = await getCartId()
 
   if (!cartId) {
@@ -24,7 +25,7 @@ export async function retrieveCart() {
     .catch(() => {
       return null
     })
-}
+})
 
 export async function getOrSetCart(countryCode: string) {
   let cart = await retrieveCart()
@@ -165,7 +166,7 @@ export async function deleteLineItem(lineId: string) {
     .catch(medusaError)
 }
 
-export async function enrichLineItems(
+export const enrichLineItems = cache(async function enrichLineItems(
   lineItems:
     | HttpTypes.StoreCartLineItem[]
     | HttpTypes.StoreOrderLineItem[]
@@ -210,7 +211,7 @@ export async function enrichLineItems(
   }) as HttpTypes.StoreCartLineItem[]
 
   return enrichedItems
-}
+})
 
 export async function setShippingMethod({
   cartId,

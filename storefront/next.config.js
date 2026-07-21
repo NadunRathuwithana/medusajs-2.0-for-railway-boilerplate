@@ -1,4 +1,7 @@
 const checkEnvVariables = require("./check-env-variables")
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: process.env.ANALYZE === "true",
+})
 
 checkEnvVariables()
 
@@ -55,4 +58,4 @@ const nextConfig = {
   }
 }
 
-module.exports = nextConfig
+module.exports = withBundleAnalyzer(nextConfig)

@@ -1,5 +1,3 @@
-"use client"
-
 import { Button, Heading } from "@medusajs/ui"
 
 import CartTotals from "@modules/common/components/cart-totals"

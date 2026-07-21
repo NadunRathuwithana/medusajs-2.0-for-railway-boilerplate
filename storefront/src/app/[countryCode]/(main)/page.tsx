@@ -1,10 +1,12 @@
 import { Metadata } from "next"
+import { Suspense } from "react"
 
 import Hero from "@modules/home/components/hero"
 import PopularProducts from "@modules/home/components/popular-products"
 import FeatureGrid from "@modules/home/components/feature-grid"
 import AllProducts from "@modules/home/components/all-products"
 import PromoBanner from "@modules/home/components/promo-banner"
+import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
 import { getCollectionsWithProducts } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
 
@@ -39,10 +41,16 @@ export default async function Home({
       <OrganisationJsonLd />
       <Hero />
       <div className="flex flex-col gap-16 small:gap-24 py-16 small:py-24">
-        <PopularProducts countryCode={countryCode} collectionHandle="popular" />
-        <PopularProducts countryCode={countryCode} title="New Arrivals" collectionHandle="new-arrivals" />
+        <Suspense fallback={<SkeletonProductGrid />}>
+          <PopularProducts countryCode={countryCode} collectionHandle="popular" />
+        </Suspense>
+        <Suspense fallback={<SkeletonProductGrid />}>
+          <PopularProducts countryCode={countryCode} title="New Arrivals" collectionHandle="new-arrivals" />
+        </Suspense>
         <FeatureGrid />
-        <AllProducts countryCode={countryCode} page={pageNumber} />
+        <Suspense fallback={<SkeletonProductGrid />}>
+          <AllProducts countryCode={countryCode} page={pageNumber} />
+        </Suspense>
         <PromoBanner />
       </div>
     </>

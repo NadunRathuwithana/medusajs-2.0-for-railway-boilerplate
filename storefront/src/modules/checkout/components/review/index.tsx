@@ -1,5 +1,3 @@
-"use client"
-
 import { clx } from "@medusajs/ui"
 import PaymentButton from "../payment-button"
 import { convertToLocale } from "@lib/util/money"

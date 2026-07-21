@@ -1,6 +1,5 @@
 "use client"
 
-import { loadStripe } from "@stripe/stripe-js"
 import React from "react"
 import StripeWrapper from "./stripe-wrapper"
 import { PayPalScriptProvider } from "@paypal/react-paypal-js"
@@ -16,7 +15,19 @@ type WrapperProps = {
 export const StripeContext = createContext(false)
 
 const stripeKey = process.env.NEXT_PUBLIC_STRIPE_KEY
-const stripePromise = stripeKey ? loadStripe(stripeKey) : null
+
+// Only load the Stripe.js SDK when a Stripe payment session is actually pending,
+// instead of fetching it unconditionally for every checkout (Koko/Onepay/PayPal/COD included).
+let stripePromise: ReturnType<typeof import("@stripe/stripe-js").loadStripe> | null = null
+function getStripePromise() {
+  if (!stripeKey) return null
+  if (!stripePromise) {
+    stripePromise = import("@stripe/stripe-js").then(({ loadStripe }) =>
+      loadStripe(stripeKey)
+    )
+  }
+  return stripePromise
+}
 
 const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
 
@@ -25,17 +36,13 @@ const Wrapper: React.FC<WrapperProps> = ({ cart, children }) => {
     (s) => s.status === "pending"
   )
 
-  if (
-    isStripe(paymentSession?.provider_id) &&
-    paymentSession &&
-    stripePromise
-  ) {
+  if (isStripe(paymentSession?.provider_id) && paymentSession && stripeKey) {
     return (
       <StripeContext.Provider value={true}>
         <StripeWrapper
           paymentSession={paymentSession}
           stripeKey={stripeKey}
-          stripePromise={stripePromise}
+          stripePromise={getStripePromise()!}
         >
           {children}
         </StripeWrapper>

@@ -1,5 +1,3 @@
-"use client"
-
 import { convertToLocale } from "@lib/util/money"
 import React from "react"
 

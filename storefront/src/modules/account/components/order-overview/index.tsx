@@ -1,5 +1,3 @@
-"use client"
-
 import { Button } from "@medusajs/ui"
 
 import OrderCard from "../order-card"
