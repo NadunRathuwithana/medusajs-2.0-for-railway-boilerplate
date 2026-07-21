@@ -25,8 +25,15 @@ export default function GoogleAnalytics() {
 
   return (
     <>
+      {/* The actual gtag.js library (163KB, ~66KB unused per the Phase 1
+          Lighthouse audit) is deferred to lazyOnload — safe because the
+          inline bootstrap below defines `gtag` synchronously, and every
+          gtag() call just does dataLayer.push(arguments) regardless of
+          whether this library has loaded yet. Once it does load, it drains
+          whatever queued up in dataLayer. No events are lost by delaying
+          this specific request. */}
       <Script
-        strategy="afterInteractive"
+        strategy="lazyOnload"
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
       />
       <Script
