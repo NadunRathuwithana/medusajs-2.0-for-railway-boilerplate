@@ -29,6 +29,10 @@ const Payment = ({
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // The session returned directly by initiatePaymentSession — synced to
+  // PaymentButton the moment the payment API responds, without waiting for the
+  // cart prop to catch up via a full Next.js RSC revalidate/refetch.
+  const [syncedSession, setSyncedSession] = useState<any>(null)
   const [cardBrand, setCardBrand] = useState<string | null>(null)
   const [cardComplete, setCardComplete] = useState(false)
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
@@ -174,6 +178,7 @@ const Payment = ({
         initiatingProviderRef.current = selectedPaymentMethod
         setIsLoading(true)
         setError(null)
+        setSyncedSession(null)
 
         // Use cartRef.current so we always use the latest cart without adding
         // `cart` to the dependency array (which would re-fire on every RSC re-render)
@@ -192,6 +197,8 @@ const Payment = ({
             // (instead of throwing) to avoid triggering Next.js error boundary
             if (result?.error) {
               setError(result.error)
+            } else if (result?.session) {
+              setSyncedSession(result.session)
             }
           })
           .catch((err: any) => {
@@ -222,10 +229,11 @@ const Payment = ({
         detail: {
           isLoading,
           selectedMethod: selectedPaymentMethod,
+          session: syncedSession,
         },
       })
     )
-  }, [isLoading, selectedPaymentMethod])
+  }, [isLoading, selectedPaymentMethod, syncedSession])
 
   const hasPaymentMethods = availablePaymentMethods?.length > 0
 
