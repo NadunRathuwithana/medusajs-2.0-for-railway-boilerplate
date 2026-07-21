@@ -1,12 +1,8 @@
 "use client"
 
-import { Metadata } from "next"
 import { useState, FormEvent } from "react"
 import { Select } from "@medusajs/ui"
 import { MessageSquare, CheckCircle2, AlertCircle } from "lucide-react"
-
-// Note: metadata export won't work in client components — move it to a wrapper if needed
-// For now, the metadata is defined separately below as a named export from a separate file
 
 export default function ContactPage() {
   const [form, setForm] = useState({

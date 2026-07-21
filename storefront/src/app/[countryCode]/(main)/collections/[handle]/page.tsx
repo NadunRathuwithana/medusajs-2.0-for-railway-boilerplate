@@ -75,11 +75,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "website",
       url: canonicalUrl,
       siteName: "Cardle",
+      images: [
+        {
+          url: "https://cardle.lk/store/buy-cotton-tote-bags-online-sri-lanka.jpg",
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: ["https://cardle.lk/store/buy-cotton-tote-bags-online-sri-lanka.jpg"],
     },
   } as Metadata
 }

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import ProductTemplate from "@modules/products/templates"
 import { getRegion, listRegions } from "@lib/data/regions"
 import { getProductByHandle, getProductsList } from "@lib/data/products"
+import { getProductPrice } from "@lib/util/get-product-price"
 import ProductJsonLd from "@modules/seo/components/product-json-ld"
 import BreadcrumbJsonLd from "@modules/seo/components/breadcrumb-json-ld"
 
@@ -108,11 +109,23 @@ export default async function ProductPage({ params }: Props) {
     notFound()
   }
 
+  const { cheapestPrice } = getProductPrice({ product: pricedProduct })
+  const anyVariantInStock =
+    pricedProduct.variants?.some(
+      (variant) =>
+        !variant.manage_inventory ||
+        variant.allow_backorder ||
+        (variant.inventory_quantity || 0) > 0
+    ) ?? true
+
   return (
     <>
       <ProductJsonLd
         product={pricedProduct}
         countryCode={countryCode}
+        price={cheapestPrice?.calculated_price_number?.toString()}
+        currencyCode={cheapestPrice?.currency_code}
+        inStock={anyVariantInStock}
       />
       <BreadcrumbJsonLd
         items={[

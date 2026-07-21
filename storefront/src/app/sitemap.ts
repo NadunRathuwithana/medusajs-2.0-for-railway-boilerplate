@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next"
 import { sdk } from "@lib/config"
+import { listCategories } from "@lib/data/categories"
 
 const BASE_URL = "https://cardle.lk"
 
@@ -27,10 +28,20 @@ async function getAllCollections(): Promise<{ handle: string; updated_at?: strin
   }
 }
 
+async function getAllCategories(): Promise<{ handle: string }[]> {
+  try {
+    const categories = await listCategories()
+    return categories || []
+  } catch {
+    return []
+  }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [products, collections] = await Promise.all([
+  const [products, collections, categories] = await Promise.all([
     getAllProducts(),
     getAllCollections(),
+    getAllCategories(),
   ])
 
   const staticPages: MetadataRoute.Sitemap = [
@@ -76,7 +87,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.3,
     },
+    {
+      url: `${BASE_URL}/refunds`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.3,
+    },
   ]
+
+  const categoryPages: MetadataRoute.Sitemap = categories
+    .filter((c) => !!c.handle)
+    .map((category) => ({
+      url: `${BASE_URL}/categories/${category.handle}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    }))
 
   const collectionPages: MetadataRoute.Sitemap = collections
     .filter((c) => !!c.handle)
@@ -96,5 +122,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }))
 
-  return [...staticPages, ...collectionPages, ...productPages]
+  return [...staticPages, ...collectionPages, ...categoryPages, ...productPages]
 }

@@ -5,6 +5,7 @@ type ProductJsonLdProps = {
   price?: string
   currencyCode?: string
   countryCode: string
+  inStock?: boolean
 }
 
 export default function ProductJsonLd({
@@ -12,6 +13,7 @@ export default function ProductJsonLd({
   price,
   currencyCode = "LKR",
   countryCode,
+  inStock = true,
 }: ProductJsonLdProps) {
   const productUrl = `https://cardle.lk/products/${product.handle}`
   const images = product.images?.map((img) => img.url) || []
@@ -46,7 +48,9 @@ export default function ProductJsonLd({
             )
               .toISOString()
               .split("T")[0],
-            availability: "https://schema.org/InStock",
+            availability: inStock
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
             itemCondition: "https://schema.org/NewCondition",
             seller: {
               "@type": "Organization",

@@ -5,6 +5,7 @@ import { getCategoryByHandle, listCategories } from "@lib/data/categories"
 import { listRegions } from "@lib/data/regions"
 import { StoreProductCategory, StoreRegion } from "@medusajs/types"
 import CategoryTemplate from "@modules/categories/templates"
+import BreadcrumbJsonLd from "@modules/seo/components/breadcrumb-json-ld"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 
 type Props = {
@@ -71,11 +72,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         type: "website",
         url: canonicalUrl,
         siteName: "Cardle",
+        images: [
+          {
+            url: "https://cardle.lk/store/buy-cotton-tote-bags-online-sri-lanka.jpg",
+          },
+        ],
       },
       twitter: {
         card: "summary_large_image",
         title: `${title} | Cardle`,
         description,
+        images: ["https://cardle.lk/store/buy-cotton-tote-bags-online-sri-lanka.jpg"],
       },
     }
   } catch (error) {
@@ -94,12 +101,26 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     notFound()
   }
 
+  const categoryUrl = `https://cardle.lk/categories/${params.category.join("/")}`
+  const categoryName = product_categories
+    .map((category: StoreProductCategory) => category.name)
+    .join(" | ")
+
   return (
-    <CategoryTemplate
-      categories={product_categories}
-      sortBy={sortBy}
-      page={page}
-      countryCode={params.countryCode}
-    />
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: "https://cardle.lk" },
+          { name: "Store", url: "https://cardle.lk/store" },
+          { name: categoryName, url: categoryUrl },
+        ]}
+      />
+      <CategoryTemplate
+        categories={product_categories}
+        sortBy={sortBy}
+        page={page}
+        countryCode={params.countryCode}
+      />
+    </>
   )
 }
