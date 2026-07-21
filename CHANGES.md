@@ -86,6 +86,13 @@ Ran axe-core (via Playwright) against staging instead of guessing from code — 
 - The checkout payment-method selector explicitly zeroed the focus ring (`focus:ring-0`) — a keyboard user tabbing through payment options got zero visual focus indicator. Added focus-visible rings there plus the mobile checkout summary toggle, search box, and password-visibility toggle (which also lacked an aria-label).
 - **Not done (flagged)**: 3 more components use the same failing design token for price display, not confirmed by axe since they weren't on the audited pages. Full keyboard tab-order walkthrough and real screen-reader testing weren't performed — axe-core catches contrast/ARIA/semantic issues but not behavioral flows.
 
+## Phase 12 — Checkout hardening (`1d2f5f0`)
+**Real finding, not assumed**: `medusa-config.js` never explicitly registers `Modules.LOCKING`, so it fell back to Medusa's default in-memory locking provider. Medusa's core `reserveInventoryStep` already wraps inventory reservation in a `Modules.LOCKING` lock keyed by inventory item — correctly preventing two concurrent buyers on the *same instance* from both grabbing the last unit, but an in-memory lock doesn't coordinate across multiple backend replicas. On a horizontally-scaled deployment, two buyers hitting different instances at once could both pass the check. Registered `@medusajs/locking` with the `@medusajs/locking-redis` provider (same `REDIS_URL` already used elsewhere), matching the exact shape Medusa's own `defineConfig` uses internally. This directly closes the "reserve stock atomically" gap — the atomicity already existed, it just wasn't distributed.
+
+- Moved the Koko payment provider's webhook/authorizePayment race-bridging cache from a static in-memory Map to Redis (same distributed-instances problem, same fix). Extracted a shared Redis client reused by rate-limit.ts and the Koko service.
+- Built abandoned-cart detection and recovery email from scratch (nothing existed before): an hourly job querying idle carts (3+ hours, not older than 7 days) with items and an email on file, sending via a new `ABANDONED_CART` template, using Redis to avoid re-sending to the same cart for 30 days.
+- **Investigated, no changes needed** (reported instead of guessing): checkout form friction was already well-implemented (minimal required fields, correct `autoComplete` hints throughout, inline error handling with no full-page reloads anywhere). OnePay always live-checks payment status so it doesn't have Koko's race. COD has no external async confirmation, so the whole webhook-race bug class doesn't apply to it.
+
 ---
 
-*Phases 12–14 (checkout hardening, third-party scripts, CI/CD) are in progress and will be appended here as they complete.*
+*Phases 13–14 (third-party scripts, CI/CD) are in progress and will be appended here as they complete.*
