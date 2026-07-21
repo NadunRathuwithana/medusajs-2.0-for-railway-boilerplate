@@ -196,5 +196,12 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|favicon.ico|.*\\.png|.*\\.jpg|.*\\.gif|.*\\.svg).*)"], // prevents redirecting on static files
+  // Excludes the whole _next/ tree (not just _next/static) — _next/image was
+  // previously unmatched, so every optimized-image request got the country-
+  // code prefix redirect applied to it (e.g. /_next/image?... ->
+  // /lk/_next/image?...), which 404s since Next's image handler only exists
+  // at the real /_next/image path. Dormant while images.unoptimized:true
+  // meant Next never actually generated /_next/image requests; it started
+  // 404ing everywhere the moment real image optimization was turned on.
+  matcher: ["/((?!api|_next/|favicon.ico|.*\\.png|.*\\.jpg|.*\\.gif|.*\\.svg).*)"], // prevents redirecting on static files
 }
