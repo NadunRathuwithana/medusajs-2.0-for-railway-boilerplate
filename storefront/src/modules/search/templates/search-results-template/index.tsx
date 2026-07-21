@@ -49,6 +49,9 @@ const SearchResultsTemplate = ({
                 sortBy={sortBy}
                 page={pageNumber}
                 countryCode={countryCode}
+                listId="search"
+                listName={`Search: ${query}`}
+                searchQuery={query}
               />
             </div>
           </>

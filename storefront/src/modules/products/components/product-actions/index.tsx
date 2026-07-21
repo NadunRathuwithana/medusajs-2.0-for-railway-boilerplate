@@ -48,7 +48,10 @@ export default function ProductActions({
   const router = useRouter()
   const pathname = usePathname()
 
-  // Track ViewContent on mount
+  // Track ViewContent on mount. Keyed on product.id (not the whole `product`
+  // object) so URL-driven re-renders that hand down a new object reference for
+  // the same product (e.g. syncing a variant/color choice to the URL) don't
+  // re-fire a duplicate ViewContent.
   useEffect(() => {
     const { cheapestPrice } = getProductPrice({ product })
     trackViewContent({
@@ -57,7 +60,8 @@ export default function ProductActions({
       price: cheapestPrice?.calculated_price_number || 0,
       currency: (cheapestPrice?.currency_code || region.currency_code).toUpperCase(),
     })
-  }, [product, region.currency_code])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.id, region.currency_code])
 
   // Initialize options from URL or default to 1 variant
   useEffect(() => {
@@ -148,27 +152,31 @@ export default function ProductActions({
 
     setIsAdding(true)
 
-    // Track AddToCart
-    const { cheapestPrice, variantPrice } = getProductPrice({
-      product,
-      variantId: selectedVariant?.id,
-    })
-    const selectedPrice = selectedVariant ? variantPrice : cheapestPrice
-    trackAddToCart({
-      id: selectedVariant.id,
-      name: `${product.title} - ${selectedVariant.title}`,
-      price: selectedPrice?.calculated_price_number || 0,
-      quantity: 1,
-      currency: (selectedPrice?.currency_code || region.currency_code).toUpperCase(),
-    })
+    try {
+      await addToCart({
+        variantId: selectedVariant.id,
+        quantity: 1,
+        countryCode,
+      })
 
-    await addToCart({
-      variantId: selectedVariant.id,
-      quantity: 1,
-      countryCode,
-    })
-
-    setIsAdding(false)
+      // Only track AddToCart once the item has actually been added — tracking
+      // beforehand would record a conversion even if the cart mutation fails
+      // (out of stock, network error, etc.).
+      const { cheapestPrice, variantPrice } = getProductPrice({
+        product,
+        variantId: selectedVariant?.id,
+      })
+      const selectedPrice = selectedVariant ? variantPrice : cheapestPrice
+      trackAddToCart({
+        id: selectedVariant.id,
+        name: `${product.title} - ${selectedVariant.title}`,
+        price: selectedPrice?.calculated_price_number || 0,
+        quantity: 1,
+        currency: (selectedPrice?.currency_code || region.currency_code).toUpperCase(),
+      })
+    } finally {
+      setIsAdding(false)
+    }
   }
 
   return (

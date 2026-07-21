@@ -2,6 +2,48 @@
 
 const isClient = typeof window !== "undefined"
 
+export const trackViewItemList = (list: {
+  listId: string
+  listName: string
+  currency: string
+  items: { id: string; name: string; price: number }[]
+}) => {
+  if (!isClient) return
+
+  if (window.gtag) {
+    window.gtag("event", "view_item_list", {
+      item_list_id: list.listId,
+      item_list_name: list.listName,
+      currency: list.currency,
+      items: list.items.map((item, index) => ({
+        item_id: item.id,
+        item_name: item.name,
+        price: item.price,
+        item_list_id: list.listId,
+        item_list_name: list.listName,
+        index,
+      })),
+    })
+  }
+}
+
+export const trackSearch = (search: { query: string; resultCount: number }) => {
+  if (!isClient) return
+
+  if (window.fbq) {
+    window.fbq("track", "Search", {
+      search_string: search.query,
+      content_type: "product",
+    })
+  }
+
+  if (window.gtag) {
+    window.gtag("event", "search", {
+      search_term: search.query,
+    })
+  }
+}
+
 export const trackViewContent = (product: { id: string; name: string; price: number; currency: string }) => {
   if (!isClient) return
 

@@ -14,9 +14,14 @@ export default function GoogleAnalytics() {
     if (!GA_MEASUREMENT_ID) return
 
     const url = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : "")
+    // Explicit page_view event is the single source of truth for every
+    // navigation (initial load included) — the inline bootstrap below
+    // disables its own automatic page_view so this never double-counts.
     if (typeof window !== "undefined" && window.gtag) {
-      window.gtag("config", GA_MEASUREMENT_ID, {
+      window.gtag("event", "page_view", {
         page_path: url,
+        page_location: window.location.href,
+        page_title: document.title,
       })
     }
   }, [pathname, searchParams])
@@ -38,7 +43,7 @@ export default function GoogleAnalytics() {
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', '${GA_MEASUREMENT_ID}', {
-              page_path: window.location.pathname,
+              send_page_view: false,
             });
           `,
         }}
