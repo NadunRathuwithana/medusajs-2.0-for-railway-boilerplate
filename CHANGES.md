@@ -75,6 +75,17 @@ Mapped routing, data fetching, state management, image usage, SEO/metadata, and 
 - Added a deep health-check endpoint (`backend /health-deep`) that actually exercises DB and Redis connections, for whichever uptime monitor gets configured later.
 - **Not done (flagged)**: actual uptime-monitor account setup and alert routing — needs you to pick a service and point it at `/health-deep`.
 
+## Phase 11 — Accessibility (`73e15e0`)
+Ran axe-core (via Playwright) against staging instead of guessing from code — real computed contrast ratios and actual ARIA violations. Same shared Nav/Footer issues repeated across every page tested, so fixing once covers the site.
+
+- Nav cart button and account link were icon-only with no accessible name at all (critical/serious) — added `aria-label` to both.
+- PDP accordion trigger wraps only a visual icon; the actual section title sits outside the button as a sibling — screen readers heard nothing describing what it expands. Added `aria-label={title}`.
+- Footer `text-gray-500` failed WCAG AA contrast two different ways (dark footer bg and the white trust-badges section) — fixed both.
+- Shared `InteractiveLink` component (6 usages) used a Medusa UI design token measuring ~2.5:1 on white — switched to a passing shade rather than touching the shared CSS variable.
+- **Found while reviewing the flagged Radio component** (used by all 3 checkout radio groups: payment method, address, shipping): `aria-checked="true"` was **hardcoded** regardless of actual state — every radio option in checkout announced as "checked" to a screen reader, making the selected option undeterminable. Fixed.
+- The checkout payment-method selector explicitly zeroed the focus ring (`focus:ring-0`) — a keyboard user tabbing through payment options got zero visual focus indicator. Added focus-visible rings there plus the mobile checkout summary toggle, search box, and password-visibility toggle (which also lacked an aria-label).
+- **Not done (flagged)**: 3 more components use the same failing design token for price display, not confirmed by axe since they weren't on the audited pages. Full keyboard tab-order walkthrough and real screen-reader testing weren't performed — axe-core catches contrast/ARIA/semantic issues but not behavioral flows.
+
 ---
 
-*Phases 11–14 (accessibility, checkout hardening, third-party scripts, CI/CD) are in progress and will be appended here as they complete.*
+*Phases 12–14 (checkout hardening, third-party scripts, CI/CD) are in progress and will be appended here as they complete.*
