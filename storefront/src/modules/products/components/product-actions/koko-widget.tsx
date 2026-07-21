@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { convertToLocale } from "@lib/util/money"
 
 export default function KokoWidget({ 
@@ -16,11 +17,13 @@ export default function KokoWidget({
       <span className="text-[#888888]">
         or 3 X <span className="font-bold">{convertToLocale({ amount: installment, currency_code: currencyCode })}</span> with
       </span>
-      <img 
-        src="/payment/koko-pay-sri-lanka-accepted.png" 
-        alt="Koko Pay Sri Lanka" 
+      <Image
+        src="/payment/koko-pay-sri-lanka-accepted.png"
+        alt="Koko Pay Sri Lanka"
         title="Koko Pay Sri Lanka"
-        className="h-6 object-contain ml-1 translate-y-[-1px]"
+        width={48}
+        height={24}
+        className="h-6 w-auto object-contain ml-1 translate-y-[-1px]"
       />
     </div>
   )

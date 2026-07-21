@@ -1,4 +1,5 @@
 import { Button } from "@medusajs/ui"
+import Image from "next/image"
 import { useMemo } from "react"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -24,12 +25,14 @@ const OrderCard = ({ order }: OrderCardProps) => {
       className="flex items-center gap-4 bg-white p-4 rounded-xl border border-gray-100 shadow-sm transition-all hover:shadow-md mb-3"
       data-testid="order-card"
     >
-      <div className="w-16 h-16 rounded-lg overflow-hidden border border-gray-100 flex-shrink-0 bg-gray-50">
+      <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-100 flex-shrink-0 bg-gray-50">
         {order.items && order.items.length > 0 && order.items[0].thumbnail ? (
-          <img
+          <Image
             src={order.items[0].thumbnail}
             alt={order.items[0].title ?? "Order item"}
-            className="w-full h-full object-cover object-center"
+            fill
+            sizes="64px"
+            className="object-cover object-center"
           />
         ) : (
           <div className="w-full h-full bg-gray-100" />

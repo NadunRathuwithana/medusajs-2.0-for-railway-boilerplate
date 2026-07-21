@@ -5,6 +5,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import dynamic from "next/dynamic"
+import Image from "next/image"
 import { addToCart } from "@lib/data/cart"
 import { getProductPrice } from "@lib/util/get-product-price"
 import { clx } from "@medusajs/ui"
@@ -118,10 +119,12 @@ export default function ProductCard({
       >
         {uniqueImages.map((src, idx) => (
           <div key={idx} className="relative h-full" style={{ width: `${100 / uniqueImages.length}%` }}>
-            <img
+            <Image
               src={src}
               alt={`${product.title} - ${idx}`}
-              className="absolute inset-0 w-full h-full object-cover object-center"
+              fill
+              sizes="(max-width: 1023px) 50vw, (max-width: 1279px) 33vw, 25vw"
+              className="object-cover object-center"
             />
           </div>
         ))}

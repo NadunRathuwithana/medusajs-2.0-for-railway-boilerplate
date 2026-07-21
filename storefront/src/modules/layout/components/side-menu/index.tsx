@@ -3,6 +3,7 @@
 import { Popover, Transition } from "@headlessui/react"
 import { XMark } from "@medusajs/icons"
 import { Text } from "@medusajs/ui"
+import Image from "next/image"
 import { Fragment } from "react"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -77,7 +78,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                     {/* Header */}
                     <div className="flex items-center justify-between border-b border-zinc-800 pb-5">
                       <div>
-                        <img src="/cardle-premium-cotton-tote-bags-logo-light.png" alt="Cardle Premium Cotton Tote Bags Logo" title="Cardle Premium Cotton Tote Bags Logo" className="h-6 w-auto mb-2" />
+                        <Image src="/cardle-premium-cotton-tote-bags-logo-light.png" alt="Cardle Premium Cotton Tote Bags Logo" title="Cardle Premium Cotton Tote Bags Logo" width={112} height={24} className="h-6 w-auto mb-2" />
                       </div>
                       <button
                         data-testid="close-menu-button"

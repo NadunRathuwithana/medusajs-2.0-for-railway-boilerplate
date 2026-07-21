@@ -1,5 +1,6 @@
 import Package from "@modules/common/icons/package"
 import MapPin from "@modules/common/icons/map-pin"
+import Image from "next/image"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
@@ -130,9 +131,9 @@ const Overview = ({ customer, orders }: OverviewProps) => {
                     className="group flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
                   >
                     {/* Thumbnail */}
-                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0">
+                    <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0">
                       {thumb ? (
-                        <img src={thumb} alt={order.items?.[0]?.title || "Order item"} title={order.items?.[0]?.title || "Order item"} className="w-full h-full object-cover object-center" />
+                        <Image src={thumb} alt={order.items?.[0]?.title || "Order item"} title={order.items?.[0]?.title || "Order item"} fill sizes="56px" className="object-cover object-center" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-300">
                           <Package size={22} />

@@ -1,4 +1,5 @@
 import { HttpTypes } from "@medusajs/types"
+import Image from "next/image"
 import { getPricesForVariant } from "@lib/util/get-product-price"
 import { convertToLocale } from "@lib/util/money"
 
@@ -33,12 +34,14 @@ const Item = ({ item }: ItemProps) => {
   return (
     <div className="flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-xl hover:shadow-sm transition-shadow" data-testid="product-row">
       {/* Image */}
-      <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-50 border border-gray-100">
+      <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-50 border border-gray-100">
         {item.thumbnail ? (
-          <img
+          <Image
             src={item.thumbnail}
             alt={item.title ?? "Product"}
-            className="w-full h-full object-cover object-center"
+            fill
+            sizes="64px"
+            className="object-cover object-center"
           />
         ) : (
           <div className="w-full h-full bg-gray-100" />

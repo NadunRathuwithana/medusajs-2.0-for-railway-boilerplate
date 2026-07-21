@@ -1,4 +1,6 @@
 import { Metadata } from "next"
+import Image from "next/image"
+import ResponsiveHeroImage from "@modules/common/components/responsive-hero-image"
 
 export const metadata: Metadata = {
   title: "About Cardle | Sri Lanka's Make-to-Order Cotton Tote Bag Brand",
@@ -10,26 +12,40 @@ export default function AboutPage() {
     <div className="w-full bg-white">
       {/* 1. Hero Banner */}
       <section className="h-[90vh] w-full relative overflow-hidden bg-[#111111] flex flex-col items-center justify-center">
-        <picture>
-          <source media="(max-width: 768px)" srcSet="/about/cardle-about-premium-cotton-tote-bags-mobile.jpg" />
-          <source media="(max-width: 1024px)" srcSet="/about/cardle-about-premium-cotton-tote-bags-tablet.jpg" />
-          <img
-            src="/about/cardle-about-premium-cotton-tote-bags.jpg"
-            alt="Cardle handcrafted cotton tote bags – the Cardle story, made in Sri Lanka"
-            className="absolute inset-0 w-full h-full object-cover object-center"
-            loading="eager"
-          />
-        </picture>
+        <ResponsiveHeroImage
+          variants={[
+            {
+              src: "/about/cardle-about-premium-cotton-tote-bags-mobile.jpg",
+              alt: "Cardle handcrafted cotton tote bags – the Cardle story, made in Sri Lanka",
+              media: "(max-width: 768px)",
+              className: "block md:hidden object-cover object-center",
+            },
+            {
+              src: "/about/cardle-about-premium-cotton-tote-bags-tablet.jpg",
+              alt: "Cardle handcrafted cotton tote bags – the Cardle story, made in Sri Lanka",
+              media: "(min-width: 769px) and (max-width: 1024px)",
+              className: "hidden md:block lg:hidden object-cover object-center",
+            },
+            {
+              src: "/about/cardle-about-premium-cotton-tote-bags.jpg",
+              alt: "Cardle handcrafted cotton tote bags – the Cardle story, made in Sri Lanka",
+              media: "(min-width: 1025px)",
+              className: "hidden lg:block object-cover object-center",
+            },
+          ]}
+        />
       </section>
 
       {/* 2. The Story Section */}
       <section className="py-24 md:py-32 px-6">
         <div className="max-w-[1440px] mx-auto flex flex-col lg:flex-row gap-12 lg:gap-16 items-center">
           <div className="group w-full lg:w-1/2 h-[400px] md:h-[600px] rounded-3xl overflow-hidden relative cursor-pointer">
-            <img
+            <Image
               src="/about/cardle-story-handmade-tote-bags.jpg"
               alt="Handmade Cardle cotton tote bag crafted with natural canvas in Sri Lanka"
-              className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover object-center group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
             />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-[1500ms] pointer-events-none" />
           </div>
@@ -69,8 +85,10 @@ export default function AboutPage() {
       <section className="py-32 px-6 bg-[#111111] text-center flex flex-col items-center justify-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-20 mix-blend-overlay">
           <img
-            src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=2572&auto=format&fit=crop"
-            alt="Texture"
+            src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=1600&auto=format&fit=crop"
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
             className="w-full h-full object-cover"
           />
         </div>
@@ -114,19 +132,23 @@ export default function AboutPage() {
             </div>
 
             <div className="group h-[350px] md:h-auto rounded-3xl overflow-hidden relative cursor-pointer">
-              <img
+              <Image
                 src="/about/cardle-premium-natural-cotton-materials.jpg"
                 alt="Premium 100% natural cotton canvas used in every Cardle tote bag"
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-[1500ms] pointer-events-none" />
             </div>
 
             <div className="group h-[350px] md:h-auto rounded-3xl overflow-hidden relative order-4 md:order-3 cursor-pointer">
-              <img
+              <Image
                 src="/about/cardle-zero-stretch-engineering-tote-bag.jpg"
                 alt="Cardle zero-stretch canvas engineering – bag holds shape under full load"
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-[1500ms] pointer-events-none" />
             </div>
@@ -202,18 +224,22 @@ export default function AboutPage() {
 
           <div className="w-full lg:w-1/2 grid grid-cols-2 gap-4 md:gap-6 h-[400px] md:h-[600px]">
             <div className="group col-span-1 rounded-3xl overflow-hidden relative mt-8 md:mt-12 cursor-pointer">
-              <img
+              <Image
                 src="/about/cardle-premium-status-tote-bag-1.jpg"
                 alt="Cardle premium cotton tote bag – clean design that looks right anywhere"
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
+                fill
+                sizes="(max-width: 1024px) 50vw, 25vw"
+                className="object-cover group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-[1500ms] pointer-events-none" />
             </div>
             <div className="group col-span-1 rounded-3xl overflow-hidden relative mb-8 md:mb-12 cursor-pointer">
-              <img
+              <Image
                 src="/about/cardle-premium-status-tote-bag-2.jpg"
                 alt="Cardle canvas tote bag – status meets utility, handcrafted in Sri Lanka"
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
+                fill
+                sizes="(max-width: 1024px) 50vw, 25vw"
+                className="object-cover group-hover:scale-105 transition-transform duration-[1500ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-[1500ms] pointer-events-none" />
             </div>

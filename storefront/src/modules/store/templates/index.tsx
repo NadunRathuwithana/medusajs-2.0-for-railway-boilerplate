@@ -3,6 +3,7 @@ import { Suspense } from "react"
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import SortDropdown from "@modules/store/components/sort-dropdown"
+import ResponsiveHeroImage from "@modules/common/components/responsive-hero-image"
 import PaginatedProducts from "./paginated-products"
 
 const StoreTemplate = ({
@@ -21,15 +22,28 @@ const StoreTemplate = ({
     <div className="w-full bg-white">
       {/* Hero Banner */}
       <section className="h-[90vh] w-full relative overflow-hidden bg-[#e5e5e5] flex flex-col items-center justify-center">
-        <picture>
-          <source media="(max-width: 768px)" srcSet="/store/buy-cotton-tote-bags-online-sri-lanka-mobile.jpg" />
-          <source media="(max-width: 1024px)" srcSet="/store/buy-cotton-tote-bags-online-sri-lanka-tablet.jpg" />
-          <img
-            src="/store/buy-cotton-tote-bags-online-sri-lanka.jpg"
-            alt="Cardle Store Hero Banner"
-            className="absolute inset-0 w-full h-full object-cover object-center"
-          />
-        </picture>
+        <ResponsiveHeroImage
+          variants={[
+            {
+              src: "/store/buy-cotton-tote-bags-online-sri-lanka-mobile.jpg",
+              alt: "Cardle Store Hero Banner",
+              media: "(max-width: 768px)",
+              className: "block md:hidden object-cover object-center",
+            },
+            {
+              src: "/store/buy-cotton-tote-bags-online-sri-lanka-tablet.jpg",
+              alt: "Cardle Store Hero Banner",
+              media: "(min-width: 769px) and (max-width: 1024px)",
+              className: "hidden md:block lg:hidden object-cover object-center",
+            },
+            {
+              src: "/store/buy-cotton-tote-bags-online-sri-lanka.jpg",
+              alt: "Cardle Store Hero Banner",
+              media: "(min-width: 1025px)",
+              className: "hidden lg:block object-cover object-center",
+            },
+          ]}
+        />
       </section>
 
       <div className="content-container max-w-[1440px] mx-auto px-6 md:px-16 py-12" data-testid="category-container">
