@@ -2,6 +2,7 @@ import {
   AbstractPaymentProvider,
   MedusaError,
 } from "@medusajs/framework/utils"
+import { Sentry } from "../../lib/sentry"
 import type {
   AuthorizePaymentInput,
   AuthorizePaymentOutput,
@@ -255,6 +256,9 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
       return { data: input.data ?? {}, status: "pending" }
     } catch (e: any) {
       this.logger_.error(`Onepay authorizePayment error: ${e.message}`)
+      Sentry.captureException(e, {
+        tags: { payment_provider: "onepay", operation: "authorizePayment" },
+      })
       return { data: input.data ?? {}, status: "error" }
     }
   }
@@ -355,6 +359,9 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
       return { status: "pending" }
     } catch (e: any) {
       this.logger_.error(`Onepay getPaymentStatus error: ${e.message}`)
+      Sentry.captureException(e, {
+        tags: { payment_provider: "onepay", operation: "getPaymentStatus" },
+      })
       return { status: "error" }
     }
   }

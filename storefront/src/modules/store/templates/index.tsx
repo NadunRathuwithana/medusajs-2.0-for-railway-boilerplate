@@ -50,6 +50,8 @@ const StoreTemplate = ({
               sortBy={sort}
               page={pageNumber}
               countryCode={countryCode}
+              listId="store"
+              listName="All Products"
             />
           </Suspense>
         </div>

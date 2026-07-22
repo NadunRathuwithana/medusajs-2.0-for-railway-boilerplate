@@ -3,15 +3,16 @@
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
 import { HttpTypes } from "@medusajs/types"
-import { omit } from "lodash"
+import omit from "lodash/omit"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
+import { cache } from "react"
 import { getAuthHeaders, getCartId, removeCartId, setCartId } from "./cookies"
 import { getProductsById } from "./products"
 import { getRegion } from "./regions"
 import { listCartShippingMethods } from "./fulfillment"
 
-export async function retrieveCart() {
+export const retrieveCart = cache(async function retrieveCart() {
   const cartId = await getCartId()
 
   if (!cartId) {
@@ -24,7 +25,7 @@ export async function retrieveCart() {
     .catch(() => {
       return null
     })
-}
+})
 
 export async function getOrSetCart(countryCode: string) {
   let cart = await retrieveCart()
@@ -165,7 +166,7 @@ export async function deleteLineItem(lineId: string) {
     .catch(medusaError)
 }
 
-export async function enrichLineItems(
+export const enrichLineItems = cache(async function enrichLineItems(
   lineItems:
     | HttpTypes.StoreCartLineItem[]
     | HttpTypes.StoreOrderLineItem[]
@@ -210,7 +211,24 @@ export async function enrichLineItems(
   }) as HttpTypes.StoreCartLineItem[]
 
   return enrichedItems
-}
+})
+
+// Single source of truth for "the current cart with enriched line items" —
+// previously copy-pasted (with slightly different null-handling) in the cart
+// page, checkout page, and the nav's CartButton.
+export const getCart = cache(async function getCart() {
+  const cart = await retrieveCart()
+
+  if (!cart) {
+    return null
+  }
+
+  if (cart.items?.length) {
+    cart.items = await enrichLineItems(cart.items, cart.region_id!)
+  }
+
+  return cart
+})
 
 export async function setShippingMethod({
   cartId,
@@ -245,10 +263,37 @@ export async function initiatePaymentSession(
     const resp = await sdk.store.payment.initiatePaymentSession(cart, data, {}, authHeaders)
 
     revalidateTag("cart")
-    // Do NOT return `resp` directly. SDK response objects may contain non-serializable 
-    // properties which causes Next.js Server Actions to crash during serialization, 
-    // throwing the "An error occurred in the Server Components render" error.
-    return { success: true }
+
+    // Hand the freshly-created session straight back to the client instead of
+    // making it wait for the cart to revalidate/refetch (a second, heavier round
+    // trip) before it can read the session off the `cart` prop. That extra hop is
+    // what was keeping the "Place order" button disabled for several seconds after
+    // the payment provider had already responded.
+    // Do NOT return `resp` directly — SDK response objects may contain
+    // non-serializable properties which causes Next.js Server Actions to crash
+    // during serialization. Pull out only the plain fields the client needs.
+    const sessions = resp?.payment_collection?.payment_sessions ?? []
+    const newSession = sessions
+      .filter((s: any) => s.provider_id === data.provider_id)
+      .sort(
+        (a: any, b: any) =>
+          new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime()
+      )
+      .pop()
+
+    return {
+      success: true,
+      session: newSession
+        ? JSON.parse(
+            JSON.stringify({
+              id: newSession.id,
+              provider_id: newSession.provider_id,
+              status: newSession.status,
+              data: newSession.data,
+            })
+          )
+        : null,
+    }
   } catch (error: any) {
     // Do NOT re-throw here. Throwing from a server action bypasses the client
     // .catch() handler and triggers Next.js's error boundary, showing the

@@ -75,6 +75,8 @@ export default function CategoryTemplate({
             page={pageNumber}
             categoryId={category.id}
             countryCode={countryCode}
+            listId={`category-${category.id}`}
+            listName={category.name}
           />
         </Suspense>
       </div>

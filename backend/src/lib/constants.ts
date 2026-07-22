@@ -136,6 +136,26 @@ export const MEILISEARCH_HOST = process.env.MEILISEARCH_HOST;
 export const MEILISEARCH_ADMIN_KEY = process.env.MEILISEARCH_ADMIN_KEY;
 
 /**
+ * (optional) Mintpay (Buy Now Pay Later) configuration
+ *
+ * MINTPAY_MERCHANT_ID     — Merchant ID obtained from Mintpay
+ * MINTPAY_MERCHANT_SECRET — Merchant secret, sent as "Authorization: Token <secret>"
+ * MINTPAY_ENV             — "sandbox" | "live" — selects the API base URL, defaults to "sandbox"
+ * MINTPAY_SUCCESS_URL     — Browser redirect Mintpay sends the customer to after a successful payment
+ * MINTPAY_FAIL_URL        — Browser redirect Mintpay sends the customer to after a failed/cancelled payment
+ *
+ * Neither redirect is trusted on its own — both return routes re-verify the
+ * purchase status server-side via the status endpoint before marking an
+ * order paid.
+ */
+export const MINTPAY_MERCHANT_ID = process.env.MINTPAY_MERCHANT_ID;
+export const MINTPAY_MERCHANT_SECRET = process.env.MINTPAY_MERCHANT_SECRET;
+export const MINTPAY_ENV =
+  (process.env.MINTPAY_ENV as "sandbox" | "live" | undefined) ?? "sandbox";
+export const MINTPAY_SUCCESS_URL = process.env.MINTPAY_SUCCESS_URL;
+export const MINTPAY_FAIL_URL = process.env.MINTPAY_FAIL_URL;
+
+/**
  * Worker mode
  */
 export const WORKER_MODE =

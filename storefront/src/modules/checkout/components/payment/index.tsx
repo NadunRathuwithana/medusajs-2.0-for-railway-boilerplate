@@ -29,6 +29,10 @@ const Payment = ({
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // The session returned directly by initiatePaymentSession — synced to
+  // PaymentButton the moment the payment API responds, without waiting for the
+  // cart prop to catch up via a full Next.js RSC revalidate/refetch.
+  const [syncedSession, setSyncedSession] = useState<any>(null)
   const [cardBrand, setCardBrand] = useState<string | null>(null)
   const [cardComplete, setCardComplete] = useState(false)
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
@@ -91,17 +95,17 @@ const Payment = ({
 
     const promoInfo = getPaymentPromoInfo(selectedPaymentMethod)
     const codeToAdd = promoInfo.code
-    
+
     // Normalize codes to uppercase for safe comparison
     const allPaymentCodesUpper = getAllPaymentPromoCodes().map(c => c.toUpperCase())
     const currentCodes = (cart.promotions || []).map((p: any) => p.code).filter(Boolean)
-    
+
     // Filter out all known payment codes to preserve user's own promos (e.g., SITEWIDE10)
     // Compare in uppercase to prevent case-mismatches from keeping the code stuck
     const nonPaymentCodes = currentCodes.filter(
       (c: string) => !allPaymentCodesUpper.includes(c.toUpperCase())
     )
-    
+
     // Build target codes array
     const targetCodes = [...nonPaymentCodes]
     if (codeToAdd) {
@@ -115,10 +119,10 @@ const Payment = ({
     // Check if targetCodes differ from currentCodes (case-insensitive check)
     const targetSorted = [...targetCodes].map(c => c.toUpperCase()).sort()
     const currentSorted = [...currentCodes].map(c => c.toUpperCase()).sort()
-    
-    const hasChanged = targetSorted.length !== currentSorted.length || 
+
+    const hasChanged = targetSorted.length !== currentSorted.length ||
       targetSorted.some((val, i) => val !== currentSorted[i])
-      
+
     // Create a string representation to check if we already attempted this exact sync
     const targetCodesString = targetSorted.join(",")
 
@@ -174,6 +178,7 @@ const Payment = ({
         initiatingProviderRef.current = selectedPaymentMethod
         setIsLoading(true)
         setError(null)
+        setSyncedSession(null)
 
         // Use cartRef.current so we always use the latest cart without adding
         // `cart` to the dependency array (which would re-fire on every RSC re-render)
@@ -184,6 +189,12 @@ const Payment = ({
             billing_address: cartRef.current?.billing_address,
             shipping_address: cartRef.current?.shipping_address,
             email: cartRef.current?.email,
+            // Mintpay's order-create call needs line items and cart
+            // timestamps too (see modules/mintpay-payment/service.ts) — Koko
+            // and OnePay simply ignore these extra fields.
+            items: cartRef.current?.items,
+            cart_created_at: cartRef.current?.created_at,
+            cart_updated_at: cartRef.current?.updated_at,
           }
         })
           .then((result: any) => {
@@ -192,6 +203,8 @@ const Payment = ({
             // (instead of throwing) to avoid triggering Next.js error boundary
             if (result?.error) {
               setError(result.error)
+            } else if (result?.session) {
+              setSyncedSession(result.session)
             }
           })
           .catch((err: any) => {
@@ -222,10 +235,11 @@ const Payment = ({
         detail: {
           isLoading,
           selectedMethod: selectedPaymentMethod,
+          session: syncedSession,
         },
       })
     )
-  }, [isLoading, selectedPaymentMethod])
+  }, [isLoading, selectedPaymentMethod, syncedSession])
 
   const hasPaymentMethods = availablePaymentMethods?.length > 0
 
@@ -264,14 +278,14 @@ const Payment = ({
                     >
                       {[...availablePaymentMethods]
                         .sort((a, b) => {
-                          const order = ["pp_system_default", "pp_onepay_onepay", "pp_koko_koko"]
+                          const order = ["pp_system_default", "pp_onepay_onepay", "pp_koko_koko", "pp_mintpay_mintpay"]
                           const indexA = order.indexOf(a.id)
                           const indexB = order.indexOf(b.id)
-                          
+
                           if (indexA === -1 && indexB === -1) return a.id > b.id ? 1 : -1
                           if (indexA === -1) return 1
                           if (indexB === -1) return -1
-                          
+
                           return indexA - indexB
                         })
                         .map((paymentMethod) => {

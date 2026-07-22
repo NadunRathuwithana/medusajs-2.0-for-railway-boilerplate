@@ -1,5 +1,6 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules, PaymentWebhookEvents } from "@medusajs/framework/utils"
+import { Sentry } from "../../../lib/sentry"
 
 /**
  * Koko _responseUrl webhook handler.
@@ -32,8 +33,21 @@ export async function POST(
       delay: 5000,
       attempts: 3,
     })
-  } catch (e) {
-    console.error("Koko webhook error:", e)
+  } catch (e: any) {
+    // Structured so this is greppable/traceable in Railway logs, not just a
+    // bare error string — orderId/trnId are the fields you'd search for when
+    // reconciling a specific customer's payment.
+    console.error(JSON.stringify({
+      event: "koko_webhook_error",
+      message: e?.message,
+      orderId: (req.body as any)?.orderId,
+      trnId: (req.body as any)?.trnId,
+      timestamp: new Date().toISOString(),
+    }))
+    Sentry.captureException(e, {
+      tags: { payment_provider: "koko", webhook: "true" },
+      extra: { body: req.body },
+    })
     // Always return 200 to prevent Koko retrying on server errors
   }
 

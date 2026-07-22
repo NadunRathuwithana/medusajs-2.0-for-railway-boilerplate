@@ -52,6 +52,8 @@ export default function CollectionTemplate({
               page={pageNumber}
               collectionId={collection.id}
               countryCode={countryCode}
+              listId={`collection-${collection.id}`}
+              listName={collection.title}
             />
           </Suspense>
         </div>

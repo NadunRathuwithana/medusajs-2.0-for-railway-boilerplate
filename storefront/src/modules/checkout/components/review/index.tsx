@@ -8,11 +8,6 @@ const Review = ({ cart }: { cart: any }) => {
   const paidByGiftcard =
     cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
 
-  const previousStepsCompleted =
-    cart.shipping_address &&
-    cart.shipping_methods.length > 0 &&
-    (cart.payment_collection || paidByGiftcard)
-
   const paymentReady =
     (cart?.shipping_methods?.length ?? 0) !== 0 || paidByGiftcard
 
@@ -40,32 +35,30 @@ const Review = ({ cart }: { cart: any }) => {
         </div>
       )}
 
-      {previousStepsCompleted && (
-        <>
-          <div className="flex items-start gap-x-1 w-full mb-4">
-            <div className="w-full">
-              <p className="text-[14px] text-gray-500 leading-relaxed">
-                By clicking the Place Order button, you confirm that you have
-                read, understand and accept our Terms of Use, Terms of Sale and
-                Returns Policy and acknowledge that you have read Medusa
-                Store&apos;s Privacy Policy.
-              </p>
-            </div>
-          </div>
+      <div className="flex items-start gap-x-1 w-full mb-4">
+        <div className="w-full">
+          <p className="text-[14px] text-gray-500 leading-relaxed">
+            By clicking the Place Order button, you confirm that you have
+            read, understand and accept our Terms of Use, Terms of Sale and
+            Returns Policy and acknowledge that you have read Medusa
+            Store&apos;s Privacy Policy.
+          </p>
+        </div>
+      </div>
 
-          <div className="lg:hidden flex items-center justify-between mb-4 pt-4 border-t border-gray-100">
-            <span className="text-base font-bold text-gray-900">Total</span>
-            <span className="text-[20px] font-bold text-gray-900 tracking-tight">
-              {convertToLocale({
-                amount: cart.total ?? 0,
-                currency_code: cart.currency_code,
-              })}
-            </span>
-          </div>
+      <div className="lg:hidden flex items-center justify-between mb-4 pt-4 border-t border-gray-100">
+        <span className="text-base font-bold text-gray-900">Total</span>
+        <span className="text-[20px] font-bold text-gray-900 tracking-tight">
+          {convertToLocale({
+            amount: cart.total ?? 0,
+            currency_code: cart.currency_code,
+          })}
+        </span>
+      </div>
 
-          <PaymentButton cart={cart} data-testid="submit-order-button" />
-        </>
-      )}
+      {/* Always rendered — PaymentButton disables itself and shows a loader
+          based on the cart's own readiness, so the CTA never disappears. */}
+      <PaymentButton cart={cart} data-testid="submit-order-button" />
     </div>
   )
 }

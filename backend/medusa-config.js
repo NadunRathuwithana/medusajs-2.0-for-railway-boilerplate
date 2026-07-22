@@ -26,6 +26,11 @@ import {
   KOKO_RETURN_URL,
   KOKO_CANCEL_URL,
   KOKO_RESPONSE_URL,
+  MINTPAY_MERCHANT_ID,
+  MINTPAY_MERCHANT_SECRET,
+  MINTPAY_ENV,
+  MINTPAY_SUCCESS_URL,
+  MINTPAY_FAIL_URL,
   WORKER_MODE,
   MINIO_ENDPOINT,
   MINIO_ACCESS_KEY,
@@ -191,7 +196,7 @@ const medusaConfig = {
           resolve: "./src/modules/onepay-payment",
           id: "onepay",
           options: {
-            appId: ONEPAY_APP_ID, 
+            appId: ONEPAY_APP_ID,
             token: ONEPAY_TOKEN,
             hashSalt: ONEPAY_HASH_SALT,
             baseUrl: ONEPAY_BASE_URL,
@@ -215,6 +220,20 @@ const medusaConfig = {
             returnUrl: KOKO_RETURN_URL,
             cancelUrl: KOKO_CANCEL_URL,
             responseUrl: KOKO_RESPONSE_URL,
+          },
+        });
+      }
+
+      if (MINTPAY_MERCHANT_ID && MINTPAY_MERCHANT_SECRET) {
+        paymentProviders.push({
+          resolve: "./src/modules/mintpay-payment",
+          id: "mintpay",
+          options: {
+            merchantId: MINTPAY_MERCHANT_ID,
+            merchantSecret: MINTPAY_MERCHANT_SECRET,
+            env: MINTPAY_ENV,
+            successUrl: MINTPAY_SUCCESS_URL,
+            failUrl: MINTPAY_FAIL_URL,
           },
         });
       }
