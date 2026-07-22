@@ -25,7 +25,9 @@ export type MintpayOrderCreateBody = {
   total_price: string
   discount: string
   customer_email: string
-  customer_id: string
+  // Despite the docs saying "String", Mintpay's API requires this to be
+  // numeric — a non-numeric string crashes their server with a 500.
+  customer_id: number
   customer_telephone: string
   ip: string
   x_forwarded_for: string
@@ -39,14 +41,22 @@ export type MintpayOrderCreateBody = {
   fail_url: string
 }
 
-/** Response from user-order/api/ — `data` is the purchase_id on success, an error reason on failure */
+/**
+ * Response from user-order/api/ — `data` is the purchase_id on success (the
+ * live API returns this as a bare number, e.g. 58877, despite the docs'
+ * example showing a quoted string), or an error reason string on failure.
+ */
 export type MintpayOrderCreateResponse = {
   message: "Success" | "Failed"
-  data: string
+  data: string | number
 }
 
 export type MintpayStatusData = {
-  order_id?: number
+  // Echoes back whatever we sent as order_id — always a string in this
+  // integration, since it's Medusa's payment session id (e.g. "payses_...").
+  // The PDF's own example shows a number, but that reflects Shopify's
+  // integer order ids, not ours.
+  order_id?: string
   total_price?: number
   status?: "Approved" | "Rejected"
   channel?: string

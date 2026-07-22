@@ -47,9 +47,12 @@ export async function mintpayGetStatus(
   purchaseId: string
 ): Promise<MintpayStatusResponse> {
   const res = await fetch(
+    // Trailing slash required — without it Django 301/308-redirects here,
+    // which most fetch implementations follow anyway, but this avoids the
+    // extra round trip.
     `${baseUrl}/user-order/api/status/merchantId/${encodeURIComponent(
       merchantId
-    )}/purchaseId/${encodeURIComponent(purchaseId)}`,
+    )}/purchaseId/${encodeURIComponent(purchaseId)}/`,
     {
       method: "GET",
       headers: {

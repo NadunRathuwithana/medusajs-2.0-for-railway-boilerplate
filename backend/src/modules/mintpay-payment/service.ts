@@ -36,6 +36,16 @@ type InjectedDependencies = {
   logger: Logger
 }
 
+/** Deterministic string -> positive integer (djb2 hash), kept within a safe
+ *  int32 range Mintpay's numeric customer_id field can accept. */
+function stableNumericId(value: string): number {
+  let hash = 5381
+  for (let i = 0; i < value.length; i++) {
+    hash = ((hash << 5) + hash + value.charCodeAt(i)) | 0
+  }
+  return Math.abs(hash) % 2147483647
+}
+
 class MintpayPaymentService extends AbstractPaymentProvider<MintpayOptions> {
   static identifier = "mintpay"
 
@@ -109,11 +119,13 @@ class MintpayPaymentService extends AbstractPaymentProvider<MintpayOptions> {
     const shippingAddress = inputData.shipping_address || billingAddress || {}
 
     const email = customer.email || inputData.email || billingAddress.email || ""
-    // Mintpay's docs describe customer_id as only applicable to "registered
-    // customers" — Medusa only populates context.customer when the cart has a
-    // customer_id (i.e. the shopper is logged in), so an empty string for
-    // guest checkouts matches that same semantics.
-    const customerId = customer.id ? String(customer.id) : ""
+    // Mintpay's API requires customer_id to be numeric (despite the docs
+    // saying "String") — sending "" gets a clean 400, but a non-numeric
+    // string like a Medusa customer id ("cus_01H...") crashes their server
+    // with a 500. Medusa's ids aren't numeric, so there's no real id to send;
+    // hash it to a stable positive integer instead so the same registered
+    // customer still maps to the same numeric id across orders. Guests get 0.
+    const customerId = customer.id ? stableNumericId(String(customer.id)) : 0
     const phone =
       customer.phone || shippingAddress.phone || billingAddress.phone || ""
 
@@ -123,7 +135,9 @@ class MintpayPaymentService extends AbstractPaymentProvider<MintpayOptions> {
     const products: MintpayProductField[] = items.map((item: any) => ({
       name: item.product_title || item.title || "Item",
       product_id: String(item.product_id ?? item.id ?? ""),
-      sku: item.variant_sku || item.variant_title || "",
+      // Mintpay rejects a blank sku outright — fall back to a placeholder
+      // for variants that don't have one.
+      sku: item.variant_sku || item.variant_title || "N/A",
       quantity: String(item.quantity ?? 1),
       unit_price: Number(item.unit_price ?? 0).toFixed(2),
       discount: "0.00",
@@ -163,7 +177,7 @@ class MintpayPaymentService extends AbstractPaymentProvider<MintpayOptions> {
       body
     )
 
-    if (response.message !== "Success" || !response.data) {
+    if (response.message !== "Success" || response.data === undefined || response.data === null) {
       this.logger_.error(
         `Mintpay: order create failed for order ${orderId} — ${response.data}`
       )
@@ -178,7 +192,10 @@ class MintpayPaymentService extends AbstractPaymentProvider<MintpayOptions> {
       )
     }
 
-    const purchaseId = response.data
+    // The live API returns this as a bare number despite the docs showing a
+    // quoted string — normalize to a string since it's used as a form field
+    // value and as Medusa's PaymentSession id (both expect strings).
+    const purchaseId = String(response.data)
 
     this.logger_.info(
       `Mintpay: created purchase ${purchaseId} for order ${orderId}`
