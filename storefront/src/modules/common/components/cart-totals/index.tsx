@@ -1,14 +1,13 @@
 "use client"
 
 import { convertToLocale } from "@lib/util/money"
-import { InformationCircleSolid } from "@medusajs/icons"
-import { Tooltip } from "@medusajs/ui"
 import React from "react"
 
 type CartTotalsProps = {
   totals: {
     total?: number | null
     subtotal?: number | null
+    item_subtotal?: number | null
     tax_total?: number | null
     shipping_total?: number | null
     discount_total?: number | null
@@ -22,74 +21,72 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
     currency_code,
     total,
     subtotal,
+    item_subtotal,
     tax_total,
     shipping_total,
     discount_total,
     gift_card_total,
   } = totals
 
+  const fmt = (amount: number) => convertToLocale({ amount, currency_code })
+
+  // Calculate pre-shipping subtotal
+  const displaySubtotal = item_subtotal ?? (subtotal ? subtotal - (shipping_total ?? 0) : 0)
+
   return (
-    <div>
-      <div className="flex flex-col gap-y-2 txt-medium text-ui-fg-subtle ">
-        <div className="flex items-center justify-between">
-          <span className="flex gap-x-1 items-center">
-            Subtotal (excl. shipping and taxes)
-          </span>
-          <span data-testid="cart-subtotal" data-value={subtotal || 0}>
-            {convertToLocale({ amount: subtotal ?? 0, currency_code })}
-          </span>
-        </div>
-        {!!discount_total && (
-          <div className="flex items-center justify-between">
-            <span>Discount</span>
-            <span
-              className="text-ui-fg-interactive"
-              data-testid="cart-discount"
-              data-value={discount_total || 0}
-            >
-              -{" "}
-              {convertToLocale({ amount: discount_total ?? 0, currency_code })}
-            </span>
-          </div>
-        )}
-        <div className="flex items-center justify-between">
-          <span>Shipping</span>
-          <span data-testid="cart-shipping" data-value={shipping_total || 0}>
-            {convertToLocale({ amount: shipping_total ?? 0, currency_code })}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="flex gap-x-1 items-center ">Taxes</span>
-          <span data-testid="cart-taxes" data-value={tax_total || 0}>
-            {convertToLocale({ amount: tax_total ?? 0, currency_code })}
-          </span>
-        </div>
-        {!!gift_card_total && (
-          <div className="flex items-center justify-between">
-            <span>Gift card</span>
-            <span
-              className="text-ui-fg-interactive"
-              data-testid="cart-gift-card-amount"
-              data-value={gift_card_total || 0}
-            >
-              -{" "}
-              {convertToLocale({ amount: gift_card_total ?? 0, currency_code })}
-            </span>
-          </div>
-        )}
-      </div>
-      <div className="h-px w-full border-b border-gray-200 my-4" />
-      <div className="flex items-center justify-between text-ui-fg-base mb-2 txt-medium ">
-        <span>Total</span>
-        <span
-          className="txt-xlarge-plus"
-          data-testid="cart-total"
-          data-value={total || 0}
-        >
-          {convertToLocale({ amount: total ?? 0, currency_code })}
+    <div className="flex flex-col gap-y-2 text-[13px]">
+      {/* Line items */}
+      <div className="flex items-center justify-between">
+        <span className="text-gray-500">Subtotal</span>
+        <span className="text-gray-800 font-medium" data-testid="cart-subtotal">
+          {fmt(displaySubtotal)}
         </span>
       </div>
-      <div className="h-px w-full border-b border-gray-200 mt-4" />
+
+      {!!discount_total && (
+        <div className="flex items-center justify-between">
+          <span className="text-green-700">Discount</span>
+          <span className="text-green-700 font-medium" data-testid="cart-discount">
+            -{fmt(discount_total)}
+          </span>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between">
+        <span className="text-gray-500">Shipping</span>
+        <span className="text-gray-800 font-medium" data-testid="cart-shipping">
+          {shipping_total ? fmt(shipping_total) : (
+            <span className="text-gray-400 italic text-[12px]">Calculated at next step</span>
+          )}
+        </span>
+      </div>
+
+      {/* <div className="flex items-center justify-between">
+        <span className="text-gray-500">Taxes</span>
+        <span className="text-gray-800 font-medium" data-testid="cart-taxes">
+          {fmt(tax_total ?? 0)}
+        </span>
+      </div> */}
+
+      {!!gift_card_total && (
+        <div className="flex items-center justify-between">
+          <span className="text-green-700">Gift card</span>
+          <span className="text-green-700 font-medium" data-testid="cart-gift-card-amount">
+            -{fmt(gift_card_total)}
+          </span>
+        </div>
+      )}
+
+      {/* Total */}
+      <div className="flex items-center justify-between pt-3 mt-1 border-t border-gray-200">
+        <span className="text-[15px] font-bold text-gray-900">Total</span>
+        <span
+          className="text-[22px] font-bold text-gray-900 tracking-tight"
+          data-testid="cart-total"
+        >
+          {fmt(total ?? 0)}
+        </span>
+      </div>
     </div>
   )
 }

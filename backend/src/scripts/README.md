@@ -22,8 +22,6 @@ export default async function myScript ({
     container.resolve(ModuleRegistrationName.PRODUCT)
 
   const [, count] = await productModuleService.listAndCount()
-
-  console.log(`You have ${count} product(s)`)
 }
 ```
 
@@ -53,7 +51,7 @@ import { ExecArgs } from "@medusajs/types"
 export default async function myScript ({
   args
 }: ExecArgs) {
-  console.log(`The arguments you passed: ${args}`)
+
 }
 ```
 

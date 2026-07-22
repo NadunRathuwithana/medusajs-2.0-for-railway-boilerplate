@@ -5,7 +5,7 @@ import { HttpTypes } from "@medusajs/types"
 
 export const listRegions = cache(async function () {
   return sdk.store.region
-    .list({}, { next: { tags: ["regions"] } })
+    .list({ fields: "+payment_providers" }, { next: { tags: ["regions"] } })
     .then(({ regions }) => regions)
     .catch(medusaError)
 })
@@ -18,6 +18,7 @@ export const retrieveRegion = cache(async function (id: string) {
 })
 
 const regionMap = new Map<string, HttpTypes.StoreRegion>()
+regionMap.clear() // Force clear on hot reload
 
 export const getRegion = cache(async function (countryCode: string) {
   try {

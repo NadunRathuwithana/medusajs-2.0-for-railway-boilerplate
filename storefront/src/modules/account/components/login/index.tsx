@@ -1,5 +1,5 @@
-import { useFormState } from "react-dom"
-
+import { useActionState, useEffect } from "react"
+import { useParams } from "next/navigation"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import Input from "@modules/common/components/input"
 import ErrorMessage from "@modules/checkout/components/error-message"
@@ -11,19 +11,32 @@ type Props = {
 }
 
 const Login = ({ setCurrentView }: Props) => {
-  const [message, formAction] = useFormState(login, null)
+  const { countryCode } = useParams()
+  const [message, formAction] = useActionState(login, null)
+
+  useEffect(() => {
+    if (message === "SUCCESS") {
+      window.location.reload()
+    }
+  }, [message])
 
   return (
     <div
-      className="max-w-sm w-full flex flex-col items-center"
+      className="w-full flex flex-col"
       data-testid="login-page"
     >
-      <h1 className="text-large-semi uppercase mb-6">Welcome back</h1>
-      <p className="text-center text-base-regular text-ui-fg-base mb-8">
-        Sign in to access an enhanced shopping experience.
-      </p>
-      <form className="w-full" action={formAction}>
-        <div className="flex flex-col w-full gap-y-2">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold capitalize tracking-tight text-bold mb-2">
+          Welcome back
+        </h1>
+        <p className="text-sm font-medium text-gray-500">
+          Sign in to access your custom Cardle dashboard, cart, and premium membership details.
+        </p>
+      </div>
+
+      <form className="w-full flex flex-col gap-y-4" action={formAction}>
+        <input type="hidden" name="countryCode" value={countryCode as string} />
+        <div className="flex flex-col w-full gap-y-3.5">
           <Input
             label="Email"
             name="email"
@@ -42,22 +55,37 @@ const Login = ({ setCurrentView }: Props) => {
             data-testid="password-input"
           />
         </div>
-        <ErrorMessage error={message} data-testid="login-error-message" />
-        <SubmitButton data-testid="sign-in-button" className="w-full mt-6">
+        
+        <ErrorMessage error={message === "SUCCESS" ? null : message} data-testid="login-error-message" />
+
+        <div className="flex w-full justify-end">
+          <button
+            type="button"
+            onClick={() => setCurrentView(LOGIN_VIEW.FORGOT_PASSWORD)}
+            className="text-xs text-gray-500 hover:text-gray-900 transition-colors"
+          >
+            Forgot password?
+          </button>
+        </div>
+        
+        <SubmitButton 
+          data-testid="sign-in-button" 
+          className="w-full mt-6 bg-black text-white hover:bg-zinc-900 transition-colors duration-200 py-3.5 rounded-full text-xs font-bold tracking-widest capitalize shadow-sm"
+        >
           Sign in
         </SubmitButton>
       </form>
-      <span className="text-center text-ui-fg-base text-small-regular mt-6">
-        Not a member?{" "}
+
+      <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between text-xs font-medium capitalize tracking-wider text-gray-500">
+        <span>Not a member yet?</span>
         <button
           onClick={() => setCurrentView(LOGIN_VIEW.REGISTER)}
-          className="underline"
+          className="text-bold hover:text-gray-700 underline font-bold transition-colors"
           data-testid="register-button"
         >
           Join us
         </button>
-        .
-      </span>
+      </div>
     </div>
   )
 }

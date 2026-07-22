@@ -2,13 +2,11 @@
 
 import { RadioGroup } from "@headlessui/react"
 import { CheckCircleSolid } from "@medusajs/icons"
-import { Button, Heading, Text, clx } from "@medusajs/ui"
+import { clx } from "@medusajs/ui"
 
-import Divider from "@modules/common/components/divider"
 import Radio from "@modules/common/components/radio"
 import ErrorMessage from "@modules/checkout/components/error-message"
-import { useRouter, useSearchParams, usePathname } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { setShippingMethod } from "@lib/data/cart"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
@@ -25,24 +23,9 @@ const Shipping: React.FC<ShippingProps> = ({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
-
-  const isOpen = searchParams.get("step") === "delivery"
-
   const selectedShippingMethod = availableShippingMethods?.find(
-    // To do: remove the previously selected shipping method instead of using the last one
     (method) => method.id === cart.shipping_methods?.at(-1)?.shipping_option_id
   )
-
-  const handleEdit = () => {
-    router.push(pathname + "?step=delivery", { scroll: false })
-  }
-
-  const handleSubmit = () => {
-    router.push(pathname + "?step=payment", { scroll: false })
-  }
 
   const set = async (id: string) => {
     setIsLoading(true)
@@ -57,66 +40,67 @@ const Shipping: React.FC<ShippingProps> = ({
 
   useEffect(() => {
     setError(null)
-  }, [isOpen])
+  }, [])
 
+  // One-shot guard: auto-select fires at most once per mount.
+  // Previously isLoading was in the deps, causing a re-fire when loading finished
+  // if the RSC hadn't updated selectedShippingMethod yet — resulting in duplicate API calls.
+  const autoSelectedRef = useRef(false)
+
+  // Auto-select the first shipping method if none is selected
+  useEffect(() => {
+    if (
+      !autoSelectedRef.current &&
+      availableShippingMethods?.length &&
+      !selectedShippingMethod?.id
+    ) {
+      autoSelectedRef.current = true
+      set(availableShippingMethods[0].id)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableShippingMethods, selectedShippingMethod])
+
+  // If no address is set, we don't show the shipping options as actionable
+  const isAddressSet = !!cart.shipping_address?.country_code
+  
   return (
     <div className="bg-white">
-      <div className="flex flex-row items-center justify-between mb-6">
-        <Heading
-          level="h2"
-          className={clx(
-            "flex flex-row text-3xl-regular gap-x-2 items-baseline",
-            {
-              "opacity-50 pointer-events-none select-none":
-                !isOpen && cart.shipping_methods?.length === 0,
-            }
-          )}
-        >
+      <div className="flex flex-row items-center justify-between mb-4">
+        <h2 className="flex flex-row text-[24px] font-bold text-bold gap-x-2 items-center">
           Delivery
-          {!isOpen && (cart.shipping_methods?.length ?? 0) > 0 && (
-            <CheckCircleSolid />
-          )}
-        </Heading>
-        {!isOpen &&
-          cart?.shipping_address &&
-          cart?.billing_address &&
-          cart?.email && (
-            <Text>
-              <button
-                onClick={handleEdit}
-                className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
-                data-testid="edit-delivery-button"
-              >
-                Edit
-              </button>
-            </Text>
-          )}
+          {cart.shipping_methods?.length ? (
+            <CheckCircleSolid className="text-green-500 w-6 h-6" />
+          ) : null}
+        </h2>
       </div>
-      {isOpen ? (
+      
+      {isAddressSet ? (
         <div data-testid="delivery-options-container">
-          <div className="pb-8">
-            <RadioGroup value={selectedShippingMethod?.id} onChange={set}>
+          <div className="pb-4">
+            <RadioGroup value={selectedShippingMethod?.id ?? ""} onChange={set} className="flex flex-col gap-2">
               {availableShippingMethods?.map((option) => {
+                const isSelected = option.id === selectedShippingMethod?.id
                 return (
                   <RadioGroup.Option
                     key={option.id}
                     value={option.id}
                     data-testid="delivery-option-radio"
                     className={clx(
-                      "flex items-center justify-between text-small-regular cursor-pointer py-4 border rounded-rounded px-8 mb-2 hover:shadow-borders-interactive-with-active",
+                      "flex items-center justify-between cursor-pointer p-4 border rounded-2xl transition-colors hover:bg-gray-50 min-h-[64px]",
                       {
-                        "border-ui-border-interactive":
-                          option.id === selectedShippingMethod?.id,
+                        "border-black bg-gray-50": isSelected,
+                        "border-gray-200 bg-white": !isSelected,
                       }
                     )}
                   >
                     <div className="flex items-center gap-x-4">
-                      <Radio
-                        checked={option.id === selectedShippingMethod?.id}
-                      />
-                      <span className="text-base-regular">{option.name}</span>
+                      <Radio checked={isSelected} />
+                      <div className="flex flex-col">
+                        <span className="text-[15px] font-medium text-gray-900">{option.name}</span>
+                        <span className="text-[13px] text-gray-500 mt-0.5">Approx. 3-7 business days</span>
+                      </div>
                     </div>
-                    <span className="justify-self-end text-ui-fg-base">
+                    <span className="text-[15px] font-bold text-gray-900">
                       {convertToLocale({
                         amount: option.amount!,
                         currency_code: cart?.currency_code,
@@ -132,39 +116,16 @@ const Shipping: React.FC<ShippingProps> = ({
             error={error}
             data-testid="delivery-option-error-message"
           />
-
-          <Button
-            size="large"
-            className="mt-6"
-            onClick={handleSubmit}
-            isLoading={isLoading}
-            disabled={!cart.shipping_methods?.[0]}
-            data-testid="submit-delivery-option-button"
-          >
-            Continue to payment
-          </Button>
         </div>
       ) : (
-        <div>
-          <div className="text-small-regular">
-            {cart && (cart.shipping_methods?.length ?? 0) > 0 && (
-              <div className="flex flex-col w-1/3">
-                <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                  Method
-                </Text>
-                <Text className="txt-medium text-ui-fg-subtle">
-                  {selectedShippingMethod?.name}{" "}
-                  {convertToLocale({
-                    amount: selectedShippingMethod?.amount!,
-                    currency_code: cart?.currency_code,
-                  })}
-                </Text>
-              </div>
-            )}
+        <div className="pb-4">
+          <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 text-gray-500 text-[15px]">
+            Please enter your shipping address to view available delivery options.
           </div>
         </div>
       )}
-      <Divider className="mt-8" />
+      
+      <div className="h-px w-full bg-gray-100 my-4" />
     </div>
   )
 }

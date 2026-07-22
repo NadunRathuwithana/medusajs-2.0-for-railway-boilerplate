@@ -10,6 +10,7 @@ import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-relat
 import { notFound } from "next/navigation"
 import ProductActionsWrapper from "./product-actions-wrapper"
 import { HttpTypes } from "@medusajs/types"
+import BackButton from "@modules/common/components/back-button"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
@@ -28,30 +29,38 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
   return (
     <>
+      <div className="content-container max-w-[1440px] mx-auto px-6 md:px-16 pt-6 pb-2 relative z-10">
+        <BackButton />
+      </div>
       <div
-        className="content-container flex flex-col small:flex-row small:items-start py-6 relative"
+        className="content-container flex flex-col lg:flex-row gap-8 lg:gap-16 py-8 relative max-w-[1440px] mx-auto px-6 md:px-16 animate-fade-in-top"
         data-testid="product-container"
       >
-        <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-6">
+        <div className="w-full lg:w-[55%] relative lg:sticky lg:top-24 h-fit animate-fade-in-right" style={{ animationDelay: "100ms", animationFillMode: "both" }}>
+          <Suspense fallback={<div className="aspect-[2/3] w-full bg-gray-100 animate-pulse" />}>
+            <ImageGallery product={product} />
+          </Suspense>
+        </div>
+        
+        <div className="flex flex-col w-full lg:w-[45%] py-4 gap-y-8 animate-fade-in-top" style={{ animationDelay: "200ms", animationFillMode: "both" }}>
           <ProductInfo product={product} />
-          <ProductTabs product={product} />
-        </div>
-        <div className="block w-full relative">
-          <ImageGallery images={product?.images || []} />
-        </div>
-        <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-12">
+          
           <ProductOnboardingCta />
           <Suspense
             fallback={
-              <ProductActions
-                disabled={true}
-                product={product}
-                region={region}
-              />
+              <Suspense fallback={null}>
+                <ProductActions
+                  disabled={true}
+                  product={product}
+                  region={region}
+                />
+              </Suspense>
             }
           >
             <ProductActionsWrapper id={product.id} region={region} />
           </Suspense>
+
+          <ProductTabs product={product} />
         </div>
       </div>
       <div

@@ -1,33 +1,37 @@
-import { Github } from "@medusajs/icons"
-import { Button, Heading } from "@medusajs/ui"
+import Image from "next/image"
 
 const Hero = () => {
   return (
-    <div className="h-[75vh] w-full border-b border-ui-border-base relative bg-ui-bg-subtle">
-      <div className="absolute inset-0 z-10 flex flex-col justify-center items-center text-center small:p-32 gap-6">
-        <span>
-          <Heading
-            level="h1"
-            className="text-3xl leading-10 text-ui-fg-base font-normal"
-          >
-            Well done! You have successfully deployed your Medusa 2.0 store on Railway!
-          </Heading>
-          <Heading
-            level="h2"
-            className="text-3xl leading-10 text-ui-fg-subtle font-normal"
-          >
-            Need help customizing your store?
-          </Heading>
-        </span>
-        <a
-          href="https://funkyton.com/medusajs-2-0-is-finally-here/"
-          target="_blank"
-        >
-          <h1 style={{ textDecoration: "underline" }}>
-            Visit the tutorial
-          </h1>
-        </a>
-      </div>
+    <div className="h-[90vh] w-full relative overflow-hidden bg-[#e5e5e5] flex flex-col items-center justify-center">
+      {/* Mobile Background Image (< 768px) */}
+      <Image
+        src="/home/cardle-premium-cotton-tote-bag-sri-lanka-mobile.jpg"
+        alt="Cardle handcrafted cotton tote bags – shop Sri Lanka's premium make-to-order bags"
+        fill
+        sizes="100vw"
+        className="block md:hidden object-cover object-top"
+        priority
+      />
+
+      {/* Tablet Background Image (768px – 1023px) */}
+      <Image
+        src="/home/cardle-premium-cotton-tote-bag-sri-lanka-tablet.jpg"
+        alt="Cardle premium canvas tote bags handcrafted in Sri Lanka"
+        fill
+        sizes="100vw"
+        className="hidden md:block lg:hidden object-cover object-top"
+        priority
+      />
+
+      {/* Desktop Background Image (1024px+) */}
+      <Image
+        src="/home/cardle-premium-cotton-tote-bag-sri-lanka.jpg"
+        alt="Cardle premium canvas tote bags handcrafted in Sri Lanka – make to order"
+        fill
+        sizes="100vw"
+        className="hidden lg:block object-cover object-top"
+        priority
+      />
     </div>
   )
 }

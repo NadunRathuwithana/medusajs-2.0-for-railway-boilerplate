@@ -16,14 +16,14 @@ export default async function userInviteHandler({
   const invite = await userModuleService.retrieveInvite(data.id)
 
   try {
-    await notificationModuleService.createNotifications({
+    if (notificationModuleService) await notificationModuleService.createNotifications({
       to: invite.email,
       channel: 'email',
       template: EmailTemplates.INVITE_USER,
       data: {
         emailOptions: {
-          replyTo: 'info@example.com',
-          subject: "You've been invited to Medusa!"
+          replyTo: 'hello@cardle.lk',
+          subject: "You've been invited to the Cardle dashboard!"
         },
         inviteLink: `${BACKEND_URL}/app/invite?token=${invite.token}`,
         preview: 'The administration dashboard awaits...'

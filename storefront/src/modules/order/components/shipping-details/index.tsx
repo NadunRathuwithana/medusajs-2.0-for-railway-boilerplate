@@ -1,8 +1,4 @@
-import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
-import { Heading, Text } from "@medusajs/ui"
-
-import Divider from "@modules/common/components/divider"
 
 type ShippingDetailsProps = {
   order: HttpTypes.StoreOrder
@@ -10,64 +6,34 @@ type ShippingDetailsProps = {
 
 const ShippingDetails = ({ order }: ShippingDetailsProps) => {
   return (
-    <div>
-      <Heading level="h2" className="flex flex-row text-3xl-regular my-6">
-        Delivery
-      </Heading>
-      <div className="flex items-start gap-x-8">
-        <div
-          className="flex flex-col w-1/3"
-          data-testid="shipping-address-summary"
-        >
-          <Text className="txt-medium-plus text-ui-fg-base mb-1">
-            Shipping Address
-          </Text>
-          <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address?.first_name}{" "}
-            {order.shipping_address?.last_name}
-          </Text>
-          <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address?.address_1}{" "}
-            {order.shipping_address?.address_2}
-          </Text>
-          <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address?.postal_code},{" "}
-            {order.shipping_address?.city}
-          </Text>
-          <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address?.country_code?.toUpperCase()}
-          </Text>
-        </div>
+    <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm flex flex-col gap-5">
+      <h2 className="text-sm font-bold uppercase tracking-wider text-gray-400">Delivery</h2>
 
-        <div
-          className="flex flex-col w-1/3 "
-          data-testid="shipping-contact-summary"
-        >
-          <Text className="txt-medium-plus text-ui-fg-base mb-1">Contact</Text>
-          <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address?.phone}
-          </Text>
-          <Text className="txt-medium text-ui-fg-subtle">{order.email}</Text>
-        </div>
-
-        <div
-          className="flex flex-col w-1/3"
-          data-testid="shipping-method-summary"
-        >
-          <Text className="txt-medium-plus text-ui-fg-base mb-1">Method</Text>
-          <Text className="txt-medium text-ui-fg-subtle">
-            {(order as any).shipping_methods[0]?.name} (
-            {convertToLocale({
-              amount: order.shipping_methods?.[0].total ?? 0,
-              currency_code: order.currency_code,
-            })
-              .replace(/,/g, "")
-              .replace(/\./g, ",")}
-            )
-          </Text>
-        </div>
+      <div className="flex flex-col gap-1" data-testid="shipping-address-summary">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Shipping Address</p>
+        <p className="text-sm font-medium text-gray-900">
+          {order.shipping_address?.first_name} {order.shipping_address?.last_name}
+        </p>
+        <p className="text-sm text-gray-500">
+          {order.shipping_address?.address_1}{order.shipping_address?.address_2 ? `, ${order.shipping_address.address_2}` : ""}
+        </p>
+        <p className="text-sm text-gray-500">
+          {order.shipping_address?.postal_code}, {order.shipping_address?.city}
+        </p>
+        <p className="text-sm text-gray-500">
+          {order.shipping_address?.country_code?.toUpperCase()}
+        </p>
       </div>
-      <Divider className="mt-8" />
+
+      <div className="h-px bg-gray-100" />
+
+      <div className="flex flex-col gap-1" data-testid="shipping-contact-summary">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Contact</p>
+        {order.shipping_address?.phone && (
+          <p className="text-sm text-gray-900">{order.shipping_address.phone}</p>
+        )}
+        <p className="text-sm text-gray-500">{order.email}</p>
+      </div>
     </div>
   )
 }

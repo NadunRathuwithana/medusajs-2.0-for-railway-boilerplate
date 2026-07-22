@@ -27,7 +27,7 @@ type NotificationEmailOptions = Omit<
  * Service to handle email notifications using the Resend API.
  */
 export class ResendNotificationService extends AbstractNotificationProviderService {
-  static identifier = "RESEND_NOTIFICATION_SERVICE"
+  static identifier = "resend"
   protected config_: ResendServiceConfig // Configuration for Resend API
   protected logger_: Logger // Logger for error and event logging
   protected resend: Resend // Instance of the Resend API client
@@ -95,17 +95,26 @@ export class ResendNotificationService extends AbstractNotificationProviderServi
 
     // Send the email via Resend
     try {
-      await this.resend.emails.send(message)
-      this.logger_.log(
-        `Successfully sent "${notification.template}" email to ${notification.to} via Resend`
+      this.logger_.info(`[Resend] Attempting to send "${notification.template}" email to ${notification.to}`);
+      const { data, error } = await this.resend.emails.send(message);
+      
+      if (error) {
+        this.logger_.error(`[Resend Error] Failed to send email to ${notification.to}: ${JSON.stringify(error)}`);
+        throw new MedusaError(
+          MedusaError.Types.UNEXPECTED_STATE,
+          `Failed to send "${notification.template}" email to ${notification.to} via Resend: ${error.name} - ${error.message}`
+        );
+      }
+
+      this.logger_.info(
+        `[Resend] Successfully sent "${notification.template}" email to ${notification.to} via Resend (ID: ${data?.id})`
       )
       return {} // Return an empty object on success
-    } catch (error) {
-      const errorCode = error.code
-      const responseError = error.response?.body?.errors?.[0]
+    } catch (err: any) {
+      this.logger_.error(`[Resend Exception] Exception while sending email: ${err.message}`, err);
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
-        `Failed to send "${notification.template}" email to ${notification.to} via Resend: ${errorCode} - ${responseError?.message ?? 'unknown error'}`
+        `Exception sending "${notification.template}" email to ${notification.to} via Resend: ${err.message}`
       )
     }
   }

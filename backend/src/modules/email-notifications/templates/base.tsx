@@ -1,4 +1,4 @@
-import { Html, Body, Container, Preview, Tailwind, Head } from '@react-email/components'
+import { Html, Body, Container, Preview, Head, Section, Text, Link, Hr, Row, Column, Img } from '@react-email/components'
 import * as React from 'react'
 
 interface BaseProps {
@@ -6,20 +6,117 @@ interface BaseProps {
   children: React.ReactNode
 }
 
+const bgLight = '#ffffff'
+const textPrimary = '#111111'
+const textSecondary = '#666666'
+const borderLight = '#eaeaea'
+const bgDark = '#000000'
+const textLight = '#ffffff'
+
+const fontFamily = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+
+const baseUrl = process.env.STORE_URL || 'https://cardle.lk'
+
 export const Base: React.FC<BaseProps> = ({ preview, children }) => {
   return (
-    <Html>
-      <Head />
-      <Preview>{preview}</Preview>
-      <Tailwind>
-        <Body className="bg-white my-auto mx-auto font-sans px-2">
-          <Container className="border border-solid border-[#eaeaea] rounded my-[40px] mx-auto p-[20px] max-w-[465px] w-full overflow-hidden">
-            <div className="max-w-full break-words">
-              {children}
-            </div>
-          </Container>
-        </Body>
-      </Tailwind>
+    <Html lang="en">
+      <Head>
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,700;0,800;1,800&display=swap');
+          * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important; }
+        `}</style>
+      </Head>
+      <Preview>{preview ?? 'Message from Cardle'}</Preview>
+      <Body style={{ backgroundColor: '#fafafa', margin: '0', padding: '40px 0', WebkitFontSmoothing: 'antialiased', fontFamily }}>
+        <Container style={{
+          maxWidth: '600px',
+          margin: '0 auto',
+          backgroundColor: bgLight,
+          overflow: 'hidden',
+          fontFamily,
+        }}>
+          {/* Header */}
+          <Section style={{ padding: '20px 30px', textAlign: 'center' }}>
+            <Row>
+              <Column style={{ width: '25%', textAlign: 'left' }}>
+                <Link href={`${baseUrl}`}>
+                  <Img src={`${baseUrl}/cardle-premium-cotton-tote-bags-logo.png`} width="100" alt="Cardle Logo" style={{ display: 'block' }} />
+                </Link>
+              </Column>
+              <Column style={{ width: '75%', textAlign: 'right' }}>
+                <Text style={{ margin: '0', fontSize: '9px', fontWeight: '500', letterSpacing: '1px', fontFamily }}>
+                  <Link href={`${baseUrl}/store`} style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>TOTE BAGS</Link> |
+                  <Link href={`${baseUrl}/store`} style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>BEST SELLERS</Link> |
+                  <Link href={`${baseUrl}/store`} style={{ color: textPrimary, textDecoration: 'none', margin: '0 6px', fontFamily }}>NEW ARRIVALS</Link>
+                </Text>
+              </Column>
+            </Row>
+          </Section>
+
+          {/* Black Banner underneath header */}
+          <Section style={{ backgroundColor: bgDark, padding: '10px 0', textAlign: 'center' }}>
+            <Text style={{ color: textLight, fontSize: '9px', margin: '0', fontWeight: '500', letterSpacing: '1px', textTransform: 'uppercase', fontFamily }}>
+              PREMIUM HANDCRAFTED BAGS &nbsp;&nbsp;|&nbsp;&nbsp; MADE IN SRI LANKA
+            </Text>
+          </Section>
+
+          {/* Body Content */}
+          {children}
+
+          {/* Footer Starts Here */}
+          {/* Green Sustainability Banner */}
+          <Section style={{ backgroundColor: '#8ea696', padding: '12px 0', textAlign: 'center' }}>
+            <Text style={{ color: textLight, fontSize: '10px', margin: '0', letterSpacing: '1px', fontFamily }}>
+              Cotton tote bags sustainably <span style={{ fontFamily }}>handcrafted in Sri Lanka</span>
+            </Text>
+          </Section>
+
+
+
+          {/* Brand Explanation */}
+          <Section style={{ backgroundColor: '#f2f2f2', padding: '30px 40px' }}>
+            <Row>
+              <Column>
+                <Text style={{ margin: '0 0 8px 0', fontSize: '12px', fontWeight: '700', color: textPrimary, fontFamily }}>
+                  Cardle
+                </Text>
+                <Text style={{ margin: '0', fontSize: '10px', color: textSecondary, lineHeight: '1.6', fontFamily }}>
+                  Cardle is dedicated to creating premium, handcrafted cotton tote bags. Made with passion in Sri Lanka, we combine sustainable materials with minimalist design to bring you everyday essentials you'll love.
+                </Text>
+              </Column>
+            </Row>
+          </Section>
+
+          {/* Bottom Footer */}
+          <Section style={{ backgroundColor: bgDark, padding: '40px', textAlign: 'center' }}>
+            <Text style={{ color: textLight, fontSize: '10px', margin: '0 0 20px', letterSpacing: '1px', fontWeight: '500', fontFamily }}>
+              CONNECT WITH US:
+            </Text>
+            {/* Social Icons Placeholder */}
+            <Section style={{ textAlign: 'center', marginBottom: '30px' }}>
+              <Link href="https://www.facebook.com/profile.php?id=61585796349137" style={{ margin: '0 10px', display: 'inline-block' }}>
+                <Img src={`${baseUrl}/social/facebook.png`} width="30" height="30" alt="Facebook" />
+              </Link>
+              <Link href="https://www.instagram.com/cardle_lk/?hl=en" style={{ margin: '0 10px', display: 'inline-block' }}>
+                <Img src={`${baseUrl}/social/instagram.png`} width="30" height="30" alt="Instagram" />
+              </Link>
+              <Link href="https://www.tiktok.com/@cardle.srilanka" style={{ margin: '0 10px', display: 'inline-block' }}>
+                <Img src={`${baseUrl}/social/tiktok.png`} width="30" height="30" alt="TikTok" />
+              </Link>
+            </Section>
+            
+            <Text style={{ color: '#888888', fontSize: '10px', margin: '0 0 4px', fontFamily }}>
+              © Cardle {new Date().getFullYear()}
+            </Text>
+            <Text style={{ color: '#888888', fontSize: '10px', margin: '0 0 20px', fontFamily }}>
+              Sri Lanka
+            </Text>
+          </Section>
+
+        </Container>
+      </Body>
     </Html>
   )
 }
+
+export { bgLight, textPrimary, textSecondary, borderLight, bgDark, textLight, fontFamily }

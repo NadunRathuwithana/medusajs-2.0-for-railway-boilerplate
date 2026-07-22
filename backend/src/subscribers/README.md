@@ -11,10 +11,6 @@ import {
   type SubscriberConfig,
 } from "@medusajs/medusa"
 
-// subscriber function
-export default async function productCreateHandler() {
-  console.log("A product was created")
-}
 
 // subscriber config
 export const config: SubscriberConfig = {
@@ -52,8 +48,6 @@ export default async function productCreateHandler({
     container.resolve(ModuleRegistrationName.PRODUCT)
 
   const product = await productModuleService.retrieve(productId)
-
-  console.log(`The product ${product.title} was created`)
 }
 
 export const config: SubscriberConfig = {

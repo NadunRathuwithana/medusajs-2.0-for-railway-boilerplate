@@ -7,10 +7,6 @@ import {
   DATABASE_URL,
   JWT_SECRET,
   REDIS_URL,
-  RESEND_API_KEY,
-  RESEND_FROM_EMAIL,
-  SENDGRID_API_KEY,
-  SENDGRID_FROM_EMAIL,
   SHOULD_DISABLE_ADMIN,
   STORE_CORS,
   STRIPE_API_KEY,
@@ -42,6 +38,15 @@ import {
   MINIO_BUCKET,
   MEILISEARCH_HOST,
   MEILISEARCH_ADMIN_KEY,
+  SMTP_HOST,
+  SMTP_PORT,
+  SMTP_USER,
+  SMTP_PASS,
+  SMTP_SECURE,
+  SMTP_FROM,
+  SMTP_ADMIN_EMAIL,
+  RESEND_API_KEY,
+  RESEND_FROM_EMAIL,
 } from "lib/constants";
 
 loadEnv(process.env.NODE_ENV, process.cwd());
@@ -121,40 +126,51 @@ const medusaConfig = {
           },
         ]
       : []),
-    ...((SENDGRID_API_KEY && SENDGRID_FROM_EMAIL) ||
-    (RESEND_API_KEY && RESEND_FROM_EMAIL)
+    // Notification module via Resend — only included when Resend credentials are set
+    // TODO: MUST change onboarding@resend.dev to a verified cardle.lk address (e.g. hello@cardle.lk) before going live with real customers!
+    ...(RESEND_API_KEY && RESEND_FROM_EMAIL
       ? [
           {
             key: Modules.NOTIFICATION,
             resolve: "@medusajs/notification",
             options: {
               providers: [
-                ...(SENDGRID_API_KEY && SENDGRID_FROM_EMAIL
-                  ? [
-                      {
-                        resolve: "@medusajs/notification-sendgrid",
-                        id: "sendgrid",
-                        options: {
-                          channels: ["email"],
-                          api_key: SENDGRID_API_KEY,
-                          from: SENDGRID_FROM_EMAIL,
-                        },
-                      },
-                    ]
-                  : []),
-                ...(RESEND_API_KEY && RESEND_FROM_EMAIL
-                  ? [
-                      {
-                        resolve: "./src/modules/email-notifications",
-                        id: "resend",
-                        options: {
-                          channels: ["email"],
-                          api_key: RESEND_API_KEY,
-                          from: RESEND_FROM_EMAIL,
-                        },
-                      },
-                    ]
-                  : []),
+                {
+                  resolve: "./src/modules/email-notifications",
+                  id: "resend",
+                  options: {
+                    channels: ["email"],
+                    api_key: RESEND_API_KEY,
+                    from: RESEND_FROM_EMAIL,
+                  },
+                },
+              ],
+            },
+          },
+        ]
+      : []),
+    // Notification module via SMTP/Nodemailer — only included when SMTP credentials are set
+    ...(!RESEND_API_KEY && SMTP_HOST && SMTP_USER && SMTP_PASS
+      ? [
+          {
+            key: Modules.NOTIFICATION,
+            resolve: "@medusajs/notification",
+            options: {
+              providers: [
+                {
+                  resolve: "./src/modules/email-notifications",
+                  id: "smtp",
+                  options: {
+                    channels: ["email"],
+                    host: SMTP_HOST,
+                    port: SMTP_PORT,
+                    user: SMTP_USER,
+                    pass: SMTP_PASS,
+                    secure: SMTP_SECURE,
+                    from: SMTP_FROM,
+                    adminEmail: SMTP_ADMIN_EMAIL,
+                  },
+                },
               ],
             },
           },
@@ -222,7 +238,12 @@ const medusaConfig = {
         });
       }
 
-      if (paymentProviders.length === 0) return [];
+      if (paymentProviders.length === 0) {
+        console.log("No payment providers were registered. Check if environment variables are set correctly.");
+        return [];
+      }
+
+      console.log("Registered payment providers in config:", paymentProviders.map(p => p.id));
 
       return [
         {

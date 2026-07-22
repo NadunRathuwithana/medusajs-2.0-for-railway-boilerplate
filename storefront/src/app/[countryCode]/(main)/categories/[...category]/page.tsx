@@ -52,15 +52,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       .map((category: StoreProductCategory) => category.name)
       .join(" | ")
 
+    const lastCategory = product_categories[product_categories.length - 1]
     const description =
-      product_categories[product_categories.length - 1].description ??
-      `${title} category.`
+      lastCategory.description ||
+      `Shop Cardle's ${title} – handcrafted canvas tote bags made to order in Sri Lanka.`
+
+    const canonicalUrl = `https://cardle.lk/categories/${params.category.join("/")}`
 
     return {
-      title: `${title} | Medusa Store`,
+      title: `${title} | Cardle`,
       description,
       alternates: {
-        canonical: `${params.category.join("/")}`,
+        canonical: canonicalUrl,
+      },
+      openGraph: {
+        title: `${title} | Cardle`,
+        description,
+        type: "website",
+        url: canonicalUrl,
+        siteName: "Cardle",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${title} | Cardle`,
+        description,
       },
     }
   } catch (error) {

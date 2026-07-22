@@ -10,7 +10,7 @@ export const retrieveOrder = cache(async function (id: string) {
     .retrieve(
       id,
       { fields: "*payment_collections.payments" },
-      { next: { tags: ["order"] }, ...getAuthHeaders() }
+      { next: { tags: ["order"] }, ...await getAuthHeaders() }
     )
     .then(({ order }) => order)
     .catch((err) => medusaError(err))
@@ -20,8 +20,29 @@ export const listOrders = cache(async function (
   limit: number = 10,
   offset: number = 0
 ) {
-  return sdk.store.order
-    .list({ limit, offset }, { next: { tags: ["order"] }, ...getAuthHeaders() })
-    .then(({ orders }) => orders)
+  const headers = await getAuthHeaders()
+  
+  const customer = await sdk.store.customer
+    .retrieve({}, { next: { tags: ["customer"] }, ...headers })
+    .then(({ customer }) => customer)
+    .catch(() => null)
+
+  if (!customer) {
+    return null
+  }
+
+  return sdk.client
+    .fetch<{ orders: any[] }>(`/store/my-orders`, {
+      method: "GET",
+      query: { limit, offset },
+      headers: headers as Record<string, string>,
+      next: { revalidate: 0, tags: ["order"] },
+    })
+    .then(({ orders }) => {
+      // Sort descending by created_at in the storefront to bypass any backend caching
+      return (orders || []).sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
+    })
     .catch((err) => medusaError(err))
 })

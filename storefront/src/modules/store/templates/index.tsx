@@ -1,9 +1,8 @@
 import { Suspense } from "react"
 
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
-import RefinementList from "@modules/store/components/refinement-list"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
-
+import SortDropdown from "@modules/store/components/sort-dropdown"
 import PaginatedProducts from "./paginated-products"
 
 const StoreTemplate = ({
@@ -16,25 +15,46 @@ const StoreTemplate = ({
   countryCode: string
 }) => {
   const pageNumber = page ? parseInt(page) : 1
-  const sort = sortBy || "created_at"
+  const sort = sortBy || "best_selling"
 
   return (
-    <div
-      className="flex flex-col small:flex-row small:items-start py-6 content-container"
-      data-testid="category-container"
-    >
-      <RefinementList sortBy={sort} />
-      <div className="w-full">
-        <div className="mb-8 text-2xl-semi">
-          <h1 data-testid="store-page-title">All products</h1>
-        </div>
-        <Suspense fallback={<SkeletonProductGrid />}>
-          <PaginatedProducts
-            sortBy={sort}
-            page={pageNumber}
-            countryCode={countryCode}
+    <div className="w-full bg-white">
+      {/* Hero Banner */}
+      <section className="h-[90vh] w-full relative overflow-hidden bg-[#e5e5e5] flex flex-col items-center justify-center">
+        <picture>
+          <source media="(max-width: 768px)" srcSet="/store/buy-cotton-tote-bags-online-sri-lanka-mobile.jpg" />
+          <source media="(max-width: 1024px)" srcSet="/store/buy-cotton-tote-bags-online-sri-lanka-tablet.jpg" />
+          <img
+            src="/store/buy-cotton-tote-bags-online-sri-lanka.jpg"
+            alt="Cardle Store Hero Banner"
+            className="absolute inset-0 w-full h-full object-cover object-center"
           />
-        </Suspense>
+        </picture>
+      </section>
+
+      <div className="content-container max-w-[1440px] mx-auto px-6 md:px-16 py-12" data-testid="category-container">
+        {/* Header Section */}
+        <div className="flex flex-row items-center justify-between mb-8 sm:mb-12 border-b border-gray-150 pb-6 gap-4">
+          <h1 className="text-3xl sm:text-4xl font-bold capitalize tracking-tight text-bold" data-testid="store-page-title">
+            All products
+          </h1>
+          <div>
+            <SortDropdown sortBy={sort} />
+          </div>
+        </div>
+
+        {/* Products Grid */}
+        <div className="w-full">
+          <Suspense fallback={<SkeletonProductGrid />}>
+            <PaginatedProducts
+              sortBy={sort}
+              page={pageNumber}
+              countryCode={countryCode}
+              listId="store"
+              listName="All Products"
+            />
+          </Suspense>
+        </div>
       </div>
     </div>
   )

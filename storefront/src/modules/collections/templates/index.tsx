@@ -1,8 +1,8 @@
 import { Suspense } from "react"
 
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
-import RefinementList from "@modules/store/components/refinement-list"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
+import SortDropdown from "@modules/store/components/sort-dropdown"
 import PaginatedProducts from "@modules/store/templates/paginated-products"
 import { HttpTypes } from "@medusajs/types"
 
@@ -21,20 +21,42 @@ export default function CollectionTemplate({
   const sort = sortBy || "created_at"
 
   return (
-    <div className="flex flex-col small:flex-row small:items-start py-6 content-container">
-      <RefinementList sortBy={sort} />
-      <div className="w-full">
-        <div className="mb-8 text-2xl-semi">
-          <h1>{collection.title}</h1>
-        </div>
-        <Suspense fallback={<SkeletonProductGrid />}>
-          <PaginatedProducts
-            sortBy={sort}
-            page={pageNumber}
-            collectionId={collection.id}
-            countryCode={countryCode}
+    <div className="w-full bg-white">
+      {/* Hero Banner */}
+      <section className="h-[90vh] w-full relative overflow-hidden bg-[#e5e5e5] flex flex-col items-center justify-center">
+        <picture>
+          <source media="(max-width: 768px)" srcSet="/store/buy-cotton-tote-bags-online-sri-lanka-mobile.jpg" />
+          <source media="(max-width: 1024px)" srcSet="/store/buy-cotton-tote-bags-online-sri-lanka-tablet.jpg" />
+          <img
+            src="/store/buy-cotton-tote-bags-online-sri-lanka.jpg"
+            alt={`${collection.title} Hero Banner`}
+            className="absolute inset-0 w-full h-full object-cover object-center"
           />
-        </Suspense>
+        </picture>
+      </section>
+
+      <div className="content-container max-w-[1440px] mx-auto px-6 md:px-16 py-12" data-testid="category-container">
+        {/* Header Section */}
+        <div className="flex items-center justify-between mb-12 border-b border-gray-150 pb-6">
+          <h1 className="text-4xl font-bold capitalize tracking-tight text-bold" data-testid="store-page-title">
+            {collection.title}
+          </h1>
+          <SortDropdown sortBy={sort} />
+        </div>
+
+        {/* Products Grid */}
+        <div className="w-full">
+          <Suspense fallback={<SkeletonProductGrid />}>
+            <PaginatedProducts
+              sortBy={sort}
+              page={pageNumber}
+              collectionId={collection.id}
+              countryCode={countryCode}
+              listId={`collection-${collection.id}`}
+              listName={collection.title}
+            />
+          </Suspense>
+        </div>
       </div>
     </div>
   )

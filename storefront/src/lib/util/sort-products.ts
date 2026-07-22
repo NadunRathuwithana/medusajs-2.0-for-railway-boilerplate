@@ -38,12 +38,28 @@ export function sortProducts(
     })
   }
 
-  if (sortBy === "created_at") {
+  if (["created_at", "featured", "most_relevant", "best_selling"].includes(sortBy)) {
     sortedProducts.sort((a, b) => {
       return (
         new Date(b.created_at!).getTime() - new Date(a.created_at!).getTime()
       )
     })
+  }
+
+  if (sortBy === "created_at_asc") {
+    sortedProducts.sort((a, b) => {
+      return (
+        new Date(a.created_at!).getTime() - new Date(b.created_at!).getTime()
+      )
+    })
+  }
+
+  if (sortBy === "alphabetical_asc") {
+    sortedProducts.sort((a, b) => (a.title || "").localeCompare(b.title || ""))
+  }
+
+  if (sortBy === "alphabetical_desc") {
+    sortedProducts.sort((a, b) => (b.title || "").localeCompare(a.title || ""))
   }
 
   return sortedProducts

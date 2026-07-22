@@ -2,7 +2,7 @@
 
 import { Button } from "@medusajs/ui"
 import { isEqual } from "lodash"
-import { useParams } from "next/navigation"
+import { useParams, useSearchParams, useRouter, usePathname } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import { useIntersection } from "@lib/hooks/use-in-view"
@@ -13,11 +13,15 @@ import MobileActions from "./mobile-actions"
 import ProductPrice from "../product-price"
 import { addToCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
+import { getProductPrice } from "@lib/util/get-product-price"
+import KokoWidget from "./koko-widget"
+import { isKoko } from "@lib/constants"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
   disabled?: boolean
+  isKokoEnabled?: boolean
 }
 
 const optionsAsKeymap = (variantOptions: any) => {
@@ -29,22 +33,57 @@ const optionsAsKeymap = (variantOptions: any) => {
   }, {})
 }
 
+import { trackAddToCart, trackViewContent } from "@lib/analytics/track"
+
 export default function ProductActions({
   product,
   region,
   disabled,
+  isKokoEnabled,
 }: ProductActionsProps) {
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
   const countryCode = useParams().countryCode as string
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
 
-  // If there is only 1 variant, preselect the options
+  // Track ViewContent on mount. Keyed on product.id (not the whole `product`
+  // object) so URL-driven re-renders that hand down a new object reference for
+  // the same product (e.g. syncing a variant/color choice to the URL) don't
+  // re-fire a duplicate ViewContent.
+  useEffect(() => {
+    const { cheapestPrice } = getProductPrice({ product })
+    trackViewContent({
+      id: product.id!,
+      name: product.title!,
+      price: cheapestPrice?.calculated_price_number || 0,
+      currency: (cheapestPrice?.currency_code || region.currency_code).toUpperCase(),
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.id, region.currency_code])
+
+  // Initialize options from URL or default to 1 variant
   useEffect(() => {
     if (product.variants?.length === 1) {
       const variantOptions = optionsAsKeymap(product.variants[0].options)
       setOptions(variantOptions ?? {})
+    } else if (searchParams) {
+      const initialOptions: Record<string, string> = {}
+      let hasParams = false
+      product.options?.forEach((opt) => {
+        const title = opt.title?.toLowerCase()
+        const value = searchParams.get(title || "")
+        if (value) {
+          initialOptions[opt.title!] = value
+          hasParams = true
+        }
+      })
+      if (hasParams) {
+        setOptions((prev) => ({ ...prev, ...initialOptions }))
+      }
     }
-  }, [product.variants])
+  }, [product.variants, product.options, searchParams])
 
   const selectedVariant = useMemo(() => {
     if (!product.variants || product.variants.length === 0) {
@@ -63,21 +102,36 @@ export default function ProductActions({
       ...prev,
       [title]: value,
     }))
+
+    // Sync to URL
+    if (title.toLowerCase() === "color") {
+      window.dispatchEvent(new CustomEvent("variantChange", { detail: { color: value } }))
+      const current = new URLSearchParams(Array.from(searchParams?.entries() || []))
+      current.set(title.toLowerCase(), value)
+      router.replace(`${pathname}?${current.toString()}`, { scroll: false })
+    }
   }
+
+  // update main image when variant changes
+  useEffect(() => {
+    if (selectedVariant) {
+      const imageUrl = selectedVariant.thumbnail || (selectedVariant.images?.[0]?.url)
+      if (imageUrl) {
+        window.dispatchEvent(new CustomEvent("updateImage", { detail: imageUrl }))
+      }
+    }
+  }, [selectedVariant])
 
   // check if the selected variant is in stock
   const inStock = useMemo(() => {
-    // If we don't manage inventory, we can always add to cart
     if (selectedVariant && !selectedVariant.manage_inventory) {
       return true
     }
 
-    // If we allow back orders on the variant, we can add to cart
     if (selectedVariant?.allow_backorder) {
       return true
     }
 
-    // If there is inventory available, we can add to cart
     if (
       selectedVariant?.manage_inventory &&
       (selectedVariant?.inventory_quantity || 0) > 0
@@ -85,7 +139,6 @@ export default function ProductActions({
       return true
     }
 
-    // Otherwise, we can't add to cart
     return false
   }, [selectedVariant])
 
@@ -99,21 +152,67 @@ export default function ProductActions({
 
     setIsAdding(true)
 
-    await addToCart({
-      variantId: selectedVariant.id,
-      quantity: 1,
-      countryCode,
-    })
+    try {
+      await addToCart({
+        variantId: selectedVariant.id,
+        quantity: 1,
+        countryCode,
+      })
 
-    setIsAdding(false)
+      // Only track AddToCart once the item has actually been added — tracking
+      // beforehand would record a conversion even if the cart mutation fails
+      // (out of stock, network error, etc.).
+      const { cheapestPrice, variantPrice } = getProductPrice({
+        product,
+        variantId: selectedVariant?.id,
+      })
+      const selectedPrice = selectedVariant ? variantPrice : cheapestPrice
+      trackAddToCart({
+        id: selectedVariant.id,
+        name: `${product.title} - ${selectedVariant.title}`,
+        price: selectedPrice?.calculated_price_number || 0,
+        quantity: 1,
+        currency: (selectedPrice?.currency_code || region.currency_code).toUpperCase(),
+      })
+    } finally {
+      setIsAdding(false)
+    }
   }
 
   return (
     <>
-      <div className="flex flex-col gap-y-2" ref={actionsRef}>
+      <div className="flex flex-col gap-y-6" ref={actionsRef}>
+
+        {/* Price at the top */}
+        <div className="-mt-4">
+          <ProductPrice product={product} variant={selectedVariant} />
+        </div>
+
+        {/* Koko Pay Widget */}
+        {(() => {
+          if (!isKokoEnabled) return null
+
+          const { cheapestPrice, variantPrice } = getProductPrice({
+            product,
+            variantId: selectedVariant?.id,
+          })
+          const selectedPrice = selectedVariant ? variantPrice : cheapestPrice
+
+          if (selectedPrice?.calculated_price_number) {
+            return (
+              <KokoWidget 
+                price={selectedPrice.calculated_price_number} 
+                currencyCode={selectedPrice.currency_code} 
+              />
+            )
+          }
+          return null
+        })()}
+
+        {/* Options */}
         <div>
           {(product.variants?.length ?? 0) > 1 && (
-            <div className="flex flex-col gap-y-4">
+            <div className="flex flex-col gap-y-6">
               {(product.options || []).map((option) => {
                 return (
                   <div key={option.id}>
@@ -124,31 +223,32 @@ export default function ProductActions({
                       title={option.title ?? ""}
                       data-testid="product-options"
                       disabled={!!disabled || isAdding}
+                      variants={product.variants ?? undefined}
                     />
                   </div>
                 )
               })}
-              <Divider />
             </div>
           )}
         </div>
 
-        <ProductPrice product={product} variant={selectedVariant} />
+        {/* Add to Cart */}
+        <div className="flex items-center w-full mt-2">
+          <Button
+            onClick={handleAddToCart}
+            disabled={!inStock || !selectedVariant || !!disabled || isAdding}
+            className="w-full h-14 rounded-full bg-black hover:bg-gray-800 text-white text-base font-medium shadow-none transition-colors border-none"
+            isLoading={isAdding}
+            data-testid="add-product-button"
+          >
+            {!selectedVariant
+              ? "Select variant"
+              : !inStock
+                ? "Out of stock"
+                : "Add to Cart"}
+          </Button>
+        </div>
 
-        <Button
-          onClick={handleAddToCart}
-          disabled={!inStock || !selectedVariant || !!disabled || isAdding}
-          variant="primary"
-          className="w-full h-10"
-          isLoading={isAdding}
-          data-testid="add-product-button"
-        >
-          {!selectedVariant
-            ? "Select variant"
-            : !inStock
-            ? "Out of stock"
-            : "Add to cart"}
-        </Button>
         <MobileActions
           product={product}
           variant={selectedVariant}

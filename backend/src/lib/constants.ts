@@ -1,26 +1,29 @@
-import { loadEnv } from '@medusajs/framework/utils'
+import { loadEnv } from "@medusajs/utils";
 
-import { assertValue } from 'utils/assert-value'
+import { assertValue } from "utils/assert-value";
 
-loadEnv(process.env.NODE_ENV || 'development', process.cwd())
+loadEnv(process.env.NODE_ENV || "development", process.cwd());
 
 /**
  * Is development environment
  */
-export const IS_DEV = process.env.NODE_ENV === 'development'
+export const IS_DEV = process.env.NODE_ENV === "development";
 
 /**
  * Public URL for the backend
  */
-export const BACKEND_URL = process.env.BACKEND_PUBLIC_URL ?? process.env.RAILWAY_PUBLIC_DOMAIN_VALUE ?? 'http://localhost:9000'
+export const BACKEND_URL =
+  process.env.BACKEND_PUBLIC_URL ??
+  process.env.RAILWAY_PUBLIC_DOMAIN_VALUE ??
+  "http://localhost:9000";
 
 /**
  * Database URL for Postgres instance used by the backend
  */
 export const DATABASE_URL = assertValue(
   process.env.DATABASE_URL,
-  'Environment variable for DATABASE_URL is not set',
-)
+  "Environment variable for DATABASE_URL is not set",
+);
 
 /**
  * (optional) Redis URL for Redis instance used by the backend
@@ -47,16 +50,16 @@ export const STORE_CORS = process.env.STORE_CORS;
  */
 export const JWT_SECRET = assertValue(
   process.env.JWT_SECRET,
-  'Environment variable for JWT_SECRET is not set',
-)
+  "Environment variable for JWT_SECRET is not set",
+);
 
 /**
  * Cookie secret used for signing cookies
  */
 export const COOKIE_SECRET = assertValue(
   process.env.COOKIE_SECRET,
-  'Environment variable for COOKIE_SECRET is not set',
-)
+  "Environment variable for COOKIE_SECRET is not set",
+);
 
 /**
  * (optional) Minio configuration for file storage
@@ -70,13 +73,15 @@ export const MINIO_BUCKET = process.env.MINIO_BUCKET; // Optional, if not set bu
  * (optional) Resend API Key and from Email - do not set if using SendGrid
  */
 export const RESEND_API_KEY = process.env.RESEND_API_KEY;
-export const RESEND_FROM_EMAIL = process.env.RESEND_FROM_EMAIL || process.env.RESEND_FROM;
+export const RESEND_FROM_EMAIL =
+  process.env.RESEND_FROM_EMAIL || process.env.RESEND_FROM;
 
 /**
  * (optionl) SendGrid API Key and from Email - do not set if using Resend
  */
 export const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
-export const SENDGRID_FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || process.env.SENDGRID_FROM;
+export const SENDGRID_FROM_EMAIL =
+  process.env.SENDGRID_FROM_EMAIL || process.env.SENDGRID_FROM;
 
 /**
  * (optional) Stripe API key and webhook secret
@@ -85,14 +90,7 @@ export const STRIPE_API_KEY = process.env.STRIPE_API_KEY;
 export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 
 /**
- * (optional) Meilisearch configuration
- */
-export const MEILISEARCH_HOST = process.env.MEILISEARCH_HOST;
-export const MEILISEARCH_ADMIN_KEY = process.env.MEILISEARCH_ADMIN_KEY;
-
-/**
- * (optional) OnePay configuration
- *
+ * (optional) OnePay Payment Gateway credentials
  * ONEPAY_APP_ID   — your unique application identifier from OnePay dashboard
  * ONEPAY_TOKEN    — API authorization token from OnePay dashboard
  * ONEPAY_HASH_SALT — secret used for SHA-256 hash generation (NEVER expose client-side)
@@ -107,8 +105,7 @@ export const ONEPAY_BASE_URL =
 export const ONEPAY_REDIRECT_URL = process.env.ONEPAY_REDIRECT_URL;
 
 /**
- * (optional) Koko Pay configuration
- *
+ * (optional) Koko Payment Gateway credentials (v1.05 — RSA form-POST API)
  * KOKO_API_KEY         — Merchant API Key
  * KOKO_MERCHANT_ID     — Merchant ID (_mId)
  * KOKO_BASE_URL        — API Base URL (QA: qaapi.paykoko.com, Prod: prodapi.paykoko.com)
@@ -131,6 +128,12 @@ export const KOKO_PLUGIN_VERSION = process.env.KOKO_PLUGIN_VERSION || "1.0.0";
 export const KOKO_RETURN_URL = process.env.KOKO_RETURN_URL;
 export const KOKO_CANCEL_URL = process.env.KOKO_CANCEL_URL;
 export const KOKO_RESPONSE_URL = process.env.KOKO_RESPONSE_URL;
+
+/**
+ * (optional) Meilisearch configuration
+ */
+export const MEILISEARCH_HOST = process.env.MEILISEARCH_HOST;
+export const MEILISEARCH_ADMIN_KEY = process.env.MEILISEARCH_ADMIN_KEY;
 
 /**
  * (optional) Mintpay (Buy Now Pay Later) configuration
@@ -156,9 +159,42 @@ export const MINTPAY_FAIL_URL = process.env.MINTPAY_FAIL_URL;
  * Worker mode
  */
 export const WORKER_MODE =
-  (process.env.MEDUSA_WORKER_MODE as 'worker' | 'server' | 'shared' | undefined) ?? 'shared'
+  (process.env.MEDUSA_WORKER_MODE as
+    | "worker"
+    | "server"
+    | "shared"
+    | undefined) ?? "shared";
 
 /**
  * Disable Admin
  */
-export const SHOULD_DISABLE_ADMIN = process.env.MEDUSA_DISABLE_ADMIN === 'true'
+export const SHOULD_DISABLE_ADMIN = process.env.MEDUSA_DISABLE_ADMIN === "true";
+
+/**
+ * (optional) SMTP Email Configuration
+ * SMTP_HOST     — SMTP server hostname (e.g. smtp.gmail.com)
+ * SMTP_PORT     — SMTP port (465 for SSL, 587 for TLS)
+ * SMTP_USER     — SMTP login username/email
+ * SMTP_PASS     — SMTP login password or app password
+ * SMTP_SECURE   — Use SSL/TLS (true for port 465)
+ * SMTP_FROM     — Sender display address (defaults to SMTP_USER)
+ * SMTP_ADMIN_EMAIL — Store admin email to receive contact form submissions
+ */
+export const SMTP_HOST = process.env.SMTP_HOST;
+export const SMTP_PORT = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 465;
+export const SMTP_USER = process.env.SMTP_USER;
+export const SMTP_PASS = process.env.SMTP_PASS;
+export const SMTP_SECURE = process.env.SMTP_PORT === '465' || process.env.SMTP_SECURE?.toLowerCase() === 'true' || process.env.SMTP_SECURE === '1';
+export const SMTP_FROM = process.env.SMTP_FROM || process.env.SMTP_USER;
+export const SMTP_ADMIN_EMAIL = process.env.SMTP_ADMIN_EMAIL || process.env.SMTP_USER;
+
+/**
+ * ADMIN_EMAIL — Store admin inbox for receiving contact form submissions.
+ * Provider-agnostic: works with both Resend and SMTP.
+ * Set ADMIN_EMAIL in your environment variables.
+ */
+export const ADMIN_EMAIL =
+  process.env.ADMIN_EMAIL ||
+  process.env.SMTP_ADMIN_EMAIL ||
+  process.env.SMTP_USER ||
+  "admin@cardle.lk";

@@ -9,6 +9,7 @@ import { listRegions } from "@lib/data/regions"
 import { StoreCollection, StoreRegion } from "@medusajs/types"
 import CollectionTemplate from "@modules/collections/templates"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
+import BreadcrumbJsonLd from "@modules/seo/components/breadcrumb-json-ld"
 
 type Props = {
   params: { handle: string; countryCode: string }
@@ -58,12 +59,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     notFound()
   }
 
-  const metadata = {
-    title: `${collection.title} | Medusa Store`,
-    description: `${collection.title} collection`,
-  } as Metadata
+  const title = `${collection.title} | Cardle`
+  const description = `Shop Cardle's ${collection.title} collection – handcrafted canvas tote bags made to order in Sri Lanka.`
+  const canonicalUrl = `https://cardle.lk/collections/${params.handle}`
 
-  return metadata
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      url: canonicalUrl,
+      siteName: "Cardle",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  } as Metadata
 }
 
 export default async function CollectionPage({ params, searchParams }: Props) {
@@ -78,11 +96,20 @@ export default async function CollectionPage({ params, searchParams }: Props) {
   }
 
   return (
-    <CollectionTemplate
-      collection={collection}
-      page={page}
-      sortBy={sortBy}
-      countryCode={params.countryCode}
-    />
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: "https://cardle.lk" },
+          { name: "Collections", url: "https://cardle.lk/store" },
+          { name: collection.title, url: `https://cardle.lk/collections/${params.handle}` },
+        ]}
+      />
+      <CollectionTemplate
+        collection={collection}
+        page={page}
+        sortBy={sortBy}
+        countryCode={params.countryCode}
+      />
+    </>
   )
 }

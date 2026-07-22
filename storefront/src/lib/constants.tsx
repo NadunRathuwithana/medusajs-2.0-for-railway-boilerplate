@@ -1,5 +1,4 @@
 import React from "react"
-import Image from "next/image"
 import { CreditCard } from "@medusajs/icons"
 
 import Ideal from "@modules/common/icons/ideal"
@@ -34,15 +33,15 @@ export const paymentInfoMap: Record<
   },
   pp_onepay_onepay: {
     title: "Credit/ Debit Card",
-    icon: <Image src="/payment/visa-mastercard-accepted.png" alt="Visa Mastercard accepted" title="Visa Mastercard accepted" width={112} height={24} className="h-6 w-auto object-contain" />,
+    icon: <img src="/payment/visa-mastercard-accepted.png" alt="Visa Mastercard accepted" title="Visa Mastercard accepted" className="h-6 object-contain" />,
   },
   pp_koko_koko: {
     title: "Koko: Buy Now Pay Later",
-    icon: <Image src="/payment/koko-pay-sri-lanka-accepted.png" alt="Koko Pay Sri Lanka accepted" title="Koko Pay Sri Lanka accepted" width={48} height={24} className="h-6 w-auto object-contain" />,
+    icon: <img src="/payment/koko-pay-sri-lanka-accepted.png" alt="Koko Pay Sri Lanka accepted" title="Koko Pay Sri Lanka accepted" className="h-6 object-contain" />,
   },
   pp_mintpay_mintpay: {
     title: "Mintpay: Buy Now Pay Later",
-    icon: <Image src="/payment/mintpay.png" alt="Mintpay accepted" title="Mintpay accepted" width={48} height={24} className="h-6 w-auto object-contain" />,
+    icon: <img src="/payment/mintpay.png" alt="Mintpay accepted" title="Mintpay accepted" className="h-6 object-contain" />,
   },
   // Add more payment providers here
 }

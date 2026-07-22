@@ -88,10 +88,55 @@ async function getCountryCode(
  * Middleware to handle region selection and onboarding status.
  */
 export async function middleware(request: NextRequest) {
+  const isMaintenanceModeEnv = process.env.NEXT_PUBLIC_ENABLE_MAINTENANCE_MODE === "true" || process.env.ENABLE_MAINTENANCE_MODE === "true"
+  const isComingSoonEnv = process.env.NEXT_PUBLIC_ENABLE_COMING_SOON === "true" || process.env.ENABLE_COMING_SOON === "true"
+
+  const hasAccess = request.cookies.get("storefront_access")?.value === "1"
+  const isMaintenancePath = request.nextUrl.pathname.startsWith("/maintenance")
+  const isComingSoonPath = request.nextUrl.pathname.startsWith("/coming-soon")
+
+  if (isMaintenanceModeEnv && !hasAccess && !isMaintenancePath) {
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = "/maintenance"
+    redirectUrl.search = ""
+    return NextResponse.redirect(redirectUrl, 307)
+  }
+
+  if (isComingSoonEnv && !isMaintenanceModeEnv && !hasAccess && !isComingSoonPath) {
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = "/coming-soon"
+    redirectUrl.search = ""
+    return NextResponse.redirect(redirectUrl, 307)
+  }
+
+  if (hasAccess && (isMaintenancePath || isComingSoonPath)) {
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = "/"
+    redirectUrl.search = ""
+    return NextResponse.redirect(redirectUrl, 307)
+  }
+
+  if (!isMaintenanceModeEnv && isMaintenancePath) {
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = "/"
+    redirectUrl.search = ""
+    return NextResponse.redirect(redirectUrl, 307)
+  }
+
+  if (!isComingSoonEnv && isComingSoonPath) {
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = "/"
+    redirectUrl.search = ""
+    return NextResponse.redirect(redirectUrl, 307)
+  }
+
+  if (isMaintenancePath || isComingSoonPath) {
+    return NextResponse.next()
+  }
+
   const searchParams = request.nextUrl.searchParams
   const isOnboarding = searchParams.get("onboarding") === "true"
   const cartId = searchParams.get("cart_id")
-  const checkoutStep = searchParams.get("step")
   const onboardingCookie = request.cookies.get("_medusa_onboarding")
   const cartIdCookie = request.cookies.get("_medusa_cart_id")
 
@@ -126,9 +171,8 @@ export async function middleware(request: NextRequest) {
     response = NextResponse.redirect(`${redirectUrl}`, 307)
   }
 
-  // If a cart_id is in the params, we set it as a cookie and redirect to the address step.
-  if (cartId && !checkoutStep) {
-    redirectUrl = `${redirectUrl}&step=address`
+  // If a cart_id is in the params, we set it as a cookie and redirect to the checkout.
+  if (cartId && !cartIdCookie) {
     response = NextResponse.redirect(`${redirectUrl}`, 307)
     response.cookies.set("_medusa_cart_id", cartId, { maxAge: 60 * 60 * 24 })
   }
