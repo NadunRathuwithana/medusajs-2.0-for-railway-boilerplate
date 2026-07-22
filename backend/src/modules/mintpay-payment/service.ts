@@ -237,8 +237,14 @@ class MintpayPaymentService extends AbstractPaymentProvider<MintpayOptions> {
       )
       const status = statusResponse.data?.status
 
-      const statusMap: Record<string, "authorized" | "pending" | "error"> = {
-        Approved: "authorized",
+      // Mintpay auto-captures on approval (no separate capture step, same as
+      // capturePayment() below is a no-op) — returning "captured" here
+      // (rather than "authorized") is what makes Medusa's payment module
+      // actually create the capture record; "authorized" alone leaves the
+      // payment sitting authorized-but-uncaptured forever, since Mintpay has
+      // no webhook to drive a later capture.
+      const statusMap: Record<string, "captured" | "pending" | "error"> = {
+        Approved: "captured",
         Rejected: "error",
       }
 
