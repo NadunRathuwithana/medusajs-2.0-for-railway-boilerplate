@@ -91,6 +91,68 @@ export const MEILISEARCH_HOST = process.env.MEILISEARCH_HOST;
 export const MEILISEARCH_ADMIN_KEY = process.env.MEILISEARCH_ADMIN_KEY;
 
 /**
+ * (optional) OnePay configuration
+ *
+ * ONEPAY_APP_ID   — your unique application identifier from OnePay dashboard
+ * ONEPAY_TOKEN    — API authorization token from OnePay dashboard
+ * ONEPAY_HASH_SALT — secret used for SHA-256 hash generation (NEVER expose client-side)
+ * ONEPAY_BASE_URL  — OnePay API base URL (defaults to live merchant API)
+ * ONEPAY_REDIRECT_URL — URL to redirect customer back after payment
+ */
+export const ONEPAY_APP_ID = process.env.ONEPAY_APP_ID;
+export const ONEPAY_TOKEN = process.env.ONEPAY_TOKEN;
+export const ONEPAY_HASH_SALT = process.env.ONEPAY_HASH_SALT;
+export const ONEPAY_BASE_URL =
+  process.env.ONEPAY_BASE_URL || "https://merchant-api-live-v2.onepay.lk";
+export const ONEPAY_REDIRECT_URL = process.env.ONEPAY_REDIRECT_URL;
+
+/**
+ * (optional) Koko Pay configuration
+ *
+ * KOKO_API_KEY         — Merchant API Key
+ * KOKO_MERCHANT_ID     — Merchant ID (_mId)
+ * KOKO_BASE_URL        — API Base URL (QA: qaapi.paykoko.com, Prod: prodapi.paykoko.com)
+ * KOKO_PRIVATE_KEY     — PEM RSA private key used to SIGN order requests
+ * KOKO_PUBLIC_KEY      — PEM RSA public key from Koko, used to VERIFY webhook signatures
+ * KOKO_PLUGIN_NAME     — Plugin identifier (e.g. cardle-medusa)
+ * KOKO_PLUGIN_VERSION  — Plugin version (e.g. 1.0.0)
+ * KOKO_RETURN_URL      — Browser redirect after successful payment
+ * KOKO_CANCEL_URL      — Browser redirect if customer cancels
+ * KOKO_RESPONSE_URL    — Server-to-server webhook URL Koko POSTs on payment completion
+ */
+export const KOKO_API_KEY = process.env.KOKO_API_KEY;
+export const KOKO_MERCHANT_ID = process.env.KOKO_MERCHANT_ID;
+export const KOKO_BASE_URL =
+  process.env.KOKO_BASE_URL || "https://qaapi.paykoko.com";
+export const KOKO_PRIVATE_KEY = process.env.KOKO_PRIVATE_KEY;
+export const KOKO_PUBLIC_KEY = process.env.KOKO_PUBLIC_KEY;
+export const KOKO_PLUGIN_NAME = process.env.KOKO_PLUGIN_NAME || "cardle-medusa";
+export const KOKO_PLUGIN_VERSION = process.env.KOKO_PLUGIN_VERSION || "1.0.0";
+export const KOKO_RETURN_URL = process.env.KOKO_RETURN_URL;
+export const KOKO_CANCEL_URL = process.env.KOKO_CANCEL_URL;
+export const KOKO_RESPONSE_URL = process.env.KOKO_RESPONSE_URL;
+
+/**
+ * (optional) Mintpay (Buy Now Pay Later) configuration
+ *
+ * MINTPAY_MERCHANT_ID     — Merchant ID obtained from Mintpay
+ * MINTPAY_MERCHANT_SECRET — Merchant secret, sent as "Authorization: Token <secret>"
+ * MINTPAY_ENV             — "sandbox" | "live" — selects the API base URL, defaults to "sandbox"
+ * MINTPAY_SUCCESS_URL     — Browser redirect Mintpay sends the customer to after a successful payment
+ * MINTPAY_FAIL_URL        — Browser redirect Mintpay sends the customer to after a failed/cancelled payment
+ *
+ * Neither redirect is trusted on its own — both return routes re-verify the
+ * purchase status server-side via the status endpoint before marking an
+ * order paid.
+ */
+export const MINTPAY_MERCHANT_ID = process.env.MINTPAY_MERCHANT_ID;
+export const MINTPAY_MERCHANT_SECRET = process.env.MINTPAY_MERCHANT_SECRET;
+export const MINTPAY_ENV =
+  (process.env.MINTPAY_ENV as "sandbox" | "live" | undefined) ?? "sandbox";
+export const MINTPAY_SUCCESS_URL = process.env.MINTPAY_SUCCESS_URL;
+export const MINTPAY_FAIL_URL = process.env.MINTPAY_FAIL_URL;
+
+/**
  * Worker mode
  */
 export const WORKER_MODE =

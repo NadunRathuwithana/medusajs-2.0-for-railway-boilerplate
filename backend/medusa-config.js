@@ -21,12 +21,20 @@ import {
   ONEPAY_BASE_URL,
   ONEPAY_REDIRECT_URL,
   KOKO_API_KEY,
-  KOKO_API_SECRET,
   KOKO_MERCHANT_ID,
   KOKO_BASE_URL,
-  KOKO_WEBHOOK_SECRET,
-  KOKO_SUCCESS_URL,
+  KOKO_PRIVATE_KEY,
+  KOKO_PUBLIC_KEY,
+  KOKO_PLUGIN_NAME,
+  KOKO_PLUGIN_VERSION,
+  KOKO_RETURN_URL,
   KOKO_CANCEL_URL,
+  KOKO_RESPONSE_URL,
+  MINTPAY_MERCHANT_ID,
+  MINTPAY_MERCHANT_SECRET,
+  MINTPAY_ENV,
+  MINTPAY_SUCCESS_URL,
+  MINTPAY_FAIL_URL,
   WORKER_MODE,
   MINIO_ENDPOINT,
   MINIO_ACCESS_KEY,
@@ -181,18 +189,35 @@ const medusaConfig = {
         });
       }
 
-      if (KOKO_API_KEY && KOKO_API_SECRET && KOKO_MERCHANT_ID) {
+      if (KOKO_API_KEY && KOKO_PRIVATE_KEY && KOKO_MERCHANT_ID) {
         paymentProviders.push({
           resolve: "./src/modules/koko-payment",
           id: "koko",
           options: {
-            apiKey: KOKO_API_KEY,
-            apiSecret: KOKO_API_SECRET,
-            merchantId: KOKO_MERCHANT_ID,
             baseUrl: KOKO_BASE_URL,
-            webhookSecret: KOKO_WEBHOOK_SECRET,
-            successUrl: KOKO_SUCCESS_URL,
+            merchantId: KOKO_MERCHANT_ID,
+            apiKey: KOKO_API_KEY,
+            privateKey: KOKO_PRIVATE_KEY,
+            kokoPublicKey: KOKO_PUBLIC_KEY,
+            pluginName: KOKO_PLUGIN_NAME,
+            pluginVersion: KOKO_PLUGIN_VERSION,
+            returnUrl: KOKO_RETURN_URL,
             cancelUrl: KOKO_CANCEL_URL,
+            responseUrl: KOKO_RESPONSE_URL,
+          },
+        });
+      }
+
+      if (MINTPAY_MERCHANT_ID && MINTPAY_MERCHANT_SECRET) {
+        paymentProviders.push({
+          resolve: "./src/modules/mintpay-payment",
+          id: "mintpay",
+          options: {
+            merchantId: MINTPAY_MERCHANT_ID,
+            merchantSecret: MINTPAY_MERCHANT_SECRET,
+            env: MINTPAY_ENV,
+            successUrl: MINTPAY_SUCCESS_URL,
+            failUrl: MINTPAY_FAIL_URL,
           },
         });
       }

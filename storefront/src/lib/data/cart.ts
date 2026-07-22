@@ -3,14 +3,16 @@
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
 import { HttpTypes } from "@medusajs/types"
-import { omit } from "lodash"
+import omit from "lodash/omit"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
+import { cache } from "react"
 import { getAuthHeaders, getCartId, removeCartId, setCartId } from "./cookies"
 import { getProductsById } from "./products"
 import { getRegion } from "./regions"
+import { listCartShippingMethods } from "./fulfillment"
 
-export async function retrieveCart() {
+export const retrieveCart = cache(async function retrieveCart() {
   const cartId = await getCartId()
 
   if (!cartId) {
@@ -18,12 +20,12 @@ export async function retrieveCart() {
   }
 
   return await sdk.store.cart
-    .retrieve(cartId, {}, { next: { tags: ["cart"] }, ...(await getAuthHeaders()) })
+    .retrieve(cartId, { fields: "+region,+region.countries,+payment_collection.payment_sessions" }, { next: { tags: ["cart"] }, ...(await getAuthHeaders()) })
     .then(({ cart }) => cart)
     .catch(() => {
       return null
     })
-}
+})
 
 export async function getOrSetCart(countryCode: string) {
   let cart = await retrieveCart()
@@ -81,13 +83,13 @@ export async function addToCart({
     throw new Error("Missing variant ID when adding to cart")
   }
 
-  const cart = await getOrSetCart(countryCode)
+  let cart = await getOrSetCart(countryCode)
   if (!cart) {
     throw new Error("Error retrieving or creating cart")
   }
 
-  await sdk.store.cart
-    .createLineItem(
+  try {
+    await sdk.store.cart.createLineItem(
       cart.id,
       {
         variant_id: variantId,
@@ -96,10 +98,28 @@ export async function addToCart({
       {},
       await getAuthHeaders()
     )
-    .then(() => {
-      revalidateTag("cart")
-    })
-    .catch(medusaError)
+    revalidateTag("cart")
+    revalidateTag("shipping")
+  } catch (error: any) {
+    const errorMsg = error?.message || error?.response?.data?.message || ""
+    if (errorMsg.includes("customer_email") && errorMsg.includes("promotion")) {
+      console.warn("Cart is poisoned by a stuck promotion. Clearing cart and retrying...")
+      await removeCartId()
+      cart = await getOrSetCart(countryCode)
+      if (cart) {
+        await sdk.store.cart.createLineItem(
+          cart.id,
+          { variant_id: variantId, quantity },
+          {},
+          await getAuthHeaders()
+        )
+        revalidateTag("cart")
+        revalidateTag("shipping")
+        return
+      }
+    }
+    medusaError(error)
+  }
 }
 
 export async function updateLineItem({
@@ -122,6 +142,7 @@ export async function updateLineItem({
     .updateLineItem(cartId, lineId, { quantity }, {}, await getAuthHeaders())
     .then(() => {
       revalidateTag("cart")
+      revalidateTag("shipping")
     })
     .catch(medusaError)
 }
@@ -137,15 +158,15 @@ export async function deleteLineItem(lineId: string) {
   }
 
   await sdk.store.cart
-    .deleteLineItem(cartId, lineId, await getAuthHeaders())
+    .deleteLineItem(cartId, lineId, {}, await getAuthHeaders())
     .then(() => {
       revalidateTag("cart")
+      revalidateTag("shipping")
     })
     .catch(medusaError)
-  revalidateTag("cart")
 }
 
-export async function enrichLineItems(
+export const enrichLineItems = cache(async function enrichLineItems(
   lineItems:
     | HttpTypes.StoreCartLineItem[]
     | HttpTypes.StoreOrderLineItem[]
@@ -190,7 +211,24 @@ export async function enrichLineItems(
   }) as HttpTypes.StoreCartLineItem[]
 
   return enrichedItems
-}
+})
+
+// Single source of truth for "the current cart with enriched line items" —
+// previously copy-pasted (with slightly different null-handling) in the cart
+// page, checkout page, and the nav's CartButton.
+export const getCart = cache(async function getCart() {
+  const cart = await retrieveCart()
+
+  if (!cart) {
+    return null
+  }
+
+  if (cart.items?.length) {
+    cart.items = await enrichLineItems(cart.items, cart.region_id!)
+  }
+
+  return cart
+})
 
 export async function setShippingMethod({
   cartId,
@@ -216,29 +254,53 @@ export async function initiatePaymentSession(
   cart: HttpTypes.StoreCart,
   data: {
     provider_id: string
-    context?: Record<string, unknown>
+    data?: Record<string, unknown>
   }
 ) {
-  return sdk.store.payment
-    .initiatePaymentSession(cart, data, {}, await getAuthHeaders())
-    .then((resp) => {
-      revalidateTag("cart")
-      return resp
-    })
-    .catch(medusaError)
+
+  try {
+    const authHeaders = await getAuthHeaders()
+    const resp = await sdk.store.payment.initiatePaymentSession(cart, data, {}, authHeaders)
+
+    revalidateTag("cart")
+    // Do NOT return `resp` directly. SDK response objects may contain non-serializable 
+    // properties which causes Next.js Server Actions to crash during serialization, 
+    // throwing the "An error occurred in the Server Components render" error.
+    return { success: true }
+  } catch (error: any) {
+    // Do NOT re-throw here. Throwing from a server action bypasses the client
+    // .catch() handler and triggers Next.js's error boundary, showing the
+    // cryptic "An error occurred in the Server Components render" message.
+    // Instead, return a structured error so the client can handle it gracefully.
+    const message =
+      error?.message ??
+      error?.response?.data?.message ??
+      "Failed to initialize payment session"
+    console.error("[initiatePaymentSession] Error:", message, error)
+    return { error: message }
+  }
 }
 
 export async function applyPromotions(codes: string[]) {
   const cartId = await getCartId()
   if (!cartId) {
-    throw new Error("No existing cart found")
+    return { error: "No existing cart found" }
   }
 
-  await updateCart({ promo_codes: codes })
-    .then(() => {
-      revalidateTag("cart")
-    })
-    .catch(medusaError)
+  try {
+    await updateCart({ promo_codes: codes })
+    return { success: true }
+  } catch (error: any) {
+    let errorMessage = error.message || "We couldn't apply that promotion right now."
+    if (errorMessage.includes("customer_email") && errorMessage.includes("required")) {
+      errorMessage = "Please enter your email address before applying this promo code."
+    } else if (errorMessage.toLowerCase().includes("invalid") || errorMessage.toLowerCase().includes("not found")) {
+      errorMessage = "This promo code doesn't seem to be valid. Please check and try again."
+    } else if (errorMessage.toLowerCase().includes("already applied")) {
+      errorMessage = "This promo code is already applied to your cart."
+    }
+    return { error: errorMessage }
+  }
 }
 
 export async function applyGiftCard(code: string) {
@@ -290,7 +352,10 @@ export async function submitPromotionForm(
 ) {
   const code = formData.get("code") as string
   try {
-    await applyPromotions([code])
+    const res = await applyPromotions([code])
+    if (res.error) {
+      return res.error
+    }
   } catch (e: any) {
     return e.message
   }
@@ -317,7 +382,6 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         postal_code: formData.get("shipping_address.postal_code"),
         city: formData.get("shipping_address.city"),
         country_code: formData.get("shipping_address.country_code"),
-        province: formData.get("shipping_address.province"),
         phone: formData.get("shipping_address.phone"),
       },
       email: formData.get("email"),
@@ -336,17 +400,29 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         postal_code: formData.get("billing_address.postal_code"),
         city: formData.get("billing_address.city"),
         country_code: formData.get("billing_address.country_code"),
-        province: formData.get("billing_address.province"),
         phone: formData.get("billing_address.phone"),
       }
     await updateCart(data)
+
+    // Clear the shipping options cache since the address just changed
+    revalidateTag("shipping")
+
+    // Automatically select the first available shipping method to bypass the delivery step
+    try {
+      const shippingMethods = await listCartShippingMethods(cartId)
+      if (shippingMethods && shippingMethods.length > 0) {
+        await setShippingMethod({ cartId, shippingMethodId: shippingMethods[0].id })
+      }
+    } catch (shippingErr: any) {
+      // Non-fatal: address was saved successfully; shipping auto-select failed.
+      // Surface a warning but do not block the address step.
+      console.warn("[setAddresses] Shipping auto-select failed:", shippingErr?.message)
+    }
   } catch (e: any) {
     return e.message
   }
 
-  redirect(
-    `/${formData.get("shipping_address.country_code")}/checkout?step=delivery`
-  )
+  return null
 }
 
 export async function placeOrder() {
