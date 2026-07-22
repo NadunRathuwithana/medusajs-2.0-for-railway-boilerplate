@@ -1,5 +1,6 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules, PaymentWebhookEvents } from "@medusajs/framework/utils"
+import { Sentry } from "../../../lib/sentry"
 
 export async function POST(
   req: MedusaRequest,
@@ -22,8 +23,17 @@ export async function POST(
       delay: 5000,
       attempts: 3,
     })
-  } catch (e) {
-    console.error("Onepay webhook error:", e)
+  } catch (e: any) {
+    console.error(JSON.stringify({
+      event: "onepay_webhook_error",
+      message: e?.message,
+      body: req.body,
+      timestamp: new Date().toISOString(),
+    }))
+    Sentry.captureException(e, {
+      tags: { payment_provider: "onepay", webhook: "true" },
+      extra: { body: req.body },
+    })
     // Always 200 — prevent Onepay from retrying
   }
 

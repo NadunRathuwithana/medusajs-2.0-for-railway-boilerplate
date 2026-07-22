@@ -5,6 +5,7 @@ import { DetailWidgetProps, AdminOrder } from "@medusajs/framework/types"
 enum PaymentMethod {
   pp_onepay_onepay = "OnePay",
   pp_koko_koko = "Koko",
+  pp_mintpay_mintpay = "Mintpay",
   pp_system_default = "COD",
   pp_stripe_stripe = "Stripe",
 }

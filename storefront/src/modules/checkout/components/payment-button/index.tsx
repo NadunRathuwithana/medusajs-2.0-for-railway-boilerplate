@@ -8,7 +8,7 @@ import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
 import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
-import { isKoko, isManual, isOnepay, isPaypal, isStripe } from "@lib/constants"
+import { isKoko, isManual, isMintpay, isOnepay, isPaypal, isStripe } from "@lib/constants"
 import { clx } from "@medusajs/ui"
 
 type PaymentButtonProps = {
@@ -16,10 +16,10 @@ type PaymentButtonProps = {
   "data-testid": string
 }
 
-const CustomButton = ({ 
-  children, 
-  isLoading, 
-  ...props 
+const CustomButton = ({
+  children,
+  isLoading,
+  ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { isLoading?: boolean }) => {
   return (
     <button
@@ -154,6 +154,18 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
         <>
           {debugInfo}
           <HostedPaymentButton
+            notReady={notReady}
+            isPreparing={isSyncing}
+            session={activeSession as any}
+            data-testid={dataTestId}
+          />
+        </>
+      )
+    case isMintpay(activeProviderId):
+      return (
+        <>
+          {debugInfo}
+          <MintpayPaymentButton
             notReady={notReady}
             isPreparing={isSyncing}
             session={activeSession as any}
@@ -566,5 +578,78 @@ const KokoPaymentButton = ({
   )
 }
 
-export default PaymentButton
+/**
+ * MintpayPaymentButton — renders a hidden HTML form and submits it to Mintpay.
+ *
+ * Unlike Koko, the order/customer data was already POSTed server-to-server in
+ * initiatePayment (Mintpay's Step 1); this form only carries the resulting
+ * purchase_id (Step 2), which is what redirects the customer's browser to
+ * Mintpay's hosted payment page.
+ */
+const MintpayPaymentButton = ({
+  session,
+  notReady,
+  isPreparing,
+  "data-testid": dataTestId,
+}: {
+  session: any
+  notReady: boolean
+  isPreparing?: boolean
+  "data-testid"?: string
+}) => {
+  const formRef = React.useRef<HTMLFormElement>(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
+  const formAction = session?.data?.mintpay_form_action as string | undefined
+  const fields = session?.data?.mintpay_form_fields as Record<string, string> | undefined
+  const sessionReady = Boolean(formAction && fields)
+
+  // If the form fields get stuck without arriving (provider hiccup), stop
+  // spinning forever and let the user know instead of leaving a dead button.
+  useEffect(() => {
+    if (notReady || sessionReady) {
+      setErrorMessage(null)
+      return
+    }
+    const timer = setTimeout(() => {
+      setErrorMessage("Payment session is taking longer than expected. Please try again.")
+    }, 8000)
+    return () => clearTimeout(timer)
+  }, [notReady, sessionReady])
+
+  const handleClick = () => {
+    if (!formRef.current || !formAction || !fields) {
+      return
+    }
+    setSubmitting(true)
+    // Real browser POST — the customer continues the flow on Mintpay's domain.
+    formRef.current.submit()
+  }
+
+  return (
+    <>
+      {formAction && fields && (
+        <form ref={formRef} action={formAction} method="POST" style={{ display: "none" }}>
+          <input type="hidden" name="purchase_id" value={fields.purchase_id} />
+        </form>
+      )}
+
+      <CustomButton
+        onClick={handleClick}
+        disabled={notReady || submitting || !sessionReady}
+        isLoading={submitting || isPreparing || (!notReady && !sessionReady)}
+        data-testid={dataTestId || "mintpay-payment-button"}
+        className="bg-black hover:bg-black/90"
+      >
+        {submitting ? "Redirecting to Mintpay…" : "Pay with Mintpay"}
+      </CustomButton>
+      <ErrorMessage
+        error={errorMessage}
+        data-testid="mintpay-payment-error-message"
+      />
+    </>
+  )
+}
+
+export default PaymentButton

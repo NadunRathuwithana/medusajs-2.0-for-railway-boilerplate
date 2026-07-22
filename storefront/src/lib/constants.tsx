@@ -39,6 +39,10 @@ export const paymentInfoMap: Record<
     title: "Koko: Buy Now Pay Later",
     icon: <img src="/payment/koko-pay-sri-lanka-accepted.png" alt="Koko Pay Sri Lanka accepted" title="Koko Pay Sri Lanka accepted" className="h-6 object-contain" />,
   },
+  pp_mintpay_mintpay: {
+    title: "Mintpay: Buy Now Pay Later",
+    icon: <img src="/payment/mintpay.png" alt="Mintpay accepted" title="Mintpay accepted" className="h-6 object-contain" />,
+  },
   // Add more payment providers here
 }
 
@@ -57,6 +61,9 @@ export const isOnepay = (providerId?: string) => {
 }
 export const isKoko = (providerId?: string) => {
   return providerId?.startsWith("pp_koko")
+}
+export const isMintpay = (providerId?: string) => {
+  return providerId?.startsWith("pp_mintpay")
 }
 
 // Add currencies that don't need to be divided by 100
@@ -101,6 +108,12 @@ export const getPaymentPromoInfo = (providerId: string) => {
       tag: process.env.NEXT_PUBLIC_PROMO_KOKO_TAG
     }
   }
+  if (providerId?.startsWith("pp_mintpay")) {
+    return {
+      code: process.env.NEXT_PUBLIC_PROMO_MINTPAY_CODE,
+      tag: process.env.NEXT_PUBLIC_PROMO_MINTPAY_TAG
+    }
+  }
   if (providerId?.startsWith("pp_system_default")) {
     return {
       code: process.env.NEXT_PUBLIC_PROMO_MANUAL_CODE,
@@ -115,6 +128,7 @@ export const getAllPaymentPromoCodes = () => {
     process.env.NEXT_PUBLIC_PROMO_STRIPE_CODE,
     process.env.NEXT_PUBLIC_PROMO_ONEPAY_CODE,
     process.env.NEXT_PUBLIC_PROMO_KOKO_CODE,
+    process.env.NEXT_PUBLIC_PROMO_MINTPAY_CODE,
     process.env.NEXT_PUBLIC_PROMO_MANUAL_CODE
   ].filter(Boolean) as string[]
 }
