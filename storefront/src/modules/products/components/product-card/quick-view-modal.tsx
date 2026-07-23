@@ -136,9 +136,9 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
       />
 
       {/* Modal Content */}
-      <div 
+      <div
         className={clx(
-          "relative bg-white w-full max-w-5xl rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row h-full md:h-[600px] lg:h-[700px] max-h-[90vh]",
+          "relative bg-white w-full max-w-5xl rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh]",
           "transition-all duration-300 transform",
           isMounted && !isClosing ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-8"
         )}
@@ -153,7 +153,7 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
         </button>
 
         {/* Left: Image Carousel */}
-        <div className="w-full md:w-1/2 relative bg-gray-100 h-64 md:h-full flex-shrink-0 group">
+        <div className="w-full md:w-1/2 relative bg-gray-100 h-64 md:h-auto flex-shrink-0 group">
           {uniqueImages.map((src, idx) => (
             <div 
               key={idx} 
@@ -184,26 +184,34 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
             </>
           )}
 
-          {/* Dots */}
+          {/* Dots — capped at 3, even if there are 20+ images. Each dot
+              represents an equal bucket of images rather than one dot per
+              image, since that becomes unusable for products with a lot
+              of photos. */}
           <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2 z-20 px-4">
-            {uniqueImages.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setCurrentIndex(idx)
-                }}
-                className={clx(
-                  "h-2.5 rounded-full transition-all duration-300 shadow-sm",
-                  idx === currentIndex ? "w-8 bg-white" : "w-2.5 bg-white/70 hover:bg-white"
-                )}
-              />
-            ))}
+            {(() => {
+              const dotCount = Math.min(uniqueImages.length, 3)
+              const bucketSize = Math.ceil(uniqueImages.length / dotCount)
+              const activeDot = Math.min(Math.floor(currentIndex / bucketSize), dotCount - 1)
+              return Array.from({ length: dotCount }).map((_, dotIdx) => (
+                <button
+                  key={dotIdx}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setCurrentIndex(dotIdx * bucketSize)
+                  }}
+                  className={clx(
+                    "h-2.5 rounded-full transition-all duration-300 shadow-sm",
+                    dotIdx === activeDot ? "w-8 bg-white" : "w-2.5 bg-white/70 hover:bg-white"
+                  )}
+                />
+              ))
+            })()}
           </div>
         </div>
 
         {/* Right: Details */}
-        <div className="w-full md:w-1/2 p-8 md:p-10 lg:p-12 overflow-y-auto flex flex-col">
+        <div className="w-full md:w-1/2 p-8 md:p-10 lg:p-12 flex flex-col">
           {/* Header */}
           <div className="mb-6">
             <p className="text-sm font-medium text-gray-500 mb-2">
