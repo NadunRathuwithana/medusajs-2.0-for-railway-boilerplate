@@ -3,8 +3,9 @@ import { Text } from "@medusajs/ui"
 
 import InteractiveLink from "@modules/common/components/interactive-link"
 import ProductCard from "@modules/products/components/product-card"
+import { getBnplProviders } from "@lib/data/payment"
 
-export default function ProductRail({
+export default async function ProductRail({
   collection,
   region,
 }: {
@@ -12,6 +13,7 @@ export default function ProductRail({
   region: HttpTypes.StoreRegion
 }) {
   const { products } = collection
+  const bnplProviders = await getBnplProviders(region.id)
 
   if (!products) {
     return null
@@ -29,7 +31,7 @@ export default function ProductRail({
         {products &&
           products.map((product) => (
             <li key={product.id}>
-              <ProductCard product={product} />
+              <ProductCard product={product} bnplProviders={bnplProviders} />
             </li>
           ))}
       </ul>

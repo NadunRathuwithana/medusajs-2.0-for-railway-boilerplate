@@ -1,6 +1,6 @@
 import { getProductsById } from "@lib/data/products"
 import { listCartPaymentMethods } from "@lib/data/payment"
-import { isKoko } from "@lib/constants"
+import { isKoko, isMintpay } from "@lib/constants"
 import { HttpTypes } from "@medusajs/types"
 import ProductActions from "@modules/products/components/product-actions"
 
@@ -27,6 +27,14 @@ export default async function ProductActionsWrapper({
   }
 
   const isKokoEnabled = paymentProviders?.some((p) => isKoko(p.id)) || false
+  const isMintpayEnabled = paymentProviders?.some((p) => isMintpay(p.id)) || false
 
-  return <ProductActions product={product} region={region} isKokoEnabled={isKokoEnabled} />
+  return (
+    <ProductActions
+      product={product}
+      region={region}
+      isKokoEnabled={isKokoEnabled}
+      isMintpayEnabled={isMintpayEnabled}
+    />
+  )
 }

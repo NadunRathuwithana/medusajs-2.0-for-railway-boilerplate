@@ -2,10 +2,11 @@
 
 import { HttpTypes } from "@medusajs/types"
 import Image from "next/image"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { createPortal } from "react-dom"
 import { clx } from "@medusajs/ui"
 import { useSearchParams } from "next/navigation"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 type ImageGalleryProps = {
   product: HttpTypes.StoreProduct
@@ -56,6 +57,16 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
   const [fullscreenIndex, setFullscreenIndex] = useState(0)
   const [mounted, setMounted] = useState(false)
 
+  // Custom left/right-arrow cursor + click-to-navigate on the main image
+  const mainImageRef = useRef<HTMLDivElement>(null)
+  const [isHoveringMain, setIsHoveringMain] = useState(false)
+  const [hoverSide, setHoverSide] = useState<"left" | "right">("right")
+  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
+
+  // Thumbnail strip scroll controls
+  const thumbStripRef = useRef<HTMLDivElement>(null)
+  const thumbRefs = useRef<(HTMLButtonElement | null)[]>([])
+
   useEffect(() => { setMounted(true) }, [])
 
   // Reset active image index when the active variant changes
@@ -63,6 +74,46 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
     setActiveIndex(0)
     setFullscreenIndex(0)
   }, [activeVariant?.id])
+
+  // Auto-slide the thumbnail strip so the active thumbnail is always in
+  // view, since with many images the strip can be longer than its
+  // container and older/later thumbnails become unreachable otherwise.
+  useEffect(() => {
+    thumbRefs.current[activeIndex]?.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest",
+    })
+  }, [activeIndex])
+
+  const scrollThumbs = (direction: "left" | "right") => {
+    thumbStripRef.current?.scrollBy({
+      left: direction === "left" ? -220 : 220,
+      behavior: "smooth",
+    })
+  }
+
+  const handleMainMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = mainImageRef.current?.getBoundingClientRect()
+    if (!rect) return
+    setCursorPos({ x: e.clientX - rect.left, y: e.clientY - rect.top })
+    setHoverSide(e.clientX - rect.left < rect.width / 2 ? "left" : "right")
+  }
+
+  const goToPrevImage = () => setActiveIndex((i) => (i - 1 + images.length) % images.length)
+  const goToNextImage = () => setActiveIndex((i) => (i + 1) % images.length)
+
+  const handleMainClick = () => {
+    if (images.length <= 1) {
+      openFullscreen(activeIndex)
+      return
+    }
+    if (hoverSide === "left") {
+      goToPrevImage()
+    } else {
+      goToNextImage()
+    }
+  }
 
   if (!images || images.length === 0) return null
 
@@ -229,8 +280,13 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
       <div key={activeVariant?.id || 'default'} className="flex flex-col gap-4 w-full" style={{ animation: "galleryEnter 0.4s ease-out forwards" }}>
         {/* Main Image */}
         <div
-          className="relative w-full aspect-[4/5] md:aspect-auto md:h-[600px] lg:h-[700px] rounded-3xl overflow-hidden bg-gray-100 cursor-zoom-in group"
-          onClick={() => openFullscreen(activeIndex)}
+          ref={mainImageRef}
+          className="relative w-full aspect-[4/5] md:aspect-auto md:h-[600px] lg:h-[700px] rounded-3xl overflow-hidden bg-gray-100 group"
+          style={{ cursor: images.length > 1 && isHoveringMain ? "none" : "zoom-in" }}
+          onMouseEnter={() => setIsHoveringMain(true)}
+          onMouseLeave={() => setIsHoveringMain(false)}
+          onMouseMove={handleMainMouseMove}
+          onClick={handleMainClick}
         >
           {images.map((image, index) => (
             <div
@@ -255,36 +311,80 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
             </div>
           ))}
 
-          {/* Fullscreen hint overlay */}
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
-            <div className="bg-black/40 backdrop-blur-sm text-white rounded-full p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-              </svg>
+          {/* Expand-to-fullscreen — its own click target, top corner, since
+              clicking the image itself now navigates prev/next instead */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              openFullscreen(activeIndex)
+            }}
+            aria-label="View fullscreen"
+            className="absolute top-4 right-4 z-20 bg-black/40 backdrop-blur-sm text-white rounded-full p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+            </svg>
+          </button>
+
+          {/* Custom directional cursor — left half hovers show a left arrow,
+              right half a right arrow, replacing the native cursor */}
+          {images.length > 1 && isHoveringMain && (
+            <div
+              className="pointer-events-none absolute z-20 w-12 h-12 -ml-6 -mt-6 rounded-full bg-white shadow-lg flex items-center justify-center"
+              style={{ left: cursorPos.x, top: cursorPos.y }}
+            >
+              {hoverSide === "left" ? (
+                <ChevronLeft className="w-5 h-5 text-gray-700" />
+              ) : (
+                <ChevronRight className="w-5 h-5 text-gray-700" />
+              )}
             </div>
-          </div>
-
-
+          )}
         </div>
 
         {/* Thumbnail strip — outside the main image */}
         {images.length > 1 && (
-          <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
-            {images.map((image, index) => (
-              <button
-                key={image.id}
-                onClick={() => setActiveIndex(index)}
-                className={clx(
-                  "relative flex-shrink-0 w-20 h-24 md:w-24 md:h-28 rounded-2xl overflow-hidden transition-all duration-200 border-2",
-                  {
-                    "border-black/60 shadow-md": index === activeIndex,
-                    "border-transparent opacity-60": index !== activeIndex,
-                  }
-                )}
-              >
-                <Image src={image.url} alt={`${product.title} – thumbnail ${index + 1}`} title={`${product.title} – view ${index + 1}`} fill sizes="96px" style={{ objectFit: "cover" }} />
-              </button>
-            ))}
+          <div className="relative group/thumbs">
+            {images.length > 4 && (
+              <>
+                <button
+                  onClick={() => scrollThumbs("left")}
+                  aria-label="Scroll thumbnails left"
+                  className="absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white shadow-md border border-gray-100 rounded-full flex items-center justify-center opacity-0 group-hover/thumbs:opacity-100 transition-opacity hover:bg-gray-50"
+                >
+                  <ChevronLeft className="w-4 h-4 text-gray-600" />
+                </button>
+                <button
+                  onClick={() => scrollThumbs("right")}
+                  aria-label="Scroll thumbnails right"
+                  className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white shadow-md border border-gray-100 rounded-full flex items-center justify-center opacity-0 group-hover/thumbs:opacity-100 transition-opacity hover:bg-gray-50"
+                >
+                  <ChevronRight className="w-4 h-4 text-gray-600" />
+                </button>
+              </>
+            )}
+            <div
+              ref={thumbStripRef}
+              className="flex gap-3 overflow-x-auto pb-1 scroll-smooth"
+              style={{ scrollbarWidth: "none" }}
+            >
+              {images.map((image, index) => (
+                <button
+                  key={image.id}
+                  ref={(el) => { thumbRefs.current[index] = el }}
+                  onClick={() => setActiveIndex(index)}
+                  className={clx(
+                    "relative flex-shrink-0 w-20 h-24 md:w-24 md:h-28 rounded-2xl overflow-hidden transition-all duration-200 border-2",
+                    {
+                      "border-black/60 shadow-md": index === activeIndex,
+                      "border-transparent opacity-60": index !== activeIndex,
+                    }
+                  )}
+                >
+                  <Image src={image.url} alt={`${product.title} – thumbnail ${index + 1}`} title={`${product.title} – view ${index + 1}`} fill sizes="96px" style={{ objectFit: "cover" }} />
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>

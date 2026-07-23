@@ -1,5 +1,6 @@
 import { sdk } from "@lib/config"
 import { cache } from "react"
+import { isKoko, isMintpay } from "@lib/constants"
 
 export const listCartPaymentMethods = cache(async function (regionId: string) {
   if (!regionId) {
@@ -20,3 +21,15 @@ export const listCartPaymentMethods = cache(async function (regionId: string) {
       return [] as any[]
     })
 })
+
+/** Which BNPL providers (Koko / Mintpay) are available for a region — used to
+ *  show the "or 3 X ... with" installment line on product cards/PDP. */
+export async function getBnplProviders(
+  regionId: string
+): Promise<Array<"koko" | "mintpay">> {
+  const providers = await listCartPaymentMethods(regionId)
+  const result: Array<"koko" | "mintpay"> = []
+  if (providers?.some((p) => isKoko(p.id))) result.push("koko")
+  if (providers?.some((p) => isMintpay(p.id))) result.push("mintpay")
+  return result
+}

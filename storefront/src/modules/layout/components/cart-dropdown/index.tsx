@@ -186,6 +186,15 @@ const CartDropdown = ({
                               Check out
                             </button>
                           </LocalizedClientLink>
+
+                          {/* View full cart */}
+                          <LocalizedClientLink
+                            href="/cart"
+                            onClick={close}
+                            className="w-full text-center text-sm text-gray-500 hover:text-gray-700 transition-colors mt-4"
+                          >
+                            View full cart
+                          </LocalizedClientLink>
                         </div>
                       )}
                   </Dialog.Panel>
@@ -259,7 +268,8 @@ const SidebarCartItem = ({ item, close }: { item: any; close: () => void }) => {
         className="w-[100px] h-[100px] bg-gray-100 rounded-xl overflow-hidden relative flex-shrink-0"
       >
         <Thumbnail
-          thumbnail={item.thumbnail}
+          thumbnail={item.thumbnail ?? item.variant?.product?.thumbnail}
+          images={item.variant?.product?.images}
           size="square"
           className="absolute inset-0 w-full h-full p-0 shadow-none border-none rounded-none [&_img]:!object-cover [&_img]:!object-center"
         />

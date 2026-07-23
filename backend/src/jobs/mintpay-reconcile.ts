@@ -9,6 +9,7 @@ import {
   MINTPAY_MERCHANT_ID,
   MINTPAY_MERCHANT_SECRET,
   MINTPAY_ENV,
+  MINTPAY_BASE_URL,
 } from "../lib/constants"
 
 const MINTPAY_PROVIDER_ID = "pp_mintpay_mintpay"
@@ -51,7 +52,7 @@ export default async function mintpayReconcileJob(container: MedusaContainer) {
 
     try {
       const statusResponse = await mintpayGetStatus(
-        mintpayBaseUrl(MINTPAY_ENV),
+        MINTPAY_BASE_URL || mintpayBaseUrl(MINTPAY_ENV),
         MINTPAY_MERCHANT_SECRET,
         MINTPAY_MERCHANT_ID,
         purchaseId

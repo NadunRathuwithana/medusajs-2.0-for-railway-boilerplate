@@ -75,7 +75,7 @@ class MintpayPaymentService extends AbstractPaymentProvider<MintpayOptions> {
   }
 
   private get baseUrl(): string {
-    return mintpayBaseUrl(this.options_.env)
+    return this.options_.baseUrl || mintpayBaseUrl(this.options_.env)
   }
 
   // ─────────────────────────────────────────────

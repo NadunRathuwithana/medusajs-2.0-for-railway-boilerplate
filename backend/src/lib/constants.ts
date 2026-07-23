@@ -140,7 +140,10 @@ export const MEILISEARCH_ADMIN_KEY = process.env.MEILISEARCH_ADMIN_KEY;
  *
  * MINTPAY_MERCHANT_ID     — Merchant ID obtained from Mintpay
  * MINTPAY_MERCHANT_SECRET — Merchant secret, sent as "Authorization: Token <secret>"
- * MINTPAY_ENV             — "sandbox" | "live" — selects the API base URL, defaults to "sandbox"
+ * MINTPAY_ENV             — "sandbox" | "live" — selects the default API base URL, defaults to "sandbox"
+ * MINTPAY_BASE_URL        — Optional override for the API base URL (e.g. https://app.mintpay.lk or
+ *                           https://dev.mintpay.lk) — set this if Mintpay's sandbox/live hostnames
+ *                           change; otherwise MINTPAY_ENV picks the default for you
  * MINTPAY_SUCCESS_URL     — Browser redirect Mintpay sends the customer to after a successful payment
  * MINTPAY_FAIL_URL        — Browser redirect Mintpay sends the customer to after a failed/cancelled payment
  *
@@ -152,6 +155,7 @@ export const MINTPAY_MERCHANT_ID = process.env.MINTPAY_MERCHANT_ID;
 export const MINTPAY_MERCHANT_SECRET = process.env.MINTPAY_MERCHANT_SECRET;
 export const MINTPAY_ENV =
   (process.env.MINTPAY_ENV as "sandbox" | "live" | undefined) ?? "sandbox";
+export const MINTPAY_BASE_URL = process.env.MINTPAY_BASE_URL;
 export const MINTPAY_SUCCESS_URL = process.env.MINTPAY_SUCCESS_URL;
 export const MINTPAY_FAIL_URL = process.env.MINTPAY_FAIL_URL;
 

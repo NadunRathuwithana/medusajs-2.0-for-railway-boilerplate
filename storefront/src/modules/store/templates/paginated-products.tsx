@@ -1,5 +1,6 @@
 import { getProductsListWithSort } from "@lib/data/products"
 import { getRegion } from "@lib/data/regions"
+import { getBnplProviders } from "@lib/data/payment"
 import { getProductPrice } from "@lib/util/get-product-price"
 import ProductCard from "@modules/products/components/product-card"
 import { Pagination } from "@modules/store/components/pagination"
@@ -63,14 +64,15 @@ export default async function PaginatedProducts({
     return null
   }
 
-  let {
-    response: { products, count },
-  } = await getProductsListWithSort({
-    page,
-    queryParams,
-    sortBy,
-    countryCode,
-  })
+  let [{ response: { products, count } }, bnplProviders] = await Promise.all([
+    getProductsListWithSort({
+      page,
+      queryParams,
+      sortBy,
+      countryCode,
+    }),
+    getBnplProviders(region.id),
+  ])
 
   const totalPages = Math.ceil(count / PRODUCT_LIMIT)
 
@@ -99,7 +101,7 @@ export default async function PaginatedProducts({
         {products.map((p) => {
           return (
             <li key={p.id}>
-              <ProductCard product={p} />
+              <ProductCard product={p} bnplProviders={bnplProviders} />
             </li>
           )
         })}
