@@ -37,11 +37,13 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
   const [isClosing, setIsClosing] = useState(false)
 
   // Images
-  const allImages = [
-    product.thumbnail,
-    ...(product.images?.map((i) => i.url) || []),
-  ].filter(Boolean) as string[]
-  const uniqueImages = Array.from(new Set(allImages))
+  const uniqueImages = useMemo(() => {
+    const allImages = [
+      product.thumbnail,
+      ...(product.images?.map((i) => i.url) || []),
+    ].filter(Boolean) as string[]
+    return Array.from(new Set(allImages))
+  }, [product.thumbnail, product.images])
 
   // Variant selection logic
   useEffect(() => {
@@ -59,18 +61,22 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
     })
   }, [product.variants, options])
 
-  // Sync main image with selected variant
+  // Sync main image with selected variant. Keyed only on the variant's
+  // identity (not on currentIndex) — same mechanism as the PDP's
+  // ImageGallery reset effect — so this only fires when the *variant*
+  // changes, never in reaction to the user's own arrow/dot navigation.
+  // Including currentIndex here (as before) made every manual nav click
+  // re-trigger this effect, which recomputed the same variant-image index
+  // and snapped straight back to it — arrows appeared "dead".
   useEffect(() => {
-    if (selectedVariant) {
-      const variantImage = selectedVariant.thumbnail || selectedVariant.images?.[0]?.url
-      if (variantImage) {
-        const index = uniqueImages.indexOf(variantImage)
-        if (index !== -1 && index !== currentIndex) {
-          setCurrentIndex(index)
-        }
-      }
+    if (!selectedVariant) return
+    const variantImage = selectedVariant.thumbnail || selectedVariant.images?.[0]?.url
+    if (!variantImage) return
+    const index = uniqueImages.indexOf(variantImage)
+    if (index !== -1) {
+      setCurrentIndex(index)
     }
-  }, [selectedVariant, uniqueImages, currentIndex])
+  }, [selectedVariant?.id, uniqueImages])
 
   const setOptionValue = (title: string, value: string) => {
     setOptions((prev) => ({ ...prev, [title]: value }))
