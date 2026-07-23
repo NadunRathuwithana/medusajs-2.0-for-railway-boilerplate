@@ -3,8 +3,6 @@
 import { Button, Heading } from "@medusajs/ui"
 
 import CartTotals from "@modules/common/components/cart-totals"
-import Divider from "@modules/common/components/divider"
-import DiscountCode from "@modules/checkout/components/discount-code"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 import { Lock } from "lucide-react"
@@ -21,10 +19,6 @@ const Summary = ({ cart }: SummaryProps) => {
       <h2 className="text-[24px] font-bold text-bold tracking-tight">
         Order Summary
       </h2>
-      
-      <DiscountCode cart={cart} />
-      
-      <div className="h-px w-full bg-gray-100 my-2" />
       
       <div className="cart-totals-wrapper">
         <CartTotals totals={cart} />

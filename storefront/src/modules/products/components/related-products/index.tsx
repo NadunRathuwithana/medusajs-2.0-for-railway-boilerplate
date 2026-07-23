@@ -1,5 +1,6 @@
 import ProductCard from "@modules/products/components/product-card"
 import { getRegion } from "@lib/data/regions"
+import { getBnplProviders } from "@lib/data/payment"
 import { getProductsList } from "@lib/data/products"
 import { HttpTypes } from "@medusajs/types"
 
@@ -58,6 +59,8 @@ export default async function RelatedProducts({
     return null
   }
 
+  const bnplProviders = await getBnplProviders(region.id)
+
   return (
     <div className="w-full">
       <div className="flex flex-col items-center text-center mb-12">
@@ -72,7 +75,7 @@ export default async function RelatedProducts({
       <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
         {products.slice(0, 4).map((product) => (
           <li key={product.id}>
-            <ProductCard product={product} />
+            <ProductCard product={product} bnplProviders={bnplProviders} />
           </li>
         ))}
       </ul>

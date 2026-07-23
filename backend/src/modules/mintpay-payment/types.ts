@@ -2,6 +2,7 @@ export type MintpayOptions = {
   merchantId: string
   merchantSecret: string          // sent as "Authorization: Token <secret>"
   env: "sandbox" | "live"
+  baseUrl?: string                 // optional override for env's default hostname
   successUrl: string
   failUrl: string
 }

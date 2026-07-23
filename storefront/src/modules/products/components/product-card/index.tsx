@@ -9,6 +9,7 @@ import { getProductPrice } from "@lib/util/get-product-price"
 import { clx } from "@medusajs/ui"
 import QuickViewModal from "./quick-view-modal"
 import { convertToLocale } from "@lib/util/money"
+import BnplWidget from "@modules/products/components/product-actions/bnpl-widget"
 
 function AddToCartBtn({ product, onOpenModal }: { product: HttpTypes.StoreProduct, onOpenModal: () => void }) {
   const [isAdding, setIsAdding] = useState(false)
@@ -57,10 +58,12 @@ export default function ProductCard({
   product,
   className,
   isNew,
+  bnplProviders = [],
 }: {
   product: HttpTypes.StoreProduct
   className?: string
   isNew?: boolean
+  bnplProviders?: Array<"koko" | "mintpay">
 }) {
   const [isHovered, setIsHovered] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -185,6 +188,15 @@ export default function ProductCard({
           )}
         </div>
       </div>
+
+      {cheapestPrice && bnplProviders.length > 0 && (
+        <BnplWidget
+          price={cheapestPrice.calculated_price_number}
+          currencyCode={cheapestPrice.currency_code}
+          providers={bnplProviders}
+          compact
+        />
+      )}
     </div>
   )
 
