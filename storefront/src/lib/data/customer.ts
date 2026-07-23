@@ -132,6 +132,8 @@ export const addCustomerAddress = async (
     province: (formData.get("province") as string) || "",
     country_code: (formData.get("country_code") as string)?.toLowerCase() || "lk",
     phone: (formData.get("phone") as string) || "",
+    is_default_shipping: formData.get("is_default_shipping") === "true",
+    is_default_billing: formData.get("is_default_billing") === "true",
   }
 
   return sdk.store.customer
@@ -163,7 +165,13 @@ export const updateCustomerAddress = async (
   currentState: Record<string, unknown>,
   formData: FormData
 ): Promise<any> => {
-  const addressId = currentState.addressId as string
+  // Fall back to a hidden "address_id" form field when the caller didn't
+  // seed addressId into useActionState's initial state (or it went stale —
+  // useActionState only reads its initial-state argument once, on first
+  // mount, so a prop-driven id computed on later renders can't reach it
+  // that way).
+  const addressId =
+    (currentState.addressId as string) || (formData.get("address_id") as string)
 
   const address = {
     first_name: formData.get("first_name") as string,
