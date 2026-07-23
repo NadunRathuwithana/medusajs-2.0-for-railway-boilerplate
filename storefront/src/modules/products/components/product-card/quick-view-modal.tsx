@@ -36,15 +36,6 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
   const [isMounted, setIsMounted] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
 
-  // Images
-  const uniqueImages = useMemo(() => {
-    const allImages = [
-      product.thumbnail,
-      ...(product.images?.map((i) => i.url) || []),
-    ].filter(Boolean) as string[]
-    return Array.from(new Set(allImages))
-  }, [product.thumbnail, product.images])
-
   // Variant selection logic
   useEffect(() => {
     if (product.variants?.length === 1) {
@@ -61,22 +52,34 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
     })
   }, [product.variants, options])
 
-  // Sync main image with selected variant. Keyed only on the variant's
-  // identity (not on currentIndex) — same mechanism as the PDP's
-  // ImageGallery reset effect — so this only fires when the *variant*
-  // changes, never in reaction to the user's own arrow/dot navigation.
-  // Including currentIndex here (as before) made every manual nav click
-  // re-trigger this effect, which recomputed the same variant-image index
-  // and snapped straight back to it — arrows appeared "dead".
-  useEffect(() => {
-    if (!selectedVariant) return
-    const variantImage = selectedVariant.thumbnail || selectedVariant.images?.[0]?.url
-    if (!variantImage) return
-    const index = uniqueImages.indexOf(variantImage)
-    if (index !== -1) {
-      setCurrentIndex(index)
+  // Images — same mechanism as the PDP's ImageGallery: swap the whole list
+  // to the selected variant's own images (not just "jump to a matching
+  // index" within one merged list), falling back to the product's combined
+  // images when no variant is selected yet or it has none of its own.
+  const baseImages = useMemo(() => {
+    const allImages = [
+      product.thumbnail,
+      ...(product.images?.map((i) => i.url) || []),
+    ].filter(Boolean) as string[]
+    return Array.from(new Set(allImages))
+  }, [product.thumbnail, product.images])
+
+  const uniqueImages = useMemo(() => {
+    if (selectedVariant?.images?.length) {
+      return Array.from(
+        new Set(selectedVariant.images.map((i) => i.url).filter(Boolean) as string[])
+      )
     }
-  }, [selectedVariant?.id, uniqueImages])
+    return baseImages
+  }, [selectedVariant, baseImages])
+
+  // Reset to the first image whenever the active variant changes — keyed
+  // only on the variant's identity, never on currentIndex itself, so
+  // manual arrow/dot navigation isn't fought (same reasoning as the PDP's
+  // reset effect).
+  useEffect(() => {
+    setCurrentIndex(0)
+  }, [selectedVariant?.id])
 
   const setOptionValue = (title: string, value: string) => {
     setOptions((prev) => ({ ...prev, [title]: value }))
@@ -184,25 +187,28 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
             </>
           )}
 
-          {/* Dots — capped at 3, even if there are 20+ images. Each dot
-              represents an equal bucket of images rather than one dot per
-              image, since that becomes unusable for products with a lot
-              of photos. */}
+          {/* Dots — dynamic pagination: at most 3 visible at a time, each
+              mapped to a real image index (not a bucket). The window
+              slides so the active dot stays centered as you navigate,
+              which stays usable even with 20+ images. */}
           <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2 z-20 px-4">
             {(() => {
-              const dotCount = Math.min(uniqueImages.length, 3)
-              const bucketSize = Math.ceil(uniqueImages.length / dotCount)
-              const activeDot = Math.min(Math.floor(currentIndex / bucketSize), dotCount - 1)
-              return Array.from({ length: dotCount }).map((_, dotIdx) => (
+              const maxVisible = Math.min(uniqueImages.length, 3)
+              const windowStart = Math.min(
+                Math.max(currentIndex - 1, 0),
+                Math.max(uniqueImages.length - maxVisible, 0)
+              )
+              const visibleIndexes = Array.from({ length: maxVisible }, (_, i) => windowStart + i)
+              return visibleIndexes.map((idx) => (
                 <button
-                  key={dotIdx}
+                  key={idx}
                   onClick={(e) => {
                     e.stopPropagation()
-                    setCurrentIndex(dotIdx * bucketSize)
+                    setCurrentIndex(idx)
                   }}
                   className={clx(
                     "h-2.5 rounded-full transition-all duration-300 shadow-sm",
-                    dotIdx === activeDot ? "w-8 bg-white" : "w-2.5 bg-white/70 hover:bg-white"
+                    idx === currentIndex ? "w-8 bg-white" : "w-2.5 bg-white/70 hover:bg-white"
                   )}
                 />
               ))
