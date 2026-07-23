@@ -187,33 +187,42 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
             </>
           )}
 
-          {/* Dots — dynamic pagination: at most 3 visible at a time, each
-              mapped to a real image index (not a bucket). The window
-              slides so the active dot stays centered as you navigate,
-              which stays usable even with 20+ images. */}
-          <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2 z-20 px-4">
-            {(() => {
-              const maxVisible = Math.min(uniqueImages.length, 3)
-              const windowStart = Math.min(
-                Math.max(currentIndex - 1, 0),
-                Math.max(uniqueImages.length - maxVisible, 0)
-              )
-              const visibleIndexes = Array.from({ length: maxVisible }, (_, i) => windowStart + i)
-              return visibleIndexes.map((idx) => (
-                <button
-                  key={idx}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setCurrentIndex(idx)
-                  }}
-                  className={clx(
-                    "h-2.5 rounded-full transition-all duration-300 shadow-sm",
-                    idx === currentIndex ? "w-8 bg-white" : "w-2.5 bg-white/70 hover:bg-white"
-                  )}
-                />
-              ))
-            })()}
-          </div>
+          {/* Dots — inspired by Swiper's dynamicBullets pagination: every
+              dot stays mounted (so it can slide, not pop), but only those
+              within 2 positions of the active image are visible, tapering
+              in size the further they are (scale 1 / 0.66 / 0.33 — the
+              exact steps Swiper itself uses), everything further out
+              collapses to 0. The whole strip re-centers on the active dot
+              as you navigate, so it stays compact even with 20+ images. */}
+          {uniqueImages.length > 1 && (
+            <div className="absolute bottom-6 left-0 right-0 z-20 px-4 overflow-hidden flex justify-center">
+              <div className="flex items-center gap-1.5 transition-transform duration-200 ease-out">
+                {uniqueImages.map((_, idx) => {
+                  const distance = Math.abs(idx - currentIndex)
+                  const scale = distance === 0 ? 1 : distance === 1 ? 0.66 : distance === 2 ? 0.33 : 0
+                  return (
+                    <button
+                      key={idx}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setCurrentIndex(idx)
+                      }}
+                      style={{
+                        transform: `scale(${scale})`,
+                        width: scale === 0 ? 0 : 10,
+                        marginLeft: scale === 0 ? 0 : undefined,
+                        marginRight: scale === 0 ? 0 : undefined,
+                      }}
+                      className={clx(
+                        "h-2.5 rounded-full shadow-sm transition-all duration-200 ease-out flex-shrink-0",
+                        idx === currentIndex ? "bg-white" : "bg-white/70 hover:bg-white"
+                      )}
+                    />
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right: Details */}
