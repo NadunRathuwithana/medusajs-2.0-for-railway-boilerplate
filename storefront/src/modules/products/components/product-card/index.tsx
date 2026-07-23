@@ -194,6 +194,7 @@ export default function ProductCard({
           price={cheapestPrice.calculated_price_number}
           currencyCode={cheapestPrice.currency_code}
           providers={bnplProviders}
+          compact
         />
       )}
     </div>
