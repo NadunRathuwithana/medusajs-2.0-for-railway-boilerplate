@@ -1,4 +1,6 @@
 import { getProductsList } from "@lib/data/products"
+import { getRegion } from "@lib/data/regions"
+import { getBnplProviders } from "@lib/data/payment"
 import ProductCard from "@modules/products/components/product-card"
 import { Pagination } from "@modules/store/components/pagination"
 
@@ -11,15 +13,19 @@ export default async function AllProducts({
 }) {
   const limit = 20
 
-  const { response } = await getProductsList({
-    pageParam: page,
-    queryParams: {
-      limit,
-    },
-    countryCode,
-  })
+  const [{ response }, region] = await Promise.all([
+    getProductsList({
+      pageParam: page,
+      queryParams: {
+        limit,
+      },
+      countryCode,
+    }),
+    getRegion(countryCode),
+  ])
 
   const { products, count } = response
+  const bnplProviders = region ? await getBnplProviders(region.id) : []
 
   if (!products || products.length === 0) {
     return null
@@ -44,7 +50,7 @@ export default async function AllProducts({
       >
         {products.map((product) => (
           <li key={product.id}>
-            <ProductCard product={product} />
+            <ProductCard product={product} bnplProviders={bnplProviders} />
           </li>
         ))}
       </ul>

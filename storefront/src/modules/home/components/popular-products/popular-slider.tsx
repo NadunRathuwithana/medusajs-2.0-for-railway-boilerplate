@@ -9,10 +9,12 @@ export default function PopularSlider({
   products,
   viewAllLink,
   isNew,
+  bnplProviders = [],
 }: {
   products: HttpTypes.StoreProduct[]
   viewAllLink?: string
   isNew?: boolean
+  bnplProviders?: Array<"koko" | "mintpay">
 }) {
   const sliderRef = useRef<HTMLUListElement>(null)
 
@@ -65,7 +67,7 @@ export default function PopularSlider({
       >
         {products.map((product) => (
           <li key={product.id} className="w-[85vw] md:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] snap-start flex-shrink-0 group">
-            <ProductCard product={product} isNew={isNew} />
+            <ProductCard product={product} isNew={isNew} bnplProviders={bnplProviders} />
           </li>
         ))}
       </ul>
