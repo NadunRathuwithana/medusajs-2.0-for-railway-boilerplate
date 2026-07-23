@@ -14,14 +14,14 @@ import ProductPrice from "../product-price"
 import { addToCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { getProductPrice } from "@lib/util/get-product-price"
-import KokoWidget from "./koko-widget"
-import { isKoko } from "@lib/constants"
+import BnplWidget from "./bnpl-widget"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
   disabled?: boolean
   isKokoEnabled?: boolean
+  isMintpayEnabled?: boolean
 }
 
 const optionsAsKeymap = (variantOptions: any) => {
@@ -40,6 +40,7 @@ export default function ProductActions({
   region,
   disabled,
   isKokoEnabled,
+  isMintpayEnabled,
 }: ProductActionsProps) {
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
@@ -188,9 +189,12 @@ export default function ProductActions({
           <ProductPrice product={product} variant={selectedVariant} />
         </div>
 
-        {/* Koko Pay Widget */}
+        {/* BNPL (Koko / Mintpay) installment widget */}
         {(() => {
-          if (!isKokoEnabled) return null
+          const bnplProviders: Array<"koko" | "mintpay"> = []
+          if (isKokoEnabled) bnplProviders.push("koko")
+          if (isMintpayEnabled) bnplProviders.push("mintpay")
+          if (bnplProviders.length === 0) return null
 
           const { cheapestPrice, variantPrice } = getProductPrice({
             product,
@@ -200,9 +204,10 @@ export default function ProductActions({
 
           if (selectedPrice?.calculated_price_number) {
             return (
-              <KokoWidget 
-                price={selectedPrice.calculated_price_number} 
-                currencyCode={selectedPrice.currency_code} 
+              <BnplWidget
+                price={selectedPrice.calculated_price_number}
+                currencyCode={selectedPrice.currency_code}
+                providers={bnplProviders}
               />
             )
           }
