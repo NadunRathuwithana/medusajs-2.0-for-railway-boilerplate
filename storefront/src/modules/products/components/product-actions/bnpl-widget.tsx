@@ -4,7 +4,7 @@ type BnplProviderKey = "koko" | "mintpay"
 
 const PROVIDER_LOGOS: Record<BnplProviderKey, { src: string; alt: string }> = {
   koko: { src: "/payment/koko-pay-sri-lanka-accepted.png", alt: "Koko Pay Sri Lanka" },
-  mintpay: { src: "/payment/mintpay.png", alt: "Mintpay" },
+  mintpay: { src: "/payment/mintpay-no-bg.png", alt: "Mintpay" },
 }
 
 export default function BnplWidget({
