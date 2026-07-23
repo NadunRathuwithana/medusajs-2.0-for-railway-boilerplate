@@ -8,6 +8,10 @@ const PROVIDER_LOGOS: Record<BnplProviderKey, { src: string; alt: string }> = {
   mintpay: { src: "/payment/mintpay-no-bg.png", alt: "Mintpay" },
 }
 
+// Fixed display order (Mintpay first, then Koko) regardless of the order
+// `providers` was computed in.
+const DISPLAY_ORDER: BnplProviderKey[] = ["mintpay", "koko"]
+
 export default function BnplWidget({
   price,
   currencyCode = "LKR",
@@ -23,28 +27,30 @@ export default function BnplWidget({
 }) {
   if (!price || providers.length === 0) return null
 
-  const installment = price / 3
+  const installment = convertToLocale({ amount: price / 3, currency_code: currencyCode })
 
   return (
     <div
-      className={clx("flex flex-wrap items-center gap-1 font-medium", {
-        "text-[15px] mt-[-10px] mb-4": !compact,
-        "text-[11px] mt-0.5": compact,
+      className={clx("flex flex-col font-medium", {
+        "gap-1 text-base mt-1 mb-4": !compact,
+        "gap-0.5 text-[13px] mt-1": compact,
       })}
     >
-      <span className="text-[#888888]">
-        or 3 X <span className="font-bold">{convertToLocale({ amount: installment, currency_code: currencyCode })}</span> with
-      </span>
-      {providers.map((key) => {
+      {DISPLAY_ORDER.filter((key) => providers.includes(key)).map((key) => {
         const logo = PROVIDER_LOGOS[key]
         return (
-          <img
-            key={key}
-            src={logo.src}
-            alt={logo.alt}
-            title={logo.alt}
-            className={clx("object-contain ml-1", compact ? "h-3.5" : "h-6 translate-y-[-1px]")}
-          />
+          <div key={key} className="flex flex-wrap items-center gap-1">
+            <span className="text-[#888888]">
+              or 3 X <span className="font-bold">{installment}</span>
+              {key === "mintpay" && " or 2.5% cashback"} with
+            </span>
+            <img
+              src={logo.src}
+              alt={logo.alt}
+              title={logo.alt}
+              className={clx("object-contain ml-1", compact ? "h-4" : "h-7")}
+            />
+          </div>
         )
       })}
     </div>
