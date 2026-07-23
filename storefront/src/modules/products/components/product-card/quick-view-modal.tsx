@@ -186,44 +186,6 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
               </button>
             </>
           )}
-
-          {/* Dots — inspired by Swiper's dynamicBullets pagination (scale
-              1 / 0.66 / 0.33 taper by distance from active). Always
-              exactly `maxSlots` dots, so the row's width never changes and
-              stays put in the center — only which images the slots point
-              to (via windowStart) and each dot's scale change. */}
-          {uniqueImages.length > 1 && (() => {
-            const maxSlots = Math.min(uniqueImages.length, 5)
-            const windowStart = Math.min(
-              Math.max(currentIndex - 2, 0),
-              Math.max(uniqueImages.length - maxSlots, 0)
-            )
-            const slots = Array.from({ length: maxSlots }, (_, i) => windowStart + i)
-            return (
-              <div className="absolute bottom-6 left-0 right-0 z-20 flex justify-center">
-                <div className="flex items-center gap-1.5">
-                  {slots.map((idx) => {
-                    const distance = Math.abs(idx - currentIndex)
-                    const scale = distance === 0 ? 1 : distance === 1 ? 0.66 : 0.33
-                    return (
-                      <button
-                        key={idx}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setCurrentIndex(idx)
-                        }}
-                        style={{ transform: `scale(${scale})` }}
-                        className={clx(
-                          "h-2.5 w-2.5 rounded-full shadow-sm transition-transform duration-200 ease-out flex-shrink-0",
-                          idx === currentIndex ? "bg-white" : "bg-white/70 hover:bg-white"
-                        )}
-                      />
-                    )
-                  })}
-                </div>
-              </div>
-            )
-          })()}
         </div>
 
         {/* Right: Details */}
