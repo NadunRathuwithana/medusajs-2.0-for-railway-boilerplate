@@ -8,10 +8,11 @@ import debounce from "lodash/debounce"
 
 import { setAddresses } from "@lib/data/cart"
 import compareAddresses from "@lib/util/compare-addresses"
+import { isAddressesFormComplete } from "@lib/util/checkout-validation"
+import { useLiveCheckout } from "@modules/checkout/context/live-checkout-context"
 import { HttpTypes } from "@medusajs/types"
 import { useActionState } from "react"
 import BillingAddress from "../billing_address"
-import ErrorMessage from "../error-message"
 import ShippingAddress from "../shipping-address"
 import { SubmitButton } from "../submit-button"
 
@@ -32,9 +33,13 @@ const Addresses = ({
       : true
   )
 
-  const [message, formAction] = useActionState(setAddresses, null)
+  // Per-field red-border errors (see ShippingAddress/BillingAddress) and the
+  // Review step's banner near "Place order" cover error display now — this
+  // action's own message is intentionally not rendered here anymore.
+  const [, formAction] = useActionState(setAddresses, null)
 
   const formRef = useRef<HTMLFormElement>(null)
+  const { setAddressesComplete } = useLiveCheckout()
 
   const debouncedSubmit = useRef(
     debounce(() => {
@@ -44,16 +49,28 @@ const Addresses = ({
     }, 1500)
   ).current
 
+  // Re-check the form's *current on-screen* values on every keystroke —
+  // synchronous, no network — so the Payment step's submit button reacts
+  // instantly (e.g. disables itself the moment the phone field is
+  // cleared) instead of only catching it ~1.5s later once the debounced
+  // save reaches the server.
+  const handleFormChange = () => {
+    if (formRef.current) {
+      setAddressesComplete(isAddressesFormComplete(new FormData(formRef.current)))
+    }
+    debouncedSubmit()
+  }
+
   return (
     <div className="bg-white">
       <div className="flex flex-row items-center justify-between mb-4">
-        <h2 className="flex flex-row text-[24px] font-bold text-bold gap-x-2 items-center">
+        <h2 className="flex flex-row text-[20px] sm:text-[24px] font-bold text-bold gap-x-2 items-center">
           Shipping Address
           {cart?.shipping_address && <CheckCircleSolid className="text-green-500 w-6 h-6" />}
         </h2>
       </div>
       
-      <form action={formAction} ref={formRef} onChange={debouncedSubmit}>
+      <form action={formAction} ref={formRef} onChange={handleFormChange} noValidate>
           <div className="pb-5">
             <ShippingAddress
               customer={customer}
@@ -70,8 +87,6 @@ const Addresses = ({
                 <BillingAddress cart={cart} />
               </div>
             )}
-            
-            <ErrorMessage error={message} data-testid="address-error-message" />
           </div>
         </form>
       <div className="h-px w-full bg-gray-100 my-5" />

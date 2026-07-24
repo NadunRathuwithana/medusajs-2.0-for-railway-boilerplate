@@ -66,7 +66,7 @@ export default function PopularSlider({
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {products.map((product) => (
-          <li key={product.id} className="w-[85vw] md:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] snap-start flex-shrink-0 group">
+          <li key={product.id} className="w-[88%] md:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] snap-start flex-shrink-0 group">
             <ProductCard product={product} isNew={isNew} bnplProviders={bnplProviders} />
           </li>
         ))}

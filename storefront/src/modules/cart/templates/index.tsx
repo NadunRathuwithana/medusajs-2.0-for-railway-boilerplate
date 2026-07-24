@@ -14,26 +14,26 @@ const CartTemplate = ({
   customer: HttpTypes.StoreCustomer | null
 }) => {
   return (
-    <div className="py-12 md:py-24 bg-[#fafafa] min-h-screen">
-      <div className="content-container max-w-[1140px] mx-auto" data-testid="cart-container">
-        <div className="mb-6">
+    <div className="py-4 sm:py-12 md:py-24 bg-[#fafafa] min-h-screen">
+      <div className="content-container !px-4 sm:!px-6 max-w-[1140px] mx-auto" data-testid="cart-container">
+        <div className="mb-4 sm:mb-6">
           <BackButton />
         </div>
         {cart?.items?.length ? (
-          <div className="flex flex-col lg:flex-row gap-12">
-            <div className="flex flex-col flex-1 gap-y-8">
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-12">
+            <div className="flex flex-col flex-1 gap-y-4 sm:gap-y-8">
               {!customer && (
-                <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100">
                   <SignInPrompt />
                 </div>
               )}
-              <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+              <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100">
                 <ItemsTemplate items={cart?.items} />
               </div>
             </div>
-            
+
             <div className="relative w-full lg:w-[400px] flex-shrink-0">
-              <div className="sticky top-24 bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+              <div className="sticky top-24 bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100">
                 {cart && cart.region && (
                   <Summary cart={cart as any} />
                 )}

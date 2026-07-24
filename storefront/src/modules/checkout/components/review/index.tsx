@@ -3,6 +3,7 @@
 import { clx } from "@medusajs/ui"
 import PaymentButton from "../payment-button"
 import { convertToLocale } from "@lib/util/money"
+import { useLiveCheckout } from "@modules/checkout/context/live-checkout-context"
 
 const Review = ({ cart }: { cart: any }) => {
   const paidByGiftcard =
@@ -11,12 +12,16 @@ const Review = ({ cart }: { cart: any }) => {
   const paymentReady =
     (cart?.shipping_methods?.length ?? 0) !== 0 || paidByGiftcard
 
-  const missingDetails = !cart?.billing_address?.first_name || !cart?.email
+  // Same live (instant, no network) check PaymentButton uses to decide
+  // whether the submit button is actually clickable, so the warning banner
+  // and the button's own gating never disagree with each other.
+  const { addressesComplete } = useLiveCheckout()
+  const missingDetails = !addressesComplete
 
   return (
     <div className="bg-white">
       <div className="flex flex-row items-center justify-between mb-3">
-        <h2 className="flex flex-row text-[24px] font-bold text-bold gap-x-2 items-center">
+        <h2 className="flex flex-row text-[20px] sm:text-[24px] font-bold text-bold gap-x-2 items-center">
           Review & Place Order
         </h2>
       </div>
@@ -29,7 +34,8 @@ const Review = ({ cart }: { cart: any }) => {
           <div>
             <h3 className="text-sm font-semibold text-orange-800">Action Required</h3>
             <p className="text-sm text-orange-700 mt-1">
-              Please complete your billing details (Name and Email) before proceeding.
+              Please complete your contact and address details (including a valid phone
+              number) before proceeding.
             </p>
           </div>
         </div>

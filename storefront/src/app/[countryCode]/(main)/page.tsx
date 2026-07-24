@@ -39,7 +39,7 @@ export default async function Home({
       <OrganisationJsonLd />
       <Hero />
       <div className="flex flex-col gap-16 small:gap-24 py-16 small:py-24">
-        <PopularProducts countryCode={countryCode} collectionHandle="popular" />
+        <PopularProducts countryCode={countryCode} collectionHandle="featured" />
         <PopularProducts countryCode={countryCode} title="New Arrivals" collectionHandle="new-arrivals" />
         <FeatureGrid />
         <AllProducts countryCode={countryCode} page={pageNumber} />

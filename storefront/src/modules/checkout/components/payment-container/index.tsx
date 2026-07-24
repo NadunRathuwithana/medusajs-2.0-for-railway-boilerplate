@@ -12,7 +12,7 @@ type PaymentContainerProps = {
   paymentProviderId: string
   selectedPaymentOptionId: string | null
   disabled?: boolean
-  paymentInfoMap: Record<string, { title: string; icon: JSX.Element }>
+  paymentInfoMap: Record<string, { title: string; shortTitle?: string; icon: JSX.Element }>
   cart?: any
 }
 
@@ -45,7 +45,14 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
             <Radio checked={isSelected} />
             <div className="flex flex-col">
               <span className="text-[15px] font-medium text-gray-900 flex items-center gap-2">
-                {paymentInfoMap[paymentProviderId]?.title || paymentProviderId}
+                <span className="sm:hidden">
+                  {paymentInfoMap[paymentProviderId]?.shortTitle ||
+                    paymentInfoMap[paymentProviderId]?.title ||
+                    paymentProviderId}
+                </span>
+                <span className="hidden sm:inline">
+                  {paymentInfoMap[paymentProviderId]?.title || paymentProviderId}
+                </span>
                 {getPaymentPromoInfo(paymentProviderId).tag && (
                   <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
                     {getPaymentPromoInfo(paymentProviderId).tag}

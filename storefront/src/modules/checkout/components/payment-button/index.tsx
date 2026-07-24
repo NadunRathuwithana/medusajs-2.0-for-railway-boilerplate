@@ -9,6 +9,7 @@ import Spinner from "@modules/common/icons/spinner"
 import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { isKoko, isManual, isMintpay, isOnepay, isPaypal, isStripe } from "@lib/constants"
+import { useLiveCheckout } from "@modules/checkout/context/live-checkout-context"
 import { clx } from "@medusajs/ui"
 
 type PaymentButtonProps = {
@@ -92,15 +93,19 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       ? paymentSession
       : undefined
 
-  // Missing required checkout info (address, email, shipping) — the button stays
-  // disabled with no spinner, since nothing is "in progress"; the user needs to
-  // go fill something in.
+  // Missing (or invalid) required checkout info. addressesComplete comes
+  // from the Addresses form's live on-screen values (recomputed
+  // synchronously on every keystroke, no network) — so clearing the phone
+  // field disables this button instantly, not ~1.5s later once the
+  // debounced save reaches the server. Shipping method is checked
+  // separately since that's its own explicit selection step, not text
+  // that gets typed/cleared the same way.
+  const { addressesComplete } = useLiveCheckout()
+  const paidByGiftcard =
+    (cart as any)?.gift_cards?.length > 0 && cart.total === 0
   const missingInfo =
-    !cart ||
-    !cart.shipping_address ||
-    !cart.billing_address ||
-    !cart.email ||
-    (cart.shipping_methods?.length ?? 0) < 1
+    !addressesComplete ||
+    ((cart.shipping_methods?.length ?? 0) < 1 && !paidByGiftcard)
 
   // A payment session is actively being created/synced for the selected method —
   // this IS "in progress", so the button stays disabled AND shows a spinner.
@@ -459,7 +464,10 @@ const HostedPaymentButton = ({
   }, [notReady, sessionReady])
 
   const handlePayment = () => {
-    if (!redirectUrl) {
+    // notReady already reflects the live (instant, no network) Addresses
+    // form validity — this is just a final synchronous guard in case the
+    // disabled attribute was somehow bypassed.
+    if (!redirectUrl || notReady) {
       return
     }
     setSubmitting(true)
@@ -524,7 +532,10 @@ const KokoPaymentButton = ({
   }, [notReady, sessionReady])
 
   const handleClick = () => {
-    if (!formRef.current || !formAction || !fields) {
+    // notReady already reflects the live (instant, no network) Addresses
+    // form validity — this is just a final synchronous guard in case the
+    // disabled attribute was somehow bypassed.
+    if (!formRef.current || !formAction || !fields || notReady) {
       return
     }
     setSubmitting(true)
@@ -619,7 +630,10 @@ const MintpayPaymentButton = ({
   }, [notReady, sessionReady])
 
   const handleClick = () => {
-    if (!formRef.current || !formAction || !fields) {
+    // notReady already reflects the live (instant, no network) Addresses
+    // form validity — this is just a final synchronous guard in case the
+    // disabled attribute was somehow bypassed.
+    if (!formRef.current || !formAction || !fields || notReady) {
       return
     }
     setSubmitting(true)

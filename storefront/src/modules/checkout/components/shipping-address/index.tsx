@@ -6,6 +6,7 @@ import { mapKeys } from "lodash"
 import React, { useEffect, useMemo, useState } from "react"
 import AddressSelect from "../address-select"
 import CountrySelect from "../country-select"
+import { isValidEmail, isValidPhone } from "@lib/util/checkout-validation"
 
 const ShippingAddress = ({
   customer,
@@ -81,6 +82,17 @@ const ShippingAddress = ({
     })
   }
 
+  // In-page validation errors, replacing the browser's native tooltip/red
+  // outline. Only shown once a field has been "touched" (blurred at least
+  // once) — so an empty required field doesn't already look like an error
+  // before the user has even had a chance to fill it in.
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setTouched((prev) => ({ ...prev, [e.target.name]: true }))
+  }
+  const fieldError = (name: string, isValid: boolean, message: string) =>
+    touched[name] && !isValid ? message : undefined
+
   return (
     <>
       {customer && (addressesInRegion?.length || 0) > 0 && (
@@ -106,6 +118,12 @@ const ShippingAddress = ({
           autoComplete="given-name"
           value={formData["shipping_address.first_name"] || ""}
           onChange={handleChange}
+          onBlur={handleBlur}
+          error={fieldError(
+            "shipping_address.first_name",
+            !!formData["shipping_address.first_name"],
+            "First name is required"
+          )}
           required
           data-testid="shipping-first-name-input"
         />
@@ -115,6 +133,12 @@ const ShippingAddress = ({
           autoComplete="family-name"
           value={formData["shipping_address.last_name"] || ""}
           onChange={handleChange}
+          onBlur={handleBlur}
+          error={fieldError(
+            "shipping_address.last_name",
+            !!formData["shipping_address.last_name"],
+            "Last name is required"
+          )}
           required
           data-testid="shipping-last-name-input"
         />
@@ -124,7 +148,14 @@ const ShippingAddress = ({
           autoComplete="address-line1"
           value={formData["shipping_address.address_1"] || ""}
           onChange={handleChange}
+          onBlur={handleBlur}
+          error={fieldError(
+            "shipping_address.address_1",
+            !!formData["shipping_address.address_1"],
+            "Address is required"
+          )}
           required
+          wrapperClassName="col-span-2"
           data-testid="shipping-address-input"
         />
         <Input
@@ -133,6 +164,7 @@ const ShippingAddress = ({
           value={formData["shipping_address.company"] || ""}
           onChange={handleChange}
           autoComplete="organization"
+          wrapperClassName="col-span-2"
           data-testid="shipping-company-input"
         />
         <Input
@@ -141,6 +173,12 @@ const ShippingAddress = ({
           autoComplete="postal-code"
           value={formData["shipping_address.postal_code"] || ""}
           onChange={handleChange}
+          onBlur={handleBlur}
+          error={fieldError(
+            "shipping_address.postal_code",
+            !!formData["shipping_address.postal_code"],
+            "Postal code is required"
+          )}
           required
           data-testid="shipping-postal-code-input"
         />
@@ -150,6 +188,12 @@ const ShippingAddress = ({
           autoComplete="address-level2"
           value={formData["shipping_address.city"] || ""}
           onChange={handleChange}
+          onBlur={handleBlur}
+          error={fieldError(
+            "shipping_address.city",
+            !!formData["shipping_address.city"],
+            "City is required"
+          )}
           required
           data-testid="shipping-city-input"
         />
@@ -160,7 +204,14 @@ const ShippingAddress = ({
           region={cart?.region}
           value={formData["shipping_address.country_code"] || "lk"}
           onChange={handleChange}
+          onBlur={handleBlur}
+          error={fieldError(
+            "shipping_address.country_code",
+            !!(formData["shipping_address.country_code"] || "lk"),
+            "Country is required"
+          )}
           required
+          wrapperClassName="col-span-2"
           data-testid="shipping-country-select"
         />
       </div>
@@ -178,19 +229,32 @@ const ShippingAddress = ({
           label="Email"
           name="email"
           type="email"
-          title="Enter a valid email address."
           autoComplete="email"
           value={formData.email || ""}
           onChange={handleChange}
+          onBlur={handleBlur}
+          error={fieldError(
+            "email",
+            isValidEmail(formData.email),
+            "Enter a valid email address"
+          )}
           required
           data-testid="shipping-email-input"
         />
         <Input
           label="Phone"
           name="shipping_address.phone"
+          type="tel"
           autoComplete="tel"
           value={formData["shipping_address.phone"] || ""}
           onChange={handleChange}
+          onBlur={handleBlur}
+          error={fieldError(
+            "shipping_address.phone",
+            isValidPhone(formData["shipping_address.phone"]),
+            "Enter a valid phone number (7-20 digits)"
+          )}
+          required
           data-testid="shipping-phone-input"
         />
       </div>

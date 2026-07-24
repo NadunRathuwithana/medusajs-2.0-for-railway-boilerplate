@@ -6,10 +6,13 @@ import Bancontact from "@modules/common/icons/bancontact"
 import PayPal from "@modules/common/icons/paypal"
 import { Truck } from "lucide-react"
 
-/* Map of payment provider_id to their title and icon. Add in any payment providers you want to use. */
+/* Map of payment provider_id to their title and icon. Add in any payment providers you want to use.
+   shortTitle is an optional condensed label shown on narrow screens instead of `title`, for
+   options whose full title (e.g. "Mintpay: Buy Now Pay Later") wraps awkwardly next to the logo
+   in the checkout list on mobile. */
 export const paymentInfoMap: Record<
   string,
-  { title: string; icon: React.JSX.Element }
+  { title: string; shortTitle?: string; icon: React.JSX.Element }
 > = {
   pp_stripe_stripe: {
     title: "Credit card",
@@ -37,10 +40,12 @@ export const paymentInfoMap: Record<
   },
   pp_koko_koko: {
     title: "Koko: Buy Now Pay Later",
+    shortTitle: "Koko",
     icon: <img src="/payment/koko-pay-sri-lanka-accepted.png" alt="Koko Pay Sri Lanka accepted" title="Koko Pay Sri Lanka accepted" className="h-6 object-contain" />,
   },
   pp_mintpay_mintpay: {
     title: "Mintpay: Buy Now Pay Later",
+    shortTitle: "Mintpay",
     icon: <img src="/payment/mintpay.png" alt="Mintpay accepted" title="Mintpay accepted" className="h-6 object-contain" />,
   },
   // Add more payment providers here

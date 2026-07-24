@@ -15,8 +15,8 @@ type SummaryProps = {
 
 const Summary = ({ cart }: SummaryProps) => {
   return (
-    <div className="flex flex-col gap-y-6">
-      <h2 className="text-[24px] font-bold text-bold tracking-tight">
+    <div className="flex flex-col gap-y-4 sm:gap-y-6">
+      <h2 className="text-[20px] sm:text-[24px] font-bold text-bold tracking-tight">
         Order Summary
       </h2>
       
