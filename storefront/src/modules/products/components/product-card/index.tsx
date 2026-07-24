@@ -11,6 +11,10 @@ import QuickViewModal from "./quick-view-modal"
 import { convertToLocale } from "@lib/util/money"
 import BnplWidget from "@modules/products/components/product-actions/bnpl-widget"
 
+// Tailwind's `lg` breakpoint — matches the flex-col/lg:flex-row switch used
+// throughout this card, so "mobile" here means the same thing it means there.
+const MOBILE_MEDIA_QUERY = "(max-width: 1023px)"
+
 function AddToCartBtn({ product, onOpenModal }: { product: HttpTypes.StoreProduct, onOpenModal: () => void }) {
   const [isAdding, setIsAdding] = useState(false)
   const countryCode = useParams().countryCode as string
@@ -18,13 +22,22 @@ function AddToCartBtn({ product, onOpenModal }: { product: HttpTypes.StoreProduc
   const hasOptions = (product.variants?.length || 0) > 1
 
   const handleAddToCart = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-
     if (hasOptions) {
+      const isMobile =
+        typeof window !== "undefined" && window.matchMedia(MOBILE_MEDIA_QUERY).matches
+      if (isMobile) {
+        // Let the click bubble up to the card's wrapping Link — on mobile we
+        // skip the options dialog entirely and just go to the product page.
+        return
+      }
+      e.preventDefault()
+      e.stopPropagation()
       onOpenModal()
       return
     }
+
+    e.preventDefault()
+    e.stopPropagation()
 
     if (!product.variants || product.variants.length === 0) return
 
@@ -112,7 +125,7 @@ export default function ProductCard({
         style={{
           width: `${uniqueImages.length * 100}%`,
           transform: `translateX(-${currentIndex * (100 / uniqueImages.length)}%)`,
-          transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)"
+          transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
         {uniqueImages.map((src, idx) => (
@@ -121,25 +134,24 @@ export default function ProductCard({
               src={src}
               alt={`${product.title} - ${idx}`}
               className="absolute inset-0 w-full h-full object-cover object-center"
+              draggable={false}
             />
           </div>
         ))}
       </div>
 
-      <div
-        className={`absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 transition-opacity duration-300 ${
-          isHovered && uniqueImages.length > 1 ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        {uniqueImages.map((_, idx) => (
-          <div
-            key={idx}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              idx === currentIndex ? "w-4 bg-black/40" : "w-1.5 bg-black/30"
-            }`}
-          />
-        ))}
-      </div>
+      {uniqueImages.length > 1 && (
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300">
+          {uniqueImages.map((_, idx) => (
+            <div
+              key={idx}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                idx === currentIndex ? "w-4 bg-black/40" : "w-1.5 bg-black/30"
+              }`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 
@@ -175,6 +187,20 @@ export default function ProductCard({
             <span className="text-sm sm:text-md font-semibold text-gray-500">Coming soon</span>
           )}
         </div>
+
+        {/* Mobile-only: Koko/Mintpay must appear above the Add to Cart button.
+            Desktop keeps its own copy below the price/button row (see below). */}
+        {cheapestPrice && bnplProviders.length > 0 && (
+          <div className="lg:hidden w-full">
+            <BnplWidget
+              price={cheapestPrice.calculated_price_number}
+              currencyCode={cheapestPrice.currency_code}
+              providers={bnplProviders}
+              compact
+            />
+          </div>
+        )}
+
         <div className="w-full lg:w-auto">
           {cheapestPrice ? (
             <AddToCartBtn product={product} onOpenModal={() => setIsModalOpen(true)} />
@@ -190,12 +216,14 @@ export default function ProductCard({
       </div>
 
       {cheapestPrice && bnplProviders.length > 0 && (
-        <BnplWidget
-          price={cheapestPrice.calculated_price_number}
-          currencyCode={cheapestPrice.currency_code}
-          providers={bnplProviders}
-          compact
-        />
+        <div className="hidden lg:block">
+          <BnplWidget
+            price={cheapestPrice.calculated_price_number}
+            currencyCode={cheapestPrice.currency_code}
+            providers={bnplProviders}
+            compact
+          />
+        </div>
       )}
     </div>
   )

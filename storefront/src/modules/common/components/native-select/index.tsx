@@ -13,11 +13,17 @@ export type NativeSelectProps = {
   errors?: Record<string, unknown>
   touched?: Record<string, unknown>
   label?: string
+  // Custom in-page validation message — shown below the field with a red
+  // border/ring, replacing the browser's native validation tooltip/outline.
+  error?: string
+  // Applied to the outer wrapper (label + select + error), not the
+  // <select> itself — e.g. "col-span-2" to span a full row in a grid.
+  wrapperClassName?: string
 } & SelectHTMLAttributes<HTMLSelectElement>
 
 const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
   (
-    { placeholder = "Select...", defaultValue, value, className, children, label, required, name, ...props },
+    { placeholder = "Select...", defaultValue, value, className, wrapperClassName, children, label, required, name, error, ...props },
     ref
   ) => {
     const innerRef = useRef<HTMLSelectElement>(null)
@@ -28,7 +34,7 @@ const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
     )
 
     return (
-      <div className="flex flex-col w-full gap-1.5">
+      <div className={clx("flex flex-col w-full gap-1.5", wrapperClassName)}>
         {label && (
           <label
             htmlFor={name}
@@ -50,10 +56,16 @@ const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
             name={name}
             id={name}
             required={required}
+            aria-invalid={!!error}
             value={value !== undefined ? value : undefined}
             defaultValue={value !== undefined ? undefined : defaultValue}
             {...props}
-            className="appearance-none block w-full h-[38px] px-3 bg-gray-50 border border-gray-200 rounded-lg text-[14px] text-gray-900 focus:outline-none focus:ring-1 focus:ring-black focus:border-black hover:bg-gray-100 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={clx(
+              "appearance-none block w-full h-[38px] px-3 bg-gray-50 border rounded-lg text-[14px] text-gray-900 focus:outline-none focus:ring-1 hover:bg-gray-100 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
+              error
+                ? "border-rose-400 focus:ring-rose-400 focus:border-rose-400 bg-rose-50/60"
+                : "border-gray-200 focus:ring-black focus:border-black"
+            )}
           >
             <option disabled value="">
               {placeholder}
@@ -64,6 +76,11 @@ const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
             <ChevronUpDown className="w-5 h-5" />
           </span>
         </div>
+        {error && (
+          <p className="text-xs text-rose-500 ml-1 -mt-0.5" role="alert">
+            {error}
+          </p>
+        )}
       </div>
     )
   }

@@ -7,6 +7,7 @@ import { createPortal } from "react-dom"
 import { clx } from "@medusajs/ui"
 import { useSearchParams } from "next/navigation"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useGestureZoom } from "@lib/hooks/use-gesture-zoom"
 
 type ImageGalleryProps = {
   product: HttpTypes.StoreProduct
@@ -57,11 +58,33 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
   const [fullscreenIndex, setFullscreenIndex] = useState(0)
   const [mounted, setMounted] = useState(false)
 
-  // Custom left/right-arrow cursor + click-to-navigate on the main image
+  // Custom left/right-arrow cursor + click-to-navigate on the main image (desktop only)
   const mainImageRef = useRef<HTMLDivElement>(null)
   const [isHoveringMain, setIsHoveringMain] = useState(false)
   const [hoverSide, setHoverSide] = useState<"left" | "right">("right")
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
+
+  // Mobile-only main image: swipe to change image (with a live drag-follow,
+  // like a native carousel). Zoom lives in the fullscreen viewer instead of
+  // inline here — a plain tap opens it — so inline zoom is disabled to avoid
+  // a double-tap racing against that tap-to-open.
+  const mobileGesture = useGestureZoom({
+    onSwipeLeft: () => goToNextImage(),
+    onSwipeRight: () => goToPrevImage(),
+    maxScale: 1,
+    doubleTapScale: 1,
+    isAtStart: activeIndex === 0,
+    isAtEnd: activeIndex === images.length - 1,
+  })
+
+  // Fullscreen viewer gestures: swipe to navigate, pinch/double-tap to zoom,
+  // pan while zoomed. Arrow buttons stay desktop-only (see `lightbox` below).
+  const lightboxGesture = useGestureZoom({
+    onSwipeLeft: () => next(),
+    onSwipeRight: () => prev(),
+    maxScale: 4,
+    doubleTapScale: 2.5,
+  })
 
   // Thumbnail strip scroll controls
   const thumbStripRef = useRef<HTMLDivElement>(null)
@@ -74,6 +97,14 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
     setActiveIndex(0)
     setFullscreenIndex(0)
   }, [activeVariant?.id])
+
+  // Zoom shouldn't carry over from one image to the next.
+  useEffect(() => {
+    mobileGesture.reset()
+  }, [activeIndex])
+  useEffect(() => {
+    lightboxGesture.reset()
+  }, [fullscreenIndex, isFullscreen])
 
   // Auto-slide the thumbnail strip so the active thumbnail is always in
   // view, since with many images the strip can be longer than its
@@ -187,12 +218,12 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
         {fullscreenIndex + 1} / {images.length}
       </div>
 
-      {/* Prev */}
+      {/* Prev — desktop only; mobile navigates by swiping */}
       {images.length > 1 && (
         <button
           onClick={(e) => { e.stopPropagation(); prev() }}
           style={{ position: "fixed", left: 24, top: "50%", transform: "translateY(-50%)", zIndex: 100000 }}
-          className="text-white bg-white/10 hover:bg-white/25 backdrop-blur-sm rounded-full p-4 transition-colors"
+          className="hidden lg:block text-white bg-white/10 hover:bg-white/25 backdrop-blur-sm rounded-full p-4 transition-colors"
         >
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M15 18l-6-6 6-6" />
@@ -200,41 +231,60 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
         </button>
       )}
 
-      {/* Full-screen image */}
+      {/* Full-screen image — a sliding track so moving left/right animates
+          like the rest of the gallery, not just a crossfade. */}
       <div
-        style={{ position: "fixed", inset: 0, paddingTop: 56, paddingBottom: images.length > 1 ? 120 : 40 }}
+        ref={lightboxGesture.containerRef}
+        style={{
+          position: "fixed",
+          inset: 0,
+          paddingTop: 56,
+          paddingBottom: images.length > 1 ? 120 : 40,
+          overflow: "hidden",
+          touchAction: lightboxGesture.touchAction,
+        }}
         onClick={(e) => e.stopPropagation()}
+        onTouchStart={lightboxGesture.handlers.onTouchStart}
+        onTouchMove={lightboxGesture.handlers.onTouchMove}
+        onTouchEnd={lightboxGesture.handlers.onTouchEnd}
       >
-        {images.map((image, index) => (
-          <div
-            key={image.id}
-            style={{
-              position: "absolute",
-              inset: 0,
-              opacity: index === fullscreenIndex ? 1 : 0,
-              visibility: index === fullscreenIndex ? "visible" : "hidden",
-              transition: "opacity 0.4s ease-in-out, visibility 0.4s ease-in-out",
-              zIndex: index === fullscreenIndex ? 10 : 0,
-            }}
-          >
-            <Image
-              src={image.url}
-              alt={`${product.title} – view ${index + 1} of ${images.length} | Cardle`}
-              fill
-              sizes="100vw"
-              style={{ objectFit: "contain", transform: index === fullscreenIndex ? "scale(1)" : "scale(0.97)", transition: "transform 0.4s ease-out" }}
-              priority={index === 0}
-            />
-          </div>
-        ))}
+        <div
+          className="flex h-full"
+          style={{
+            width: `${images.length * 100}%`,
+            transform: `translateX(calc(-${fullscreenIndex * (100 / images.length)}% + ${lightboxGesture.dragX}px))`,
+            transition: lightboxGesture.isGesturing ? "none" : "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
+        >
+          {images.map((image, index) => (
+            <div key={image.id} className="relative h-full" style={{ width: `${100 / images.length}%` }}>
+              <Image
+                src={image.url}
+                alt={`${product.title} – view ${index + 1} of ${images.length} | Cardle`}
+                fill
+                sizes="100vw"
+                style={{
+                  objectFit: "contain",
+                  transform:
+                    index === fullscreenIndex
+                      ? `translate(${lightboxGesture.panX}px, ${lightboxGesture.panY}px) scale(${lightboxGesture.scale})`
+                      : undefined,
+                  transition:
+                    index === fullscreenIndex && !lightboxGesture.isGesturing ? "transform 0.3s ease-out" : undefined,
+                }}
+                priority={index === 0}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Next */}
+      {/* Next — desktop only; mobile navigates by swiping */}
       {images.length > 1 && (
         <button
           onClick={(e) => { e.stopPropagation(); next() }}
           style={{ position: "fixed", right: 24, top: "50%", transform: "translateY(-50%)", zIndex: 100000 }}
-          className="text-white bg-white/10 hover:bg-white/25 backdrop-blur-sm rounded-full p-4 transition-colors"
+          className="hidden lg:block text-white bg-white/10 hover:bg-white/25 backdrop-blur-sm rounded-full p-4 transition-colors"
         >
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M9 18l6-6-6-6" />
@@ -278,10 +328,46 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
       `}</style>
 
       <div key={activeVariant?.id || 'default'} className="flex flex-col gap-4 w-full" style={{ animation: "galleryEnter 0.4s ease-out forwards" }}>
-        {/* Main Image */}
+        {/* Main Image — mobile: full-bleed swipe carousel. Tap opens the
+            fullscreen viewer (pinch/double-tap zoom lives there instead, so
+            it doesn't race against tap-to-open here). No arrow buttons. */}
+        <div
+          ref={mobileGesture.containerRef}
+          className="lg:hidden relative -mx-6 w-[calc(100%+3rem)] md:-mx-16 md:w-[calc(100%+8rem)] aspect-[4/5] overflow-hidden bg-gray-100"
+          style={{ touchAction: mobileGesture.touchAction }}
+          onClick={() => openFullscreen(activeIndex)}
+          onTouchStart={mobileGesture.handlers.onTouchStart}
+          onTouchMove={mobileGesture.handlers.onTouchMove}
+          onTouchEnd={mobileGesture.handlers.onTouchEnd}
+        >
+          <div
+            className="flex h-full"
+            style={{
+              width: `${images.length * 100}%`,
+              transform: `translateX(calc(-${activeIndex * (100 / images.length)}% + ${mobileGesture.dragX}px))`,
+              transition: mobileGesture.isGesturing ? "none" : "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
+            }}
+          >
+            {images.map((image, index) => (
+              <div key={image.id} className="relative h-full" style={{ width: `${100 / images.length}%` }}>
+                <Image
+                  src={image.url}
+                  priority={index === 0}
+                  alt={`${product.title} – image ${index + 1} | Cardle`}
+                  fill
+                  sizes="100vw"
+                  style={{ objectFit: "cover" }}
+                  draggable={false}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Main Image — desktop: hover cursor nav + fullscreen viewer */}
         <div
           ref={mainImageRef}
-          className="relative w-full aspect-[4/5] md:aspect-auto md:h-[600px] lg:h-[700px] rounded-3xl overflow-hidden bg-gray-100 group"
+          className="hidden lg:block relative w-full aspect-[4/5] md:aspect-auto md:h-[600px] lg:h-[700px] rounded-3xl overflow-hidden bg-gray-100 group"
           style={{ cursor: images.length > 1 && isHoveringMain ? "none" : "zoom-in" }}
           onMouseEnter={() => setIsHoveringMain(true)}
           onMouseLeave={() => setIsHoveringMain(false)}
@@ -319,7 +405,7 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
               openFullscreen(activeIndex)
             }}
             aria-label="View fullscreen"
-            className="absolute top-4 right-4 z-20 bg-black/40 backdrop-blur-sm text-white rounded-full p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            className="absolute top-4 right-4 z-20 bg-black/40 backdrop-blur-sm text-white rounded-full p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
@@ -342,22 +428,23 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
           )}
         </div>
 
-        {/* Thumbnail strip — outside the main image */}
+        {/* Thumbnail strip — outside the main image. Mobile: full-bleed like
+            the main image above; desktop: contained within the column. */}
         {images.length > 1 && (
-          <div className="relative group/thumbs">
+          <div className="relative group/thumbs -mx-6 w-[calc(100%+3rem)] md:-mx-16 md:w-[calc(100%+8rem)] lg:mx-0 lg:w-full">
             {images.length > 4 && (
               <>
                 <button
                   onClick={() => scrollThumbs("left")}
                   aria-label="Scroll thumbnails left"
-                  className="absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white shadow-md border border-gray-100 rounded-full flex items-center justify-center opacity-0 group-hover/thumbs:opacity-100 transition-opacity hover:bg-gray-50"
+                  className="hidden lg:flex absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white shadow-md border border-gray-100 rounded-full items-center justify-center opacity-0 group-hover/thumbs:opacity-100 transition-opacity hover:bg-gray-50"
                 >
                   <ChevronLeft className="w-4 h-4 text-gray-600" />
                 </button>
                 <button
                   onClick={() => scrollThumbs("right")}
                   aria-label="Scroll thumbnails right"
-                  className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white shadow-md border border-gray-100 rounded-full flex items-center justify-center opacity-0 group-hover/thumbs:opacity-100 transition-opacity hover:bg-gray-50"
+                  className="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white shadow-md border border-gray-100 rounded-full items-center justify-center opacity-0 group-hover/thumbs:opacity-100 transition-opacity hover:bg-gray-50"
                 >
                   <ChevronRight className="w-4 h-4 text-gray-600" />
                 </button>
@@ -365,7 +452,7 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
             )}
             <div
               ref={thumbStripRef}
-              className="flex gap-3 overflow-x-auto pb-1 scroll-smooth"
+              className="flex gap-3 overflow-x-auto pb-1 scroll-smooth px-6 md:px-16 lg:px-0"
               style={{ scrollbarWidth: "none" }}
             >
               {images.map((image, index) => (

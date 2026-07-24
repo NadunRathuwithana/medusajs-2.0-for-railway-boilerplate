@@ -66,7 +66,7 @@ export default function FeatureGrid() {
             className="group/btn inline-flex items-center justify-between w-fit gap-4 bg-white text-[#111111] pl-6 pr-3 py-3 rounded-full text-sm font-bold tracking-widest hover:bg-gray-200 transition-colors"
           >
             Shop the collection
-            <div className="bg-white text-[#111111] p-1 rounded-full flex items-center justify-center transform group-hover/btn:translate-x-1 transition-transform duration-300">
+            <div className="bg-black text-white p-1 rounded-full flex items-center justify-center transform group-hover/btn:translate-x-1 transition-transform duration-300">
               <ArrowRight className="w-4 h-4" />
             </div>
           </LocalizedClientLink>
