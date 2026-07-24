@@ -1,4 +1,4 @@
-import { Label } from "@medusajs/ui"
+import { Label, clx } from "@medusajs/ui"
 import React, { useState } from "react"
 
 import Eye from "@modules/common/icons/eye"
@@ -10,10 +10,13 @@ type InputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> & {
   touched?: Record<string, unknown>
   name: string
   topLabel?: string
+  // Custom in-page validation message — shown below the field with a red
+  // border/ring, replacing the browser's native validation tooltip/outline.
+  error?: string
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ type, name, label, touched, required, topLabel, value, defaultValue, ...props }, ref) => {
+  ({ type, name, label, touched, required, topLabel, value, defaultValue, error, className, onBlur, ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false)
     const inputType = type === "password" && showPassword ? "text" : type
 
@@ -30,20 +33,28 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {topLabel || label}
           {required && <span className="text-rose-500 ml-1">*</span>}
         </label>
-        
+
         <div className="relative w-full">
           <input
             type={inputType}
             name={name}
             id={name}
             required={required}
-            className="block w-full h-[38px] px-3 bg-gray-50 border border-gray-200 rounded-lg text-[14px] text-gray-900 focus:outline-none focus:ring-1 focus:ring-black focus:border-black hover:bg-gray-100 transition-colors duration-200 placeholder:text-gray-400"
+            aria-invalid={!!error}
+            onBlur={onBlur}
+            className={clx(
+              "block w-full h-[38px] px-3 bg-gray-50 border rounded-lg text-[14px] text-gray-900 focus:outline-none focus:ring-1 hover:bg-gray-100 transition-colors duration-200 placeholder:text-gray-400",
+              error
+                ? "border-rose-400 focus:ring-rose-400 focus:border-rose-400 bg-rose-50/60"
+                : "border-gray-200 focus:ring-black focus:border-black",
+              className
+            )}
             ref={ref}
             value={finalValue}
             defaultValue={finalDefaultValue}
             {...props}
           />
-          
+
           {type === "password" && (
             <button
               type="button"
@@ -54,6 +65,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             </button>
           )}
         </div>
+
+        {error && (
+          <p className="text-xs text-rose-500 ml-1 -mt-0.5" role="alert">
+            {error}
+          </p>
+        )}
       </div>
     )
   }

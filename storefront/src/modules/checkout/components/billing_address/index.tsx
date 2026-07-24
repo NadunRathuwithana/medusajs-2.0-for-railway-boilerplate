@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import Input from "@modules/common/components/input"
 import CountrySelect from "../country-select"
 import { HttpTypes } from "@medusajs/types"
+import { isValidPhone } from "@lib/util/checkout-validation"
 
 const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
   const [formData, setFormData] = useState<any>({})
@@ -31,6 +32,16 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
     })
   }
 
+  // In-page validation errors, replacing the browser's native tooltip/red
+  // outline. Only shown once a field has been "touched" (blurred at least
+  // once).
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setTouched((prev) => ({ ...prev, [e.target.name]: true }))
+  }
+  const fieldError = (name: string, isValid: boolean, message: string) =>
+    touched[name] && !isValid ? message : undefined
+
   return (
     <>
       <div className="grid grid-cols-2 gap-4">
@@ -40,6 +51,12 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
           autoComplete="given-name"
           value={formData["billing_address.first_name"] || ""}
           onChange={handleChange}
+          onBlur={handleBlur}
+          error={fieldError(
+            "billing_address.first_name",
+            !!formData["billing_address.first_name"],
+            "First name is required"
+          )}
           required
           data-testid="billing-first-name-input"
         />
@@ -49,6 +66,12 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
           autoComplete="family-name"
           value={formData["billing_address.last_name"] || ""}
           onChange={handleChange}
+          onBlur={handleBlur}
+          error={fieldError(
+            "billing_address.last_name",
+            !!formData["billing_address.last_name"],
+            "Last name is required"
+          )}
           required
           data-testid="billing-last-name-input"
         />
@@ -58,6 +81,12 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
           autoComplete="address-line1"
           value={formData["billing_address.address_1"] || ""}
           onChange={handleChange}
+          onBlur={handleBlur}
+          error={fieldError(
+            "billing_address.address_1",
+            !!formData["billing_address.address_1"],
+            "Address is required"
+          )}
           required
           data-testid="billing-address-input"
         />
@@ -75,6 +104,12 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
           autoComplete="postal-code"
           value={formData["billing_address.postal_code"] || ""}
           onChange={handleChange}
+          onBlur={handleBlur}
+          error={fieldError(
+            "billing_address.postal_code",
+            !!formData["billing_address.postal_code"],
+            "Postal code is required"
+          )}
           required
           data-testid="billing-postal-input"
         />
@@ -84,6 +119,12 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
           autoComplete="address-level2"
           value={formData["billing_address.city"] || ""}
           onChange={handleChange}
+          onBlur={handleBlur}
+          error={fieldError(
+            "billing_address.city",
+            !!formData["billing_address.city"],
+            "City is required"
+          )}
           required
           data-testid="billing-city-input"
         />
@@ -94,6 +135,12 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
           region={cart?.region}
           value={formData["billing_address.country_code"] || "lk"}
           onChange={handleChange}
+          onBlur={handleBlur}
+          error={fieldError(
+            "billing_address.country_code",
+            !!(formData["billing_address.country_code"] || "lk"),
+            "Country is required"
+          )}
           required
           data-testid="billing-country-select"
         />
@@ -101,11 +148,15 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
           label="Phone"
           name="billing_address.phone"
           type="tel"
-          pattern="^\+?[0-9\s\-()]{7,20}$"
-          title="Enter a valid phone number."
           autoComplete="tel"
           value={formData["billing_address.phone"] || ""}
           onChange={handleChange}
+          onBlur={handleBlur}
+          error={fieldError(
+            "billing_address.phone",
+            isValidPhone(formData["billing_address.phone"]),
+            "Enter a valid phone number (7-20 digits)"
+          )}
           required
           data-testid="billing-phone-input"
         />

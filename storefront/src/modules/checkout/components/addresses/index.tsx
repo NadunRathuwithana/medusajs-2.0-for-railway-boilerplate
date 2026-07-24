@@ -68,7 +68,7 @@ const Addresses = ({
         </h2>
       </div>
       
-      <form action={formAction} ref={formRef} onChange={handleFormChange}>
+      <form action={formAction} ref={formRef} onChange={handleFormChange} noValidate>
           <div className="pb-5">
             <ShippingAddress
               customer={customer}
