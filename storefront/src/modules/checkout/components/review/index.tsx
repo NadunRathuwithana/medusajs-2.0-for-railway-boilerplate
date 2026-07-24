@@ -21,7 +21,7 @@ const Review = ({ cart }: { cart: any }) => {
   return (
     <div className="bg-white">
       <div className="flex flex-row items-center justify-between mb-3">
-        <h2 className="flex flex-row text-[24px] font-bold text-bold gap-x-2 items-center">
+        <h2 className="flex flex-row text-[20px] sm:text-[24px] font-bold text-bold gap-x-2 items-center">
           Review & Place Order
         </h2>
       </div>

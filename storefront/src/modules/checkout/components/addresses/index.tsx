@@ -64,7 +64,7 @@ const Addresses = ({
   return (
     <div className="bg-white">
       <div className="flex flex-row items-center justify-between mb-4">
-        <h2 className="flex flex-row text-[24px] font-bold text-bold gap-x-2 items-center">
+        <h2 className="flex flex-row text-[20px] sm:text-[24px] font-bold text-bold gap-x-2 items-center">
           Shipping Address
           {cart?.shipping_address && <CheckCircleSolid className="text-green-500 w-6 h-6" />}
         </h2>
