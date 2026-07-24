@@ -11,6 +11,7 @@ import { getAuthHeaders, getCartId, removeCartId, setCartId } from "./cookies"
 import { getProductsById } from "./products"
 import { getRegion } from "./regions"
 import { listCartShippingMethods } from "./fulfillment"
+import { isCheckoutIncomplete } from "@lib/util/checkout-validation"
 
 export const retrieveCart = cache(async function retrieveCart() {
   const cartId = await getCartId()
@@ -456,6 +457,30 @@ export async function placeOrder() {
   const cartId = await getCartId()
   if (!cartId) {
     throw new Error("No existing cart found when placing an order")
+  }
+
+  // Re-validate against the TRUE current server cart immediately before
+  // completing it. The "Place order" button's enabled state is derived
+  // from the client's cart prop, which can be stale — e.g. the Addresses
+  // form debounces its save by ~1.5s, so a field the user just cleared (or
+  // never filled in) may not have round-tripped to the server yet, or the
+  // button simply hasn't re-rendered with fresh data. Trusting that alone
+  // let orders through with missing/invalid contact info; this check reads
+  // straight from the backend (cache: "no-store") right before completing,
+  // so it can't be bypassed by a stale client render.
+  const currentCart = await sdk.store.cart
+    .retrieve(
+      cartId,
+      { fields: "+region,+region.countries" },
+      { cache: "no-store", ...(await getAuthHeaders()) }
+    )
+    .then(({ cart }) => cart)
+    .catch(() => null)
+
+  if (!currentCart || isCheckoutIncomplete(currentCart)) {
+    throw new Error(
+      "Your contact details or address are incomplete or invalid. Please double-check your email, phone number, and address before placing the order."
+    )
   }
 
   const cartRes = await sdk.store.cart

@@ -100,9 +100,13 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
         <Input
           label="Phone"
           name="billing_address.phone"
+          type="tel"
+          pattern="^\+?[0-9\s\-()]{7,20}$"
+          title="Enter a valid phone number."
           autoComplete="tel"
           value={formData["billing_address.phone"] || ""}
           onChange={handleChange}
+          required
           data-testid="billing-phone-input"
         />
       </div>

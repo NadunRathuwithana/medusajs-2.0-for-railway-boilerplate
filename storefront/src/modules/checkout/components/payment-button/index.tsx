@@ -9,6 +9,7 @@ import Spinner from "@modules/common/icons/spinner"
 import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { isKoko, isManual, isMintpay, isOnepay, isPaypal, isStripe } from "@lib/constants"
+import { isCheckoutIncomplete } from "@lib/util/checkout-validation"
 import { clx } from "@medusajs/ui"
 
 type PaymentButtonProps = {
@@ -92,15 +93,15 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       ? paymentSession
       : undefined
 
-  // Missing required checkout info (address, email, shipping) — the button stays
-  // disabled with no spinner, since nothing is "in progress"; the user needs to
-  // go fill something in.
-  const missingInfo =
-    !cart ||
-    !cart.shipping_address ||
-    !cart.billing_address ||
-    !cart.email ||
-    (cart.shipping_methods?.length ?? 0) < 1
+  // Missing (or invalid) required checkout info — email, full shipping/
+  // billing address including a valid phone, or a selected shipping
+  // method. The button stays disabled with no spinner, since nothing is
+  // "in progress"; the user needs to go fill something in. Re-evaluated
+  // from the live `cart` prop on every render, so re-fetching the cart
+  // (e.g. after the Addresses form syncs) immediately reflects here too —
+  // it previously only checked that shipping_address/billing_address
+  // *objects* existed, not that their fields (esp. phone) were filled in.
+  const missingInfo = isCheckoutIncomplete(cart)
 
   // A payment session is actively being created/synced for the selected method —
   // this IS "in progress", so the button stays disabled AND shows a spinner.

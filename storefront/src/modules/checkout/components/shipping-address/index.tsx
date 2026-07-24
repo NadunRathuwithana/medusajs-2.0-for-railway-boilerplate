@@ -188,9 +188,13 @@ const ShippingAddress = ({
         <Input
           label="Phone"
           name="shipping_address.phone"
+          type="tel"
+          pattern="^\+?[0-9\s\-()]{7,20}$"
+          title="Enter a valid phone number."
           autoComplete="tel"
           value={formData["shipping_address.phone"] || ""}
           onChange={handleChange}
+          required
           data-testid="shipping-phone-input"
         />
       </div>

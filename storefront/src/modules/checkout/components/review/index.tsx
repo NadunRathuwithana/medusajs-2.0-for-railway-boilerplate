@@ -3,6 +3,7 @@
 import { clx } from "@medusajs/ui"
 import PaymentButton from "../payment-button"
 import { convertToLocale } from "@lib/util/money"
+import { isCheckoutIncomplete } from "@lib/util/checkout-validation"
 
 const Review = ({ cart }: { cart: any }) => {
   const paidByGiftcard =
@@ -11,7 +12,11 @@ const Review = ({ cart }: { cart: any }) => {
   const paymentReady =
     (cart?.shipping_methods?.length ?? 0) !== 0 || paidByGiftcard
 
-  const missingDetails = !cart?.billing_address?.first_name || !cart?.email
+  // Same deep field-by-field check PaymentButton uses to decide whether the
+  // submit button is actually clickable — previously this only checked
+  // billing_address.first_name and email, so the warning banner and the
+  // button's own gating could disagree with each other.
+  const missingDetails = isCheckoutIncomplete(cart)
 
   return (
     <div className="bg-white">
@@ -29,7 +34,8 @@ const Review = ({ cart }: { cart: any }) => {
           <div>
             <h3 className="text-sm font-semibold text-orange-800">Action Required</h3>
             <p className="text-sm text-orange-700 mt-1">
-              Please complete your billing details (Name and Email) before proceeding.
+              Please complete your contact and address details (including a valid phone
+              number) before proceeding.
             </p>
           </div>
         </div>
