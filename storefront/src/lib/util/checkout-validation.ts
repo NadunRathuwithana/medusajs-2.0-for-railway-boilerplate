@@ -38,6 +38,20 @@ function isAddressComplete(address?: {
 }
 
 /**
+ * True when the cart has a valid email plus complete shipping and billing
+ * addresses (name, address line, city, postal code, country, valid phone).
+ * Does not check shipping method — see isCheckoutIncomplete for that.
+ */
+export function isCartAddressesComplete(cart: any): boolean {
+  return !!(
+    cart &&
+    isValidEmail(cart.email) &&
+    isAddressComplete(cart.shipping_address) &&
+    isAddressComplete(cart.billing_address)
+  )
+}
+
+/**
  * True when the cart is missing (or has invalid) required checkout details —
  * email, shipping address, billing address, or a selected shipping method
  * (unless the order is fully paid by gift card, which skips shipping).
@@ -49,9 +63,40 @@ export function isCheckoutIncomplete(cart: any): boolean {
     cart.gift_cards && cart.gift_cards.length > 0 && cart.total === 0
 
   return (
-    !isValidEmail(cart.email) ||
-    !isAddressComplete(cart.shipping_address) ||
-    !isAddressComplete(cart.billing_address) ||
+    !isCartAddressesComplete(cart) ||
     ((cart.shipping_methods?.length ?? 0) < 1 && !paidByGiftcard)
   )
+}
+
+/**
+ * Same completeness check as isCheckoutIncomplete, but reads straight off a
+ * live <form>'s FormData instead of the (server-round-trip-lagged) cart
+ * object — used to validate the Addresses form's *current on-screen*
+ * values instantly, on every keystroke, with zero network involved. This
+ * is what lets the Payment step's submit button react in real time the
+ * moment a required field is cleared, instead of only catching it after
+ * the debounced save reaches the server.
+ */
+export function isAddressFormDataComplete(fd: FormData, prefix: string): boolean {
+  const get = (key: string) => ((fd.get(`${prefix}.${key}`) as string) || "").trim()
+  return !!(
+    get("first_name") &&
+    get("last_name") &&
+    get("address_1") &&
+    get("city") &&
+    get("postal_code") &&
+    get("country_code") &&
+    isValidPhone(get("phone"))
+  )
+}
+
+export function isAddressesFormComplete(fd: FormData): boolean {
+  const email = ((fd.get("email") as string) || "").trim()
+  const sameAsBilling = fd.get("same_as_billing") === "on"
+
+  if (!isValidEmail(email)) return false
+  if (!isAddressFormDataComplete(fd, "shipping_address")) return false
+  if (!sameAsBilling && !isAddressFormDataComplete(fd, "billing_address")) return false
+
+  return true
 }

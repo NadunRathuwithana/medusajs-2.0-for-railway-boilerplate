@@ -11,7 +11,6 @@ import { getAuthHeaders, getCartId, removeCartId, setCartId } from "./cookies"
 import { getProductsById } from "./products"
 import { getRegion } from "./regions"
 import { listCartShippingMethods } from "./fulfillment"
-import { isCheckoutIncomplete } from "@lib/util/checkout-validation"
 
 export const retrieveCart = cache(async function retrieveCart() {
   const cartId = await getCartId()
@@ -453,60 +452,10 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
   return null
 }
 
-const CHECKOUT_INCOMPLETE_MESSAGE =
-  "Your contact details or address are incomplete or invalid. Please double-check your email, phone number, and address before placing the order."
-
-/**
- * Re-fetches the cart straight from the backend (cache: "no-store" — never
- * the client's possibly-stale cart prop, and never a cached response) and
- * checks it's actually complete. This is the one place both the
- * direct-checkout flow (placeOrder, below) and the redirect-based BNPL
- * buttons (Koko/Mintpay/OnePay — which never call placeOrder() at all
- * before sending the customer to the payment gateway) call before doing
- * anything, so neither path can proceed on stale/incomplete data.
- */
-export async function validateCheckoutReady(): Promise<
-  { ok: true } | { ok: false; message: string }
-> {
-  const cartId = await getCartId()
-  if (!cartId) {
-    return { ok: false, message: "No existing cart found." }
-  }
-
-  const currentCart = await sdk.store.cart
-    .retrieve(
-      cartId,
-      { fields: "+region,+region.countries" },
-      { cache: "no-store", ...(await getAuthHeaders()) }
-    )
-    .then(({ cart }) => cart)
-    .catch(() => null)
-
-  if (!currentCart || isCheckoutIncomplete(currentCart)) {
-    return { ok: false, message: CHECKOUT_INCOMPLETE_MESSAGE }
-  }
-
-  return { ok: true }
-}
-
 export async function placeOrder() {
   const cartId = await getCartId()
   if (!cartId) {
     throw new Error("No existing cart found when placing an order")
-  }
-
-  // Re-validate against the TRUE current server cart immediately before
-  // completing it. The "Place order" button's enabled state is derived
-  // from the client's cart prop, which can be stale — e.g. the Addresses
-  // form debounces its save by ~1.5s, so a field the user just cleared (or
-  // never filled in) may not have round-tripped to the server yet, or the
-  // button simply hasn't re-rendered with fresh data. Trusting that alone
-  // let orders through with missing/invalid contact info; this check reads
-  // straight from the backend, so it can't be bypassed by a stale client
-  // render.
-  const readiness = await validateCheckoutReady()
-  if (!readiness.ok) {
-    throw new Error(readiness.message)
   }
 
   const cartRes = await sdk.store.cart

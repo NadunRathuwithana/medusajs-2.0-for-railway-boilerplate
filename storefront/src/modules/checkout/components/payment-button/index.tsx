@@ -6,10 +6,10 @@ import { useElements, useStripe } from "@stripe/react-stripe-js"
 import React, { useState, useEffect } from "react"
 import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
-import { placeOrder, validateCheckoutReady } from "@lib/data/cart"
+import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { isKoko, isManual, isMintpay, isOnepay, isPaypal, isStripe } from "@lib/constants"
-import { isCheckoutIncomplete } from "@lib/util/checkout-validation"
+import { useLiveCheckout } from "@modules/checkout/context/live-checkout-context"
 import { clx } from "@medusajs/ui"
 
 type PaymentButtonProps = {
@@ -93,15 +93,19 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       ? paymentSession
       : undefined
 
-  // Missing (or invalid) required checkout info — email, full shipping/
-  // billing address including a valid phone, or a selected shipping
-  // method. The button stays disabled with no spinner, since nothing is
-  // "in progress"; the user needs to go fill something in. Re-evaluated
-  // from the live `cart` prop on every render, so re-fetching the cart
-  // (e.g. after the Addresses form syncs) immediately reflects here too —
-  // it previously only checked that shipping_address/billing_address
-  // *objects* existed, not that their fields (esp. phone) were filled in.
-  const missingInfo = isCheckoutIncomplete(cart)
+  // Missing (or invalid) required checkout info. addressesComplete comes
+  // from the Addresses form's live on-screen values (recomputed
+  // synchronously on every keystroke, no network) — so clearing the phone
+  // field disables this button instantly, not ~1.5s later once the
+  // debounced save reaches the server. Shipping method is checked
+  // separately since that's its own explicit selection step, not text
+  // that gets typed/cleared the same way.
+  const { addressesComplete } = useLiveCheckout()
+  const paidByGiftcard =
+    (cart as any)?.gift_cards?.length > 0 && cart.total === 0
+  const missingInfo =
+    !addressesComplete ||
+    ((cart.shipping_methods?.length ?? 0) < 1 && !paidByGiftcard)
 
   // A payment session is actively being created/synced for the selected method —
   // this IS "in progress", so the button stays disabled AND shows a spinner.
@@ -459,22 +463,14 @@ const HostedPaymentButton = ({
     return () => clearTimeout(timer)
   }, [notReady, sessionReady])
 
-  const handlePayment = async () => {
-    if (!redirectUrl) {
+  const handlePayment = () => {
+    // notReady already reflects the live (instant, no network) Addresses
+    // form validity — this is just a final synchronous guard in case the
+    // disabled attribute was somehow bypassed.
+    if (!redirectUrl || notReady) {
       return
     }
-    // Re-check against the live server cart before sending the customer
-    // off to the payment gateway — this flow never calls placeOrder() on
-    // its own initial click (the order is only completed later, when they
-    // return from the gateway), so without this check a stale/incomplete
-    // cart could redirect out with no validation at all.
     setSubmitting(true)
-    const readiness = await validateCheckoutReady()
-    if (!readiness.ok) {
-      setErrorMessage(readiness.message)
-      setSubmitting(false)
-      return
-    }
     window.location.href = redirectUrl
   }
 
@@ -535,21 +531,14 @@ const KokoPaymentButton = ({
     return () => clearTimeout(timer)
   }, [notReady, sessionReady])
 
-  const handleClick = async () => {
-    if (!formRef.current || !formAction || !fields) {
+  const handleClick = () => {
+    // notReady already reflects the live (instant, no network) Addresses
+    // form validity — this is just a final synchronous guard in case the
+    // disabled attribute was somehow bypassed.
+    if (!formRef.current || !formAction || !fields || notReady) {
       return
     }
-    // Re-check against the live server cart before submitting to Koko —
-    // this flow never calls placeOrder() on its own initial click, so
-    // without this check a stale/incomplete cart could redirect out with
-    // no validation at all.
     setSubmitting(true)
-    const readiness = await validateCheckoutReady()
-    if (!readiness.ok) {
-      setErrorMessage(readiness.message)
-      setSubmitting(false)
-      return
-    }
     // Submit the real HTML form — Koko requires an actual browser POST,
     // not a fetch() call, since the customer continues the flow on Koko's domain.
     formRef.current.submit()
@@ -640,21 +629,14 @@ const MintpayPaymentButton = ({
     return () => clearTimeout(timer)
   }, [notReady, sessionReady])
 
-  const handleClick = async () => {
-    if (!formRef.current || !formAction || !fields) {
+  const handleClick = () => {
+    // notReady already reflects the live (instant, no network) Addresses
+    // form validity — this is just a final synchronous guard in case the
+    // disabled attribute was somehow bypassed.
+    if (!formRef.current || !formAction || !fields || notReady) {
       return
     }
-    // Re-check against the live server cart before submitting to Mintpay —
-    // this flow never calls placeOrder() on its own initial click, so
-    // without this check a stale/incomplete cart could redirect out with
-    // no validation at all.
     setSubmitting(true)
-    const readiness = await validateCheckoutReady()
-    if (!readiness.ok) {
-      setErrorMessage(readiness.message)
-      setSubmitting(false)
-      return
-    }
     // Real browser POST — the customer continues the flow on Mintpay's domain.
     formRef.current.submit()
   }

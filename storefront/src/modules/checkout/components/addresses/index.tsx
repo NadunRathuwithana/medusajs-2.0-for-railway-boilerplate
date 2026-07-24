@@ -8,6 +8,8 @@ import debounce from "lodash/debounce"
 
 import { setAddresses } from "@lib/data/cart"
 import compareAddresses from "@lib/util/compare-addresses"
+import { isAddressesFormComplete } from "@lib/util/checkout-validation"
+import { useLiveCheckout } from "@modules/checkout/context/live-checkout-context"
 import { HttpTypes } from "@medusajs/types"
 import { useActionState } from "react"
 import BillingAddress from "../billing_address"
@@ -35,6 +37,7 @@ const Addresses = ({
   const [message, formAction] = useActionState(setAddresses, null)
 
   const formRef = useRef<HTMLFormElement>(null)
+  const { setAddressesComplete } = useLiveCheckout()
 
   const debouncedSubmit = useRef(
     debounce(() => {
@@ -43,6 +46,18 @@ const Addresses = ({
       }
     }, 1500)
   ).current
+
+  // Re-check the form's *current on-screen* values on every keystroke —
+  // synchronous, no network — so the Payment step's submit button reacts
+  // instantly (e.g. disables itself the moment the phone field is
+  // cleared) instead of only catching it ~1.5s later once the debounced
+  // save reaches the server.
+  const handleFormChange = () => {
+    if (formRef.current) {
+      setAddressesComplete(isAddressesFormComplete(new FormData(formRef.current)))
+    }
+    debouncedSubmit()
+  }
 
   return (
     <div className="bg-white">
@@ -53,7 +68,7 @@ const Addresses = ({
         </h2>
       </div>
       
-      <form action={formAction} ref={formRef} onChange={debouncedSubmit}>
+      <form action={formAction} ref={formRef} onChange={handleFormChange}>
           <div className="pb-5">
             <ShippingAddress
               customer={customer}

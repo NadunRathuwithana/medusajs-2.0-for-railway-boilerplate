@@ -5,6 +5,8 @@ import Addresses from "@modules/checkout/components/addresses"
 import Payment from "@modules/checkout/components/payment"
 import Review from "@modules/checkout/components/review"
 import Shipping from "@modules/checkout/components/shipping"
+import { LiveCheckoutProvider } from "@modules/checkout/context/live-checkout-context"
+import { isCartAddressesComplete } from "@lib/util/checkout-validation"
 
 export default async function CheckoutForm({
   cart,
@@ -24,11 +26,13 @@ export default async function CheckoutForm({
   const paymentMethods = await listCartPaymentMethods(cart.region?.id ?? "")
 
   return (
-    <div className="flex flex-col">
-      <Addresses cart={cart} customer={customer} />
-      <Shipping cart={cart} availableShippingMethods={shippingMethods} />
-      <Payment cart={cart} availablePaymentMethods={paymentMethods ?? []} />
-      <Review cart={cart} />
-    </div>
+    <LiveCheckoutProvider initialComplete={isCartAddressesComplete(cart)}>
+      <div className="flex flex-col">
+        <Addresses cart={cart} customer={customer} />
+        <Shipping cart={cart} availableShippingMethods={shippingMethods} />
+        <Payment cart={cart} availablePaymentMethods={paymentMethods ?? []} />
+        <Review cart={cart} />
+      </div>
+    </LiveCheckoutProvider>
   )
 }

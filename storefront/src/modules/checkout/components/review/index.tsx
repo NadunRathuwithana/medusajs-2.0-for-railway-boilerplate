@@ -3,7 +3,7 @@
 import { clx } from "@medusajs/ui"
 import PaymentButton from "../payment-button"
 import { convertToLocale } from "@lib/util/money"
-import { isCheckoutIncomplete } from "@lib/util/checkout-validation"
+import { useLiveCheckout } from "@modules/checkout/context/live-checkout-context"
 
 const Review = ({ cart }: { cart: any }) => {
   const paidByGiftcard =
@@ -12,11 +12,11 @@ const Review = ({ cart }: { cart: any }) => {
   const paymentReady =
     (cart?.shipping_methods?.length ?? 0) !== 0 || paidByGiftcard
 
-  // Same deep field-by-field check PaymentButton uses to decide whether the
-  // submit button is actually clickable — previously this only checked
-  // billing_address.first_name and email, so the warning banner and the
-  // button's own gating could disagree with each other.
-  const missingDetails = isCheckoutIncomplete(cart)
+  // Same live (instant, no network) check PaymentButton uses to decide
+  // whether the submit button is actually clickable, so the warning banner
+  // and the button's own gating never disagree with each other.
+  const { addressesComplete } = useLiveCheckout()
+  const missingDetails = !addressesComplete
 
   return (
     <div className="bg-white">
