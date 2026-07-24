@@ -6,7 +6,7 @@ import { useElements, useStripe } from "@stripe/react-stripe-js"
 import React, { useState, useEffect } from "react"
 import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
-import { placeOrder } from "@lib/data/cart"
+import { placeOrder, validateCheckoutReady } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { isKoko, isManual, isMintpay, isOnepay, isPaypal, isStripe } from "@lib/constants"
 import { isCheckoutIncomplete } from "@lib/util/checkout-validation"
@@ -459,11 +459,22 @@ const HostedPaymentButton = ({
     return () => clearTimeout(timer)
   }, [notReady, sessionReady])
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     if (!redirectUrl) {
       return
     }
+    // Re-check against the live server cart before sending the customer
+    // off to the payment gateway — this flow never calls placeOrder() on
+    // its own initial click (the order is only completed later, when they
+    // return from the gateway), so without this check a stale/incomplete
+    // cart could redirect out with no validation at all.
     setSubmitting(true)
+    const readiness = await validateCheckoutReady()
+    if (!readiness.ok) {
+      setErrorMessage(readiness.message)
+      setSubmitting(false)
+      return
+    }
     window.location.href = redirectUrl
   }
 
@@ -524,11 +535,21 @@ const KokoPaymentButton = ({
     return () => clearTimeout(timer)
   }, [notReady, sessionReady])
 
-  const handleClick = () => {
+  const handleClick = async () => {
     if (!formRef.current || !formAction || !fields) {
       return
     }
+    // Re-check against the live server cart before submitting to Koko —
+    // this flow never calls placeOrder() on its own initial click, so
+    // without this check a stale/incomplete cart could redirect out with
+    // no validation at all.
     setSubmitting(true)
+    const readiness = await validateCheckoutReady()
+    if (!readiness.ok) {
+      setErrorMessage(readiness.message)
+      setSubmitting(false)
+      return
+    }
     // Submit the real HTML form — Koko requires an actual browser POST,
     // not a fetch() call, since the customer continues the flow on Koko's domain.
     formRef.current.submit()
@@ -619,11 +640,21 @@ const MintpayPaymentButton = ({
     return () => clearTimeout(timer)
   }, [notReady, sessionReady])
 
-  const handleClick = () => {
+  const handleClick = async () => {
     if (!formRef.current || !formAction || !fields) {
       return
     }
+    // Re-check against the live server cart before submitting to Mintpay —
+    // this flow never calls placeOrder() on its own initial click, so
+    // without this check a stale/incomplete cart could redirect out with
+    // no validation at all.
     setSubmitting(true)
+    const readiness = await validateCheckoutReady()
+    if (!readiness.ok) {
+      setErrorMessage(readiness.message)
+      setSubmitting(false)
+      return
+    }
     // Real browser POST — the customer continues the flow on Mintpay's domain.
     formRef.current.submit()
   }
