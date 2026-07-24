@@ -134,13 +134,13 @@ const Item = ({ item, type = "full" }: ItemProps) => {
 
   return (
     <div
-      className="flex gap-5 p-5 bg-[#fafafa] rounded-2xl border border-gray-100 hover:border-gray-200 transition-colors group"
+      className="flex gap-3 p-3 sm:gap-5 sm:p-5 bg-[#fafafa] rounded-2xl border border-gray-100 hover:border-gray-200 transition-colors group"
       data-testid="product-row"
     >
       {/* 1:1 Image */}
       <LocalizedClientLink
         href={`/products/${handle}`}
-        className="w-[120px] h-[120px] flex-shrink-0 rounded-xl overflow-hidden bg-gray-100 relative aspect-square"
+        className="w-[84px] h-[84px] sm:w-[120px] sm:h-[120px] flex-shrink-0 rounded-xl overflow-hidden bg-gray-100 relative aspect-square"
       >
         <Thumbnail
           thumbnail={item.thumbnail ?? item.variant?.product?.thumbnail}
@@ -151,10 +151,14 @@ const Item = ({ item, type = "full" }: ItemProps) => {
 
       {/* Details */}
       <div className="flex flex-1 flex-col justify-between min-w-0">
-        <div className="flex justify-between items-start gap-4">
+        {/* Title/variant and price stack vertically on mobile (each gets
+            the full row width) instead of squeezing side by side, which
+            was crushing longer titles down to a couple of characters next
+            to the fixed-width thumbnail + price block. */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-start sm:gap-4">
           <div className="flex flex-col gap-1 min-w-0">
             <LocalizedClientLink href={`/products/${handle}`}>
-              <h3 className="text-[15px] font-semibold text-gray-900 leading-tight hover:text-gray-600 transition-colors truncate">
+              <h3 className="text-[14px] sm:text-[15px] font-semibold text-gray-900 leading-tight hover:text-gray-600 transition-colors">
                 {item.title}
               </h3>
             </LocalizedClientLink>
@@ -162,18 +166,18 @@ const Item = ({ item, type = "full" }: ItemProps) => {
           </div>
 
           {/* Price block */}
-          <div className="flex flex-col items-end gap-1 flex-shrink-0">
+          <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-1 flex-shrink-0">
             {hasReducedPrice ? (
               <>
                 <span className="text-gray-400 text-[13px] line-through">
                   {formatPrice(originalPrice)}
                 </span>
-                <span className="text-[#e11d48] text-[16px] font-bold">
+                <span className="text-[#e11d48] text-[15px] sm:text-[16px] font-bold">
                   {formatPrice(currentPrice)}
                 </span>
               </>
             ) : (
-              <span className="text-bold text-[16px] font-bold">
+              <span className="text-bold text-[15px] sm:text-[16px] font-bold">
                 {formatPrice(currentPrice)}
               </span>
             )}
@@ -181,7 +185,7 @@ const Item = ({ item, type = "full" }: ItemProps) => {
         </div>
 
         {/* Bottom row: discount badge + quantity + delete */}
-        <div className="flex items-center justify-between mt-4">
+        <div className="flex items-center justify-between mt-3 sm:mt-4">
           {/* Discount badge */}
           <div className="flex items-center gap-2">
             {hasReducedPrice && (
