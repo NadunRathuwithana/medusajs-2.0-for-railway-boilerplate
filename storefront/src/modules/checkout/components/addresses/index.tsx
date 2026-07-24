@@ -13,7 +13,6 @@ import { useLiveCheckout } from "@modules/checkout/context/live-checkout-context
 import { HttpTypes } from "@medusajs/types"
 import { useActionState } from "react"
 import BillingAddress from "../billing_address"
-import ErrorMessage from "../error-message"
 import ShippingAddress from "../shipping-address"
 import { SubmitButton } from "../submit-button"
 
@@ -34,7 +33,10 @@ const Addresses = ({
       : true
   )
 
-  const [message, formAction] = useActionState(setAddresses, null)
+  // Per-field red-border errors (see ShippingAddress/BillingAddress) and the
+  // Review step's banner near "Place order" cover error display now — this
+  // action's own message is intentionally not rendered here anymore.
+  const [, formAction] = useActionState(setAddresses, null)
 
   const formRef = useRef<HTMLFormElement>(null)
   const { setAddressesComplete } = useLiveCheckout()
@@ -85,8 +87,6 @@ const Addresses = ({
                 <BillingAddress cart={cart} />
               </div>
             )}
-            
-            <ErrorMessage error={message} data-testid="address-error-message" />
           </div>
         </form>
       <div className="h-px w-full bg-gray-100 my-5" />
