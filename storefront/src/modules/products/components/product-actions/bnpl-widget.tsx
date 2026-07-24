@@ -12,6 +12,11 @@ const PROVIDER_LOGOS: Record<BnplProviderKey, { src: string; alt: string }> = {
 // `providers` was computed in.
 const DISPLAY_ORDER: BnplProviderKey[] = ["mintpay", "koko"]
 
+// Mintpay's "or X% cashback" copy — configurable so it can be updated
+// without a code change, and omitted entirely (not just "or 0% cashback")
+// when unset, since it's advertising a real, currently-active promotion.
+const MINTPAY_CASHBACK_PERCENT = process.env.NEXT_PUBLIC_MINTPAY_CASHBACK_PERCENT
+
 export default function BnplWidget({
   price,
   currencyCode = "LKR",
@@ -42,7 +47,7 @@ export default function BnplWidget({
           <div key={key} className="flex flex-wrap items-center gap-1">
             <span className="text-[#888888]">
               or 3 X <span className="font-bold">{installment}</span>
-              {key === "mintpay" && " or 2.5% cashback"} with
+              {key === "mintpay" && MINTPAY_CASHBACK_PERCENT && ` or ${MINTPAY_CASHBACK_PERCENT}% cashback`} with
             </span>
             <img
               src={logo.src}
