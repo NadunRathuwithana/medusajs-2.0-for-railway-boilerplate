@@ -13,10 +13,13 @@ type InputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> & {
   // Custom in-page validation message — shown below the field with a red
   // border/ring, replacing the browser's native validation tooltip/outline.
   error?: string
+  // Applied to the outer wrapper (label + input + error), not the <input>
+  // itself — e.g. "col-span-2" to span a full row in a grid layout.
+  wrapperClassName?: string
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ type, name, label, touched, required, topLabel, value, defaultValue, error, className, onBlur, ...props }, ref) => {
+  ({ type, name, label, touched, required, topLabel, value, defaultValue, error, className, wrapperClassName, onBlur, ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false)
     const inputType = type === "password" && showPassword ? "text" : type
 
@@ -25,7 +28,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const finalDefaultValue = finalValue !== undefined ? undefined : (defaultValue !== undefined && defaultValue !== null ? defaultValue : "")
 
     return (
-      <div className="flex flex-col w-full gap-1.5">
+      <div className={clx("flex flex-col w-full gap-1.5", wrapperClassName)}>
         <label
           htmlFor={name}
           className="text-[13px] font-medium text-gray-700 ml-1"

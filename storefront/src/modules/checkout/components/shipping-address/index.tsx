@@ -155,6 +155,7 @@ const ShippingAddress = ({
             "Address is required"
           )}
           required
+          wrapperClassName="col-span-2"
           data-testid="shipping-address-input"
         />
         <Input
@@ -163,6 +164,7 @@ const ShippingAddress = ({
           value={formData["shipping_address.company"] || ""}
           onChange={handleChange}
           autoComplete="organization"
+          wrapperClassName="col-span-2"
           data-testid="shipping-company-input"
         />
         <Input
@@ -209,6 +211,7 @@ const ShippingAddress = ({
             "Country is required"
           )}
           required
+          wrapperClassName="col-span-2"
           data-testid="shipping-country-select"
         />
       </div>

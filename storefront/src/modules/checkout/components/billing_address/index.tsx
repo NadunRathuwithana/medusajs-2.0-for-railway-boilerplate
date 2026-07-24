@@ -88,6 +88,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
             "Address is required"
           )}
           required
+          wrapperClassName="col-span-2"
           data-testid="billing-address-input"
         />
         <Input
@@ -96,6 +97,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
           value={formData["billing_address.company"] || ""}
           onChange={handleChange}
           autoComplete="organization"
+          wrapperClassName="col-span-2"
           data-testid="billing-company-input"
         />
         <Input

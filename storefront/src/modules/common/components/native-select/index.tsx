@@ -16,11 +16,14 @@ export type NativeSelectProps = {
   // Custom in-page validation message — shown below the field with a red
   // border/ring, replacing the browser's native validation tooltip/outline.
   error?: string
+  // Applied to the outer wrapper (label + select + error), not the
+  // <select> itself — e.g. "col-span-2" to span a full row in a grid.
+  wrapperClassName?: string
 } & SelectHTMLAttributes<HTMLSelectElement>
 
 const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
   (
-    { placeholder = "Select...", defaultValue, value, className, children, label, required, name, error, ...props },
+    { placeholder = "Select...", defaultValue, value, className, wrapperClassName, children, label, required, name, error, ...props },
     ref
   ) => {
     const innerRef = useRef<HTMLSelectElement>(null)
@@ -31,7 +34,7 @@ const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
     )
 
     return (
-      <div className="flex flex-col w-full gap-1.5">
+      <div className={clx("flex flex-col w-full gap-1.5", wrapperClassName)}>
         {label && (
           <label
             htmlFor={name}
