@@ -1,5 +1,7 @@
 import { Metadata } from "next"
 
+import ObfuscatedEmail from "@modules/common/components/obfuscated-email"
+
 export const metadata: Metadata = {
   title: "Terms of Service | Cardle",
   description:
@@ -25,12 +27,12 @@ export default function TermsPage() {
           <p className="mb-4">These Terms of Service (“Terms”, “Terms of Service”) govern your use of our website located at www.cardle.lk (together or individually “Service”) operated by Cardle.</p>
           <p className="mb-4">Our Privacy Policy also governs your use of our Service and explains how we collect, safeguard and disclose information that results from your use of our web pages.</p>
           <p className="mb-4">Your agreement with us includes these Terms and our Privacy Policy (“Agreements”). You acknowledge that you have read and understood Agreements, and agree to be bound of them.</p>
-          <p>If you do not agree with (or cannot comply with) Agreements, then you may not use the Service, but please let us know by emailing at support@cardle.lk so we can try to find a solution. These Terms apply to all visitors, users and others who wish to access or use Service.</p>
+          <p>If you do not agree with (or cannot comply with) Agreements, then you may not use the Service, but please let us know by emailing at <ObfuscatedEmail user="support" domain="cardle.lk" className="underline" /> so we can try to find a solution. These Terms apply to all visitors, users and others who wish to access or use Service.</p>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold text-bold mb-4">2. Communications</h2>
-          <p>By using our Service, you agree to subscribe to newsletters, marketing or promotional materials and other information we may send. However, you may opt out of receiving any, or all, of these communications from us by following the unsubscribe link or by emailing at support@cardle.lk.</p>
+          <p>By using our Service, you agree to subscribe to newsletters, marketing or promotional materials and other information we may send. However, you may opt out of receiving any, or all, of these communications from us by following the unsubscribe link or by emailing at <ObfuscatedEmail user="support" domain="cardle.lk" className="underline" />.</p>
         </section>
 
         <section>
@@ -108,7 +110,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-2xl font-semibold text-bold mb-4">12. Copyright Policy</h2>
           <p className="mb-4">We respect the intellectual property rights of others. It is our policy to respond to any claim that Content posted on Service infringes on the copyright or other intellectual property rights (“Infringement”) of any person or entity.</p>
-          <p className="mb-4">If you are a copyright owner, or authorized on behalf of one, and you believe that the copyrighted work has been copied in a way that constitutes copyright infringement, please submit your claim via email to support@cardle.lk, with the subject line: “Copyright Infringement” and include in your claim a detailed description of the alleged Infringement as detailed below, under “DMCA Notice and Procedure for Copyright Infringement Claims”</p>
+          <p className="mb-4">If you are a copyright owner, or authorized on behalf of one, and you believe that the copyrighted work has been copied in a way that constitutes copyright infringement, please submit your claim via email to <ObfuscatedEmail user="support" domain="cardle.lk" className="underline" />, with the subject line: “Copyright Infringement” and include in your claim a detailed description of the alleged Infringement as detailed below, under “DMCA Notice and Procedure for Copyright Infringement Claims”</p>
           <p>You may be held accountable for damages (including costs and attorneys’ fees) for misrepresentation or bad-faith claims on the infringement of any Content found on and/or through Service on your copyright.</p>
         </section>
 
@@ -123,12 +125,12 @@ export default function TermsPage() {
             <li>a statement by you that you have a good faith belief that the disputed use is not authorized by the copyright owner, its agent, or the law;</li>
             <li>a statement by you, made under penalty of perjury, that the above information in your notice is accurate and that you are the copyright owner or authorized to act on the copyright owner’s behalf.</li>
           </ul>
-          <p>You can contact our Copyright Agent via email at support@cardle.lk.</p>
+          <p>You can contact our Copyright Agent via email at <ObfuscatedEmail user="support" domain="cardle.lk" className="underline" />.</p>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold text-bold mb-4">14. Error Reporting and Feedback</h2>
-          <p>You may provide us either directly at support@cardle.lk or via third party sites and tools with information and feedback concerning errors, suggestions for improvements, ideas, problems, complaints, and other matters related to our Service (“Feedback”). You acknowledge and agree that: (i) you shall not retain, acquire or assert any intellectual property right or other right, title or interest in or to the Feedback; (ii) Company may have development ideas similar to the Feedback; (iii) Feedback does not contain confidential information or proprietary information from you or any third party; and (iv) Company is not under any obligation of confidentiality with respect to the Feedback. In the event the transfer of the ownership to the Feedback is not possible due to applicable mandatory laws, you grant Company and its affiliates an exclusive, transferable, irrevocable, free-of-charge, sub-licensable, unlimited and perpetual right to use (including copy, modify, create derivative works, publish, distribute and commercialize) Feedback in any manner and for any purpose.</p>
+          <p>You may provide us either directly at <ObfuscatedEmail user="support" domain="cardle.lk" className="underline" /> or via third party sites and tools with information and feedback concerning errors, suggestions for improvements, ideas, problems, complaints, and other matters related to our Service (“Feedback”). You acknowledge and agree that: (i) you shall not retain, acquire or assert any intellectual property right or other right, title or interest in or to the Feedback; (ii) Company may have development ideas similar to the Feedback; (iii) Feedback does not contain confidential information or proprietary information from you or any third party; and (iv) Company is not under any obligation of confidentiality with respect to the Feedback. In the event the transfer of the ownership to the Feedback is not possible due to applicable mandatory laws, you grant Company and its affiliates an exclusive, transferable, irrevocable, free-of-charge, sub-licensable, unlimited and perpetual right to use (including copy, modify, create derivative works, publish, distribute and commercialize) Feedback in any manner and for any purpose.</p>
         </section>
 
         <section>
@@ -190,7 +192,7 @@ export default function TermsPage() {
 
         <section>
           <h2 className="text-2xl font-semibold text-bold mb-4">24. Contact Us</h2>
-          <p>Please send your feedback, comments, requests for technical support by email: support@cardle.lk.</p>
+          <p>Please send your feedback, comments, requests for technical support by email: <ObfuscatedEmail user="support" domain="cardle.lk" className="underline" />.</p>
         </section>
       </div>
     </div>

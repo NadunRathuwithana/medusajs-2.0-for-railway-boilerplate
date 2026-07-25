@@ -32,6 +32,13 @@ const Hero = () => {
         className="hidden lg:block object-cover object-top"
         priority
       />
+
+      {/* PLACEHOLDER copy — replace with final wording */}
+      {/* <div className="absolute inset-0 flex items-end justify-start p-6 md:p-10 bg-gradient-to-t from-black/40 via-transparent to-transparent">
+        <h1 className="text-white text-sm md:text-base font-semibold uppercase tracking-wide max-w-xs drop-shadow-md">
+          Premium Cotton Tote Bags, Handcrafted in Sri Lanka
+        </h1>
+      </div> */}
     </div>
   )
 }

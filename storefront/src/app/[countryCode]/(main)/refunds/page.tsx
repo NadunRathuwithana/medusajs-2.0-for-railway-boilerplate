@@ -1,5 +1,7 @@
 import { Metadata } from "next"
 
+import ObfuscatedEmail from "@modules/common/components/obfuscated-email"
+
 export const metadata: Metadata = {
   title: "Refund Policy | Cardle",
   description:
@@ -36,7 +38,8 @@ export default function RefundsPage() {
           </h2>
           <p className="mb-4">
             <span className="font-semibold">Step 01:</span> You can inform us
-            through email at hello@cardle.lk or call us at +94 77 949 7859. Let
+            through email at{" "}
+            <ObfuscatedEmail user="hello" domain="cardle.lk" className="underline" /> or call us at +94 77 949 7859. Let
             us know your need to exchange your particular item.
           </p>
           <p className="mb-4">
@@ -88,7 +91,8 @@ export default function RefundsPage() {
               days of receipt.
             </li>
             <li>
-              You can inform us via email at hello@cardle.lk or call/WhatsApp us
+              You can inform us via email at{" "}
+              <ObfuscatedEmail user="hello" domain="cardle.lk" className="underline" /> or call/WhatsApp us
               at +94 77 949 7859.
             </li>
           </ul>

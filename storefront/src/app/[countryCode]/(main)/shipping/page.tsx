@@ -1,5 +1,7 @@
 import { Metadata } from "next"
 
+import ObfuscatedEmail from "@modules/common/components/obfuscated-email"
+
 export const metadata: Metadata = {
   title: "Shipping Policy – Cardle Sri Lanka",
   description:
@@ -114,7 +116,8 @@ export default function ShippingPolicyPage() {
             ready to assist you!
           </p>
           <p>
-            Feel free to contact us via email at hello@cardle.lk or call us on
+            Feel free to contact us via email at{" "}
+            <ObfuscatedEmail user="hello" domain="cardle.lk" className="underline" /> or call us on
             +94 77 949 7859
           </p>
         </section>

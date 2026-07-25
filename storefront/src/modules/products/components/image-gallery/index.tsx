@@ -8,6 +8,7 @@ import { clx } from "@medusajs/ui"
 import { useSearchParams } from "next/navigation"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useGestureZoom } from "@lib/hooks/use-gesture-zoom"
+import { useInfiniteCarouselPosition } from "@lib/hooks/use-infinite-carousel-position"
 
 type ImageGalleryProps = {
   product: HttpTypes.StoreProduct
@@ -67,14 +68,14 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
   // Mobile-only main image: swipe to change image (with a live drag-follow,
   // like a native carousel). Zoom lives in the fullscreen viewer instead of
   // inline here — a plain tap opens it — so inline zoom is disabled to avoid
-  // a double-tap racing against that tap-to-open.
+  // a double-tap racing against that tap-to-open. No edge resistance — the
+  // carousel loops (see `useInfiniteCarouselPosition` below), so there's no
+  // "edge" to soften against.
   const mobileGesture = useGestureZoom({
     onSwipeLeft: () => goToNextImage(),
     onSwipeRight: () => goToPrevImage(),
     maxScale: 1,
     doubleTapScale: 1,
-    isAtStart: activeIndex === 0,
-    isAtEnd: activeIndex === images.length - 1,
   })
 
   // Fullscreen viewer gestures: swipe to navigate, pinch/double-tap to zoom,
@@ -85,6 +86,21 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
     maxScale: 4,
     doubleTapScale: 2.5,
   })
+
+  // Loop both mobile tracks (inline + fullscreen) so swiping past the last
+  // image continues forward into the first instead of snapping backwards.
+  const mobileLoop = useInfiniteCarouselPosition({
+    index: activeIndex,
+    length: images.length,
+    resetKey: activeVariant?.id,
+  })
+  const lightboxLoop = useInfiniteCarouselPosition({
+    index: fullscreenIndex,
+    length: images.length,
+    resetKey: activeVariant?.id,
+  })
+  const loopImages = images.length > 1 ? [images[images.length - 1], ...images, images[0]] : images
+  const firstRealLoopIdx = images.length > 1 ? 1 : 0
 
   // Thumbnail strip scroll controls
   const thumbStripRef = useRef<HTMLDivElement>(null)
@@ -250,32 +266,37 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
       >
         <div
           className="flex h-full"
+          onTransitionEnd={(e) => lightboxLoop.handleTransitionEnd(e.propertyName)}
           style={{
-            width: `${images.length * 100}%`,
-            transform: `translateX(calc(-${fullscreenIndex * (100 / images.length)}% + ${lightboxGesture.dragX}px))`,
-            transition: lightboxGesture.isGesturing ? "none" : "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+            width: `${loopImages.length * 100}%`,
+            transform: `translateX(calc(-${lightboxLoop.trackPosition * (100 / loopImages.length)}% + ${lightboxGesture.dragX}px))`,
+            transition:
+              lightboxGesture.isGesturing || lightboxLoop.suppressTransition
+                ? "none"
+                : "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
-          {images.map((image, index) => (
-            <div key={image.id} className="relative h-full" style={{ width: `${100 / images.length}%` }}>
-              <Image
-                src={image.url}
-                alt={`${product.title} – view ${index + 1} of ${images.length} | Cardle`}
-                fill
-                sizes="100vw"
-                style={{
-                  objectFit: "contain",
-                  transform:
-                    index === fullscreenIndex
+          {loopImages.map((image, idx) => {
+            const isActive = idx === (images.length > 1 ? fullscreenIndex + 1 : 0)
+            return (
+              <div key={idx} className="relative h-full" style={{ width: `${100 / loopImages.length}%` }}>
+                <Image
+                  src={image.url}
+                  alt={`${product.title} – view ${idx} of ${images.length} | Cardle`}
+                  fill
+                  sizes="100vw"
+                  style={{
+                    objectFit: "contain",
+                    transform: isActive
                       ? `translate(${lightboxGesture.panX}px, ${lightboxGesture.panY}px) scale(${lightboxGesture.scale})`
                       : undefined,
-                  transition:
-                    index === fullscreenIndex && !lightboxGesture.isGesturing ? "transform 0.3s ease-out" : undefined,
-                }}
-                priority={index === 0}
-              />
-            </div>
-          ))}
+                    transition: isActive && !lightboxGesture.isGesturing ? "transform 0.3s ease-out" : undefined,
+                  }}
+                  priority={idx === firstRealLoopIdx}
+                />
+              </div>
+            )
+          })}
         </div>
       </div>
 
@@ -342,18 +363,22 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
         >
           <div
             className="flex h-full"
+            onTransitionEnd={(e) => mobileLoop.handleTransitionEnd(e.propertyName)}
             style={{
-              width: `${images.length * 100}%`,
-              transform: `translateX(calc(-${activeIndex * (100 / images.length)}% + ${mobileGesture.dragX}px))`,
-              transition: mobileGesture.isGesturing ? "none" : "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
+              width: `${loopImages.length * 100}%`,
+              transform: `translateX(calc(-${mobileLoop.trackPosition * (100 / loopImages.length)}% + ${mobileGesture.dragX}px))`,
+              transition:
+                mobileGesture.isGesturing || mobileLoop.suppressTransition
+                  ? "none"
+                  : "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
             }}
           >
-            {images.map((image, index) => (
-              <div key={image.id} className="relative h-full" style={{ width: `${100 / images.length}%` }}>
+            {loopImages.map((image, idx) => (
+              <div key={idx} className="relative h-full" style={{ width: `${100 / loopImages.length}%` }}>
                 <Image
                   src={image.url}
-                  priority={index === 0}
-                  alt={`${product.title} – image ${index + 1} | Cardle`}
+                  priority={idx === firstRealLoopIdx}
+                  alt={`${product.title} – image ${idx} | Cardle`}
                   fill
                   sizes="100vw"
                   style={{ objectFit: "cover" }}

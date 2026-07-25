@@ -4,6 +4,7 @@ import { Headset, Package, ShieldCheck } from "lucide-react"
 import Image from "next/image"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import ObfuscatedEmail from "@modules/common/components/obfuscated-email"
 
 const FacebookIcon = ({ className }: { className?: string }) => (
   <svg
@@ -287,12 +288,11 @@ export default async function Footer() {
               <ul className="flex flex-col gap-3 text-[13px] text-gray-400 font-medium">
                 <li>
                   <span className="text-gray-500">Email: </span>
-                  <a
+                  <ObfuscatedEmail
+                    user="hello"
+                    domain="cardle.lk"
                     className="text-white hover:text-gray-300 transition-colors"
-                    href="mailto:hello@cardle.lk"
-                  >
-                    hello@cardle.lk
-                  </a>
+                  />
                 </li>
                 <li>
                   <span className="text-gray-500">Phone: </span>

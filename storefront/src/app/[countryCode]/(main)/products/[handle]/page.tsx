@@ -58,16 +58,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     notFound()
   }
 
-  const title = `${product.title} | Cardle`
-  const description = product.description
-    ? product.description.slice(0, 160)
-    : `Shop the ${product.title} – a handcrafted canvas tote bag by Cardle, made to order in Sri Lanka.`
+  // Absolute title: bypasses the root layout's `%s | Cardle Sri Lanka`
+  // template. This string already carries full branding — letting the
+  // template apply on top would render "{title} | Cardle | Cardle Sri Lanka".
+  const title = `${product.title} – Handmade Canvas Tote Bag | Sri Lanka`
+
+  const KEYWORD_SUFFIX = "Handmade canvas tote bag, Sri Lanka."
+  const baseDescription = product.description?.trim()
+  const description = baseDescription
+    ? `${baseDescription.slice(0, 160 - KEYWORD_SUFFIX.length - 1)} ${KEYWORD_SUFFIX}`
+    : `Shop the ${product.title} – a handmade canvas tote bag by Cardle, made to order in Sri Lanka.`
+
   const canonicalUrl = `https://cardle.lk/products/${product.handle}`
   const ogImage = product.thumbnail || "https://cardle.lk/cardle-premium-cotton-totes-coming-soon.jpg"
 
   return {
-    title,
+    title: { absolute: title },
     description,
+    keywords: [
+      product.title!,
+      `${product.title} canvas tote bag`,
+      "handmade tote bag Sri Lanka",
+      "canvas tote bag Sri Lanka",
+    ],
     alternates: {
       canonical: canonicalUrl,
     },
@@ -110,10 +123,7 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <>
-      <ProductJsonLd
-        product={pricedProduct}
-        countryCode={countryCode}
-      />
+      <ProductJsonLd product={pricedProduct} />
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: "https://cardle.lk" },

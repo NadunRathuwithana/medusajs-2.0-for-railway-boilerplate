@@ -1,5 +1,7 @@
 import { Metadata } from "next"
 
+import ObfuscatedEmail from "@modules/common/components/obfuscated-email"
+
 export const metadata: Metadata = {
   title: "Privacy Policy | Cardle",
   description:
@@ -76,7 +78,8 @@ export default function PrivacyPolicyPage() {
         <section>
           <h2 className="text-2xl font-semibold text-bold mb-4">Contact Us</h2>
           <p>
-            If you have any questions or concerns about our privacy policy, please contact us at support@cardle.lk
+            If you have any questions or concerns about our privacy policy, please contact us at{" "}
+            <ObfuscatedEmail user="support" domain="cardle.lk" className="underline" />
           </p>
         </section>
       </div>
