@@ -15,6 +15,11 @@ import BnplWidget from "@modules/products/components/product-actions/bnpl-widget
 // throughout this card, so "mobile" here means the same thing it means there.
 const MOBILE_MEDIA_QUERY = "(max-width: 1023px)"
 
+// Matches the "10% Off Sitewide" nav banner / checkout promo — a display-only
+// hint on cards that don't already have their own price-list sale price.
+// The real discount still only applies via the promotion at checkout.
+const SITEWIDE_DISCOUNT_PERCENT = Number(process.env.NEXT_PUBLIC_SITEWIDE_DISCOUNT_PERCENT) || 0
+
 function AddToCartBtn({ product, onOpenModal }: { product: HttpTypes.StoreProduct, onOpenModal: () => void }) {
   const [isAdding, setIsAdding] = useState(false)
   const countryCode = useParams().countryCode as string
@@ -108,6 +113,33 @@ export default function ProductCard({
   const { cheapestPrice } = getProductPrice({ product })
   const isComingSoon = !cheapestPrice
 
+  // Real price-list sale (percentage_diff > 0) always wins. Otherwise, if a
+  // sitewide discount percent is configured, show what the regular price
+  // becomes under it — same crossed-out-original + badge treatment either way.
+  const hasRealDiscount = !!cheapestPrice && Number(cheapestPrice.percentage_diff) > 0
+  const sitewideDiscountedAmount =
+    cheapestPrice && !hasRealDiscount && SITEWIDE_DISCOUNT_PERCENT > 0
+      ? cheapestPrice.calculated_price_number * (1 - SITEWIDE_DISCOUNT_PERCENT / 100)
+      : null
+
+  const showDiscount = hasRealDiscount || sitewideDiscountedAmount !== null
+  const discountPercent = hasRealDiscount
+    ? cheapestPrice!.percentage_diff
+    : String(SITEWIDE_DISCOUNT_PERCENT)
+  const displayOriginalPrice = hasRealDiscount ? cheapestPrice!.original_price : cheapestPrice?.calculated_price
+  const displayCurrentPrice =
+    sitewideDiscountedAmount !== null
+      ? convertToLocale({ amount: sitewideDiscountedAmount, currency_code: cheapestPrice!.currency_code })
+      : cheapestPrice?.calculated_price
+  const displaySavingsAmount = hasRealDiscount
+    ? cheapestPrice!.original_price_number - cheapestPrice!.calculated_price_number
+    : sitewideDiscountedAmount !== null
+    ? cheapestPrice!.calculated_price_number - sitewideDiscountedAmount
+    : 0
+  // So the BNPL "3 X <installment>" math matches whatever price is actually
+  // shown above, instead of the pre-sitewide-discount amount.
+  const effectivePriceNumber = sitewideDiscountedAmount ?? cheapestPrice?.calculated_price_number
+
   const imageArea = (
     <div
       className="relative aspect-[4/5] w-full overflow-hidden bg-gray-100 mb-4 rounded-[24px]"
@@ -146,7 +178,7 @@ export default function ProductCard({
       </div>
 
       {uniqueImages.length > 1 && (
-        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300">
+        <div className="hidden lg:flex absolute bottom-4 left-0 right-0 justify-center gap-1.5 opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300">
           {uniqueImages.map((_, idx) => (
             <div
               key={idx}
@@ -169,21 +201,21 @@ export default function ProductCard({
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           {cheapestPrice ? (
             <>
-              {Number(cheapestPrice.percentage_diff) > 0 && (
+              {showDiscount && (
                 <span className="text-xs sm:text-sm font-medium text-gray-400 line-through">
-                  {cheapestPrice.original_price}
+                  {displayOriginalPrice}
                 </span>
               )}
-              <span className={clx("text-sm sm:text-md font-semibold", Number(cheapestPrice.percentage_diff) > 0 ? "text-[#e11d48]" : "text-gray-700")}>
-                {cheapestPrice.calculated_price}
+              <span className={clx("text-sm sm:text-md font-semibold", showDiscount ? "text-[#e11d48]" : "text-gray-700")}>
+                {displayCurrentPrice}
               </span>
-              {Number(cheapestPrice.percentage_diff) > 0 && (
+              {showDiscount && (
                 <div className="flex items-center gap-1 mt-1 sm:mt-0 w-full sm:w-auto">
                   <span className="bg-[#fce7f3] text-[#be185d] text-[10px] font-medium px-2 py-0.5 rounded-full">
-                    {cheapestPrice.percentage_diff}% off
+                    {discountPercent}% off
                   </span>
                   <span className="bg-[#e11d48] text-white text-[10px] font-medium px-2 py-0.5 rounded-full">
-                    -{convertToLocale({ amount: cheapestPrice.original_price_number - cheapestPrice.calculated_price_number, currency_code: cheapestPrice.currency_code })}
+                    -{convertToLocale({ amount: displaySavingsAmount, currency_code: cheapestPrice.currency_code })}
                   </span>
                 </div>
               )}
@@ -198,7 +230,7 @@ export default function ProductCard({
         {cheapestPrice && bnplProviders.length > 0 && (
           <div className="lg:hidden w-full">
             <BnplWidget
-              price={cheapestPrice.calculated_price_number}
+              price={effectivePriceNumber!}
               currencyCode={cheapestPrice.currency_code}
               providers={bnplProviders}
               compact
@@ -223,7 +255,7 @@ export default function ProductCard({
       {cheapestPrice && bnplProviders.length > 0 && (
         <div className="hidden lg:block">
           <BnplWidget
-            price={cheapestPrice.calculated_price_number}
+            price={effectivePriceNumber!}
             currencyCode={cheapestPrice.currency_code}
             providers={bnplProviders}
             compact

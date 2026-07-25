@@ -11,9 +11,9 @@ const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
   return (
     <div className="flex flex-col gap-6 w-full">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h2 className="text-3xl font-bold text-gray-900">
           Order #{order.display_id}
-        </h1>
+        </h2>
         <button 
           onClick={() => window.print()} 
           className="print:hidden flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl text-sm font-medium transition-colors"

@@ -85,6 +85,17 @@ async function getCountryCode(
 }
 
 /**
+ * Passes the request through while stamping the resolved pathname onto a
+ * request header, so server components (e.g. the root layout) can read the
+ * current path via next/headers to build a path-correct canonical URL.
+ */
+function passThrough(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set("x-pathname", request.nextUrl.pathname)
+  return NextResponse.next({ request: { headers: requestHeaders } })
+}
+
+/**
  * Middleware to handle region selection and onboarding status.
  */
 export async function middleware(request: NextRequest) {
@@ -131,7 +142,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (isMaintenancePath || isComingSoonPath) {
-    return NextResponse.next()
+    return passThrough(request)
   }
 
   const searchParams = request.nextUrl.searchParams
@@ -153,7 +164,7 @@ export async function middleware(request: NextRequest) {
     (!isOnboarding || onboardingCookie) &&
     (!cartId || cartIdCookie)
   ) {
-    return NextResponse.next()
+    return passThrough(request)
   }
 
   const redirectPath =
@@ -186,5 +197,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|favicon.ico|.*\\.png|.*\\.jpg|.*\\.gif|.*\\.svg).*)"], // prevents redirecting on static files
+  matcher: [
+    "/((?!api|_next/static|favicon.ico|sitemap.xml|robots.txt|.*\\.png|.*\\.jpg|.*\\.gif|.*\\.svg|.*\\.xml|.*\\.txt).*)",
+  ], // prevents redirecting on static files, including the root-level sitemap.xml and robots.txt routes
 }
