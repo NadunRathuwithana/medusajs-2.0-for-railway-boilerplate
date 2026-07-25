@@ -13,7 +13,7 @@ import MobileActions from "./mobile-actions"
 import ProductPrice from "../product-price"
 import { addToCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
-import { getProductPrice } from "@lib/util/get-product-price"
+import { getProductPrice, isVariantInStock } from "@lib/util/get-product-price"
 import BnplWidget from "./bnpl-widget"
 
 type ProductActionsProps = {
@@ -124,24 +124,7 @@ export default function ProductActions({
   }, [selectedVariant])
 
   // check if the selected variant is in stock
-  const inStock = useMemo(() => {
-    if (selectedVariant && !selectedVariant.manage_inventory) {
-      return true
-    }
-
-    if (selectedVariant?.allow_backorder) {
-      return true
-    }
-
-    if (
-      selectedVariant?.manage_inventory &&
-      (selectedVariant?.inventory_quantity || 0) > 0
-    ) {
-      return true
-    }
-
-    return false
-  }, [selectedVariant])
+  const inStock = useMemo(() => isVariantInStock(selectedVariant), [selectedVariant])
 
   const actionsRef = useRef<HTMLDivElement>(null)
 

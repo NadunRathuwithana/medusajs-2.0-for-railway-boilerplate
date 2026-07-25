@@ -11,7 +11,10 @@ import { getRegion } from "@lib/data/regions"
 import OrganisationJsonLd from "@modules/seo/components/organisation-json-ld"
 
 export const metadata: Metadata = {
-  title: "Cardle – Premium Cotton Tote Bags Sri Lanka | Shop Online",
+  // Absolute: bypasses the root layout's `%s | Cardle Sri Lanka` template —
+  // this string already carries full branding, so letting the template
+  // apply on top would double it up ("... | Shop Online | Cardle Sri Lanka").
+  title: { absolute: "Cardle – Premium Cotton Tote Bags Sri Lanka | Shop Online" },
   description:
     "Shop handcrafted cotton tote bags made to order in Sri Lanka. Free delivery available. Explore Cardle's collection of premium, sustainable bags. Order online at cardle.lk",
 }

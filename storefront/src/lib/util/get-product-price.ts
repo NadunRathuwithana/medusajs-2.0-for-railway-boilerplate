@@ -27,6 +27,50 @@ export const getPricesForVariant = (variant: any) => {
   }
 }
 
+export function getCheapestVariant(product?: HttpTypes.StoreProduct | null) {
+  if (!product?.variants?.length) {
+    return null
+  }
+
+  const priced: any[] = product.variants.filter((v: any) => !!v.calculated_price)
+
+  if (!priced.length) {
+    return null
+  }
+
+  return priced.sort((a, b) => {
+    return (
+      a.calculated_price.calculated_amount - b.calculated_price.calculated_amount
+    )
+  })[0]
+}
+
+// Mirrors the availability rule used by the add-to-cart button: a variant is
+// sellable if inventory isn't tracked, backorders are allowed, or there's
+// stock on hand. Shared so JSON-LD/the merchant feed can't drift from what
+// the storefront actually lets customers buy.
+export function isVariantInStock(
+  variant?: {
+    manage_inventory?: boolean | null
+    allow_backorder?: boolean | null
+    inventory_quantity?: number | null
+  } | null
+): boolean {
+  if (!variant) {
+    return false
+  }
+
+  if (!variant.manage_inventory) {
+    return true
+  }
+
+  if (variant.allow_backorder) {
+    return true
+  }
+
+  return (variant.inventory_quantity || 0) > 0
+}
+
 export function getProductPrice({
   product,
   variantId,
@@ -39,20 +83,7 @@ export function getProductPrice({
   }
 
   const cheapestPrice = () => {
-    if (!product || !product.variants?.length) {
-      return null
-    }
-
-    const cheapestVariant: any = product.variants
-      .filter((v: any) => !!v.calculated_price)
-      .sort((a: any, b: any) => {
-        return (
-          a.calculated_price.calculated_amount -
-          b.calculated_price.calculated_amount
-        )
-      })[0]
-
-    return getPricesForVariant(cheapestVariant)
+    return getPricesForVariant(getCheapestVariant(product))
   }
 
   const variantPrice = () => {

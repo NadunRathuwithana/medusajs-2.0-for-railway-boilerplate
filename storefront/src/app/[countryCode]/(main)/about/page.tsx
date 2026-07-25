@@ -20,6 +20,12 @@ export default function AboutPage() {
             loading="eager"
           />
         </picture>
+        {/* PLACEHOLDER copy — replace with final wording */}
+        <div className="absolute inset-0 flex items-end justify-start p-6 md:p-10 bg-gradient-to-t from-black/40 via-transparent to-transparent">
+          <h1 className="text-white text-sm md:text-base font-semibold uppercase tracking-wide max-w-xs drop-shadow-md">
+            About Cardle Tote Bags
+          </h1>
+        </div>
       </section>
 
       {/* 2. The Story Section */}
