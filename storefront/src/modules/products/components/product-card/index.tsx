@@ -90,7 +90,12 @@ export default function ProductCard({
 
   useEffect(() => {
     let interval: NodeJS.Timeout
-    if (isHovered && uniqueImages.length > 1 && !isModalOpen) {
+    // Mobile has no real hover — some mobile browsers still fire a
+    // synthetic mouseenter on tap, which would otherwise auto-advance
+    // through the images right as the user is trying to tap through to
+    // the product page. Desktop-only.
+    const isMobile = typeof window !== "undefined" && window.matchMedia(MOBILE_MEDIA_QUERY).matches
+    if (isHovered && !isMobile && uniqueImages.length > 1 && !isModalOpen) {
       interval = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % uniqueImages.length)
       }, 800)
