@@ -19,7 +19,7 @@ export default function ReturnsPage() {
           Return/ Refunds and Exchange Policy
         </h1>
         <p className="text-gray-500 text-lg">
-          Last updated: {new Date().toLocaleDateString()}
+          Last updated: July 15, 2026
         </p>
       </div>
 
