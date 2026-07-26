@@ -17,7 +17,7 @@ export default function TermsPage() {
     <div className="py-24 max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
       <div className="mb-16 border-b border-gray-200 pb-8">
         <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">Terms of Service</h1>
-        <p className="text-gray-500 text-lg">Last updated: {new Date().toLocaleDateString()}</p>
+        <p className="text-gray-500 text-lg">Last updated: July 15, 2026</p>
       </div>
       
       <div className="flex flex-col gap-12 text-gray-700 leading-relaxed text-lg">
