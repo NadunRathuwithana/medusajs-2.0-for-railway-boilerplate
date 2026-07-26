@@ -46,6 +46,10 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
   )
 }
 
+// Medusa stores width/height/length in inches here — shown as-is, with the
+// cm equivalent kept alongside in brackets as a reference conversion.
+const inchesToCm = (inches: number) => (inches * 2.54).toFixed(1)
+
 const DescriptionTab = ({ product }: ProductTabsProps) => {
   return (
     <div className="py-6">
@@ -60,19 +64,28 @@ const DescriptionTab = ({ product }: ProductTabsProps) => {
             {product.width && (
               <div className="flex flex-col">
                 <span className="text-gray-400 font-medium text-xs">Width</span>
-                <span className="font-medium text-gray-900 mt-0.5">{product.width} cm</span>
+                <span className="font-medium text-gray-900 mt-0.5">
+                  {product.width} in{" "}
+                  <span className="text-gray-400 font-normal">(≈ {inchesToCm(product.width)} cm)</span>
+                </span>
               </div>
             )}
             {product.height && (
               <div className="flex flex-col">
                 <span className="text-gray-400 font-medium text-xs">Height</span>
-                <span className="font-medium text-gray-900 mt-0.5">{product.height} cm</span>
+                <span className="font-medium text-gray-900 mt-0.5">
+                  {product.height} in{" "}
+                  <span className="text-gray-400 font-normal">(≈ {inchesToCm(product.height)} cm)</span>
+                </span>
               </div>
             )}
             {product.length && (
               <div className="flex flex-col">
                 <span className="text-gray-400 font-medium text-xs">Depth</span>
-                <span className="font-medium text-gray-900 mt-0.5">{product.length} cm</span>
+                <span className="font-medium text-gray-900 mt-0.5">
+                  {product.length} in{" "}
+                  <span className="text-gray-400 font-normal">(≈ {inchesToCm(product.length)} cm)</span>
+                </span>
               </div>
             )}
             {product.weight && (
