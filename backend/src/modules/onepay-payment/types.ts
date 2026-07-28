@@ -18,13 +18,29 @@ export type OnepayCreateResponse = {
   }
 }
 
-// v3 API /v3/transaction/status/ response
+// v3 API /v3/transaction/status/ response.
+// NOTE: the exact shape hasn't been confirmed against a real FAILED/CANCELLED
+// transaction — this is deliberately loose (all optional) so
+// OnepayPaymentService.interpretStatusResponse() can defensively read either
+// a flat shape or one nested under `data` (matching /v3/checkout/link/'s
+// convention, where the top-level `status` is an API-call-result code, not
+// the payment outcome) without fighting the type checker. Never assume a
+// bare truthy top-level `status` means the payment succeeded.
 export type OnepayStatusResponse = {
-  status: boolean
-  ipg_transaction_id: string
-  amount: number
-  currency: string
-  paid_on: string           // "YYYY-MM-DD HH:mm:ss"
+  status?: boolean | number
+  status_message?: string  // "SUCCESS" | "FAILED" | "CANCELLED", if present
+  ipg_transaction_id?: string
+  amount?: number
+  currency?: string
+  paid_on?: string          // "YYYY-MM-DD HH:mm:ss"
+  data?: {
+    status?: boolean | number
+    status_message?: string
+    ipg_transaction_id?: string
+    amount?: number
+    currency?: string
+    paid_on?: string
+  }
 }
 
 // Webhook callback payload
