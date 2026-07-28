@@ -29,6 +29,7 @@
     "@medusajs/framework": "2.13.6",
     "@medusajs/utils": "2.13.6",
     "@medusajs/icons": "latest",
+    "@medusajs/js-sdk": "2.13.6",
     "@medusajs/medusa": "2.13.6",
     "@medusajs/notification-sendgrid": "^2.13.6",
     "@medusajs/payment-stripe": "2.13.6",

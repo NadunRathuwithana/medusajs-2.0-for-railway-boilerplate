@@ -9,7 +9,16 @@ type ProductTabsProps = {
   product: HttpTypes.StoreProduct
 }
 
+// `metadata` is an untyped bag on the base product type — these are the two
+// custom keys the admin's "Extra Product Details" widget writes.
+type ProductCustomMetadata = {
+  strap_length?: number | string | null
+  size_chart_url?: string | null
+}
+
 const ProductTabs = ({ product }: ProductTabsProps) => {
+  const metadata = (product.metadata ?? {}) as ProductCustomMetadata
+
   const tabs = [
     {
       label: "Description & Fit",
@@ -25,6 +34,13 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
     tabs.push({
       label: "Tags",
       component: <TagsTab product={product} />,
+    })
+  }
+
+  if (metadata.size_chart_url) {
+    tabs.push({
+      label: "Size Guide",
+      component: <SizeGuideTab product={product} />,
     })
   }
 
@@ -51,13 +67,17 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
 const inchesToCm = (inches: number) => (inches * 2.54).toFixed(1)
 
 const DescriptionTab = ({ product }: ProductTabsProps) => {
+  const metadata = (product.metadata ?? {}) as ProductCustomMetadata
+  const hasStrapLength =
+    metadata.strap_length != null && !Number.isNaN(Number(metadata.strap_length))
+
   return (
     <div className="py-6">
       <div className="text-sm text-gray-500 whitespace-pre-line leading-relaxed mb-6">
         {product.description || "No description available for this product."}
       </div>
 
-      {(product.width || product.height || product.length || product.weight) && (
+      {(product.width || product.height || product.length || product.weight || hasStrapLength) && (
         <div className="border-t border-gray-100 pt-6">
           <h3 className="text-sm font-semibold mb-4 text-gray-900">Product Dimensions</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-y-4 gap-x-4 text-sm">
@@ -85,6 +105,17 @@ const DescriptionTab = ({ product }: ProductTabsProps) => {
                 <span className="font-medium text-gray-900 mt-0.5">
                   {product.length} in{" "}
                   <span className="text-gray-400 font-normal">(≈ {inchesToCm(product.length)} cm)</span>
+                </span>
+              </div>
+            )}
+            {hasStrapLength && (
+              <div className="flex flex-col">
+                <span className="text-gray-400 font-medium text-xs">Strap Length</span>
+                <span className="font-medium text-gray-900 mt-0.5">
+                  {metadata.strap_length} in{" "}
+                  <span className="text-gray-400 font-normal">
+                    (≈ {inchesToCm(Number(metadata.strap_length))} cm)
+                  </span>
                 </span>
               </div>
             )}
@@ -159,6 +190,23 @@ const ShippingInfoTab = ({ product }: ProductTabsProps) => {
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+const SizeGuideTab = ({ product }: ProductTabsProps) => {
+  const metadata = (product.metadata ?? {}) as ProductCustomMetadata
+  if (!metadata.size_chart_url) return null
+
+  return (
+    <div className="py-6">
+      {/* Plain <img>, not next/image — the uploaded chart's dimensions are
+          unknown, same reasoning as the product-card mini carousel. */}
+      <img
+        src={metadata.size_chart_url}
+        alt={`${product.title} size guide`}
+        className="max-w-full h-auto rounded-xl"
+      />
     </div>
   )
 }

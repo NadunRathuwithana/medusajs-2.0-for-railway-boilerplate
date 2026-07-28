@@ -81,6 +81,62 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
   }
 
 
+  /**
+   * Interpret a /v3/transaction/status/ response.
+   *
+   * IMPORTANT: Onepay's v3 API uses the SAME "outer status is just an
+   * API-call-result code" convention we already proved out for
+   * /v3/checkout/link/ (see initiatePayment: `response.status !== 200`
+   * check, with the real payload nested under `data`). The previous
+   * implementation did `if (statusResponse.status)` as a bare truthy
+   * check on that outer field — since it's truthy whenever the HTTP
+   * call itself succeeded (e.g. a numeric 200, or any non-empty value),
+   * it reported EVERY transaction as authorized regardless of whether
+   * the payment actually succeeded, failed, or was cancelled. That's
+   * why failed Onepay transactions were showing as "order success".
+   *
+   * This defensively checks both a flat and a `data`-nested shape, and
+   * only trusts an EXPLICIT success or failure marker (mirroring the
+   * webhook payload's `status`/`status_message` convention). Anything
+   * ambiguous falls through to "pending" — never to success — and logs
+   * the raw payload so the exact field names can be confirmed from logs.
+   */
+  private interpretStatusResponse(raw: any): {
+    isSuccess: boolean
+    isFailure: boolean
+    statusMessage: string
+    paidOn?: string
+    amount?: number
+  } {
+    const node = raw && typeof raw === "object" && raw.data ? raw.data : raw
+    const rawMessage = node?.status_message ?? raw?.status_message
+    const statusMessage = typeof rawMessage === "string" ? rawMessage.toUpperCase() : ""
+    const numericStatus =
+      typeof node?.status === "number"
+        ? node.status
+        : typeof raw?.status === "number"
+        ? raw.status
+        : undefined
+    const boolStatus = typeof node?.status === "boolean" ? node.status : undefined
+
+    const isSuccess =
+      statusMessage === "SUCCESS" || numericStatus === 1 || boolStatus === true
+    const isFailure =
+      statusMessage === "FAILED" ||
+      statusMessage === "CANCELLED" ||
+      numericStatus === 0 ||
+      numericStatus === 2 ||
+      boolStatus === false
+
+    return {
+      isSuccess,
+      isFailure,
+      statusMessage,
+      paidOn: node?.paid_on ?? raw?.paid_on,
+      amount: node?.amount ?? raw?.amount,
+    }
+  }
+
   /** Make a request to Onepay API */
   private async onepayRequest<T>(
     path: string,
@@ -241,18 +297,36 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
         }
       )
 
-      if (statusResponse.status) {
+      const { isSuccess, isFailure, statusMessage, paidOn, amount } =
+        this.interpretStatusResponse(statusResponse)
+
+      if (isSuccess) {
         return {
           data: {
             ...input.data,
-            paid_on: statusResponse.paid_on,
-            verified_amount: statusResponse.amount,
+            paid_on: paidOn,
+            verified_amount: amount,
             onepay_status: "success",
           },
           status: "authorized",
         }
       }
 
+      if (isFailure) {
+        this.logger_.warn(
+          `Onepay: transaction ${ipgTransactionId} reported as ${statusMessage || "failed"} — not authorizing`
+        )
+        return {
+          data: { ...input.data, onepay_status: statusMessage || "failed" },
+          status: "error",
+        }
+      }
+
+      // Ambiguous response shape — log the raw payload so the exact field
+      // names can be confirmed, but never default to authorized.
+      this.logger_.warn(
+        `Onepay: unrecognized status response for ${ipgTransactionId}: ${JSON.stringify(statusResponse)}`
+      )
       return { data: input.data ?? {}, status: "pending" }
     } catch (e: any) {
       this.logger_.error(`Onepay authorizePayment error: ${e.message}`)
@@ -352,8 +426,18 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
         }
       )
 
-      if (statusResponse.status) {
+      const { isSuccess, isFailure, statusMessage } =
+        this.interpretStatusResponse(statusResponse)
+
+      if (isSuccess) {
         return { status: "captured" }
+      }
+
+      if (isFailure) {
+        this.logger_.warn(
+          `Onepay: transaction ${ipgTransactionId} reported as ${statusMessage || "failed"} — not captured`
+        )
+        return { status: "error" }
       }
 
       return { status: "pending" }
