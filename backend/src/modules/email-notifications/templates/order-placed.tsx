@@ -82,6 +82,7 @@ const getPaymentMethodName = (providerId: string) => {
   if (providerId.includes('system_default')) return 'Cash on Delivery'
   if (providerId.includes('onepay')) return 'Visa / Mastercard'
   if (providerId.includes('koko')) return 'Koko Pay'
+  if (providerId.includes('mintpay')) return 'Mint Pay'
   return providerId.replace(/_/g, ' ').toUpperCase()
 }
 
