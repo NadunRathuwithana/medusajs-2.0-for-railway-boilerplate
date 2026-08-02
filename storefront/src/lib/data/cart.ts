@@ -5,6 +5,7 @@ import medusaError from "@lib/util/medusa-error"
 import { HttpTypes } from "@medusajs/types"
 import omit from "lodash/omit"
 import { revalidateTag } from "next/cache"
+import { cookies as getCookies, headers as getHeaders } from "next/headers"
 import { redirect } from "next/navigation"
 import { cache } from "react"
 import { getAuthHeaders, getCartId, removeCartId, setCartId } from "./cookies"
@@ -456,6 +457,39 @@ export async function placeOrder() {
   const cartId = await getCartId()
   if (!cartId) {
     throw new Error("No existing cart found when placing an order")
+  }
+
+  // Carry Meta match-key parameters through onto the order (cart.metadata is
+  // copied verbatim to order.metadata on completion), since the order.placed
+  // subscriber that fires the Conversions API Purchase event has no access to
+  // the original request's cookies/IP. _fbc/_fbp are captured as early as
+  // possible client-side by MetaParamSync; client_ip_address is taken from the
+  // request that's actually completing checkout, which is more reliable than
+  // a client-side IP echo call.
+  try {
+    const cookieStore = await getCookies()
+    const headersList = await getHeaders()
+
+    const fbc = cookieStore.get("_fbc")?.value
+    const fbp = cookieStore.get("_fbp")?.value
+    const forwardedFor = headersList.get("x-forwarded-for")
+    const clientIp =
+      forwardedFor?.split(",")[0]?.trim() ||
+      headersList.get("x-real-ip") ||
+      undefined
+    const eventSourceUrl = headersList.get("referer") || undefined
+
+    const metaMetadata: Record<string, string> = {}
+    if (fbc) metaMetadata.fbc = fbc
+    if (fbp) metaMetadata.fbp = fbp
+    if (clientIp) metaMetadata.client_ip_address = clientIp
+    if (eventSourceUrl) metaMetadata.event_source_url = eventSourceUrl
+
+    if (Object.keys(metaMetadata).length > 0) {
+      await updateCart({ metadata: metaMetadata })
+    }
+  } catch (err) {
+    console.warn("[Meta CAPI] Failed to attach tracking metadata to cart:", err)
   }
 
   const cartRes = await sdk.store.cart
