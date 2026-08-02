@@ -127,15 +127,27 @@ const medusaConfig = {
           },
         ]
       : []),
-    // Notification module via Resend — only included when Resend credentials are set
-    // TODO: MUST change onboarding@resend.dev to a verified cardle.lk address (e.g. hello@cardle.lk) before going live with real customers!
-    ...(RESEND_API_KEY && RESEND_FROM_EMAIL
-      ? [
+    // Notification module — the "local" provider handles the "feed" channel, which
+    // powers the admin UI's in-app notifications (e.g. the order/product export
+    // "download ready" notification). It must always be registered, regardless of
+    // whether email credentials are configured, or those admin notifications break.
+    {
+      key: Modules.NOTIFICATION,
+      resolve: "@medusajs/notification",
+      options: {
+        providers: [
           {
-            key: Modules.NOTIFICATION,
-            resolve: "@medusajs/notification",
+            resolve: "@medusajs/notification-local",
+            id: "local",
             options: {
-              providers: [
+              name: "Local Notification Provider",
+              channels: ["feed"],
+            },
+          },
+          // Notification provider via Resend — only included when Resend credentials are set
+          // TODO: MUST change onboarding@resend.dev to a verified cardle.lk address (e.g. hello@cardle.lk) before going live with real customers!
+          ...(RESEND_API_KEY && RESEND_FROM_EMAIL
+            ? [
                 {
                   resolve: "./src/modules/email-notifications",
                   id: "resend",
@@ -145,19 +157,11 @@ const medusaConfig = {
                     from: RESEND_FROM_EMAIL,
                   },
                 },
-              ],
-            },
-          },
-        ]
-      : []),
-    // Notification module via SMTP/Nodemailer — only included when SMTP credentials are set
-    ...(!RESEND_API_KEY && SMTP_HOST && SMTP_USER && SMTP_PASS
-      ? [
-          {
-            key: Modules.NOTIFICATION,
-            resolve: "@medusajs/notification",
-            options: {
-              providers: [
+              ]
+            : []),
+          // Notification provider via SMTP/Nodemailer — only included when SMTP credentials are set
+          ...(!RESEND_API_KEY && SMTP_HOST && SMTP_USER && SMTP_PASS
+            ? [
                 {
                   resolve: "./src/modules/email-notifications",
                   id: "smtp",
@@ -172,11 +176,11 @@ const medusaConfig = {
                     adminEmail: SMTP_ADMIN_EMAIL,
                   },
                 },
-              ],
-            },
-          },
-        ]
-      : []),
+              ]
+            : []),
+        ],
+      },
+    },
     // Payment providers (Stripe + OnePay) — only included when env vars are set
     ...(() => {
       const paymentProviders = [];
