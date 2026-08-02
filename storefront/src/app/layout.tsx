@@ -75,6 +75,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 import MetaPixel from "@components/analytics/MetaPixel"
+import MetaParamSync from "@components/analytics/MetaParamSync"
 import GoogleAnalytics from "@components/analytics/GoogleAnalytics"
 import { Suspense } from "react"
 
@@ -84,6 +85,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
       <body suppressHydrationWarning>
         <Suspense fallback={null}>
           <MetaPixel />
+          <MetaParamSync />
           <GoogleAnalytics />
         </Suspense>
         <main className="relative">{props.children}</main>
