@@ -7,21 +7,16 @@ import "styles/globals.css"
 // host (www.cardle.lk or cardle.lk) actually served the request.
 const CANONICAL_SITE_URL = "https://cardle.lk"
 
-// Locale-prefixed routes (e.g. /lk, /lk/store) canonicalize to the
-// un-prefixed path, matching the convention already used by pages that set
-// their own canonical (faq, products/[handle], etc).
-function toCanonicalPath(pathname: string) {
-  const stripped = pathname.replace(/^\/[a-z]{2}(?=\/|$)/, "")
-  return stripped === "" ? "/" : stripped
-}
-
 export async function generateMetadata(): Promise<Metadata> {
   const headersList = await headers()
-  const pathname = headersList.get("x-pathname") || "/"
-  const canonicalPath = toCanonicalPath(pathname)
-  const canonicalUrl = `${CANONICAL_SITE_URL}${
-    canonicalPath === "/" ? "" : canonicalPath
-  }`
+  // middleware.ts always resolves "/" (and every other path) to a
+  // region-prefixed one ("/lk", "/lk/store", ...) before this ever renders,
+  // so x-pathname is already the real, 200-serving URL — canonicalizing to
+  // anything else would point Google at a URL that just redirects, which is
+  // exactly the stale-index problem this fix is for. "/lk" is the fallback
+  // for the rare case the header is missing (e.g. /maintenance).
+  const pathname = headersList.get("x-pathname") || "/lk"
+  const canonicalUrl = `${CANONICAL_SITE_URL}${pathname}`
 
   return {
     metadataBase: new URL(getBaseURL()),

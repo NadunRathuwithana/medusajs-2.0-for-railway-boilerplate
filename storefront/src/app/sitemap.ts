@@ -2,6 +2,11 @@ import { MetadataRoute } from "next"
 import { sdk } from "@lib/config"
 
 const BASE_URL = "https://cardle.lk"
+// Cardle only ever serves the "lk" region — "/" itself just 307-redirects to
+// /lk and is never a URL Google should index or crawl-consolidate onto, so
+// every sitemap entry points straight at the region-prefixed URL that
+// actually returns 200.
+const REGION_URL = `${BASE_URL}/lk`
 
 async function getAllProducts(): Promise<{ handle: string; updated_at?: string | null }[]> {
   try {
@@ -35,43 +40,43 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticPages: MetadataRoute.Sitemap = [
     {
-      url: BASE_URL,
+      url: REGION_URL,
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1.0,
     },
     {
-      url: `${BASE_URL}/store`,
+      url: `${REGION_URL}/store`,
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.9,
     },
     {
-      url: `${BASE_URL}/about`,
+      url: `${REGION_URL}/about`,
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.5,
     },
     {
-      url: `${BASE_URL}/contact`,
+      url: `${REGION_URL}/contact`,
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.5,
     },
     {
-      url: `${BASE_URL}/faq`,
+      url: `${REGION_URL}/faq`,
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.5,
     },
     {
-      url: `${BASE_URL}/shipping`,
+      url: `${REGION_URL}/shipping`,
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.3,
     },
     {
-      url: `${BASE_URL}/returns`,
+      url: `${REGION_URL}/returns`,
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.3,
@@ -81,7 +86,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const collectionPages: MetadataRoute.Sitemap = collections
     .filter((c) => !!c.handle)
     .map((collection) => ({
-      url: `${BASE_URL}/collections/${collection.handle}`,
+      url: `${REGION_URL}/collections/${collection.handle}`,
       lastModified: collection.updated_at ? new Date(collection.updated_at) : new Date(),
       changeFrequency: "weekly" as const,
       priority: 0.8,
@@ -90,7 +95,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const productPages: MetadataRoute.Sitemap = products
     .filter((p) => !!p.handle)
     .map((product) => ({
-      url: `${BASE_URL}/products/${product.handle}`,
+      url: `${REGION_URL}/products/${product.handle}`,
       lastModified: product.updated_at ? new Date(product.updated_at) : new Date(),
       changeFrequency: "weekly" as const,
       priority: 0.7,

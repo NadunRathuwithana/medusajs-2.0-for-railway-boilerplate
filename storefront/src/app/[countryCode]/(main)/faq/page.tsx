@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "Find answers to common questions about Cardle's handcrafted cotton tote bags — shipping times, returns, materials, care instructions and more.",
   alternates: {
-    canonical: "https://cardle.lk/faq",
+    canonical: "https://cardle.lk/lk/faq",
   },
 }
 

@@ -84,7 +84,7 @@ function buildItemXml(product: HttpTypes.StoreProduct, variant: any): string | n
     .slice(0, 10)
 
   const sku = variant.sku || variant.id
-  const productUrl = `${BASE_URL}/products/${product.handle}`
+  const productUrl = `${BASE_URL}/${FEED_COUNTRY_CODE}/products/${product.handle}`
   const availability = isVariantInStock(variant) ? "in stock" : "out of stock"
   const price = `${priceInfo.calculated_price_number.toFixed(2)} ${priceInfo.currency_code.toUpperCase()}`
   const description =

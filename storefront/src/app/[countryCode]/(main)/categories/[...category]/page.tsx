@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       lastCategory.description ||
       `Shop Cardle's ${title} – handcrafted canvas tote bags made to order in Sri Lanka.`
 
-    const canonicalUrl = `https://cardle.lk/categories/${params.category.join("/")}`
+    const canonicalUrl = `https://cardle.lk/lk/categories/${params.category.join("/")}`
 
     return {
       title: `${title} | Cardle`,
