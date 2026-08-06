@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     "Cardle's refund policy for handcrafted cotton tote bags. Learn the conditions for receiving a full refund and how to initiate a request.",
   alternates: {
-    canonical: "https://cardle.lk/refunds",
+    canonical: "https://cardle.lk/lk/refunds",
   },
 }
 

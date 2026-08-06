@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     "Cardle's 7-day return, refund and exchange policy for handcrafted cotton tote bags. Learn how to request an exchange or refund, conditions that apply, and how to reach our team.",
   alternates: {
-    canonical: "https://cardle.lk/returns",
+    canonical: "https://cardle.lk/lk/returns",
   },
 }
 
