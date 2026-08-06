@@ -6,7 +6,7 @@ import { mapKeys } from "lodash"
 import React, { useEffect, useMemo, useState } from "react"
 import AddressSelect from "../address-select"
 import CountrySelect from "../country-select"
-import { isValidEmail, isValidPhone } from "@lib/util/checkout-validation"
+import { isValidEmail, isValidPhone, cleanPhone } from "@lib/util/checkout-validation"
 
 const ShippingAddress = ({
   customer,
@@ -50,7 +50,7 @@ const ShippingAddress = ({
         "shipping_address.city": address?.city || "",
         "shipping_address.country_code":
           address?.country_code?.toLowerCase() || "",
-        "shipping_address.phone": address?.phone || "",
+        "shipping_address.phone": address?.phone ? cleanPhone(address.phone) : "",
       }))
 
     email &&
@@ -76,9 +76,11 @@ const ShippingAddress = ({
       HTMLInputElement | HTMLInputElement | HTMLSelectElement
     >
   ) => {
+    const { name, value } = e.target
+    const updatedValue = name.endsWith(".phone") || name === "phone" ? cleanPhone(value) : value
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: updatedValue,
     })
   }
 
@@ -252,7 +254,7 @@ const ShippingAddress = ({
           error={fieldError(
             "shipping_address.phone",
             isValidPhone(formData["shipping_address.phone"]),
-            "Enter a valid phone number (7-20 digits)"
+            "Enter a valid phone number"
           )}
           required
           data-testid="shipping-phone-input"

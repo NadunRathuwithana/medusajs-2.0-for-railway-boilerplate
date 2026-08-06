@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 import Input from "@modules/common/components/input"
 import CountrySelect from "../country-select"
 import { HttpTypes } from "@medusajs/types"
-import { isValidPhone } from "@lib/util/checkout-validation"
+import { isValidPhone, cleanPhone } from "@lib/util/checkout-validation"
 
 const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
   const [formData, setFormData] = useState<any>({})
@@ -17,7 +17,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
       "billing_address.city": cart?.billing_address?.city || "",
       "billing_address.country_code":
         cart?.billing_address?.country_code?.toLowerCase() || "",
-      "billing_address.phone": cart?.billing_address?.phone || "",
+      "billing_address.phone": cart?.billing_address?.phone ? cleanPhone(cart.billing_address.phone) : "",
     })
   }, [cart?.billing_address])
 
@@ -26,9 +26,11 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
       HTMLInputElement | HTMLInputElement | HTMLSelectElement
     >
   ) => {
+    const { name, value } = e.target
+    const updatedValue = name.endsWith(".phone") || name === "phone" ? cleanPhone(value) : value
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: updatedValue,
     })
   }
 
@@ -157,7 +159,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
           error={fieldError(
             "billing_address.phone",
             isValidPhone(formData["billing_address.phone"]),
-            "Enter a valid phone number (7-20 digits)"
+            "Enter a valid phone number"
           )}
           required
           data-testid="billing-phone-input"

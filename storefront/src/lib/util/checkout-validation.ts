@@ -6,11 +6,18 @@
 // disagree, letting a cart with blank/invalid contact fields reach
 // placeOrder() anyway.
 
-const PHONE_PATTERN = /^\+?[0-9\s\-()]{7,20}$/
+const PHONE_PATTERN = /^(0\d{9}|(\+94|94)\d{9})$/
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+export function cleanPhone(val: string): string {
+  if (!val) return ""
+  const hasLeadingPlus = val.trim().startsWith("+")
+  const digitsOnly = val.replace(/\D/g, "")
+  return hasLeadingPlus ? `+${digitsOnly}` : digitsOnly
+}
+
 export function isValidPhone(phone?: string | null): boolean {
-  return !!phone && PHONE_PATTERN.test(phone.trim())
+  return !!phone && PHONE_PATTERN.test(cleanPhone(phone))
 }
 
 export function isValidEmail(email?: string | null): boolean {
