@@ -61,7 +61,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = `${collection.title} | Cardle`
   const description = `Shop Cardle's ${collection.title} collection – handcrafted canvas tote bags made to order in Sri Lanka.`
-  const canonicalUrl = `https://cardle.lk/collections/${params.handle}`
+  const canonicalUrl = `https://cardle.lk/lk/collections/${params.handle}`
 
   return {
     title,
@@ -99,9 +99,9 @@ export default async function CollectionPage({ params, searchParams }: Props) {
     <>
       <BreadcrumbJsonLd
         items={[
-          { name: "Home", url: "https://cardle.lk" },
-          { name: "Collections", url: "https://cardle.lk/store" },
-          { name: collection.title, url: `https://cardle.lk/collections/${params.handle}` },
+          { name: "Home", url: "https://cardle.lk/lk" },
+          { name: "Collections", url: "https://cardle.lk/lk/store" },
+          { name: collection.title, url: `https://cardle.lk/lk/collections/${params.handle}` },
         ]}
       />
       <CollectionTemplate

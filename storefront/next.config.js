@@ -63,6 +63,23 @@ const nextConfig = {
       },
     ]
   },
+  async headers() {
+    return [
+      {
+        // Everything except _next/static, _next/image, and favicon.ico —
+        // in particular every HTML document (the "/" region-redirect stub
+        // included) must never be cached by Cloudflare or the browser, or a
+        // stale pre-redirect / pre-deploy response gets served forever.
+        source: "/((?!_next/static|_next/image|favicon.ico).*)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, must-revalidate",
+          },
+        ],
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig

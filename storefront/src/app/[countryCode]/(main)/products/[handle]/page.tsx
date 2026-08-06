@@ -69,7 +69,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? `${baseDescription.slice(0, 160 - KEYWORD_SUFFIX.length - 1)} ${KEYWORD_SUFFIX}`
     : `Shop the ${product.title} – a handmade canvas tote bag by Cardle, made to order in Sri Lanka.`
 
-  const canonicalUrl = `https://cardle.lk/products/${product.handle}`
+  const canonicalUrl = `https://cardle.lk/lk/products/${product.handle}`
   const ogImage = product.thumbnail || "https://cardle.lk/cardle-premium-cotton-totes-coming-soon.jpg"
 
   return {
@@ -126,9 +126,9 @@ export default async function ProductPage({ params }: Props) {
       <ProductJsonLd product={pricedProduct} />
       <BreadcrumbJsonLd
         items={[
-          { name: "Home", url: "https://cardle.lk" },
-          { name: "Shop", url: "https://cardle.lk/store" },
-          { name: pricedProduct.title, url: `https://cardle.lk/products/${pricedProduct.handle}` },
+          { name: "Home", url: "https://cardle.lk/lk" },
+          { name: "Shop", url: "https://cardle.lk/lk/store" },
+          { name: pricedProduct.title, url: `https://cardle.lk/lk/products/${pricedProduct.handle}` },
         ]}
       />
       <ProductTemplate
