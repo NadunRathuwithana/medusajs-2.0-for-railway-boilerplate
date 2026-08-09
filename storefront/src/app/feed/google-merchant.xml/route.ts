@@ -6,13 +6,7 @@ import {
 } from "@lib/util/get-product-price"
 import { HttpTypes } from "@medusajs/types"
 
-// Without this, Next treats a parameterless GET handler as statically
-// optimizable and executes it against the live Medusa backend during the
-// build itself ("Collecting page data") — which breaks the build wherever
-// the backend/publishable key isn't reachable at build time. The feed
-// should hit the backend per-request anyway, so force it dynamic; the
-// per-fetch `next: { revalidate }` below still caches the underlying data.
-export const dynamic = "force-dynamic"
+export const revalidate = 3600
 
 const BASE_URL = "https://cardle.lk"
 // Cardle only sells into Sri Lanka — the feed is priced/stocked off that

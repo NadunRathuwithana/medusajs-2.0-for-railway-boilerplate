@@ -66,21 +66,6 @@ export default function ProductActions({
 
   // Initialize options from URL or default to 1 variant
   useEffect(() => {
-    // An option with only one possible value isn't a real choice — nothing
-    // for the user to click. Pre-select those, otherwise selectedVariant
-    // (which requires an exact match on every option key) can never
-    // resolve until the user redundantly clicks through options that don't
-    // actually offer alternatives — silently blocking add-to-cart.
-    const singleValueOptions: Record<string, string> = {}
-    product.options?.forEach((opt) => {
-      if (opt.title && opt.values?.length === 1 && opt.values[0].value) {
-        singleValueOptions[opt.title] = opt.values[0].value
-      }
-    })
-    if (Object.keys(singleValueOptions).length > 0) {
-      setOptions((prev) => ({ ...singleValueOptions, ...prev }))
-    }
-
     if (product.variants?.length === 1) {
       const variantOptions = optionsAsKeymap(product.variants[0].options)
       setOptions(variantOptions ?? {})
@@ -136,40 +121,6 @@ export default function ProductActions({
         window.dispatchEvent(new CustomEvent("updateImage", { detail: imageUrl }))
       }
     }
-  }, [selectedVariant])
-
-  // Tell the Description tab which variant is selected, so it can show that
-  // variant's own weight/dimensions instead of always falling back to the
-  // product-level static values. `detail: null` on deselect (or a field
-  // being unset on the variant) lets the listener fall back per-field.
-  //
-  // Medusa's native weight/length/height/width admin fields only accept
-  // whole numbers, so a `display_*` metadata override (set via the
-  // "Precise Display Dimensions" admin widget) takes priority when present,
-  // falling back to the native field otherwise.
-  useEffect(() => {
-    const variantMetadata = (selectedVariant?.metadata ?? {}) as Record<string, unknown>
-
-    const pickDimension = (metaKey: string, nativeValue: number | null | undefined) => {
-      const override = variantMetadata[metaKey]
-      if (override != null && override !== "" && !Number.isNaN(Number(override))) {
-        return Number(override)
-      }
-      return nativeValue ?? null
-    }
-
-    window.dispatchEvent(
-      new CustomEvent("variantDimensionsChange", {
-        detail: selectedVariant
-          ? {
-              weight: pickDimension("display_weight", selectedVariant.weight),
-              length: pickDimension("display_length", selectedVariant.length),
-              height: pickDimension("display_height", selectedVariant.height),
-              width: pickDimension("display_width", selectedVariant.width),
-            }
-          : null,
-      })
-    )
   }, [selectedVariant])
 
   // check if the selected variant is in stock
