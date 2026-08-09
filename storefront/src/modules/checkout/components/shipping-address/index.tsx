@@ -49,7 +49,7 @@ const ShippingAddress = ({
         "shipping_address.postal_code": address?.postal_code || "",
         "shipping_address.city": address?.city || "",
         "shipping_address.country_code":
-          address?.country_code?.toLowerCase() || "",
+          address?.country_code?.toLowerCase() || "", 
         "shipping_address.phone": address?.phone ? cleanPhone(address.phone) : "",
       }))
 
