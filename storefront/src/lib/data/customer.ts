@@ -9,6 +9,23 @@ import { cache } from "react"
 import { getAuthHeaders, removeAuthToken } from "./cookies"
 import { cookies } from "next/headers"
 
+// sdk.auth.login/register can return a plain JWT string, a redirect response
+// (third-party auth, has `.location`), or — as of newer SDK versions — an
+// MFA/email-verification-required response that has neither. This storefront
+// doesn't implement an MFA/verification UI, so treat those as a failure
+// instead of silently writing an `undefined` auth cookie.
+function extractAuthToken(result: unknown): string {
+  if (typeof result === "string") {
+    return result
+  }
+  if (result && typeof result === "object" && "location" in result && typeof (result as any).location === "string") {
+    return (result as any).location
+  }
+  throw new Error(
+    "This account requires additional verification (MFA or email confirmation), which isn't supported here yet."
+  )
+}
+
 export const getCustomer = cache(async function () {
   return await sdk.store.customer
     .retrieve({}, { next: { tags: ["customer"] }, ...await getAuthHeaders() })
@@ -58,7 +75,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
       password,
     })
 
-    const tokenValue = typeof loginToken === 'string' ? loginToken : loginToken.location
+    const tokenValue = extractAuthToken(loginToken)
     const cookiesStore = await cookies()
     cookiesStore.set("_medusa_jwt", tokenValue, {
       maxAge: 60 * 60 * 24 * 7,
@@ -86,7 +103,7 @@ export async function login(_currentState: unknown, formData: FormData) {
   let success = false
   try {
     const token = await sdk.auth.login("customer", "emailpass", { email, password })
-    const tokenValue = typeof token === 'string' ? token : token.location
+    const tokenValue = extractAuthToken(token)
     const cookiesStore = await cookies()
     cookiesStore.set("_medusa_jwt", tokenValue, {
       maxAge: 60 * 60 * 24 * 7,
@@ -235,7 +252,7 @@ export async function resetPassword(_currentState: unknown, formData: FormData) 
       password,
     })
 
-    const tokenValue = typeof loginToken === 'string' ? loginToken : loginToken.location
+    const tokenValue = extractAuthToken(loginToken)
     const cookiesStore = await cookies()
     cookiesStore.set("_medusa_jwt", tokenValue, {
       maxAge: 60 * 60 * 24 * 7,
