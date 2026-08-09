@@ -3,7 +3,7 @@
 import Accordion from "./accordion"
 import { HttpTypes } from "@medusajs/types"
 import { CalendarDays, Truck } from "lucide-react"
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 type ProductTabsProps = {
   product: HttpTypes.StoreProduct
@@ -66,10 +66,42 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
 // cm equivalent kept alongside in brackets as a reference conversion.
 const inchesToCm = (inches: number) => (inches * 2.54).toFixed(1)
 
+type VariantDimensions = {
+  weight?: number | null
+  length?: number | null
+  height?: number | null
+  width?: number | null
+}
+
 const DescriptionTab = ({ product }: ProductTabsProps) => {
   const metadata = (product.metadata ?? {}) as ProductCustomMetadata
   const hasStrapLength =
     metadata.strap_length != null && !Number.isNaN(Number(metadata.strap_length))
+
+  // Static (product-level) values are the default/fallback. Once a variant
+  // is selected, its own weight/dimensions take over per-field — a variant
+  // that doesn't override a given field still falls back to the product's.
+  const [variantDimensions, setVariantDimensions] = useState<VariantDimensions | null>(null)
+
+  useEffect(() => {
+    const handleVariantDimensionsChange = (e: CustomEvent<VariantDimensions | null>) => {
+      setVariantDimensions(e.detail)
+    }
+    window.addEventListener(
+      "variantDimensionsChange",
+      handleVariantDimensionsChange as EventListener
+    )
+    return () =>
+      window.removeEventListener(
+        "variantDimensionsChange",
+        handleVariantDimensionsChange as EventListener
+      )
+  }, [])
+
+  const width = variantDimensions?.width ?? product.width
+  const height = variantDimensions?.height ?? product.height
+  const length = variantDimensions?.length ?? product.length
+  const weight = variantDimensions?.weight ?? product.weight
 
   return (
     <div className="py-6">
@@ -77,34 +109,34 @@ const DescriptionTab = ({ product }: ProductTabsProps) => {
         {product.description || "No description available for this product."}
       </div>
 
-      {(product.width || product.height || product.length || product.weight || hasStrapLength) && (
+      {(width || height || length || weight || hasStrapLength) && (
         <div className="border-t border-gray-100 pt-6">
           <h3 className="text-sm font-semibold mb-4 text-gray-900">Product Dimensions</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-y-4 gap-x-4 text-sm">
-            {product.width && (
+            {width && (
               <div className="flex flex-col">
                 <span className="text-gray-400 font-medium text-xs">Width</span>
                 <span className="font-medium text-gray-900 mt-0.5">
-                  {product.width} in{" "}
-                  <span className="text-gray-400 font-normal">(≈ {inchesToCm(product.width)} cm)</span>
+                  {width} in{" "}
+                  <span className="text-gray-400 font-normal">(≈ {inchesToCm(width)} cm)</span>
                 </span>
               </div>
             )}
-            {product.height && (
+            {height && (
               <div className="flex flex-col">
                 <span className="text-gray-400 font-medium text-xs">Height</span>
                 <span className="font-medium text-gray-900 mt-0.5">
-                  {product.height} in{" "}
-                  <span className="text-gray-400 font-normal">(≈ {inchesToCm(product.height)} cm)</span>
+                  {height} in{" "}
+                  <span className="text-gray-400 font-normal">(≈ {inchesToCm(height)} cm)</span>
                 </span>
               </div>
             )}
-            {product.length && (
+            {length && (
               <div className="flex flex-col">
                 <span className="text-gray-400 font-medium text-xs">Depth</span>
                 <span className="font-medium text-gray-900 mt-0.5">
-                  {product.length} in{" "}
-                  <span className="text-gray-400 font-normal">(≈ {inchesToCm(product.length)} cm)</span>
+                  {length} in{" "}
+                  <span className="text-gray-400 font-normal">(≈ {inchesToCm(length)} cm)</span>
                 </span>
               </div>
             )}
@@ -119,10 +151,10 @@ const DescriptionTab = ({ product }: ProductTabsProps) => {
                 </span>
               </div>
             )}
-            {product.weight && (
+            {weight && (
               <div className="flex flex-col">
                 <span className="text-gray-400 font-medium text-xs">Weight</span>
-                <span className="font-medium text-gray-900 mt-0.5">{product.weight} g</span>
+                <span className="font-medium text-gray-900 mt-0.5">{weight} g</span>
               </div>
             )}
           </div>
