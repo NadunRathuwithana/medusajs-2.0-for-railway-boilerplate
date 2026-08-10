@@ -5,7 +5,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import { addToCart } from "@lib/data/cart"
-import { getProductPrice } from "@lib/util/get-product-price"
+import { getProductPrice, isVariantInStock } from "@lib/util/get-product-price"
 import { clx } from "@medusajs/ui"
 import QuickViewModal from "./quick-view-modal"
 import { convertToLocale } from "@lib/util/money"
@@ -25,8 +25,18 @@ function AddToCartBtn({ product, onOpenModal }: { product: HttpTypes.StoreProduc
   const countryCode = useParams().countryCode as string
 
   const hasOptions = (product.variants?.length || 0) > 1
+  // Sold out only when EVERY variant is — if some are still in stock, the
+  // "Options" flow (or the single variant itself) still lets the customer
+  // pick one that's actually available.
+  const isSoldOut = !product.variants?.some((v) => isVariantInStock(v))
 
   const handleAddToCart = async (e: React.MouseEvent) => {
+    if (isSoldOut) {
+      e.preventDefault()
+      e.stopPropagation()
+      return
+    }
+
     if (hasOptions) {
       const isMobile =
         typeof window !== "undefined" && window.matchMedia(MOBILE_MEDIA_QUERY).matches
@@ -64,10 +74,14 @@ function AddToCartBtn({ product, onOpenModal }: { product: HttpTypes.StoreProduc
   return (
     <button
       onClick={handleAddToCart}
-      disabled={isAdding || (!hasOptions && (!product.variants || product.variants.length === 0))}
-      className="w-full lg:w-auto bg-[#111111] text-white px-4 sm:px-6 py-3 rounded-full text-xs font-bold tracking-widest capitalize hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+      disabled={
+        isAdding ||
+        isSoldOut ||
+        (!hasOptions && (!product.variants || product.variants.length === 0))
+      }
+      className="w-full lg:w-auto bg-[#111111] text-white px-4 sm:px-6 py-3 rounded-full text-xs font-bold tracking-widest capitalize hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-zinc-400 whitespace-nowrap"
     >
-      {isAdding ? "Adding..." : hasOptions ? "Options" : "Add to Cart"}
+      {isAdding ? "Adding..." : isSoldOut ? "Sold Out" : hasOptions ? "Options" : "Add to Cart"}
     </button>
   )
 }
