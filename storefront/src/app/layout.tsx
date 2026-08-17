@@ -66,6 +66,9 @@ export async function generateMetadata(): Promise<Metadata> {
         "max-snippet": -1,
       },
     },
+    other: {
+      "facebook-domain-verification": "yvanftcs05s6tpmywdo6psw2l97vz7",
+    },
   }
 }
 
