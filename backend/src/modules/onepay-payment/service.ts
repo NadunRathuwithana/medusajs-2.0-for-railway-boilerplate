@@ -301,14 +301,24 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
         this.interpretStatusResponse(statusResponse)
 
       if (isSuccess) {
+        // Onepay captures automatically at transaction time — there's no
+        // separate merchant capture step (see capturePayment(), a no-op).
+        // Returning "authorized" here left the payment session stuck in
+        // "authorized, not captured" in the admin unless the webhook also
+        // happened to land and process (its action:"captured" does trigger
+        // a real capture) — a race that explains why some orders showed
+        // captured and others didn't, even though Onepay had settled both.
+        // Returning "captured" directly makes this path self-sufficient,
+        // matching the same fix already applied to Mintpay.
         return {
           data: {
             ...input.data,
             paid_on: paidOn,
             verified_amount: amount,
             onepay_status: "success",
+            captured_at: new Date().toISOString(),
           },
-          status: "authorized",
+          status: "captured",
         }
       }
 
