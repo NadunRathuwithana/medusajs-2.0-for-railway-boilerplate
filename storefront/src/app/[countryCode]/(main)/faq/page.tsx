@@ -18,15 +18,15 @@ export default function FAQPage() {
     },
     {
       question: "How long does shipping take?",
-      answer: "Standard shipping typically takes 3-5 business days. We also offer express shipping which takes 1-2 business days. Personalised items may require an additional 2-4 business days for processing."
+      answer: "Standard shipping typically takes 3-7 business days. Personalised items may require an additional 2-4 business days for processing."
     },
     {
       question: "Can I return or exchange my order?",
-      answer: "We offer a 30-day return policy for unused items in their original packaging. Please note that custom or personalised items cannot be returned unless they arrive damaged or defective."
+      answer: "We offer a 14-day return policy for unused items in their original packaging. Please note that custom or personalised items cannot be returned unless they arrive damaged or defective."
     },
     {
       question: "What materials do you use?",
-      answer: "We use premium materials sourced globally, focusing on durability and aesthetic appeal. Our core collections feature high-grade vegan leather, water-resistant canvas, and reinforced metal hardware."
+      answer: "Our totes are crafted from premium 100% cotton canvas, chosen for its durability and natural texture. Each bag features reinforced stitching and quality metal hardware for long-lasting everyday use."
     },
     {
       question: "How do I care for my Cardle product?",
