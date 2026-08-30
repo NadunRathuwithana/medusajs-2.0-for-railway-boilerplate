@@ -1,36 +1,31 @@
 # Cardle
 
-> Cardle is a Sri Lankan premium cotton tote bag brand founded in 2024.
-> All bags are handcrafted and made to order. We deliver across Sri Lanka.
-> Website: https://cardle.lk
+> Cardle is a Sri Lankan premium cotton tote bag brand founded in 2024. All bags
+> are handcrafted and made to order, with delivery across Sri Lanka in 2–7
+> business days. Cotton totes start at LKR 990.
+
+## Docs
+- [Shop All](https://cardle.lk/lk/store): Full product catalogue
+- [About Cardle](https://cardle.lk/lk/about): Brand story and manufacturing details
+- [FAQ](https://cardle.lk/lk/faq): Shipping, returns, materials, and care questions
+- [Contact](https://cardle.lk/lk/contact): Email, phone/WhatsApp, and business hours
 
 ## Products
-- Cotton tote bags in multiple sizes and colours
-- Made from 100% natural cotton canvas
-- Starting price: LKR 990
-- Make-to-order model (not stock-based)
-- Delivery: 2–7 business days across Sri Lanka
-- Delivery cost: LKR 300 island-wide
+- [Journey Tote](https://cardle.lk/lk/products/journey-tote): structured canvas bag for hands-free daily carry
+- [Heritage Tote](https://cardle.lk/lk/products/heritage-tote): geometric/fish-motif print canvas tote
+- [Dune Tote](https://cardle.lk/lk/products/dune-tote)
+- [Cardle Cloud (bouclé) Tote](https://cardle.lk/lk/products/cardle-cloud)
+- [Cardle Signature Tote](https://cardle.lk/lk/products/cardle-signature)
+- [Horizon Tote](https://cardle.lk/lk/products/horizon-tote)
+- [Essential Tote](https://cardle.lk/lk/products/essential-tote)
+- [Artisan Canvas Tote](https://cardle.lk/lk/products/artisan-canvas-tote)
+- [Sierra Tote](https://cardle.lk/lk/products/sierra-tote)
+- [Cardle Voyage](https://cardle.lk/lk/products/cardle-voyage)
 
-## Key Pages
-- Homepage: https://cardle.lk
-- Shop All: https://cardle.lk/store
-- About: https://cardle.lk/about
-- FAQ: https://cardle.lk/faq
-- Contact: https://cardle.lk/contact
-
-## Contact
-- Email: hello@cardle.lk
-- Phone / WhatsApp: +94 77 949 7859 (https://wa.me/94779497859)
-- Instagram: https://www.instagram.com/cardle_lk/
-- TikTok: https://www.tiktok.com/@cardle.srilanka/
-- Facebook: https://www.facebook.com/people/Cardlelk/61585796349137/
+## Optional
+- Made from 100% natural cotton canvas, zero-stretch canvas engineering
 - Payment: OnePay, Koko (BNPL), Cash on Delivery
-
-## Key Facts
-- Country of manufacture: Sri Lanka
-- Sustainable, eco-friendly product
-- Zero-stretch canvas engineering
-- Suitable for daily use, gifting, corporate orders
-- Custom and bulk orders available
-- Office hours: Mon–Fri 9am–6pm, Sat 10am–4pm
+- Delivery: LKR 300 island-wide, 2–7 business days
+- Custom and bulk/corporate orders available
+- Contact: hello@cardle.lk · WhatsApp +94 77 949 7859 · Mon–Fri 9am–6pm, Sat 10am–4pm
+- Social: [Instagram](https://www.instagram.com/cardle_lk/) · [TikTok](https://www.tiktok.com/@cardle.srilanka/) · [Facebook](https://www.facebook.com/people/Cardlelk/61585796349137/)

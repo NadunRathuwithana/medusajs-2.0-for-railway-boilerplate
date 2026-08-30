@@ -14,7 +14,14 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
+    // Was unoptimized:true — Next.js was serving every product photo (raw
+    // ~1638x2048 uploads from the Medusa media bucket) at full resolution
+    // and original format with no resizing/WebP-AVIF conversion, even
+    // though the components already use next/image with a `sizes` prop.
+    // This is what the "~6.2MB of oversized images" Lighthouse finding
+    // was actually pointing at — flipping it on lets Next's built-in
+    // optimizer do the resize/reformat work it was already set up for.
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
         protocol: "http",

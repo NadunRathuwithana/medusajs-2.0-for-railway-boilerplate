@@ -35,8 +35,17 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
         disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout/", "/lk/account/"],
       },
+      // "Claude-Web" is a retired user-agent string — Anthropic's current
+      // crawlers are ClaudeBot (bulk/training crawl) and Claude-User
+      // (real-time fetches on a user's behalf). Targeting the live names
+      // instead of a name that matches neither.
       {
-        userAgent: "Claude-Web",
+        userAgent: "ClaudeBot",
+        allow: "/",
+        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout/", "/lk/account/"],
+      },
+      {
+        userAgent: "Claude-User",
         allow: "/",
         disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout/", "/lk/account/"],
       },
@@ -47,6 +56,21 @@ export default function robots(): MetadataRoute.Robots {
       },
       {
         userAgent: "Google-Extended",
+        allow: "/",
+        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout/", "/lk/account/"],
+      },
+      {
+        userAgent: "Applebot-Extended",
+        allow: "/",
+        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout/", "/lk/account/"],
+      },
+      {
+        userAgent: "Amazonbot",
+        allow: "/",
+        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout/", "/lk/account/"],
+      },
+      {
+        userAgent: "Bytespider",
         allow: "/",
         disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout/", "/lk/account/"],
       },

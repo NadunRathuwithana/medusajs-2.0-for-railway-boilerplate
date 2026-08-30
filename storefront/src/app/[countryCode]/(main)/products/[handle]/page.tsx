@@ -11,6 +11,18 @@ type Props = {
   params: Promise<{ countryCode: string; handle: string }>
 }
 
+// Cuts at the last whitespace before the limit so meta descriptions never
+// end mid-word — a fixed-index slice() previously cut sentences like
+// "...daily essentia" (from "essentials").
+function truncateAtWordBoundary(text: string, maxLength: number): string {
+  if (text.length <= maxLength) {
+    return text
+  }
+  const sliced = text.slice(0, maxLength)
+  const lastSpace = sliced.lastIndexOf(" ")
+  return (lastSpace > 0 ? sliced.slice(0, lastSpace) : sliced).trimEnd() + "…"
+}
+
 export async function generateStaticParams() {
   const countryCodes = await listRegions().then(
     (regions) =>
@@ -64,9 +76,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = `${product.title} – Handmade Canvas Tote Bag | Sri Lanka`
 
   const KEYWORD_SUFFIX = "Handmade canvas tote bag, Sri Lanka."
+  const MAX_META_DESCRIPTION_LENGTH = 155
   const baseDescription = product.description?.trim()
   const description = baseDescription
-    ? `${baseDescription.slice(0, 160 - KEYWORD_SUFFIX.length - 1)} ${KEYWORD_SUFFIX}`
+    ? `${truncateAtWordBoundary(baseDescription, MAX_META_DESCRIPTION_LENGTH - KEYWORD_SUFFIX.length - 1)} ${KEYWORD_SUFFIX}`
     : `Shop the ${product.title} – a handmade canvas tote bag by Cardle, made to order in Sri Lanka.`
 
   const canonicalUrl = `https://cardle.lk/lk/products/${product.handle}`

@@ -10,7 +10,12 @@ type ProductJsonLdProps = {
 }
 
 export default function ProductJsonLd({ product }: ProductJsonLdProps) {
-  const productUrl = `https://cardle.lk/products/${product.handle}`
+  // Must match the real, canonical (sitemap-listed) URL — the bare
+  // /products/... path 30x-redirects to /lk/products/..., which structured
+  // data validators and crawlers treat as a weaker signal than a direct
+  // match. Hardcoded "/lk" matches this single-region site's existing
+  // convention (see BreadcrumbJsonLd's usage on the same page).
+  const productUrl = `https://cardle.lk/lk/products/${product.handle}`
   const images = product.images?.map((img) => img.url) || []
   if (product.thumbnail && !images.includes(product.thumbnail)) {
     images.unshift(product.thumbnail)

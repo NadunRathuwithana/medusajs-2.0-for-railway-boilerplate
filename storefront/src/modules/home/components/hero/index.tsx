@@ -33,12 +33,11 @@ const Hero = () => {
         priority
       />
 
-      {/* PLACEHOLDER copy — replace with final wording */}
-      {/* <div className="absolute inset-0 flex items-end justify-start p-6 md:p-10 bg-gradient-to-t from-black/40 via-transparent to-transparent">
-        <h1 className="text-white text-sm md:text-base font-semibold uppercase tracking-wide max-w-xs drop-shadow-md">
-          Premium Cotton Tote Bags, Handcrafted in Sri Lanka
-        </h1>
-      </div> */}
+      {/* The homepage had no <h1> at all — every heading jumped straight to
+          H2 ("Popular Right Now", etc). Visually hidden since the hero
+          image already carries the visual message; this exists purely so
+          the page has exactly one, meaningful top-level heading. */}
+      <h1 className="sr-only">Cardle – Premium Cotton Tote Bags, Handcrafted in Sri Lanka</h1>
     </div>
   )
 }

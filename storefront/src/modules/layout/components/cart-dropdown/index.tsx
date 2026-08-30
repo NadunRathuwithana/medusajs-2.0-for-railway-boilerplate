@@ -57,6 +57,7 @@ const CartDropdown = ({
       <button
         className="hover:text-ui-fg-base flex items-center h-full"
         onClick={open}
+        aria-label="Open cart"
         data-testid="nav-cart-link"
       >
         <div className="relative flex items-center justify-center">
@@ -108,6 +109,7 @@ const CartDropdown = ({
                       </div>
                       <button
                         onClick={close}
+                        aria-label="Close cart"
                         className="p-2.5 bg-white border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
                       >
                         <X className="w-5 h-5 text-gray-500" />
