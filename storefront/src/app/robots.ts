@@ -74,10 +74,13 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
         disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout/", "/lk/account/"],
       },
-      // Block common scraper bots that aren't useful
+      // Common Crawl feeds many LLM pretraining datasets — allowing it
+      // (with the same path restrictions as the other AI crawlers) improves
+      // the site's visibility in models trained on Common Crawl snapshots.
       {
         userAgent: "CCBot",
-        disallow: "/",
+        allow: "/",
+        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout/", "/lk/account/"],
       },
     ],
     sitemap: `${BASE_URL}/sitemap.xml`,
