@@ -198,6 +198,12 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|favicon.ico|sitemap.xml|robots.txt|.*\\.png|.*\\.jpg|.*\\.gif|.*\\.svg|.*\\.xml|.*\\.txt).*)",
+    // _next/image must be excluded too, not just _next/static: it has no
+    // file extension (it's a query-string-driven route, /_next/image?url=...),
+    // so it wasn't caught by the .jpg/.png/etc patterns either. Without this,
+    // the optimizer's own request got treated as a country-code-less path and
+    // 307-redirected to /lk/_next/image?... — not a real route, so every
+    // optimized image 404'd once image optimization was turned on.
+    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.png|.*\\.jpg|.*\\.gif|.*\\.svg|.*\\.xml|.*\\.txt).*)",
   ], // prevents redirecting on static files, including the root-level sitemap.xml and robots.txt routes
 }
