@@ -9,38 +9,66 @@ const DEFAULT_REGION = process.env.NEXT_PUBLIC_DEFAULT_REGION || "us"
 const regionMapCache = {
   regionMap: new Map<string, HttpTypes.StoreRegion>(),
   regionMapUpdated: Date.now(),
+  // In-flight fetch, shared by every request that finds a cold/stale cache.
+  // Without this, N concurrent requests arriving before the first fetch
+  // resolves each independently kick off their own /store/regions call —
+  // since middleware runs on every single matched request, a traffic burst
+  // right after a cold start (fresh deploy/restart, empty cache) could fire
+  // a thundering herd of duplicate requests at the backend simultaneously.
+  inFlight: null as Promise<void> | null,
+}
+
+async function fetchRegionMap() {
+  const { regions } = await fetch(`${BACKEND_URL}/store/regions`, {
+    headers: {
+      "x-publishable-api-key": PUBLISHABLE_API_KEY!,
+    },
+    next: {
+      revalidate: 3600,
+      tags: ["regions"],
+    },
+    // Middleware has no per-request timeout of its own — an unresponsive
+    // backend would otherwise hang this fetch (and therefore every routed
+    // request) indefinitely.
+    signal: AbortSignal.timeout(8000),
+  }).then((res) => res.json())
+
+  if (!regions?.length) {
+    notFound()
+  }
+
+  regions.forEach((region: HttpTypes.StoreRegion) => {
+    region.countries?.forEach((c) => {
+      regionMapCache.regionMap.set(c?.iso_2 ?? "", region)
+    })
+  })
+
+  regionMapCache.regionMapUpdated = Date.now()
 }
 
 async function getRegionMap() {
   const { regionMap, regionMapUpdated } = regionMapCache
 
-  if (
-    !regionMap.keys().next().value ||
-    regionMapUpdated < Date.now() - 3600 * 1000
-  ) {
-    // Fetch regions from Medusa. We can't use the JS client here because middleware is running on Edge and the client needs a Node environment.
-    const { regions } = await fetch(`${BACKEND_URL}/store/regions`, {
-      headers: {
-        "x-publishable-api-key": PUBLISHABLE_API_KEY!,
-      },
-      next: {
-        revalidate: 3600,
-        tags: ["regions"],
-      },
-    }).then((res) => res.json())
+  const isStale =
+    !regionMap.keys().next().value || regionMapUpdated < Date.now() - 3600 * 1000
 
-    if (!regions?.length) {
-      notFound()
+  if (isStale) {
+    try {
+      // Join an already-in-flight refresh instead of starting a new one.
+      if (!regionMapCache.inFlight) {
+        regionMapCache.inFlight = fetchRegionMap().finally(() => {
+          regionMapCache.inFlight = null
+        })
+      }
+      await regionMapCache.inFlight
+    } catch (error) {
+      // A transient backend hiccup here previously threw uncaught out of
+      // getRegionMap(), failing the ENTIRE middleware invocation — which
+      // runs on virtually every route — for that request. Falling back to
+      // whatever's already cached (possibly stale, possibly empty on a
+      // cold start) keeps the site up instead of 500ing every page.
+      console.error("[middleware] Failed to refresh region map:", error)
     }
-
-    // Create a map of country codes to regions.
-    regions.forEach((region: HttpTypes.StoreRegion) => {
-      region.countries?.forEach((c) => {
-        regionMapCache.regionMap.set(c.iso_2 ?? "", region)
-      })
-    })
-
-    regionMapCache.regionMapUpdated = Date.now()
   }
 
   return regionMapCache.regionMap
@@ -152,6 +180,17 @@ export async function middleware(request: NextRequest) {
   const cartIdCookie = request.cookies.get("_medusa_cart_id")
 
   const regionMap = await getRegionMap()
+
+  // Backend unreachable AND no cache from a previous successful fetch (e.g.
+  // right after a fresh deploy) — countryCode will resolve to undefined,
+  // and the redirect logic below defaults to redirecting a request to
+  // itself when that happens, i.e. an infinite redirect loop, which is a
+  // worse failure than just letting the request through to fail/error
+  // normally inside the page (now that pages have real error.tsx boundaries).
+  if (regionMap.size === 0) {
+    console.error("[middleware] Region map is empty — passing request through unresolved")
+    return passThrough(request)
+  }
 
   const countryCode = regionMap && (await getCountryCode(request, regionMap))
 

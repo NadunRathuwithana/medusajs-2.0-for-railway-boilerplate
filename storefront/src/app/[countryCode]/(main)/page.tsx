@@ -33,8 +33,14 @@ export default async function Home({
   const collections = await getCollectionsWithProducts(countryCode)
   const region = await getRegion(countryCode)
 
+  // Previously `return null` here — a slow/failing backend call silently
+  // rendered a blank page below the header, with no visible error. Throwing
+  // lets the new error.tsx in this route group show a real "something went
+  // wrong, retry" state instead.
   if (!collections || !region) {
-    return null
+    throw new Error(
+      `Failed to load homepage data for region "${countryCode}" — collections or region came back empty.`
+    )
   }
 
   return (

@@ -4,6 +4,12 @@ import { cache } from "react"
 import { getRegion } from "./regions"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import { sortProducts } from "@lib/util/sort-products"
+import { withRetry, nextFetchOptions } from "@lib/util/with-retry"
+
+// See lib/data/regions.ts for why `revalidate` (not just `tags`) matters on
+// Next 15 — without it these product reads were live, uncached backend
+// round-trips on every single page load.
+const PRODUCTS_REVALIDATE_SECONDS = 300
 
 export const getProductsById = cache(async function ({
   ids,
@@ -12,35 +18,41 @@ export const getProductsById = cache(async function ({
   ids: string[]
   regionId: string
 }) {
-  return sdk.store.product
-    .list(
-      {
-        id: ids,
-        region_id: regionId,
-        fields: "*variants.calculated_price,+variants.inventory_quantity,*variants.images",
-      },{ next: { tags: ["products"] } }
-    )
-    .then(({ products }) => {
-      return products
-    })
+  return withRetry(() =>
+    sdk.store.product
+      .list(
+        {
+          id: ids,
+          region_id: regionId,
+          fields: "*variants.calculated_price,+variants.inventory_quantity,*variants.images",
+        },
+        nextFetchOptions(["products"], PRODUCTS_REVALIDATE_SECONDS)
+      )
+      .then(({ products }) => {
+        return products
+      })
+  )
 })
 
 export const getProductByHandle = cache(async function (
   handle: string,
   regionId: string
 ) {
-  return sdk.store.product
-    .list(
-      {
-        handle,
-        region_id: regionId,
-        fields:
-          "*variants.calculated_price,+variants.inventory_quantity,+variants.weight,+variants.length,+variants.height,+variants.width,+variants.metadata,*variants.images,+metadata",
-      },{ next: { tags: ["products"] } }
-    )
-    .then(({ products }) => {
-      return products[0]
-    })
+  return withRetry(() =>
+    sdk.store.product
+      .list(
+        {
+          handle,
+          region_id: regionId,
+          fields:
+            "*variants.calculated_price,+variants.inventory_quantity,+variants.weight,+variants.length,+variants.height,+variants.width,+variants.metadata,*variants.images,+metadata",
+        },
+        nextFetchOptions(["products"], PRODUCTS_REVALIDATE_SECONDS)
+      )
+      .then(({ products }) => {
+        return products[0]
+      })
+  )
 })
 
 export const getProductsList = cache(async function ({
@@ -67,29 +79,31 @@ export const getProductsList = cache(async function ({
       nextPage: null,
     }
   }
-  return sdk.store.product
-    .list(
-      {
-        limit,
-        offset,
-        region_id: region.id,
-        fields: "*variants.calculated_price,+variants.inventory_quantity,*variants.images",
-        ...queryParams,
-      },
-      { next: { tags: ["products"] } }
-    )
-    .then(({ products, count }) => {
-      const nextPage = count > offset + limit ? pageParam + 1 : null
-
-      return {
-        response: {
-          products,
-          count,
+  return withRetry(() =>
+    sdk.store.product
+      .list(
+        {
+          limit,
+          offset,
+          region_id: region.id,
+          fields: "*variants.calculated_price,+variants.inventory_quantity,*variants.images",
+          ...queryParams,
         },
-        nextPage: nextPage,
-        queryParams,
-      }
-    })
+        nextFetchOptions(["products"], PRODUCTS_REVALIDATE_SECONDS)
+      )
+      .then(({ products, count }) => {
+        const nextPage = count > offset + limit ? pageParam + 1 : null
+
+        return {
+          response: {
+            products,
+            count,
+          },
+          nextPage: nextPage,
+          queryParams,
+        }
+      })
+  )
 })
 
 /**
