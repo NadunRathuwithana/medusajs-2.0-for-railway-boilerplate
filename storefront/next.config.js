@@ -51,10 +51,32 @@ const nextConfig = {
         protocol: "https",
         hostname: "medusa-server-testing.s3.us-east-1.amazonaws.com",
       },
-      ...(process.env.NEXT_PUBLIC_MINIO_ENDPOINT ? [{ // Note: needed when using MinIO bucket storage for media
+      // Media bucket migration (bucket-uat-5fec.up.railway.app -> media.cardle.lk):
+      // existing DB rows have the OLD host baked into their absolute image
+      // URLs, so both hosts must stay allowed simultaneously through the
+      // whole migration — switching NEXT_PUBLIC_MINIO_ENDPOINT alone made
+      // the Next.js image optimizer 400 every pre-existing image the moment
+      // the old host stopped being an allowed remotePattern. Hardcoded
+      // (not just derived from the env var) so this doesn't silently regress
+      // again the next time the env var changes.
+      // TODO: remove "bucket-uat-5fec.up.railway.app" after 2026-10-01 once
+      // the media.cardle.lk migration is confirmed stable.
+      {
         protocol: "https",
-        hostname: process.env.NEXT_PUBLIC_MINIO_ENDPOINT,
-      }] : []),
+        hostname: "bucket-uat-5fec.up.railway.app",
+      },
+      {
+        protocol: "https",
+        hostname: "media.cardle.lk",
+      },
+      ...(process.env.NEXT_PUBLIC_MINIO_ENDPOINT &&
+      process.env.NEXT_PUBLIC_MINIO_ENDPOINT !== "bucket-uat-5fec.up.railway.app" &&
+      process.env.NEXT_PUBLIC_MINIO_ENDPOINT !== "media.cardle.lk"
+        ? [{ // Note: needed when using MinIO bucket storage for media (e.g. local dev pointing at a different endpoint)
+            protocol: "https",
+            hostname: process.env.NEXT_PUBLIC_MINIO_ENDPOINT,
+          }]
+        : []),
     ],
   },
   serverRuntimeConfig: {
