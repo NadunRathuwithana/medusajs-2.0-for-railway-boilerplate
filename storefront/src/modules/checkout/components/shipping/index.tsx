@@ -10,6 +10,8 @@ import { useEffect, useRef, useState } from "react"
 import { setShippingMethod } from "@lib/data/cart"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
+import { trackAddShippingInfo } from "@lib/analytics/track"
+import { wasEventTracked, markEventTracked } from "@lib/analytics/dedup"
 
 type ShippingProps = {
   cart: HttpTypes.StoreCart
@@ -30,6 +32,19 @@ const Shipping: React.FC<ShippingProps> = ({
   const set = async (id: string) => {
     setIsLoading(true)
     await setShippingMethod({ cartId: cart.id, shippingMethodId: id })
+      .then(() => {
+        // Dedup per cart — re-selecting the same or a different method
+        // shouldn't re-fire this once the step has been completed once.
+        if (wasEventTracked("shipping_info", cart.id)) return
+        const method = availableShippingMethods?.find((m) => m.id === id)
+        trackAddShippingInfo({
+          items: cart.items ?? [],
+          total: cart.total,
+          currency: cart.currency_code,
+          shippingTier: method?.name,
+        })
+        markEventTracked("shipping_info", cart.id)
+      })
       .catch((err) => {
         setError(err.message)
       })

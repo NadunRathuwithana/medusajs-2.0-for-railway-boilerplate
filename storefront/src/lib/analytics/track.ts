@@ -2,6 +2,16 @@
 
 const isClient = typeof window !== "undefined"
 
+// Meta Pixel rejects any currency that isn't an uppercase 3-letter ISO 4217
+// code ("[Meta Pixel] - Invalid parameter format for currency"). Medusa
+// stores/returns currency_code lowercase (e.g. "lkr"), and two call sites
+// (CheckoutTracker's InitiateCheckout, PurchaseTracker's Purchase) were
+// passing it straight through unnormalized — this is the root cause of that
+// console warning. Normalizing centrally here means every current and future
+// call site is covered, not just the ones a caller remembers to .toUpperCase().
+const normalizeCurrency = (currency: string | undefined | null): string =>
+  (currency || "LKR").toString().trim().toUpperCase()
+
 export const trackViewItemList = (list: {
   listId: string
   listName: string
@@ -14,7 +24,7 @@ export const trackViewItemList = (list: {
     window.gtag("event", "view_item_list", {
       item_list_id: list.listId,
       item_list_name: list.listName,
-      currency: list.currency,
+      currency: normalizeCurrency(list.currency),
       items: list.items.map((item, index) => ({
         item_id: item.id,
         item_name: item.name,
@@ -53,13 +63,13 @@ export const trackViewContent = (product: { id: string; name: string; price: num
       content_name: product.name,
       content_type: "product",
       value: product.price,
-      currency: product.currency,
+      currency: normalizeCurrency(product.currency),
     })
   }
 
   if (window.gtag) {
     window.gtag("event", "view_item", {
-      currency: product.currency,
+      currency: normalizeCurrency(product.currency),
       value: product.price,
       items: [
         {
@@ -82,13 +92,13 @@ export const trackAddToCart = (item: { id: string; name: string; price: number; 
       content_name: item.name,
       content_type: "product",
       value: item.price * item.quantity,
-      currency: item.currency,
+      currency: normalizeCurrency(item.currency),
     })
   }
 
   if (window.gtag) {
     window.gtag("event", "add_to_cart", {
-      currency: item.currency,
+      currency: normalizeCurrency(item.currency),
       value: item.price * item.quantity,
       items: [
         {
@@ -112,14 +122,14 @@ export const trackInitiateCheckout = (cart: { items: any[]; total: number; curre
       content_ids,
       content_type: "product",
       value: cart.total,
-      currency: cart.currency,
+      currency: normalizeCurrency(cart.currency),
       num_items: cart.items.length,
     })
   }
 
   if (window.gtag) {
     window.gtag("event", "begin_checkout", {
-      currency: cart.currency,
+      currency: normalizeCurrency(cart.currency),
       value: cart.total,
       items: cart.items.map((i) => ({
         item_id: i.variant_id || i.id,
@@ -147,7 +157,7 @@ export const trackPurchase = (
         content_ids,
         content_type: "product",
         value: order.total,
-        currency: order.currency,
+        currency: normalizeCurrency(order.currency),
         num_items: order.items.length,
       },
       { eventID: eventId }
@@ -158,8 +168,74 @@ export const trackPurchase = (
     window.gtag("event", "purchase", {
       transaction_id: order.id,
       value: order.total,
-      currency: order.currency,
+      currency: normalizeCurrency(order.currency),
       items: order.items.map((i) => ({
+        item_id: i.variant_id || i.id,
+        item_name: i.title,
+        price: i.unit_price,
+        quantity: i.quantity,
+      })),
+    })
+  }
+}
+
+// GA4 standard ecommerce event — fired when the customer's shipping method
+// is set. Previously never implemented at all, which is why GA4's checkout
+// funnel exploration showed 0% for this step even though purchases were
+// happening: a funnel requires each named step to fire in session order, and
+// this step simply never existed to advance through.
+export const trackAddShippingInfo = (cart: {
+  items: any[]
+  total: number
+  currency: string
+  shippingTier?: string
+}) => {
+  if (!isClient) return
+
+  if (window.gtag) {
+    window.gtag("event", "add_shipping_info", {
+      currency: normalizeCurrency(cart.currency),
+      value: cart.total,
+      shipping_tier: cart.shippingTier,
+      items: cart.items.map((i) => ({
+        item_id: i.variant_id || i.id,
+        item_name: i.title,
+        price: i.unit_price,
+        quantity: i.quantity,
+      })),
+    })
+  }
+}
+
+// GA4 standard ecommerce event, plus Meta's matching standard "AddPaymentInfo"
+// pixel event — fired when a payment method/session is selected. Meta had no
+// signal here at all beyond InitiateCheckout and Purchase (a "thin" funnel for
+// ad delivery); this fills that gap on the client side.
+export const trackAddPaymentInfo = (cart: {
+  items: any[]
+  total: number
+  currency: string
+  paymentType?: string
+}) => {
+  if (!isClient) return
+
+  const content_ids = cart.items.map((i) => i.variant_id || i.id)
+
+  if (window.fbq) {
+    window.fbq("track", "AddPaymentInfo", {
+      content_ids,
+      content_type: "product",
+      value: cart.total,
+      currency: normalizeCurrency(cart.currency),
+    })
+  }
+
+  if (window.gtag) {
+    window.gtag("event", "add_payment_info", {
+      currency: normalizeCurrency(cart.currency),
+      value: cart.total,
+      payment_type: cart.paymentType,
+      items: cart.items.map((i) => ({
         item_id: i.variant_id || i.id,
         item_name: i.title,
         price: i.unit_price,

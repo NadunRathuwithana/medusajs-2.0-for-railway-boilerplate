@@ -11,6 +11,8 @@ import PaymentContainer from "@modules/checkout/components/payment-container"
 import { isStripe as isStripeFunc, paymentInfoMap, getPaymentPromoInfo, getAllPaymentPromoCodes } from "@lib/constants"
 import { StripeContext } from "@modules/checkout/components/payment-wrapper"
 import { initiatePaymentSession, applyPromotions } from "@lib/data/cart"
+import { trackAddPaymentInfo } from "@lib/analytics/track"
+import { wasEventTracked, markEventTracked } from "@lib/analytics/dedup"
 
 const Payment = ({
   cart,
@@ -205,6 +207,19 @@ const Payment = ({
               setError(result.error)
             } else if (result?.session) {
               setSyncedSession(result.session)
+              // Dedup per cart+method — switching providers is a genuinely
+              // new "payment info submitted" event, but re-renders of the
+              // same already-initiated session shouldn't re-fire.
+              const dedupKey = `${cartIdRef.current}:${selectedPaymentMethod}`
+              if (!wasEventTracked("payment_info", dedupKey)) {
+                trackAddPaymentInfo({
+                  items: cartRef.current?.items ?? [],
+                  total: cartRef.current?.total,
+                  currency: cartRef.current?.currency_code,
+                  paymentType: selectedPaymentMethod,
+                })
+                markEventTracked("payment_info", dedupKey)
+              }
             }
           })
           .catch((err: any) => {
