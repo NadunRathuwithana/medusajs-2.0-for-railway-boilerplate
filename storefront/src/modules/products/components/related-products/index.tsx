@@ -44,7 +44,7 @@ export default async function RelatedProducts({
       queryParams,
       countryCode,
     })
-    
+
     products = response.response.products.filter(
       (responseProduct) => responseProduct.id !== product.id
     )
@@ -55,6 +55,36 @@ export default async function RelatedProducts({
       error.message || error
     )
     products = []
+  }
+
+  // This section should always show 4 products — a collection with 4 or
+  // fewer total products (this one included) previously left the grid
+  // short, since the only source was "other products in the same
+  // collection". Pad from the general catalog when needed, excluding this
+  // product and anything already picked, so the count never drops below 4
+  // as long as the store actually has enough inventory.
+  if (products.length < 4) {
+    try {
+      const excludeIds = new Set([product.id, ...products.map((p) => p.id)])
+      const fallbackQueryParams: StoreProductParamsWithTags & HttpTypes.FindParams = {
+        region_id: region.id,
+        is_giftcard: false,
+        limit: 4 + excludeIds.size,
+      }
+      const fallbackResponse = await getProductsList({
+        queryParams: fallbackQueryParams,
+        countryCode,
+      })
+      const fallbackProducts = fallbackResponse.response.products.filter(
+        (p) => !excludeIds.has(p.id)
+      )
+      products = [...products, ...fallbackProducts]
+    } catch (error: any) {
+      console.error(
+        `[RelatedProducts] Fallback fetch failed for ${product.id}:`,
+        error.message || error
+      )
+    }
   }
 
   if (!products.length) {
