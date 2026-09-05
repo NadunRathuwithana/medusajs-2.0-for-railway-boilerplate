@@ -38,7 +38,9 @@ export function sortProducts(
     })
   }
 
-  if (["created_at", "featured", "most_relevant", "best_selling"].includes(sortBy)) {
+  // "best_selling" is handled separately in getProductsListWithSort, backed
+  // by real order data — it never reaches here.
+  if (["created_at", "featured", "most_relevant"].includes(sortBy)) {
     sortedProducts.sort((a, b) => {
       return (
         new Date(b.created_at!).getTime() - new Date(a.created_at!).getTime()

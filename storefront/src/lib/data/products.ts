@@ -6,6 +6,30 @@ import { SortOptions } from "@modules/store/components/refinement-list/sort-prod
 import { sortProducts } from "@lib/util/sort-products"
 import { withRetry, nextFetchOptions } from "@lib/util/with-retry"
 
+// Ranked most-sold-first, backed by real order data (see
+// backend/src/api/store/products/best-selling/route.ts) — "Best selling"
+// previously had no sales data behind it at all and silently fell back to
+// sorting by created_at, which just looked like a random order relative to
+// actual sales. Revalidates hourly: real sales volume doesn't need to be
+// live-accurate to the second, and this avoids re-running the aggregation
+// query on every store-page view.
+export const getBestSellingProductIds = cache(async function (): Promise<string[]> {
+  try {
+    return await withRetry(async () => {
+      const { product_ids } = await sdk.client.fetch<{ product_ids: string[] }>(
+        "/store/products/best-selling",
+        nextFetchOptions(["best-selling"], 3600)
+      )
+      return product_ids ?? []
+    })
+  } catch (e) {
+    // Best-selling ranking is a nice-to-have ordering, not critical data —
+    // fall back to no ranking (callers treat an empty list as "unranked")
+    // rather than breaking the store page if this fails.
+    return []
+  }
+})
+
 // See lib/data/regions.ts for why `revalidate` (not just `tags`) matters on
 // Next 15 — without it these product reads were live, uncached backend
 // round-trips on every single page load.
@@ -138,7 +162,21 @@ export const getProductsListWithSort = cache(async function ({
     countryCode,
   })
 
-  const sortedProducts = sortProducts(products, sortBy)
+  let sortedProducts: HttpTypes.StoreProduct[]
+  if (sortBy === "best_selling") {
+    const rankedIds = await getBestSellingProductIds()
+    const rank = new Map(rankedIds.map((id, index) => [id, index]))
+    // Products with no sales yet aren't in the ranking — keep them, ordered
+    // newest-first, after everything that has actually sold at least once.
+    sortedProducts = [...products].sort((a, b) => {
+      const rankA = rank.get(a.id!) ?? Infinity
+      const rankB = rank.get(b.id!) ?? Infinity
+      if (rankA !== rankB) return rankA - rankB
+      return new Date(b.created_at!).getTime() - new Date(a.created_at!).getTime()
+    })
+  } else {
+    sortedProducts = sortProducts(products, sortBy)
+  }
 
   const pageParam = (page - 1) * limit
 
