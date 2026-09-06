@@ -11,7 +11,6 @@ export const metadata: Metadata = {
 type Params = {
   searchParams: Promise<{
     sortBy?: SortOptions
-    page?: string
   }>
   params: Promise<{
     countryCode: string
@@ -22,15 +21,9 @@ export default async function StorePage({ searchParams, params }: Params) {
   // Next.js 15 made these Promises — destructuring them directly (as this
   // used to) still worked via a deprecation-warned compatibility shim, but
   // that shim is going away, so it was one Next.js upgrade away from every
-  // sortBy/page value silently coming back undefined.
-  const { sortBy, page } = await searchParams
+  // sortBy value silently coming back undefined.
+  const { sortBy } = await searchParams
   const { countryCode } = await params
 
-  return (
-    <StoreTemplate
-      sortBy={sortBy}
-      page={page}
-      countryCode={countryCode}
-    />
-  )
+  return <StoreTemplate sortBy={sortBy} countryCode={countryCode} />
 }

@@ -3,18 +3,15 @@ import { Suspense } from "react"
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import SortDropdown from "@modules/store/components/sort-dropdown"
-import PaginatedProducts from "./paginated-products"
+import InfiniteProducts from "./infinite-products"
 
 const StoreTemplate = ({
   sortBy,
-  page,
   countryCode,
 }: {
   sortBy?: SortOptions
-  page?: string
   countryCode: string
 }) => {
-  const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "best_selling"
 
   return (
@@ -45,14 +42,8 @@ const StoreTemplate = ({
 
         {/* Products Grid */}
         <div className="w-full">
-          <Suspense fallback={<SkeletonProductGrid />}>
-            <PaginatedProducts
-              sortBy={sort}
-              page={pageNumber}
-              countryCode={countryCode}
-              listId="store"
-              listName="All Products"
-            />
+          <Suspense key={sort} fallback={<SkeletonProductGrid />}>
+            <InfiniteProducts sortBy={sort} countryCode={countryCode} />
           </Suspense>
         </div>
       </div>
