@@ -67,5 +67,14 @@ export default defineMiddlewares({
         rateLimit({ windowMs: 60_000, max: 10, keyPrefix: "cart-complete" }),
       ],
     },
+    {
+      // Public, unauthenticated, and cached — this limit is just a backstop
+      // against abuse/scraping, not something Meta's normal polling cadence
+      // should ever come close to.
+      matcher: "/feed/meta-catalog.xml",
+      middlewares: [
+        rateLimit({ windowMs: 60_000, max: 30, keyPrefix: "meta-catalog-feed" }),
+      ],
+    },
   ],
 })
