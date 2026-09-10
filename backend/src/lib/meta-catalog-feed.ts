@@ -18,6 +18,15 @@ const PRODUCT_CATEGORY = "Apparel & Accessories > Handbags & Wallets"
 // the pattern already used by koko-payment/service.ts and rate-limit.ts.
 let memoryCache: { xml: string; generatedAt: number } | null = null
 
+// Shared by every request that finds a cold/stale cache, so N concurrent
+// requests during that window trigger ONE regeneration instead of N —
+// same thundering-herd fix already applied to middleware.ts's region-map
+// cache. Without this, a burst of hits while the cache is cold (e.g. right
+// after a deploy, or several people/tools checking the feed at once) would
+// each independently run the full catalog query against the same database
+// the storefront's own product/payment-provider lookups depend on.
+let inFlightBuild: Promise<string> | null = null
+
 function escapeXml(value: string): string {
   return value
     .replace(/&/g, "&amp;")
@@ -297,7 +306,12 @@ export async function getMetaCatalogFeedXml(container: MedusaContainer): Promise
   }
 
   try {
-    const xml = await buildMetaCatalogFeedXml(container)
+    if (!inFlightBuild) {
+      inFlightBuild = buildMetaCatalogFeedXml(container).finally(() => {
+        inFlightBuild = null
+      })
+    }
+    const xml = await inFlightBuild
     await writeCache({ xml, generatedAt: Date.now() })
     return xml
   } catch (err: any) {
