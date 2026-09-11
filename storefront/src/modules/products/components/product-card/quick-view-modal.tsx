@@ -201,13 +201,23 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
             <div className="flex items-end justify-between">
               <div>
                 {cheapestPrice ? (
-                  <div className="flex flex-col">
+                  <div className="flex flex-col gap-0.5">
                     {Number(cheapestPrice.percentage_diff) > 0 && (
-                      <span className="text-sm font-medium text-gray-400 line-through">
-                        {cheapestPrice.original_price}
-                      </span>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-xs sm:text-sm font-medium text-gray-400 line-through leading-none">
+                          {cheapestPrice.original_price}
+                        </span>
+                        <span className="bg-[#e11d48] text-white text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-full tracking-wider">
+                          {cheapestPrice.percentage_diff}% off
+                        </span>
+                      </div>
                     )}
-                    <span className="text-2xl font-bold text-gray-900">
+                    <span
+                      className={clx("text-lg sm:text-xl font-bold leading-tight", {
+                        "text-[#e11d48]": Number(cheapestPrice.percentage_diff) > 0,
+                        "text-gray-900": Number(cheapestPrice.percentage_diff) <= 0,
+                      })}
+                    >
                       {cheapestPrice.calculated_price}
                     </span>
                   </div>

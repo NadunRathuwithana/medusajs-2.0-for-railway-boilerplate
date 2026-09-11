@@ -2,7 +2,6 @@ import { clx } from "@medusajs/ui"
 
 import { getProductPrice } from "@lib/util/get-product-price"
 import { HttpTypes } from "@medusajs/types"
-import { convertToLocale } from "@lib/util/money"
 
 export default function ProductPrice({
   product,
@@ -22,11 +21,28 @@ export default function ProductPrice({
     return <div className="block w-32 h-9 bg-gray-100 animate-pulse" />
   }
 
+  const hasDiscount = Number(selectedPrice.percentage_diff) > 0
+
   return (
-    <div className="flex flex-col text-ui-fg-base">
+    <div className="flex flex-col gap-0.5 text-ui-fg-base">
+      {hasDiscount && (
+        <div className="flex items-center gap-2 mb-0.5">
+          <span
+            className="line-through text-gray-400 font-medium text-xs sm:text-sm leading-none"
+            data-testid="original-product-price"
+            data-value={selectedPrice.original_price_number}
+          >
+            {selectedPrice.original_price}
+          </span>
+          <span className="bg-[#e11d48] text-white text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-full tracking-wider">
+            {selectedPrice.percentage_diff}% off
+          </span>
+        </div>
+      )}
       <span
-        className={clx("text-xl-semi font-bold", {
-          "text-[#e11d48]": Number(selectedPrice.percentage_diff) > 0,
+        className={clx("text-lg sm:text-xl font-bold leading-tight", {
+          "text-[#e11d48]": hasDiscount,
+          "text-gray-900": !hasDiscount,
         })}
       >
         {!variant && "From "}
@@ -37,23 +53,6 @@ export default function ProductPrice({
           {selectedPrice.calculated_price}
         </span>
       </span>
-      {Number(selectedPrice.percentage_diff) > 0 && (
-        <div className="flex flex-wrap items-center gap-2 mt-2">
-          <span
-            className="line-through text-gray-400 font-medium text-sm"
-            data-testid="original-product-price"
-            data-value={selectedPrice.original_price_number}
-          >
-            {selectedPrice.original_price}
-          </span>
-          <span className="bg-[#fce7f3] text-[#be185d] text-[11px] font-medium px-2.5 py-1 rounded-full">
-            {selectedPrice.percentage_diff}% off
-          </span>
-          <span className="bg-[#e11d48] text-white text-[11px] font-medium px-2.5 py-1 rounded-full">
-            -{convertToLocale({ amount: selectedPrice.original_price_number - selectedPrice.calculated_price_number, currency_code: selectedPrice.currency_code })}
-          </span>
-        </div>
-      )}
     </div>
   )
 }
