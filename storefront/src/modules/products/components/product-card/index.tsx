@@ -145,11 +145,6 @@ export default function ProductCard({
     sitewideDiscountedAmount !== null
       ? convertToLocale({ amount: sitewideDiscountedAmount, currency_code: cheapestPrice!.currency_code })
       : cheapestPrice?.calculated_price
-  const displaySavingsAmount = hasRealDiscount
-    ? cheapestPrice!.original_price_number - cheapestPrice!.calculated_price_number
-    : sitewideDiscountedAmount !== null
-    ? cheapestPrice!.calculated_price_number - sitewideDiscountedAmount
-    : 0
   // So the BNPL "3 X <installment>" math matches whatever price is actually
   // shown above, instead of the pre-sitewide-discount amount.
   const effectivePriceNumber = sitewideDiscountedAmount ?? cheapestPrice?.calculated_price_number
@@ -163,6 +158,11 @@ export default function ProductCard({
       {(isNew || (product as any).collection?.handle === "new-arrivals") && !isComingSoon && (
         <div className="absolute top-4 left-4 z-10 bg-[#111111] text-white text-[10px] font-bold px-3 py-1.5 rounded-full capitalize tracking-wider">
           New
+        </div>
+      )}
+      {showDiscount && !isComingSoon && (
+        <div className="absolute top-4 right-4 z-10 bg-[#e11d48] text-white text-[10px] font-bold px-3 py-1.5 rounded-full tracking-wider">
+          {discountPercent}% off
         </div>
       )}
       {isComingSoon && (
@@ -212,30 +212,20 @@ export default function ProductCard({
         {product.title}
       </h3>
       <div className="mt-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2 sm:gap-3">
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+        <div className="flex flex-col justify-center gap-0.5">
           {cheapestPrice ? (
             <>
               {showDiscount && (
-                <span className="text-xs sm:text-sm font-medium text-gray-400 line-through">
+                <span className="text-xs font-medium text-gray-400 line-through leading-none">
                   {displayOriginalPrice}
                 </span>
               )}
-              <span className={clx("text-sm sm:text-md font-semibold", showDiscount ? "text-[#e11d48]" : "text-gray-700")}>
+              <span className={clx("text-base sm:text-lg font-bold leading-tight", showDiscount ? "text-[#e11d48]" : "text-gray-900")}>
                 {displayCurrentPrice}
               </span>
-              {showDiscount && (
-                <div className="flex items-center gap-1 mt-1 sm:mt-0 w-full sm:w-auto">
-                  <span className="bg-[#fce7f3] text-[#be185d] text-[10px] font-medium px-2 py-0.5 rounded-full">
-                    {discountPercent}% off
-                  </span>
-                  <span className="bg-[#e11d48] text-white text-[10px] font-medium px-2 py-0.5 rounded-full">
-                    -{convertToLocale({ amount: displaySavingsAmount, currency_code: cheapestPrice.currency_code })}
-                  </span>
-                </div>
-              )}
             </>
           ) : (
-            <span className="text-sm sm:text-md font-semibold text-gray-500">Coming soon</span>
+            <span className="text-sm sm:text-base font-semibold text-gray-500">Coming soon</span>
           )}
         </div>
 
