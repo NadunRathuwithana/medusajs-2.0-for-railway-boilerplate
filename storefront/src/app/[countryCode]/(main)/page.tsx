@@ -3,6 +3,7 @@ import { Metadata } from "next"
 import Hero from "@modules/home/components/hero"
 import PopularProducts from "@modules/home/components/popular-products"
 import FeatureGrid from "@modules/home/components/feature-grid"
+import WideBanner from "@modules/home/components/wide-banner"
 import AllProducts from "@modules/home/components/all-products"
 import PromoBanner from "@modules/home/components/promo-banner"
 import { getCollectionsWithProducts } from "@lib/data/collections"
@@ -50,9 +51,10 @@ export default async function Home({
       <div className="flex flex-col gap-16 small:gap-24 py-16 small:py-24">
         <PopularProducts countryCode={countryCode} collectionHandle="featured" />
         <PopularProducts countryCode={countryCode} title="New Arrivals" collectionHandle="new-arrivals" />
-        <FeatureGrid />
+        <WideBanner />
         <AllProducts countryCode={countryCode} page={pageNumber} />
         <PromoBanner />
+        <FeatureGrid />
       </div>
     </>
   )
