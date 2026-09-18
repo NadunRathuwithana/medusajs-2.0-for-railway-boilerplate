@@ -52,7 +52,7 @@ export const getRegion = cache(async function (countryCode: string) {
 
     const region = countryCode
       ? regionMap.get(countryCode)
-      : regionMap.get("us")
+      : regionMap.get(process.env.NEXT_PUBLIC_DEFAULT_REGION || "lk")
 
     return region
   } catch (e: any) {
