@@ -12,3 +12,16 @@ export const sdk = new Medusa({
   debug: process.env.NODE_ENV === "development",
   publishableKey: process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY,
 })
+
+// Medusa SDK treats the 3rd arg of list()/retrieve() as request headers, so
+// `next: { revalidate }` never reached fetch() and every page view hit the
+// backend. Hoist it into the fetch init so Next's data cache actually applies.
+const __origFetch = sdk.client.fetch.bind(sdk.client)
+;(sdk.client as any).fetch = (input: any, init?: any) => {
+  const h = init?.headers
+  if (h && typeof h === "object" && h.next && typeof h.next === "object") {
+    const { next, ...rest } = h
+    return (__origFetch as any)(input, { ...init, headers: rest, next })
+  }
+  return (__origFetch as any)(input, init)
+}
