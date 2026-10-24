@@ -21,7 +21,7 @@ const KOKO_PROVIDER_ID = "pp_koko_koko"
 
 /**
  * Safety net for missed Koko webhooks. Polls Koko's orderView for payment
- * sessions still pending (2 min to 3 days old). For SUCCESS ones, replays
+ * sessions still pending (2 min to 24 h old). For SUCCESS ones, replays
  * Koko's own signed confirmation (orderId + trnId + status + signature from
  * orderView) through the normal webhook event, so signature verification and
  * order completion behave exactly like a real webhook.
@@ -43,7 +43,7 @@ export default async function kokoReconcileJob(container: MedusaContainer) {
   let resolved = 0
   for (const session of sessions as any[]) {
     const age = now - new Date(session.created_at).getTime()
-    if (age < 2 * 60_000 || age > 3 * 24 * 3600_000) continue
+    if (age < 2 * 60_000 || age > 24 * 3600_000) continue
 
     try {
       const dataString = buildOrderViewDataString({
