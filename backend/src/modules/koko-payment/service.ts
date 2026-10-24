@@ -463,7 +463,9 @@ class KokoPaymentService extends AbstractPaymentProvider<KokoOptions> {
       )
     }
 
-    return res.json() as Promise<KokoOrderViewResponse>
+    // Koko wraps the order in { status, statusCode, content: {...} }
+    const json = (await res.json()) as any
+    return (json?.content ?? json) as KokoOrderViewResponse
   }
 }
 
