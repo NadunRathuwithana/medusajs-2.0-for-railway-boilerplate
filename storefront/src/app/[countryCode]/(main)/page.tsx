@@ -10,6 +10,7 @@ import { getCollectionsWithProducts } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
 
 import OrganisationJsonLd from "@modules/seo/components/organisation-json-ld"
+import WebsiteJsonLd from "@modules/seo/components/website-json-ld"
 
 export const metadata: Metadata = {
   // Absolute: bypasses the root layout's `%s | Cardle Sri Lanka` template —
@@ -47,6 +48,7 @@ export default async function Home({
   return (
     <>
       <OrganisationJsonLd />
+      <WebsiteJsonLd />
       <Hero />
       <div className="flex flex-col gap-16 small:gap-24 py-16 small:py-24">
         <PopularProducts countryCode={countryCode} collectionHandle="featured" />

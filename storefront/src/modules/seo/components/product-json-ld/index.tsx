@@ -63,6 +63,44 @@ export default function ProductJsonLd({ product }: ProductJsonLdProps) {
               "@type": "Organization",
               name: "Cardle",
             },
+            // Mirrors /shipping (LKR 300 island-wide, 2-7 business days) and
+            // /returns (7-day returns). Update these if either page changes.
+            shippingDetails: {
+              "@type": "OfferShippingDetails",
+              shippingRate: {
+                "@type": "MonetaryAmount",
+                value: "300",
+                currency: "LKR",
+              },
+              shippingDestination: {
+                "@type": "DefinedRegion",
+                addressCountry: "LK",
+              },
+              deliveryTime: {
+                "@type": "ShippingDeliveryTime",
+                handlingTime: {
+                  "@type": "QuantitativeValue",
+                  minValue: 0,
+                  maxValue: 2,
+                  unitCode: "DAY",
+                },
+                transitTime: {
+                  "@type": "QuantitativeValue",
+                  minValue: 2,
+                  maxValue: 7,
+                  unitCode: "DAY",
+                },
+              },
+            },
+            hasMerchantReturnPolicy: {
+              "@type": "MerchantReturnPolicy",
+              applicableCountry: "LK",
+              returnPolicyCategory:
+                "https://schema.org/MerchantReturnFiniteReturnWindow",
+              merchantReturnDays: 7,
+              returnMethod: "https://schema.org/ReturnByMail",
+              url: "https://cardle.lk/lk/returns",
+            },
           },
         }
       : {}),

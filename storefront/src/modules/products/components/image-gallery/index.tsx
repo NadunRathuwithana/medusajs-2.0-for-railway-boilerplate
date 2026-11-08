@@ -162,15 +162,13 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
     }
   }
 
-  if (!images || images.length === 0) return null
-
   const openFullscreen = (index: number) => {
     setFullscreenIndex(index)
     setIsFullscreen(true)
   }
   const closeFullscreen = () => setIsFullscreen(false)
-  const prev = () => setFullscreenIndex((i) => (i - 1 + images.length) % images.length)
-  const next = () => setFullscreenIndex((i) => (i + 1) % images.length)
+  const prev = () => setFullscreenIndex((i) => (i - 1 + (images?.length || 1)) % (images?.length || 1))
+  const next = () => setFullscreenIndex((i) => (i + 1) % (images?.length || 1))
 
   // Keyboard & scroll lock
   useEffect(() => {
@@ -187,6 +185,9 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
       document.body.style.overflow = ""
     }
   }, [isFullscreen])
+
+  // Must stay below every hook above (rules of hooks).
+  if (!images || images.length === 0) return null
 
   const lightbox = (
     <div

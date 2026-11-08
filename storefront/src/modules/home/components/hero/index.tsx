@@ -3,12 +3,19 @@
 import Image from "next/image"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { clx } from "@medusajs/ui"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 type Slide = {
   mobile: string
   tablet: string
   desktop: string
   alt: string
+  // Live text over the image: crisp, translatable and readable by screen readers.
+  // Slide 1 already carries its headline in the artwork, so it only gets the button.
+  eyebrow?: string
+  title?: string
+  cta: string
+  href: string
 }
 
 // Slide 1 keeps the original per-breakpoint crops. Slides 2-3 reuse the two
@@ -22,18 +29,28 @@ const SLIDES: Slide[] = [
     tablet: "/home/cardle-premium-cotton-tote-bag-sri-lanka-tablet.jpg",
     desktop: "/home/cardle-premium-cotton-tote-bag-sri-lanka.jpg",
     alt: "Cardle handcrafted cotton tote bags – shop Sri Lanka's premium make-to-order bags",
+    cta: "Shop the collection",
+    href: "/store",
   },
   {
     mobile: "/home/cardle-uncompromising-craftsmanship.jpg",
     tablet: "/home/cardle-uncompromising-craftsmanship.jpg",
     desktop: "/home/cardle-uncompromising-craftsmanship.jpg",
     alt: "Cardle uncompromising craftsmanship – zero-stretch canvas engineering",
+    eyebrow: "Uncompromising craftsmanship",
+    title: "Zero-stretch canvas, built to last",
+    cta: "Shop totes",
+    href: "/store",
   },
   {
     mobile: "/home/cardle-status-meets-utility-tote-bag.jpg",
     tablet: "/home/cardle-status-meets-utility-tote-bag.jpg",
     desktop: "/home/cardle-status-meets-utility-tote-bag.jpg",
     alt: "Cardle – where status meets utility, quiet luxury everyday carry",
+    eyebrow: "Status meets utility",
+    title: "Quiet luxury for everyday carry",
+    cta: "Explore the range",
+    href: "/store",
   },
 ]
 
@@ -45,6 +62,9 @@ const SWIPE_THRESHOLD_PX = 50
 const Hero = () => {
   const [index, setIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
+  // Separate from hover/touch pausing: a visible control so keyboard and touch
+  // users can stop the autoplay for good (WCAG 2.2.2).
+  const [userPaused, setUserPaused] = useState(false)
   const touchStart = useRef<{ x: number; y: number } | null>(null)
 
   const goTo = useCallback((next: number) => {
@@ -52,12 +72,12 @@ const Hero = () => {
   }, [])
 
   useEffect(() => {
-    if (isPaused || SLIDES.length <= 1) return
+    if (isPaused || userPaused || SLIDES.length <= 1) return
     const timer = setInterval(() => {
       setIndex((prev) => (prev + 1) % SLIDES.length)
     }, AUTOPLAY_MS)
     return () => clearInterval(timer)
-  }, [isPaused])
+  }, [isPaused, userPaused])
 
   const onTouchStart = (e: React.TouchEvent) => {
     setIsPaused(true)
@@ -120,6 +140,39 @@ const Hero = () => {
           />
         </div>
       ))}
+
+      {/* Live text and call to action for the active slide */}
+      <div className="absolute inset-x-0 bottom-16 z-20 flex flex-col items-center px-6 text-center pointer-events-none">
+        {SLIDES[index].eyebrow && (
+          <span className="text-white/90 uppercase tracking-[0.3em] text-xs font-semibold mb-2 drop-shadow">
+            {SLIDES[index].eyebrow}
+          </span>
+        )}
+        {SLIDES[index].title && (
+          <p className="text-white text-2xl md:text-4xl font-bold tracking-tight mb-4 max-w-2xl drop-shadow-lg">
+            {SLIDES[index].title}
+          </p>
+        )}
+        <LocalizedClientLink
+          href={SLIDES[index].href}
+          className="pointer-events-auto inline-flex items-center bg-white text-black px-7 py-3 rounded-full text-xs md:text-sm font-bold tracking-widest uppercase hover:bg-gray-200 transition-colors"
+        >
+          {SLIDES[index].cta}
+        </LocalizedClientLink>
+      </div>
+
+      {/* Pause / play */}
+      {SLIDES.length > 1 && (
+        <button
+          type="button"
+          onClick={() => setUserPaused((v) => !v)}
+          aria-label={userPaused ? "Play slideshow" : "Pause slideshow"}
+          aria-pressed={userPaused}
+          className="absolute top-4 right-4 z-20 h-9 w-9 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center text-xs transition-colors"
+        >
+          <span aria-hidden>{userPaused ? "▶" : "❚❚"}</span>
+        </button>
+      )}
 
       {/* Dot navigation */}
       {SLIDES.length > 1 && (

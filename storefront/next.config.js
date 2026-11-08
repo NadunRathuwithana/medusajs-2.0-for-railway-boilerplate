@@ -5,13 +5,34 @@ checkEnvVariables()
 /**
  * @type {import('next').NextConfig}
  */
+const backendHost = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "https://api.cardle.lk"
+const searchHost = process.env.NEXT_PUBLIC_SEARCH_ENDPOINT || ""
+
+// Report-only: browsers log violations to the console but block nothing.
+// Review the console on dev.cardle.lk across browse, cart and checkout, add any
+// legitimate source that shows up, then switch the header key to
+// "Content-Security-Policy" to enforce.
+const cspReportOnly = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://connect.facebook.net https://www.googletagmanager.com https://js.stripe.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  `img-src 'self' data: blob: https://media.cardle.lk https://www.facebook.com https://www.google-analytics.com https://www.googletagmanager.com ${backendHost}`,
+  `connect-src 'self' ${backendHost} ${searchHost} https://www.facebook.com https://connect.facebook.net https://www.google-analytics.com https://*.google-analytics.com https://api.stripe.com`,
+  "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://www.facebook.com",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'self'",
+].join("; ")
+
 const nextConfig = {
   reactStrictMode: true,
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   images: {
     // Was unoptimized:true — Next.js was serving every product photo (raw
@@ -23,10 +44,9 @@ const nextConfig = {
     // optimizer do the resize/reformat work it was already set up for.
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
-      {
-        protocol: "http",
-        hostname: "localhost",
-      },
+      ...(process.env.NODE_ENV !== "production"
+        ? [{ protocol: "http", hostname: "localhost" }]
+        : []),
       ...(process.env.NEXT_PUBLIC_BASE_URL
         ? [{ // Note: needed to serve images from /public folder
             protocol: process.env.NEXT_PUBLIC_BASE_URL.startsWith("https") ? "https" : "http",
@@ -39,19 +59,8 @@ const nextConfig = {
             hostname: process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL.replace(/^https?:\/\//, ""),
           }]
         : []),
-      { // Note: can be removed after deleting demo products
-        protocol: "https",
-        hostname: "medusa-public-images.s3.eu-west-1.amazonaws.com",
-      },
-      { // Note: can be removed after deleting demo products
-        protocol: "https",
-        hostname: "medusa-server-testing.s3.amazonaws.com",
-      },
-      { // Note: can be removed after deleting demo products
-        protocol: "https",
-        hostname: "medusa-server-testing.s3.us-east-1.amazonaws.com",
-      },
-      // Media bucket migration (bucket-uat-5fec.up.railway.app -> media.cardle.lk):
+      // Media bucket migration (bucket-uat-5fec.up.railway.app -> media.cardle.lk) is
+      // finished and the old host is no longer allowed. Notes from the migration:
       // existing DB rows have the OLD host baked into their absolute image
       // URLs, so both hosts must stay allowed simultaneously through the
       // whole migration — switching NEXT_PUBLIC_MINIO_ENDPOINT alone made
@@ -100,6 +109,7 @@ const nextConfig = {
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Content-Security-Policy-Report-Only", value: cspReportOnly },
         ],
       },
       {
