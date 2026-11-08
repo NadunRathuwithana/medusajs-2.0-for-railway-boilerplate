@@ -4,6 +4,7 @@ import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
+import Image from "next/image"
 import { addToCart } from "@lib/data/cart"
 import { getProductPrice, isVariantInStock } from "@lib/util/get-product-price"
 import { clx } from "@medusajs/ui"
@@ -100,12 +101,23 @@ export default function ProductCard({
   const [isHovered, setIsHovered] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  // Only the first image is mounted until the card is hovered, so a grid of
+  // products downloads one photo each instead of every variant photo.
+  const [showAllImages, setShowAllImages] = useState(false)
 
   const allImages = [
     product.thumbnail,
     ...(product.variants?.map((v) => v.thumbnail || (v as any).images?.[0]?.url) || []),
   ].filter(Boolean) as string[]
-  const uniqueImages = Array.from(new Set(allImages))
+  // Some variant thumbnails still hold the retired Railway bucket host.
+  // Same files live on the media CDN, so rewrite before they hit the optimizer.
+  const uniqueImages = Array.from(
+    new Set(
+      allImages.map((u) =>
+        u.replace(/^https?:\/\/bucket-[a-z0-9-]+\.up\.railway\.app/, "https://media.cardle.lk")
+      )
+    )
+  )
 
   useEffect(() => {
     let interval: NodeJS.Timeout
@@ -152,7 +164,11 @@ export default function ProductCard({
   const imageArea = (
     <div
       className="relative aspect-[4/5] w-full overflow-hidden bg-gray-100 mb-4 rounded-[24px]"
-      onMouseEnter={() => !isComingSoon && setIsHovered(true)}
+      onMouseEnter={() => {
+        if (isComingSoon) return
+        setIsHovered(true)
+        setShowAllImages(true)
+      }}
       onMouseLeave={() => !isComingSoon && setIsHovered(false)}
     >
       {(isNew || (product as any).collection?.handle === "new-arrivals") && !isComingSoon && (
@@ -181,12 +197,18 @@ export default function ProductCard({
       >
         {uniqueImages.map((src, idx) => (
           <div key={idx} className="relative h-full" style={{ width: `${100 / uniqueImages.length}%` }}>
-            <img
-              src={src}
-              alt={`${product.title} - ${idx}`}
-              className="absolute inset-0 w-full h-full object-cover object-center"
-              draggable={false}
-            />
+            {(idx === 0 || showAllImages) && (
+              <Image
+                src={src}
+                alt={`${product.title} - ${idx}`}
+                fill
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                quality={75}
+                loading="lazy"
+                className="object-cover object-center"
+                draggable={false}
+              />
+            )}
           </div>
         ))}
       </div>

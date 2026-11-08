@@ -63,10 +63,6 @@ const nextConfig = {
       // the media.cardle.lk migration is confirmed stable.
       {
         protocol: "https",
-        hostname: "bucket-uat-5fec.up.railway.app",
-      },
-      {
-        protocol: "https",
         hostname: "media.cardle.lk",
       },
       ...(process.env.NEXT_PUBLIC_MINIO_ENDPOINT &&
@@ -94,6 +90,18 @@ const nextConfig = {
   },
   async headers() {
     return [
+      {
+        // Baseline security headers on every response. A strict CSP is
+        // deliberately left out until it has been tested against Stripe,
+        // Meta Pixel and GA.
+        source: "/:path*",
+        headers: [
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
       {
         // Everything except _next/static, _next/image, and favicon.ico —
         // in particular every HTML document (the "/" region-redirect stub
