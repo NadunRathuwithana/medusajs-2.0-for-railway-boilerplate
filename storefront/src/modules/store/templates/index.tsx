@@ -17,7 +17,7 @@ const StoreTemplate = ({
   return (
     <div className="w-full bg-white">
       {/* Hero Banner */}
-      <section className="h-[90vh] w-full relative overflow-hidden bg-[#e5e5e5] flex flex-col items-center justify-center">
+      <section className="h-[62vh] min-h-[380px] max-h-[640px] w-full relative overflow-hidden bg-[#e5e5e5] flex flex-col items-center justify-center">
         <picture>
           <source media="(max-width: 768px)" srcSet="/store/buy-cotton-tote-bags-online-sri-lanka-mobile.jpg" />
           <source media="(max-width: 1024px)" srcSet="/store/buy-cotton-tote-bags-online-sri-lanka-tablet.jpg" />

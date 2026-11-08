@@ -9,7 +9,7 @@ export default function AboutPage() {
   return (
     <div className="w-full bg-white">
       {/* 1. Hero Banner */}
-      <section className="h-[90vh] w-full relative overflow-hidden bg-[#111111] flex flex-col items-center justify-center">
+      <section className="h-[62vh] min-h-[380px] max-h-[640px] w-full relative overflow-hidden bg-[#111111] flex flex-col items-center justify-center">
         <picture>
           <source media="(max-width: 768px)" srcSet="/about/cardle-about-premium-cotton-tote-bags-mobile.jpg" />
           <source media="(max-width: 1024px)" srcSet="/about/cardle-about-premium-cotton-tote-bags-tablet.jpg" />
