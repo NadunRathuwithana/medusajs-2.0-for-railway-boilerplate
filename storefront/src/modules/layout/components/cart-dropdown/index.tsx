@@ -32,8 +32,12 @@ const CartDropdown = ({
   const open = () => setCartOpen(true)
   const close = () => setCartOpen(false)
 
+  // Packing extras are charged in the total but never shown as products.
+  const productItems = (cartState?.items ?? []).filter((i: any) => !i?.metadata?.packing)
+  const packingItems = (cartState?.items ?? []).filter((i: any) => i?.metadata?.packing)
+
   const totalItems =
-    cartState?.items?.reduce((acc, item) => {
+    productItems.reduce((acc, item) => {
       return acc + item.quantity
     }, 0) || 0
 
@@ -119,9 +123,9 @@ const CartDropdown = ({
 
                     {/* Content */}
                     <div className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar bg-white relative z-0">
-                      {cartState && cartState.items?.length ? (
+                      {cartState && productItems.length ? (
                         <div className="flex flex-col p-8 gap-y-8">
-                          {cartState.items
+                          {[...productItems]
                             .sort((a, b) =>
                               (a.created_at ?? "") > (b.created_at ?? "")
                                 ? -1
@@ -130,6 +134,14 @@ const CartDropdown = ({
                             .map((item) => (
                               <SidebarCartItem key={item.id} item={item} close={close} />
                             ))}
+                          {packingItems.length > 0 && (
+                            <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 text-[13px] text-gray-600">
+                              <span>Packing: {packingItems.map((i: any) => i.metadata?.packing_name || "Extra").join(", ")}</span>
+                              <span className="font-medium text-gray-900">
+                                +{convertToLocale({ amount: packingItems.reduce((a: number, i: any) => a + Number(i.unit_price || 0) * i.quantity, 0), currency_code: cartState!.currency_code, maximumFractionDigits: 0 })}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <div className="flex flex-col items-center justify-center h-full p-8 text-center gap-y-4">
@@ -157,8 +169,7 @@ const CartDropdown = ({
 
                     {/* Bottom Actions */}
                     {cartState &&
-                      cartState.items &&
-                      cartState.items.length > 0 && (
+                      productItems.length > 0 && (
                         <div className="border-t border-gray-100 bg-[#fafafa] flex flex-col pb-8 pt-6 px-8 relative z-20">
                           {/* Subtotal */}
                           <div className="flex justify-between items-start mb-6">
