@@ -2,6 +2,7 @@ import { getProductsById } from "@lib/data/products"
 import { listCartPaymentMethods } from "@lib/data/payment"
 import { isKoko, isMintpay } from "@lib/constants"
 import { HttpTypes } from "@medusajs/types"
+import { getProductAddons } from "@lib/data/addons"
 import ProductActions from "@modules/products/components/product-actions"
 
 /**
@@ -14,12 +15,13 @@ export default async function ProductActionsWrapper({
   id: string
   region: HttpTypes.StoreRegion
 }) {
-  const [product, paymentProviders] = await Promise.all([
+  const [product, paymentProviders, addons] = await Promise.all([
     getProductsById({
       ids: [id],
       regionId: region.id,
     }).then((res) => res[0]),
-    listCartPaymentMethods(region.id)
+    listCartPaymentMethods(region.id),
+    getProductAddons(id),
   ])
 
   if (!product) {
@@ -35,6 +37,7 @@ export default async function ProductActionsWrapper({
       region={region}
       isKokoEnabled={isKokoEnabled}
       isMintpayEnabled={isMintpayEnabled}
+      addons={addons}
     />
   )
 }

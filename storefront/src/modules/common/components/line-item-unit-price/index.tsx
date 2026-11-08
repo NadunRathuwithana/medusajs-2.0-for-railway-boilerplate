@@ -1,4 +1,4 @@
-import { getPricesForVariant } from "@lib/util/get-product-price"
+import { getPricesForItem } from "@lib/util/get-product-price"
 import { HttpTypes } from "@medusajs/types"
 import { clx } from "@medusajs/ui"
 
@@ -17,7 +17,7 @@ const LineItemUnitPrice = ({
     original_price_number,
     calculated_price_number,
     percentage_diff,
-  } = getPricesForVariant(item.variant) ?? {}
+  } = getPricesForItem(item) ?? {}
   const hasReducedPrice = calculated_price_number < original_price_number
 
   return (

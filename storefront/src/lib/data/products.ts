@@ -115,7 +115,9 @@ export const getProductsList = cache(async function ({
         },
         nextFetchOptions(["products"], PRODUCTS_REVALIDATE_SECONDS)
       )
-      .then(({ products, count }) => {
+      .then(({ products: all, count }) => {
+        // The hidden "Packing" product (used to charge packing upgrades) is never listed.
+        const products = all.filter((p) => !(p.metadata as any)?.internal)
         const nextPage = count > offset + limit ? pageParam + 1 : null
 
         return {

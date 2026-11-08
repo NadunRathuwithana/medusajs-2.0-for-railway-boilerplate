@@ -29,7 +29,7 @@ export async function ensurePackingVariant(scope: any): Promise<PackingSettings>
       input: {
         products: [
           {
-            title: "Packing (internal)",
+            title: "Packing",
             handle: "internal-packing",
             status: "published",
             metadata: { internal: true },

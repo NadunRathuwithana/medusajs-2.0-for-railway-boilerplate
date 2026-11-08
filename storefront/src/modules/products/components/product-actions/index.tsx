@@ -15,6 +15,9 @@ import { addToCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { getProductPrice, isVariantInStock } from "@lib/util/get-product-price"
 import BnplWidget from "./bnpl-widget"
+import AddonPicker from "@modules/products/components/addon-picker"
+import type { Addon } from "@lib/data/addons"
+import { convertToLocale } from "@lib/util/money"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -22,6 +25,7 @@ type ProductActionsProps = {
   disabled?: boolean
   isKokoEnabled?: boolean
   isMintpayEnabled?: boolean
+  addons?: Addon[]
 }
 
 const optionsAsKeymap = (variantOptions: any) => {
@@ -41,7 +45,12 @@ export default function ProductActions({
   disabled,
   isKokoEnabled,
   isMintpayEnabled,
+  addons = [],
 }: ProductActionsProps) {
+  const [addonIds, setAddonIds] = useState<string[]>([])
+  const toggleAddon = (id: string) =>
+    setAddonIds((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]))
+  const addonsTotal = addons.filter((a) => addonIds.includes(a.id)).reduce((n, a) => n + a.price, 0)
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
   const countryCode = useParams().countryCode as string
@@ -190,6 +199,7 @@ export default function ProductActions({
         variantId: selectedVariant.id,
         quantity: 1,
         countryCode,
+        addonIds,
       })
 
       // Only track AddToCart once the item has actually been added — tracking
@@ -203,7 +213,7 @@ export default function ProductActions({
       trackAddToCart({
         id: selectedVariant.id,
         name: `${product.title} - ${selectedVariant.title}`,
-        price: selectedPrice?.calculated_price_number || 0,
+        price: (selectedPrice?.calculated_price_number || 0) + addonsTotal,
         quantity: 1,
         currency: (selectedPrice?.currency_code || region.currency_code).toUpperCase(),
       })
@@ -268,6 +278,20 @@ export default function ProductActions({
             </div>
           )}
         </div>
+
+        {/* Add-ons (only on products that have them) */}
+        <AddonPicker
+          addons={addons}
+          selected={addonIds}
+          onToggle={toggleAddon}
+          currencyCode={region.currency_code}
+          disabled={!!disabled || isAdding}
+        />
+        {addonsTotal > 0 && (
+          <p className="text-sm text-gray-600 -mb-2">
+            Add-ons: +{convertToLocale({ amount: addonsTotal, currency_code: region.currency_code, maximumFractionDigits: 0 })}
+          </p>
+        )}
 
         {/* Add to Cart */}
         <div className="flex items-center w-full mt-2">

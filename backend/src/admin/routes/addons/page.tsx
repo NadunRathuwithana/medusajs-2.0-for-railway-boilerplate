@@ -191,8 +191,8 @@ const AddonsPage = () => {
   }, [])
   useEffect(reload, [reload])
   useEffect(() => {
-    sdk.admin.product.list({ limit: 200, fields: "id,title" } as any).then((r: any) =>
-      setProducts((r.products as Product[]).filter((p) => p.title !== "Packing (internal)"))
+    sdk.admin.product.list({ limit: 200, fields: "id,title,handle" } as any).then((r: any) =>
+      setProducts((r.products as any[]).filter((p) => p.handle !== "internal-packing"))
     )
   }, [])
   return (

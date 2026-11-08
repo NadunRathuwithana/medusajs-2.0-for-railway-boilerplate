@@ -1,8 +1,9 @@
 import { HttpTypes } from "@medusajs/types"
-import { getPricesForVariant } from "@lib/util/get-product-price"
+import { getPricesForItem } from "@lib/util/get-product-price"
 import { convertToLocale } from "@lib/util/money"
 
 import LineItemOptions from "@modules/common/components/line-item-options"
+import LineItemAddons from "@modules/common/components/line-item-addons"
 
 type ItemProps = {
   item: HttpTypes.StoreCartLineItem | HttpTypes.StoreOrderLineItem
@@ -11,7 +12,7 @@ type ItemProps = {
 const Item = ({ item }: ItemProps) => {
   const productHandle = (item as any).variant?.product?.handle
 
-  const prices = getPricesForVariant(item.variant)
+  const prices = getPricesForItem(item)
   const currency_code = prices?.currency_code
   const unitPrice = prices?.calculated_price_number ?? 0
   const originalUnitPrice = prices?.original_price_number ?? 0
@@ -67,6 +68,7 @@ const Item = ({ item }: ItemProps) => {
             <LineItemOptions variant={item.variant} data-testid="product-variant" />
           </div>
         )}
+        <LineItemAddons metadata={item.metadata} currencyCode={currency_code || undefined} />
         {/* Unit price × qty */}
         <p className="text-xs text-gray-400 mt-1">
           {fmt(unitPrice)} × {item.quantity}

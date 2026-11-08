@@ -27,6 +27,32 @@ export const getPricesForVariant = (variant: any) => {
   }
 }
 
+/**
+ * Price info for a cart / order line. Lines with add-ons (or packing) carry a
+ * custom unit price set by the backend, so the variant's catalog price would be
+ * wrong for them. Everything else behaves exactly as before.
+ */
+export const getPricesForItem = (item: any) => {
+  const custom =
+    item?.is_custom_price === true ||
+    Array.isArray(item?.metadata?.addons) ||
+    item?.metadata?.packing === true
+  const catalog = getPricesForVariant(item?.variant)
+  if (!custom || typeof item?.unit_price !== "number") return catalog
+
+  const currency_code = catalog?.currency_code || "LKR"
+  const amount = item.unit_price
+  return {
+    calculated_price_number: amount,
+    calculated_price: convertToLocale({ amount, currency_code }),
+    original_price_number: amount,
+    original_price: convertToLocale({ amount, currency_code }),
+    currency_code,
+    price_type: "default",
+    percentage_diff: "0",
+  }
+}
+
 export function getCheapestVariant(product?: HttpTypes.StoreProduct | null) {
   if (!product?.variants?.length) {
     return null

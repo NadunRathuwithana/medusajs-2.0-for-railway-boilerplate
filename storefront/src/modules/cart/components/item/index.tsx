@@ -5,11 +5,12 @@ import { HttpTypes } from "@medusajs/types"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import DeleteButton from "@modules/common/components/delete-button"
 import LineItemOptions from "@modules/common/components/line-item-options"
+import LineItemAddons from "@modules/common/components/line-item-addons"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "@modules/products/components/thumbnail"
 import { useState, useEffect, useTransition, useRef } from "react"
 import { Minus, Plus, Trash2 } from "lucide-react"
-import { getPricesForVariant } from "@lib/util/get-product-price"
+import { getPricesForItem } from "@lib/util/get-product-price"
 import { convertToLocale } from "@lib/util/money"
 import { getPercentageDiff } from "@lib/util/get-precentage-diff"
 import { clx } from "@medusajs/ui"
@@ -59,7 +60,7 @@ const Item = ({ item, type = "full" }: ItemProps) => {
     }, 500)
   }
 
-  const { currency_code } = getPricesForVariant(item.variant) ?? {}
+  const { currency_code } = getPricesForItem(item) ?? {}
   
   // Calculate optimistic totals based on current optimisticQty
   const originalPrice = ((item.original_total ?? (item.unit_price * item.quantity)) / (item.quantity || 1)) * optimisticQty
@@ -108,6 +109,7 @@ const Item = ({ item, type = "full" }: ItemProps) => {
               className="text-[13px] text-gray-500 mt-0.5" 
               data-testid="product-variant" 
             />
+            <LineItemAddons metadata={item.metadata} currencyCode={currency_code || undefined} />
           </div>
           
           {/* Price */}
@@ -163,6 +165,7 @@ const Item = ({ item, type = "full" }: ItemProps) => {
               </h3>
             </LocalizedClientLink>
             <LineItemOptions variant={item.variant} className="text-[13px] text-gray-400" data-testid="product-variant" />
+            <LineItemAddons metadata={item.metadata} currencyCode={currency_code || undefined} />
           </div>
 
           {/* Price block */}

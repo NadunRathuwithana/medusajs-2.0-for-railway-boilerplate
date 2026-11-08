@@ -7,6 +7,7 @@ import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
 import DeleteButton from "@modules/common/components/delete-button"
 import LineItemOptions from "@modules/common/components/line-item-options"
+import LineItemAddons from "@modules/common/components/line-item-addons"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "@modules/products/components/thumbnail"
 import {
@@ -18,7 +19,7 @@ import {
 } from "lucide-react"
 import { updateLineItem } from "@lib/data/cart"
 import Spinner from "@modules/common/icons/spinner"
-import { getPricesForVariant } from "@lib/util/get-product-price"
+import { getPricesForItem } from "@lib/util/get-product-price"
 import { getPercentageDiff } from "@lib/util/get-precentage-diff"
 
 const CartDropdown = ({
@@ -247,7 +248,7 @@ const SidebarCartItem = ({ item, close }: { item: any; close: () => void }) => {
   }
 
   const { currency_code, calculated_price_number, original_price_number } =
-    getPricesForVariant(item.variant) ?? {}
+    getPricesForItem(item) ?? {}
   const adjustmentsSum = (item.adjustments || []).reduce(
     (acc: number, adj: any) => adj.amount + acc,
     0
@@ -298,6 +299,7 @@ const SidebarCartItem = ({ item, close }: { item: any; close: () => void }) => {
             variant={item.variant}
             className="text-[13px] text-gray-500 mb-2"
           />
+          <LineItemAddons metadata={item.metadata} currencyCode={currency_code || undefined} />
         </div>
 
         {/* Price & Quantity */}

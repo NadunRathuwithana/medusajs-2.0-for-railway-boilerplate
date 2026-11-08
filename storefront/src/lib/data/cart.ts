@@ -75,10 +75,12 @@ export async function addToCart({
   variantId,
   quantity,
   countryCode,
+  addonIds,
 }: {
   variantId: string
   quantity: number
   countryCode: string
+  addonIds?: string[]
 }) {
   if (!variantId) {
     throw new Error("Missing variant ID when adding to cart")
@@ -90,15 +92,24 @@ export async function addToCart({
   }
 
   try {
-    await sdk.store.cart.createLineItem(
-      cart.id,
-      {
-        variant_id: variantId,
-        quantity,
-      },
-      {},
-      await getAuthHeaders()
-    )
+    if (addonIds?.length) {
+      // Bag + add-ons go through the backend so the price is worked out there.
+      await sdk.client.fetch(`/store/carts/${cart.id}/addon-items`, {
+        method: "POST",
+        body: { variant_id: variantId, quantity, addon_ids: addonIds },
+        headers: await getAuthHeaders(),
+      })
+    } else {
+      await sdk.store.cart.createLineItem(
+        cart.id,
+        {
+          variant_id: variantId,
+          quantity,
+        },
+        {},
+        await getAuthHeaders()
+      )
+    }
     revalidateTag("cart")
     revalidateTag("shipping")
   } catch (error: any) {
@@ -532,4 +543,17 @@ export async function updateRegion(countryCode: string, currentPath: string) {
   revalidateTag("products")
 
   redirect(`/${countryCode}${currentPath}`)
+}
+
+
+/** Packing at checkout. `packingId` null (or the default option) = included. */
+export async function setPacking(packingId: string | null) {
+  const cartId = await getCartId()
+  if (!cartId) throw new Error("No cart")
+  await sdk.client.fetch(`/store/carts/${cartId}/packing`, {
+    method: "POST",
+    body: { packing_id: packingId },
+    headers: await getAuthHeaders(),
+  })
+  revalidateTag("cart")
 }
