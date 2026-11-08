@@ -78,6 +78,8 @@ const medusaConfig = {
   modules: [
     // Site CMS: hero / page banners, creatives and the top promo bar.
     { resolve: "./src/modules/cms" },
+    // Add-ons per product + checkout packing options.
+    { resolve: "./src/modules/addons" },
     {
       key: Modules.FILE,
       resolve: "@medusajs/file",
