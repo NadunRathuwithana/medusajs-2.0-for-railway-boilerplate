@@ -5,7 +5,6 @@ import PopularProducts from "@modules/home/components/popular-products"
 import FeatureGrid from "@modules/home/components/feature-grid"
 import WideBanner from "@modules/home/components/wide-banner"
 import AllProducts from "@modules/home/components/all-products"
-import PromoBanner from "@modules/home/components/promo-banner"
 import { getCollectionsWithProducts } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
 
@@ -55,7 +54,6 @@ export default async function Home({
         <PopularProducts countryCode={countryCode} title="New Arrivals" collectionHandle="new-arrivals" />
         <WideBanner />
         <AllProducts countryCode={countryCode} page={pageNumber} />
-        <PromoBanner />
         <FeatureGrid />
       </div>
     </>
