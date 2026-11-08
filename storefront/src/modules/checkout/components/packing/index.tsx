@@ -1,12 +1,13 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useState, useTransition } from "react"
+import { useEffect, useRef, useState } from "react"
 import { clx } from "@medusajs/ui"
 import { Packing as PackingData, PackingOption } from "@lib/data/addons"
 import { setPacking } from "@lib/data/cart"
 import { convertToLocale } from "@lib/util/money"
 import { Lightbox } from "@modules/common/components/image-lightbox"
+import { setOptimisticPacking, usePackingSelection } from "./packing-store"
 
 /**
  * Order-summary packing block. Standard packing is always included (free);
@@ -14,30 +15,45 @@ import { Lightbox } from "@modules/common/components/image-lightbox"
  */
 export default function Packing({ cart, packing }: { cart: any; packing: PackingData }) {
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
-  const [optimistic, setOptimistic] = useState<string[] | null>(null)
   const [zoom, setZoom] = useState<PackingOption | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const { current, synced } = usePackingSelection(cart, packing)
+  const latest = useRef<string[]>(current)
+  const running = useRef(false)
+
+  // Once the server cart matches what the user picked, drop the optimistic copy.
+  useEffect(() => {
+    if (synced && !running.current) setOptimisticPacking(null)
+  }, [synced])
 
   if (!packing?.enabled) return null
 
-  const saved: string[] = Array.isArray(cart?.metadata?.packing_ids) ? cart.metadata.packing_ids : []
-  const current = optimistic ?? saved
+  // Show first, sync later: update the UI instantly, send the latest choice in the background.
+  const flush = async () => {
+    if (running.current) return
+    running.current = true
+    try {
+      let sent: string[]
+      do {
+        sent = latest.current
+        await setPacking(sent)
+      } while (sent.join() !== latest.current.join())
+      router.refresh()
+    } catch (e: any) {
+      setOptimisticPacking(null)
+      setError(e?.message || "Could not update packing")
+    } finally {
+      running.current = false
+    }
+  }
 
   const toggle = (id: string) => {
-    if (isPending) return
-    const next = current.includes(id) ? current.filter((x) => x !== id) : [...current, id]
+    const base = running.current ? latest.current : current
+    const next = base.includes(id) ? base.filter((x) => x !== id) : [...base, id]
+    latest.current = next
     setError(null)
-    setOptimistic(next)
-    startTransition(async () => {
-      try {
-        await setPacking(next)
-        router.refresh()
-      } catch (e: any) {
-        setOptimistic(null)
-        setError(e?.message || "Could not update packing")
-      }
-    })
+    setOptimisticPacking(next)
+    flush()
   }
 
   const money = (n: number) =>
@@ -51,7 +67,7 @@ export default function Packing({ cart, packing }: { cart: any; packing: Packing
       </div>
 
       {packing.options.length > 0 && (
-        <ul className={clx("flex flex-col gap-y-2", isPending && "opacity-70")}>
+        <ul className="flex flex-col gap-y-2">
           {packing.options.map((o) => {
             const on = current.includes(o.id)
             return (

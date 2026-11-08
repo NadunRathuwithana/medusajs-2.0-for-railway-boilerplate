@@ -3,13 +3,15 @@
 import { useState } from "react"
 import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
 import { convertToLocale } from "@lib/util/money"
+import { usePackingSelection, withPackingDelta } from "@modules/checkout/components/packing/packing-store"
 import { ShoppingCart, ChevronDown, ChevronUp } from "lucide-react"
 
 const MobileCheckoutSummary = ({ cart, packing }: { cart: any; packing?: any }) => {
   const [isOpen, setIsOpen] = useState(false)
 
+  const { delta } = usePackingSelection(cart, packing)
   const total = convertToLocale({
-    amount: cart.total ?? 0,
+    amount: withPackingDelta(cart, delta).total ?? 0,
     currency_code: cart.currency_code,
   })
 

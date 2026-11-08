@@ -1,6 +1,6 @@
 import ItemsPreviewTemplate from "@modules/cart/templates/preview"
 import DiscountCode from "@modules/checkout/components/discount-code"
-import CartTotals from "@modules/common/components/cart-totals"
+import { LiveTotals } from "@modules/checkout/components/packing/live-totals"
 import { convertToLocale } from "@lib/util/money"
 import Packing from "@modules/checkout/components/packing"
 import type { Packing as PackingData } from "@lib/data/addons"
@@ -39,7 +39,7 @@ const CheckoutSummary = ({ cart, packing }: { cart: any; packing?: PackingData }
 
       {/* Totals block */}
       <div className="bg-gray-50 rounded-2xl px-5 py-4">
-        <CartTotals totals={cart} />
+        <LiveTotals cart={cart} packing={packing} />
       </div>
     </div>
   )
