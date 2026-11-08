@@ -2,106 +2,107 @@
 
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
-import { HttpTypes } from "@medusajs/types"
-import { Packing as PackingData } from "@lib/data/addons"
+import { clx } from "@medusajs/ui"
+import { Packing as PackingData, PackingOption } from "@lib/data/addons"
 import { setPacking } from "@lib/data/cart"
 import { convertToLocale } from "@lib/util/money"
-import ZoomableImage from "@modules/common/components/image-lightbox"
+import { Lightbox } from "@modules/common/components/image-lightbox"
 
 /**
- * Packing choice at checkout. The default option is preselected and included,
- * so customers can ignore this section and carry on.
+ * Order-summary packing block. Standard packing is always included (free);
+ * extras like a gift box or bag are optional checkboxes.
  */
-export default function Packing({
-  cart,
-  packing,
-}: {
-  cart: HttpTypes.StoreCart
-  packing: PackingData
-}) {
+export default function Packing({ cart, packing }: { cart: any; packing: PackingData }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const [optimistic, setOptimistic] = useState<string[] | null>(null)
+  const [zoom, setZoom] = useState<PackingOption | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [optimistic, setOptimistic] = useState<string | null>(null)
 
-  if (!packing.enabled || packing.options.length === 0) return null
+  if (!packing?.enabled) return null
 
-  const saved = (cart.metadata as any)?.packing_id as string | null | undefined
-  const known = packing.options.some((o) => o.id === saved)
-  const selectedId = known ? (saved as string) : packing.default_id ?? packing.options[0].id
-  const current = optimistic ?? selectedId
+  const saved: string[] = Array.isArray(cart?.metadata?.packing_ids) ? cart.metadata.packing_ids : []
+  const current = optimistic ?? saved
 
-  const choose = (id: string) => {
-    if (id === current || isPending) return
+  const toggle = (id: string) => {
+    if (isPending) return
+    const next = current.includes(id) ? current.filter((x) => x !== id) : [...current, id]
     setError(null)
-    setOptimistic(id)
+    setOptimistic(next)
     startTransition(async () => {
       try {
-        await setPacking(id)
+        await setPacking(next)
         router.refresh()
       } catch (e: any) {
         setOptimistic(null)
-        setError(e?.message || "Could not change packing")
+        setError(e?.message || "Could not update packing")
       }
     })
   }
 
   const money = (n: number) =>
-    n > 0
-      ? `+ ${convertToLocale({ amount: n, currency_code: cart.currency_code, maximumFractionDigits: 0 })}`
-      : "Included"
+    n > 0 ? `+${convertToLocale({ amount: n, currency_code: cart.currency_code, maximumFractionDigits: 0 })}` : "Free"
 
   return (
-    <section className="bg-white" data-testid="packing-step">
-      <div className="flex flex-col gap-y-1 pb-4">
-        <h2 className="text-2xl-regular font-semibold text-gray-900">Packing</h2>
-        <p className="text-sm text-gray-500">
-          Your order is packed as standard. Pick an upgrade if you like, it is optional.
-        </p>
+    <div className="mb-4" data-testid="packing-summary">
+      <div className="flex items-baseline justify-between mb-2">
+        <span className="text-[14px] font-semibold text-gray-900">Packing</span>
+        <span className="text-[12px] text-gray-400">{packing.default_name || "Standard packing"} included</span>
       </div>
-      <ul className="flex flex-col gap-y-2" role="radiogroup" aria-label="Packing">
-        {packing.options.map((o) => {
-          const on = o.id === current
-          return (
-            <li
-              key={o.id}
-              className={`flex items-center gap-x-3 rounded-xl border p-2.5 transition-colors ${
-                on ? "border-black bg-gray-50" : "border-gray-200"
-              } ${isPending ? "opacity-70" : ""}`}
-            >
-              {o.image ? (
-                <ZoomableImage src={o.image} alt={o.name} className="h-20 w-20" />
-              ) : (
-                <div className="h-20 w-20 shrink-0 rounded-lg bg-gray-100" />
-              )}
-              <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-x-3">
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-medium text-gray-900">
-                    {o.name}
-                    {o.is_default && (
-                      <span className="ml-2 rounded-full bg-gray-900 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
-                        Standard
-                      </span>
+
+      {packing.options.length > 0 && (
+        <ul className={clx("flex flex-col gap-y-2", isPending && "opacity-70")}>
+          {packing.options.map((o) => {
+            const on = current.includes(o.id)
+            return (
+              <li key={o.id}>
+                <div className={clx("flex items-center gap-x-3 rounded-xl border px-2.5 py-2 transition-colors",
+                  on ? "border-black bg-white" : "border-gray-200 bg-white hover:border-gray-300")}>
+                  <button type="button" onClick={() => o.image && setZoom(o)} disabled={!o.image}
+                    aria-label={`View ${o.name}`}
+                    className="h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-gray-100 bg-gray-50 cursor-zoom-in">
+                    {o.image && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={o.image} alt={o.name} className="h-full w-full object-cover" />
                     )}
-                  </span>
-                  {o.description && <span className="block text-xs text-gray-500 line-clamp-2">{o.description}</span>}
-                  <span className="mt-0.5 block text-xs font-semibold text-gray-900">{money(o.is_default ? 0 : o.price)}</span>
-                </span>
-                <input
-                  type="radio"
-                  name="packing"
-                  checked={on}
-                  onChange={() => choose(o.id)}
-                  className="h-5 w-5 shrink-0 accent-black"
-                  aria-label={o.name}
-                />
-              </label>
-            </li>
-          )
-        })}
-      </ul>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-      <div className="mt-8 h-px w-full bg-gray-200" />
-    </section>
+                  </button>
+                  <button type="button" onClick={() => toggle(o.id)} aria-pressed={on}
+                    className="flex min-w-0 flex-1 items-center gap-x-3 text-left">
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[13px] font-medium text-gray-900 truncate">{o.name}</span>
+                      <span className="block text-[12px] text-gray-500">{money(o.price)}</span>
+                    </span>
+                    <span className={clx("flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] transition-colors",
+                      on ? "bg-black text-white" : "border border-gray-300 text-transparent")}>✓</span>
+                  </button>
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+      {error && <p className="mt-2 text-[12px] text-red-600">{error}</p>}
+
+      {zoom?.image && (
+        <Lightbox src={zoom.image} alt={zoom.name} onClose={() => setZoom(null)}
+          caption={
+            <div>
+              <div className="flex items-baseline justify-between gap-x-3">
+                <p className="text-base font-semibold text-gray-900">{zoom.name}</p>
+                <p className="text-sm font-medium text-gray-900">{money(zoom.price)}</p>
+              </div>
+              {zoom.description && <p className="mt-1 text-sm text-gray-500">{zoom.description}</p>}
+            </div>
+          }
+          footer={
+            <button type="button" onClick={() => { toggle(zoom.id); setZoom(null) }}
+              className={clx("h-12 w-full rounded-full text-sm font-medium transition-colors",
+                current.includes(zoom.id) ? "border border-gray-300 text-gray-900 hover:bg-gray-50" : "bg-black text-white hover:bg-gray-800")}>
+              {current.includes(zoom.id) ? "Remove" : "Add to order"}
+            </button>
+          }
+        />
+      )}
+    </div>
   )
 }

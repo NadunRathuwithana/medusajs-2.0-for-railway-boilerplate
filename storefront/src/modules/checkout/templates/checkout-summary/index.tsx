@@ -2,9 +2,13 @@ import ItemsPreviewTemplate from "@modules/cart/templates/preview"
 import DiscountCode from "@modules/checkout/components/discount-code"
 import CartTotals from "@modules/common/components/cart-totals"
 import { convertToLocale } from "@lib/util/money"
+import Packing from "@modules/checkout/components/packing"
+import type { Packing as PackingData } from "@lib/data/addons"
 
-const CheckoutSummary = ({ cart }: { cart: any }) => {
-  const itemCount = cart?.items?.reduce(
+const CheckoutSummary = ({ cart, packing }: { cart: any; packing?: PackingData }) => {
+  // Packing extras are shown in their own block, not as products.
+  const products = (cart?.items ?? []).filter((i: any) => !i?.metadata?.packing)
+  const itemCount = products.reduce(
     (acc: number, item: any) => acc + item.quantity,
     0
   ) ?? 0
@@ -23,8 +27,10 @@ const CheckoutSummary = ({ cart }: { cart: any }) => {
 
       {/* Items list */}
       <div className="mb-4">
-        <ItemsPreviewTemplate items={cart?.items} />
+        <ItemsPreviewTemplate items={products} />
       </div>
+
+      {packing && <Packing cart={cart} packing={packing} />}
 
       {/* Promo code — sits just above the totals */}
       <div className="border border-dashed border-gray-200 rounded-xl px-4 py-3 mb-4 bg-gray-50/50">

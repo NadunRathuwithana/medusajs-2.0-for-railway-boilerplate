@@ -9,22 +9,24 @@ import { ADDONS_MODULE } from "../../../../../modules/addons"
 import { readPackingSettings } from "../../../../../modules/addons/lib"
 
 /**
- * POST /store/carts/:id/packing  { packing_id: string | null }
- * null or the default option = included, nothing charged.
- * Any other option adds one "packing" line at that option's price.
+ * POST /store/carts/:id/packing  { packing_ids: string[] }
+ * Standard packing is always included and free. Each ticked extra (box, bag...)
+ * becomes one "packing" line at its catalog price. [] = standard only.
  */
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const cartId = req.params.id
-  const packingId = ((req.body ?? {}) as any).packing_id as string | null | undefined
+  const raw = ((req.body ?? {}) as any).packing_ids
+  const ids: string[] = Array.isArray(raw) ? [...new Set(raw.map(String))].slice(0, 10) : []
 
   const settings = await readPackingSettings(req.scope)
   if (!settings.enabled) throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "Packing is switched off")
 
   const svc = req.scope.resolve(ADDONS_MODULE) as any
-  let option: any = null
-  if (packingId) {
-    option = await svc.retrievePackingOption(packingId).catch(() => null)
-    if (!option || !option.is_active) throw new MedusaError(MedusaError.Types.INVALID_DATA, "Packing option not available")
+  const options = ids.length
+    ? (await svc.listPackingOptions({ id: ids, is_active: true })).filter((o: any) => !o.is_default)
+    : []
+  if (options.length !== ids.length) {
+    throw new MedusaError(MedusaError.Types.INVALID_DATA, "A packing option is not available")
   }
 
   const query = req.scope.resolve("query")
@@ -39,20 +41,19 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const old = (cart.items ?? []).filter((i: any) => i.metadata?.packing === true).map((i: any) => i.id)
   if (old.length) await deleteLineItemsWorkflow(req.scope).run({ input: { cart_id: cartId, ids: old } })
 
-  const charge = option && !option.is_default ? Number(option.price || 0) : 0
-  if (option && charge > 0) {
+  const paid = options.filter((o: any) => Number(o.price || 0) > 0)
+  if (paid.length) {
     if (!settings.variant_id) throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "Packing is not set up")
+    // Different metadata per option keeps them as separate lines.
     await addToCartWorkflow(req.scope).run({
       input: {
         cart_id: cartId,
-        items: [
-          {
-            variant_id: settings.variant_id,
-            quantity: 1,
-            unit_price: charge,
-            metadata: { packing: true, packing_id: option.id, packing_name: option.name, image: option.image },
-          } as any,
-        ],
+        items: paid.map((o: any) => ({
+          variant_id: settings.variant_id!,
+          quantity: 1,
+          unit_price: Number(o.price),
+          metadata: { packing: true, packing_id: o.id, packing_name: o.name, image: o.image },
+        })) as any,
       },
     })
   }
@@ -62,10 +63,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       id: cartId,
       metadata: {
         ...(cart.metadata ?? {}),
-        packing_id: option?.id ?? null,
-        packing_name: option?.name ?? null,
+        packing_ids: options.map((o: any) => o.id),
+        packing_names: options.map((o: any) => o.name),
       },
     },
   })
-  res.json({ ok: true, packing_id: option?.id ?? null, charge })
+  res.json({ ok: true, packing_ids: options.map((o: any) => o.id) })
 }

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 
 import Wrapper from "@modules/checkout/components/payment-wrapper"
 import CheckoutForm from "@modules/checkout/templates/checkout-form"
+import { getPacking } from "@lib/data/addons"
 import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
 import MobileCheckoutSummary from "@modules/checkout/components/mobile-checkout-summary"
 import { enrichLineItems, retrieveCart } from "@lib/data/cart"
@@ -33,6 +34,7 @@ import CheckoutTracker from "@components/analytics/CheckoutTracker"
 export default async function Checkout() {
   const cart = await fetchCart()
   const customer = await getCustomer()
+  const packing = await getPacking()
 
   return (
     <div className="bg-[#fafafa] min-h-screen py-4 sm:py-12 md:py-24">
@@ -41,7 +43,7 @@ export default async function Checkout() {
         <div className="mb-4 sm:mb-6">
           <BackButton />
         </div>
-        <MobileCheckoutSummary cart={cart} />
+        <MobileCheckoutSummary cart={cart} packing={packing} />
 
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-12">
           <div className="flex-1 bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100">
@@ -51,7 +53,7 @@ export default async function Checkout() {
           </div>
           <div className="hidden lg:block w-full lg:w-[400px] flex-shrink-0">
             <div className="sticky top-24 bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-              <CheckoutSummary cart={cart} />
+              <CheckoutSummary cart={cart} packing={packing} />
             </div>
           </div>
         </div>

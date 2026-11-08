@@ -5,7 +5,7 @@ import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
 import { convertToLocale } from "@lib/util/money"
 import { ShoppingCart, ChevronDown, ChevronUp } from "lucide-react"
 
-const MobileCheckoutSummary = ({ cart }: { cart: any }) => {
+const MobileCheckoutSummary = ({ cart, packing }: { cart: any; packing?: any }) => {
   const [isOpen, setIsOpen] = useState(false)
 
   const total = convertToLocale({
@@ -33,7 +33,7 @@ const MobileCheckoutSummary = ({ cart }: { cart: any }) => {
         }`}
       >
         <div className="p-5 border-t border-gray-100">
-          <CheckoutSummary cart={cart} />
+          <CheckoutSummary cart={cart} packing={packing} />
         </div>
       </div>
     </div>

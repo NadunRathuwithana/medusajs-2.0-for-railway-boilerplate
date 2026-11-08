@@ -10,7 +10,12 @@ export type Addon = {
 }
 
 export type PackingOption = Addon & { is_default: boolean }
-export type Packing = { enabled: boolean; default_id: string | null; options: PackingOption[] }
+export type Packing = {
+  enabled: boolean
+  default_id: string | null
+  default_name?: string
+  options: PackingOption[]
+}
 
 /** Add-ons offered for one product. Empty on any failure, so the page still works. */
 export async function getProductAddons(productId: string): Promise<Addon[]> {

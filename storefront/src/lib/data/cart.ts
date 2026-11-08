@@ -546,13 +546,13 @@ export async function updateRegion(countryCode: string, currentPath: string) {
 }
 
 
-/** Packing at checkout. `packingId` null (or the default option) = included. */
-export async function setPacking(packingId: string | null) {
+/** Packing extras at checkout (box, bag...). [] = standard packing only. */
+export async function setPacking(packingIds: string[]) {
   const cartId = await getCartId()
   if (!cartId) throw new Error("No cart")
   await sdk.client.fetch(`/store/carts/${cartId}/packing`, {
     method: "POST",
-    body: { packing_id: packingId },
+    body: { packing_ids: packingIds },
     headers: await getAuthHeaders(),
   })
   revalidateTag("cart")
