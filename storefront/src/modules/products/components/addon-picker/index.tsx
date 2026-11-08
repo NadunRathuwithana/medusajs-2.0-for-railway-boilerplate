@@ -102,7 +102,30 @@ export default function AddonPicker({
         })}
       </div>
 
-      {zoom?.image && <Lightbox src={zoom.image} alt={zoom.name} onClose={() => setZoom(null)} />}
+      {zoom?.image && (
+        <Lightbox
+          src={zoom.image}
+          alt={zoom.name}
+          onClose={() => setZoom(null)}
+          caption={
+            <div>
+              <div className="flex items-baseline justify-between gap-x-3">
+                <p className="text-base font-semibold text-gray-900">{zoom.name}</p>
+                <p className="text-sm font-medium text-gray-900">{price(zoom.price)}</p>
+              </div>
+              {zoom.description && <p className="mt-1 text-sm text-gray-500">{zoom.description}</p>}
+            </div>
+          }
+          footer={
+            <button type="button" disabled={disabled}
+              onClick={() => { onToggle(zoom.id); setZoom(null) }}
+              className={clx("h-12 w-full rounded-full text-sm font-medium transition-colors",
+                selected.includes(zoom.id) ? "border border-gray-300 text-gray-900 hover:bg-gray-50" : "bg-black text-white hover:bg-gray-800")}>
+              {selected.includes(zoom.id) ? "Remove add-on" : "Add to my bag"}
+            </button>
+          }
+        />
+      )}
     </div>
   )
 }
