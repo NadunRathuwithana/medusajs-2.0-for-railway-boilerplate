@@ -141,7 +141,7 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
       {/* Modal Content */}
       <div
         className={clx(
-          "relative bg-white w-full max-w-5xl rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[62vh] min-h-[380px] max-h-[640px]",
+          "relative bg-white w-full max-w-5xl rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh]",
           "transition-all duration-300 transform",
           isMounted && !isClosing ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-8"
         )}
