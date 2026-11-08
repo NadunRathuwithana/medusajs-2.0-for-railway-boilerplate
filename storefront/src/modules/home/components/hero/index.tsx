@@ -1,189 +1,149 @@
 "use client"
 
 import Image from "next/image"
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { AnimatePresence, motion } from "framer-motion"
+import { clx } from "@medusajs/ui"
 
-type Slide =
-  | { type: "responsive"; alt: string }
-  | {
-      type: "single"
-      src: string
-      alt: string
-      eyebrow: string
-      title: string
-      href: string
-      cta: string
-    }
+type Slide = {
+  mobile: string
+  tablet: string
+  desktop: string
+  alt: string
+}
 
-// Slide 1 is the original responsive hero art. Swap `src` on the other slides
-// for real campaign banners whenever they are ready.
+// Slide 1 keeps the original per-breakpoint crops. Slides 2-3 reuse the two
+// photos that used to live in the "CARDLE - ELEVATING THE EVERYDAY CARRY"
+// grid — that section is shrinking to a compact strip at the end of the
+// page and no longer needs its own large images, so these are free to
+// become hero slides instead of sitting unused or duplicated.
 const SLIDES: Slide[] = [
   {
-    type: "responsive",
+    mobile: "/home/cardle-premium-cotton-tote-bag-sri-lanka-mobile.jpg",
+    tablet: "/home/cardle-premium-cotton-tote-bag-sri-lanka-tablet.jpg",
+    desktop: "/home/cardle-premium-cotton-tote-bag-sri-lanka.jpg",
     alt: "Cardle handcrafted cotton tote bags – shop Sri Lanka's premium make-to-order bags",
   },
   {
-    type: "single",
-    src: "/home/cardle-status-meets-utility-tote-bag.jpg",
-    alt: "Close-up of a Cardle cotton canvas tote bag handle stitching",
-    eyebrow: "Status meets utility",
-    title: "Built to carry everything",
-    href: "/store",
-    cta: "Shop totes",
+    mobile: "/home/cardle-uncompromising-craftsmanship.jpg",
+    tablet: "/home/cardle-uncompromising-craftsmanship.jpg",
+    desktop: "/home/cardle-uncompromising-craftsmanship.jpg",
+    alt: "Cardle uncompromising craftsmanship – zero-stretch canvas engineering",
   },
   {
-    type: "single",
-    src: "/home/cardle-uncompromising-craftsmanship.jpg",
-    alt: "Close-up of heavyweight Cardle cotton canvas fabric",
-    eyebrow: "Uncompromising craftsmanship",
-    title: "Handmade in Sri Lanka",
-    href: "/store",
-    cta: "Explore the collection",
+    mobile: "/home/cardle-status-meets-utility-tote-bag.jpg",
+    tablet: "/home/cardle-status-meets-utility-tote-bag.jpg",
+    desktop: "/home/cardle-status-meets-utility-tote-bag.jpg",
+    alt: "Cardle – where status meets utility, quiet luxury everyday carry",
   },
 ]
 
-const INTERVAL_MS = 5500
+const AUTOPLAY_MS = 5500
+// Swipe must clear this many px horizontally, and stay mostly horizontal,
+// before it's treated as a slide change rather than an incidental touch/scroll.
+const SWIPE_THRESHOLD_PX = 50
 
 const Hero = () => {
   const [index, setIndex] = useState(0)
-  const [paused, setPaused] = useState(false)
-  const touchStartX = useRef<number | null>(null)
+  const [isPaused, setIsPaused] = useState(false)
+  const touchStart = useRef<{ x: number; y: number } | null>(null)
 
-  const go = useCallback(
-    (next: number) => setIndex((next + SLIDES.length) % SLIDES.length),
-    []
-  )
+  const goTo = useCallback((next: number) => {
+    setIndex(((next % SLIDES.length) + SLIDES.length) % SLIDES.length)
+  }, [])
 
   useEffect(() => {
-    if (paused) return
-    const t = setTimeout(() => go(index + 1), INTERVAL_MS)
-    return () => clearTimeout(t)
-  }, [index, paused, go])
+    if (isPaused || SLIDES.length <= 1) return
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % SLIDES.length)
+    }, AUTOPLAY_MS)
+    return () => clearInterval(timer)
+  }, [isPaused])
 
-  const slide = SLIDES[index]
+  const onTouchStart = (e: React.TouchEvent) => {
+    setIsPaused(true)
+    touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+  }
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    setIsPaused(false)
+    if (!touchStart.current) return
+    const dx = e.changedTouches[0].clientX - touchStart.current.x
+    const dy = e.changedTouches[0].clientY - touchStart.current.y
+    touchStart.current = null
+
+    if (Math.abs(dx) < SWIPE_THRESHOLD_PX || Math.abs(dx) < Math.abs(dy)) {
+      return // too small, or more vertical (a scroll) than horizontal
+    }
+    goTo(index + (dx < 0 ? 1 : -1))
+  }
 
   return (
     <div
       className="h-[62vh] min-h-[380px] max-h-[640px] w-full relative overflow-hidden bg-[#e5e5e5]"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onTouchStart={(e) => {
-        touchStartX.current = e.touches[0].clientX
-      }}
-      onTouchEnd={(e) => {
-        if (touchStartX.current === null) return
-        const dx = e.changedTouches[0].clientX - touchStartX.current
-        if (Math.abs(dx) > 40) go(index + (dx < 0 ? 1 : -1))
-        touchStartX.current = null
-      }}
-      role="region"
-      aria-roledescription="carousel"
-      aria-label="Featured"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
     >
-      {/* Single h1 for the page (kept visually hidden, hero art carries the message) */}
-      <h1 className="sr-only">Cardle – Premium Cotton Tote Bags, Handcrafted in Sri Lanka</h1>
-
-      <AnimatePresence initial={false} mode="sync">
-        <motion.div
-          key={index}
-          className="absolute inset-0"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.7, ease: "easeInOut" }}
-          aria-live={paused ? "polite" : "off"}
-        >
-          {slide.type === "responsive" ? (
-            <>
-              <Image
-                src="/home/cardle-premium-cotton-tote-bag-sri-lanka-mobile.jpg"
-                alt={slide.alt}
-                fill
-                sizes="100vw"
-                className="block md:hidden object-cover object-top"
-                priority
-              />
-              <Image
-                src="/home/cardle-premium-cotton-tote-bag-sri-lanka-tablet.jpg"
-                alt={slide.alt}
-                fill
-                sizes="100vw"
-                className="hidden md:block lg:hidden object-cover object-top"
-                priority
-              />
-              <Image
-                src="/home/cardle-premium-cotton-tote-bag-sri-lanka.jpg"
-                alt={slide.alt}
-                fill
-                sizes="100vw"
-                className="hidden lg:block object-cover object-top"
-                priority
-              />
-            </>
-          ) : (
-            <>
-              <Image
-                src={slide.src}
-                alt={slide.alt}
-                fill
-                sizes="100vw"
-                className="object-cover object-center"
-              />
-              <div className="absolute inset-0 bg-black/35" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-                <span className="text-white/80 uppercase tracking-[0.3em] text-xs md:text-sm font-semibold mb-3">
-                  {slide.eyebrow}
-                </span>
-                <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tighter text-white mb-6 max-w-3xl leading-[1.1]">
-                  {slide.title}
-                </h2>
-                <LocalizedClientLink
-                  href={slide.href}
-                  className="inline-flex items-center bg-white text-black px-8 py-3 rounded-full text-xs md:text-sm font-bold tracking-widest uppercase hover:bg-gray-200 transition-colors"
-                >
-                  {slide.cta}
-                </LocalizedClientLink>
-              </div>
-            </>
+      {SLIDES.map((slide, i) => (
+        <div
+          key={slide.desktop}
+          aria-hidden={i !== index}
+          className={clx(
+            "absolute inset-0 transition-opacity duration-1000 ease-in-out",
+            i === index ? "opacity-100 z-10" : "opacity-0 z-0"
           )}
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Arrows (hidden on small screens, swipe works there) */}
-      <button
-        type="button"
-        aria-label="Previous slide"
-        onClick={() => go(index - 1)}
-        className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 items-center justify-center rounded-full bg-white/80 hover:bg-white text-black transition-colors"
-      >
-        <span aria-hidden>‹</span>
-      </button>
-      <button
-        type="button"
-        aria-label="Next slide"
-        onClick={() => go(index + 1)}
-        className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 items-center justify-center rounded-full bg-white/80 hover:bg-white text-black transition-colors"
-      >
-        <span aria-hidden>›</span>
-      </button>
-
-      {/* Dots */}
-      <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
-        {SLIDES.map((_, i) => (
-          <button
-            key={i}
-            type="button"
-            aria-label={`Go to slide ${i + 1}`}
-            aria-current={i === index}
-            onClick={() => go(i)}
-            className={`h-2 rounded-full transition-all ${
-              i === index ? "w-6 bg-white" : "w-2 bg-white/60 hover:bg-white/80"
-            }`}
+        >
+          <Image
+            src={slide.mobile}
+            alt={slide.alt}
+            fill
+            sizes="100vw"
+            className="block md:hidden object-cover object-top"
+            priority={i === 0}
           />
-        ))}
-      </div>
+          <Image
+            src={slide.tablet}
+            alt={slide.alt}
+            fill
+            sizes="100vw"
+            className="hidden md:block lg:hidden object-cover object-top"
+            priority={i === 0}
+          />
+          <Image
+            src={slide.desktop}
+            alt={slide.alt}
+            fill
+            sizes="100vw"
+            className="hidden lg:block object-cover object-top"
+            priority={i === 0}
+          />
+        </div>
+      ))}
+
+      {/* Dot navigation */}
+      {SLIDES.length > 1 && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+          {SLIDES.map((slide, i) => (
+            <button
+              key={slide.desktop}
+              onClick={() => goTo(i)}
+              aria-label={`Go to slide ${i + 1}`}
+              aria-current={i === index}
+              className={clx(
+                "h-1.5 rounded-full transition-all duration-300",
+                i === index ? "w-6 bg-white" : "w-1.5 bg-white/50 hover:bg-white/75"
+              )}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* The homepage had no <h1> at all — every heading jumped straight to
+          H2 ("Popular Right Now", etc). Visually hidden since the hero
+          image already carries the visual message; this exists purely so
+          the page has exactly one, meaningful top-level heading. */}
+      <h1 className="sr-only">Cardle – Premium Cotton Tote Bags, Handcrafted in Sri Lanka</h1>
     </div>
   )
 }
