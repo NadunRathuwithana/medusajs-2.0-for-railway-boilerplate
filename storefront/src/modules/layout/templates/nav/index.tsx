@@ -7,15 +7,33 @@ import CartButton from "@modules/layout/components/cart-button"
 import SideMenu from "@modules/layout/components/side-menu"
 import { User, ShoppingBag } from "lucide-react"
 import Image from "next/image"
+import { getCms } from "@lib/data/cms"
+import CtaLink from "@modules/cms/cta-link"
 
 export default async function Nav() {
-  const regions = await listRegions().then((regions: StoreRegion[]) => regions)
+  const [regions, cms] = await Promise.all([
+    listRegions().then((regions: StoreRegion[]) => regions),
+    getCms(),
+  ])
+  // undefined = CMS unreachable -> keep the original text; null = switched off in admin
+  const promo =
+    cms.promo_bar === undefined
+      ? { text: "5% Off for all Card Payments", href: null }
+      : cms.promo_bar
 
   return (
     <div className="sticky top-0 inset-x-0 z-50 group">
-      <div className="flex items-center justify-center text-center bg-zinc-900 text-white text-[11px] small:text-xs font-medium py-1.5 px-4 capitalize tracking-wide">
-        5% Off for all Card Payments
-      </div>
+      {promo && (
+        <div className="flex items-center justify-center text-center bg-zinc-900 text-white text-[11px] small:text-xs font-medium py-1.5 px-4 capitalize tracking-wide">
+          {promo.href ? (
+            <CtaLink href={promo.href} className="hover:underline">
+              {promo.text}
+            </CtaLink>
+          ) : (
+            promo.text
+          )}
+        </div>
+      )}
       <header className="relative h-16 mx-auto border-b duration-200 bg-white border-ui-border-base">
         <nav className="content-container txt-xsmall-plus text-ui-fg-subtle flex items-center justify-between w-full h-full text-small-regular">
           <div className="flex-1 basis-0 h-full flex items-center">

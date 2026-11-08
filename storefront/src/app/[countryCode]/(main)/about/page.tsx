@@ -1,3 +1,4 @@
+import PageBanner from "@modules/cms/page-banner"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -8,8 +9,11 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <div className="w-full bg-white">
-      {/* 1. Hero Banner */}
-      <section className="h-[62vh] min-h-[380px] max-h-[640px] w-full relative overflow-hidden bg-[#111111] flex flex-col items-center justify-center">
+      {/* Hero Banner (editable in Admin > Site CMS) */}
+      <PageBanner
+        pageKey="about"
+        fallback={
+          <section className="h-[62vh] min-h-[380px] max-h-[640px] w-full relative overflow-hidden bg-[#111111] flex flex-col items-center justify-center">
         <picture>
           <source media="(max-width: 768px)" srcSet="/about/cardle-about-premium-cotton-tote-bags-mobile.jpg" />
           <source media="(max-width: 1024px)" srcSet="/about/cardle-about-premium-cotton-tote-bags-tablet.jpg" />
@@ -27,6 +31,8 @@ export default function AboutPage() {
           </h1>
         </div>
       </section>
+        }
+      />
 
       {/* 2. The Story Section */}
       <section className="py-24 md:py-32 px-6">

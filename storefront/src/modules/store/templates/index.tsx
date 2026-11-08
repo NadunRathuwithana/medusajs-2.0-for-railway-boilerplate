@@ -1,3 +1,4 @@
+import PageBanner from "@modules/cms/page-banner"
 import { Suspense } from "react"
 
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
@@ -16,8 +17,11 @@ const StoreTemplate = ({
 
   return (
     <div className="w-full bg-white">
-      {/* Hero Banner */}
-      <section className="h-[62vh] min-h-[380px] max-h-[640px] w-full relative overflow-hidden bg-[#e5e5e5] flex flex-col items-center justify-center">
+      {/* Hero Banner (editable in Admin > Site CMS) */}
+      <PageBanner
+        pageKey="store"
+        fallback={
+          <section className="h-[62vh] min-h-[380px] max-h-[640px] w-full relative overflow-hidden bg-[#e5e5e5] flex flex-col items-center justify-center">
         <picture>
           <source media="(max-width: 768px)" srcSet="/store/buy-cotton-tote-bags-online-sri-lanka-mobile.jpg" />
           <source media="(max-width: 1024px)" srcSet="/store/buy-cotton-tote-bags-online-sri-lanka-tablet.jpg" />
@@ -28,6 +32,8 @@ const StoreTemplate = ({
           />
         </picture>
       </section>
+        }
+      />
 
       <div className="content-container max-w-[1440px] mx-auto px-6 md:px-16 py-12" data-testid="category-container">
         {/* Header Section */}
