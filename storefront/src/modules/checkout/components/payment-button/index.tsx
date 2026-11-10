@@ -216,9 +216,11 @@ const StripePaymentButton = ({
 }) => {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const { flushAddresses } = useLiveCheckout()
 
   const onPaymentCompleted = async () => {
     try {
+      await flushAddresses()
       await placeOrder()
     } catch (err: any) {
       if (err?.message?.includes("NEXT_REDIRECT") || err?.digest?.startsWith("NEXT_REDIRECT")) {
@@ -241,6 +243,7 @@ const StripePaymentButton = ({
 
   const handlePayment = async () => {
     setSubmitting(true)
+    await flushAddresses()
 
     if (!stripe || !elements || !card || !cart || !clientSecret) {
       setSubmitting(false)
@@ -324,9 +327,11 @@ const PayPalPaymentButton = ({
 }) => {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const { flushAddresses } = useLiveCheckout()
 
   const onPaymentCompleted = async () => {
     try {
+      await flushAddresses()
       await placeOrder()
     } catch (err: any) {
       if (err?.message?.includes("NEXT_REDIRECT") || err?.digest?.startsWith("NEXT_REDIRECT")) {
@@ -396,9 +401,11 @@ const ManualTestPaymentButton = ({
 }) => {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const { flushAddresses } = useLiveCheckout()
 
   const onPaymentCompleted = async () => {
     try {
+      await flushAddresses()
       await placeOrder()
     } catch (err: any) {
       if (err?.message?.includes("NEXT_REDIRECT") || err?.digest?.startsWith("NEXT_REDIRECT")) {
@@ -446,6 +453,7 @@ const HostedPaymentButton = ({
 }) => {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const { flushAddresses } = useLiveCheckout()
 
   const redirectUrl = session?.data?.redirect_url as string | undefined
   const sessionReady = Boolean(redirectUrl)
@@ -463,7 +471,7 @@ const HostedPaymentButton = ({
     return () => clearTimeout(timer)
   }, [notReady, sessionReady])
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     // notReady already reflects the live (instant, no network) Addresses
     // form validity — this is just a final synchronous guard in case the
     // disabled attribute was somehow bypassed.
@@ -471,6 +479,9 @@ const HostedPaymentButton = ({
       return
     }
     setSubmitting(true)
+    // Make sure the phone/address the customer just typed is saved on the
+    // cart before we leave the site (the form auto-saves on a short delay).
+    await flushAddresses()
     window.location.href = redirectUrl
   }
 
@@ -513,6 +524,7 @@ const KokoPaymentButton = ({
   const formRef = React.useRef<HTMLFormElement>(null)
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const { flushAddresses } = useLiveCheckout()
 
   const formAction = session?.data?.koko_form_action as string | undefined
   const fields = session?.data?.koko_form_fields as Record<string, string> | undefined
@@ -531,7 +543,7 @@ const KokoPaymentButton = ({
     return () => clearTimeout(timer)
   }, [notReady, sessionReady])
 
-  const handleClick = () => {
+  const handleClick = async () => {
     // notReady already reflects the live (instant, no network) Addresses
     // form validity — this is just a final synchronous guard in case the
     // disabled attribute was somehow bypassed.
@@ -539,6 +551,7 @@ const KokoPaymentButton = ({
       return
     }
     setSubmitting(true)
+    await flushAddresses()
     // Submit the real HTML form — Koko requires an actual browser POST,
     // not a fetch() call, since the customer continues the flow on Koko's domain.
     formRef.current.submit()
@@ -611,6 +624,7 @@ const MintpayPaymentButton = ({
   const formRef = React.useRef<HTMLFormElement>(null)
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const { flushAddresses } = useLiveCheckout()
 
   const formAction = session?.data?.mintpay_form_action as string | undefined
   const fields = session?.data?.mintpay_form_fields as Record<string, string> | undefined
@@ -629,7 +643,7 @@ const MintpayPaymentButton = ({
     return () => clearTimeout(timer)
   }, [notReady, sessionReady])
 
-  const handleClick = () => {
+  const handleClick = async () => {
     // notReady already reflects the live (instant, no network) Addresses
     // form validity — this is just a final synchronous guard in case the
     // disabled attribute was somehow bypassed.
@@ -637,6 +651,7 @@ const MintpayPaymentButton = ({
       return
     }
     setSubmitting(true)
+    await flushAddresses()
     // Real browser POST — the customer continues the flow on Mintpay's domain.
     formRef.current.submit()
   }

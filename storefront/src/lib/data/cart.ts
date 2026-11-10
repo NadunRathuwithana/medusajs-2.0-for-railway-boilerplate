@@ -470,6 +470,34 @@ export async function placeOrder() {
     throw new Error("No existing cart found when placing an order")
   }
 
+  // Never complete an order that has no phone number: re-read the cart fresh
+  // (not the cached copy) and heal/validate it first.
+  {
+    const fresh = await sdk.store.cart
+      .retrieve(cartId, { fields: "id,shipping_address.*,billing_address.*" }, await getAuthHeaders())
+      .then((r: any) => r.cart)
+      .catch(() => null)
+    if (fresh) {
+      const shipPhone = fresh.shipping_address?.phone
+      const billPhone = fresh.billing_address?.phone
+      if (!shipPhone && !billPhone) {
+        throw new Error("Please enter your phone number so we can contact you about your delivery.")
+      }
+      if (!shipPhone || !billPhone) {
+        const phone = shipPhone || billPhone
+        const pick = (a: any) => ({
+          first_name: a?.first_name, last_name: a?.last_name, address_1: a?.address_1,
+          address_2: a?.address_2 ?? "", company: a?.company, postal_code: a?.postal_code,
+          city: a?.city, country_code: a?.country_code, phone,
+        })
+        await updateCart({
+          ...(shipPhone ? {} : { shipping_address: pick(fresh.shipping_address) }),
+          ...(billPhone ? {} : { billing_address: pick(fresh.billing_address) }),
+        } as any)
+      }
+    }
+  }
+
   // Carry Meta match-key parameters through onto the order (cart.metadata is
   // copied verbatim to order.metadata on completion), since the order.placed
   // subscriber that fires the Conversions API Purchase event has no access to

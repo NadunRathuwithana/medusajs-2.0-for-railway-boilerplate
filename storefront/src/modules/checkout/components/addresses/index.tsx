@@ -39,15 +39,40 @@ const Addresses = ({
   const [, formAction] = useActionState(setAddresses, null)
 
   const formRef = useRef<HTMLFormElement>(null)
-  const { setAddressesComplete } = useLiveCheckout()
+  const { setAddressesComplete, registerFlush } = useLiveCheckout()
 
-  const debouncedSubmit = useRef(
-    debounce(() => {
-      if (formRef.current) {
-        formRef.current.requestSubmit()
+  // Edits are auto-saved shortly after typing stops. `dirty` tracks edits that
+  // have not reached the server yet, and `inflight` the save currently
+  // running, so the payment step can wait for both before leaving/placing the
+  // order (otherwise a quick "Pay" tap could finish with no phone saved).
+  const dirty = useRef(false)
+  const inflight = useRef<Promise<void> | null>(null)
+
+  const saveNow = useRef(async () => {
+    if (!formRef.current) return
+    dirty.current = false
+    const run = (async () => {
+      try {
+        await setAddresses(null, new FormData(formRef.current!))
+      } catch (e) {
+        dirty.current = true
       }
-    }, 1500)
-  ).current
+    })()
+    inflight.current = run
+    await run
+    if (inflight.current === run) inflight.current = null
+  }).current
+
+  const debouncedSubmit = useRef(debounce(() => saveNow(), 1500)).current
+
+  useEffect(() => {
+    registerFlush(async () => {
+      debouncedSubmit.cancel()
+      if (inflight.current) await inflight.current
+      if (dirty.current) await saveNow()
+    })
+    return () => registerFlush(null)
+  }, [registerFlush, debouncedSubmit, saveNow])
 
   // Re-check the form's *current on-screen* values on every keystroke —
   // synchronous, no network — so the Payment step's submit button reacts
@@ -58,6 +83,7 @@ const Addresses = ({
     if (formRef.current) {
       setAddressesComplete(isAddressesFormComplete(new FormData(formRef.current)))
     }
+    dirty.current = true
     debouncedSubmit()
   }
 
