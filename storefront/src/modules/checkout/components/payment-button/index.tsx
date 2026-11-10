@@ -6,7 +6,7 @@ import { useElements, useStripe } from "@stripe/react-stripe-js"
 import React, { useState, useEffect } from "react"
 import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
-import { placeOrder } from "@lib/data/cart"
+import { assertCartInStock, placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { isKoko, isManual, isMintpay, isOnepay, isPaypal, isStripe } from "@lib/constants"
 import { useLiveCheckout } from "@modules/checkout/context/live-checkout-context"
@@ -481,7 +481,14 @@ const HostedPaymentButton = ({
     setSubmitting(true)
     // Make sure the phone/address the customer just typed is saved on the
     // cart before we leave the site (the form auto-saves on a short delay).
-    await flushAddresses()
+    try {
+      await flushAddresses()
+      await assertCartInStock()
+    } catch (err: any) {
+      setErrorMessage(err?.message || "Could not verify stock. Please try again.")
+      setSubmitting(false)
+      return
+    }
     window.location.href = redirectUrl
   }
 
@@ -551,7 +558,14 @@ const KokoPaymentButton = ({
       return
     }
     setSubmitting(true)
-    await flushAddresses()
+    try {
+      await flushAddresses()
+      await assertCartInStock()
+    } catch (err: any) {
+      setErrorMessage(err?.message || "Could not verify stock. Please try again.")
+      setSubmitting(false)
+      return
+    }
     // Submit the real HTML form — Koko requires an actual browser POST,
     // not a fetch() call, since the customer continues the flow on Koko's domain.
     formRef.current.submit()
@@ -651,7 +665,14 @@ const MintpayPaymentButton = ({
       return
     }
     setSubmitting(true)
-    await flushAddresses()
+    try {
+      await flushAddresses()
+      await assertCartInStock()
+    } catch (err: any) {
+      setErrorMessage(err?.message || "Could not verify stock. Please try again.")
+      setSubmitting(false)
+      return
+    }
     // Real browser POST — the customer continues the flow on Mintpay's domain.
     formRef.current.submit()
   }

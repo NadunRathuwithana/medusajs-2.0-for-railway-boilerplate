@@ -464,11 +464,72 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
   return null
 }
 
+/**
+ * Throws if any product line in the cart is out of stock (or short on stock).
+ * Called before the customer is sent to pay, so nobody pays for an item that
+ * can no longer be fulfilled.
+ */
+export async function assertCartInStock() {
+  const cartId = await getCartId()
+  if (!cartId) return
+  const cart: any = await sdk.store.cart
+    .retrieve(
+      cartId,
+      { fields: "id,region_id,items.id,items.title,items.quantity,items.variant_id,items.product_id,items.metadata" },
+      await getAuthHeaders()
+    )
+    .then((r: any) => r.cart)
+    .catch(() => null)
+  if (!cart?.items?.length) return
+
+  const lines = cart.items.filter((i: any) => !i.metadata?.packing && i.variant_id)
+  const productIds = Array.from(new Set(lines.map((i: any) => i.product_id).filter(Boolean))) as string[]
+  if (!productIds.length) return
+
+  let products: any[]
+  try {
+    products = await sdk.store.product
+      .list({
+        id: productIds,
+        region_id: cart.region_id,
+        limit: productIds.length,
+        fields: "id,title,+variants.inventory_quantity,+variants.manage_inventory,+variants.allow_backorder",
+      })
+      .then((r: any) => r.products)
+  } catch {
+    // Can't verify right now: don't block the customer, the backend still validates on completion.
+    return
+  }
+
+  const variants = new Map<string, any>()
+  products.forEach((p) => p.variants?.forEach((v: any) => variants.set(v.id, v)))
+
+  const bad: string[] = []
+  for (const line of lines) {
+    const v = variants.get(line.variant_id)
+    if (!v) {
+      bad.push(`${line.title} (no longer available)`)
+      continue
+    }
+    if (!v.manage_inventory || v.allow_backorder) continue
+    const qty = v.inventory_quantity ?? 0
+    if (qty <= 0) bad.push(`${line.title} (sold out)`)
+    else if (qty < line.quantity) bad.push(`${line.title} (only ${qty} left)`)
+  }
+  if (bad.length) {
+    throw new Error(
+      `Sorry, some items just sold out: ${bad.join(", ")}. Please remove or update them in your cart before paying.`
+    )
+  }
+}
+
 export async function placeOrder() {
   const cartId = await getCartId()
   if (!cartId) {
     throw new Error("No existing cart found when placing an order")
   }
+
+  await assertCartInStock()
 
   // Never complete an order that has no phone number: re-read the cart fresh
   // (not the cached copy) and heal/validate it first.
