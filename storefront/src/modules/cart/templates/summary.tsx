@@ -14,6 +14,7 @@ type SummaryProps = {
 }
 
 const Summary = ({ cart }: SummaryProps) => {
+  const blocked = (cart.items ?? []).some((i: any) => !!i?.stock_issue)
   return (
     <div className="flex flex-col gap-y-4 sm:gap-y-6">
       <h2 className="text-[20px] sm:text-[24px] font-bold text-bold tracking-tight">
@@ -24,6 +25,17 @@ const Summary = ({ cart }: SummaryProps) => {
         <CartTotals totals={cart} />
       </div>
       
+      {blocked && (
+        <p className="text-[13px] text-red-600">
+          Some items in your cart are sold out or low on stock. Please update them before checking out.
+        </p>
+      )}
+      {blocked ? (
+        <button disabled className="w-full mt-4 h-[60px] bg-gray-300 text-white rounded-[16px] flex items-center justify-center gap-2 font-medium text-[16px] cursor-not-allowed">
+          <Lock className="w-4 h-4" />
+          Check out
+        </button>
+      ) : (
       <LocalizedClientLink
         href="/checkout"
         data-testid="checkout-button"
@@ -34,6 +46,7 @@ const Summary = ({ cart }: SummaryProps) => {
           Check out
         </button>
       </LocalizedClientLink>
+      )}
     </div>
   )
 }

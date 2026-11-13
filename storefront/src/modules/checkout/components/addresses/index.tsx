@@ -69,7 +69,9 @@ const Addresses = ({
     registerFlush(async () => {
       debouncedSubmit.cancel()
       if (inflight.current) await inflight.current
-      if (dirty.current) await saveNow()
+      // Always save what is on screen right before paying, even if nothing looks
+      // dirty (autofill/paste can change a field without a change event).
+      await saveNow()
     })
     return () => registerFlush(null)
   }, [registerFlush, debouncedSubmit, saveNow])

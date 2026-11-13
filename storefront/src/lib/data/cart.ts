@@ -12,6 +12,7 @@ import { getAuthHeaders, getCartId, removeCartId, setCartId } from "./cookies"
 import { getProductsById } from "./products"
 import { getRegion } from "./regions"
 import { listCartShippingMethods } from "./fulfillment"
+import { cleanPhone, isValidPhone } from "@lib/util/checkout-validation"
 
 export const retrieveCart = cache(async function retrieveCart() {
   const cartId = await getCartId()
@@ -178,6 +179,57 @@ export async function deleteLineItem(lineId: string) {
     .catch(medusaError)
 }
 
+/**
+ * Re-price the cart against today's real products: current prices, price lists
+ * (sales), promotions and inventory. A cart line keeps the price it had when it
+ * was added, so without this a sale starting/ending, a price change or a
+ * discount change leaves the customer looking at stale numbers. Updating the
+ * cart (even with no changes) makes Medusa refresh every line.
+ */
+async function repriceCart(cartId: string) {
+  try {
+    await sdk.store.cart.update(cartId, {}, {}, await getAuthHeaders())
+    return true
+  } catch {
+    return false
+  }
+}
+
+/** For server-rendered cart/checkout pages: the cart, re-priced with live data. */
+export async function retrieveLiveCart() {
+  const cart = await retrieveCart()
+  if (!cart?.items?.length) return cart
+  // Skip when it was just edited (it is already fresh) to spare the backend.
+  const age = Date.now() - new Date((cart as any).updated_at).getTime()
+  if (age < 15_000) return cart
+  if (!(await repriceCart(cart.id))) return cart
+  return await sdk.store.cart
+    .retrieve(
+      cart.id,
+      { fields: "+region,+region.countries,+payment_collection.payment_sessions" },
+      await getAuthHeaders()
+    )
+    .then(({ cart: fresh }) => fresh)
+    .catch(() => cart)
+}
+
+/** For client components (cart drawer): re-price, then refresh the page data. */
+export async function syncCart() {
+  const cartId = await getCartId()
+  if (!cartId) return
+  if (await repriceCart(cartId)) revalidateTag("cart")
+}
+
+function stockIssueFor(item: any, variant: any): string | undefined {
+  if (item?.metadata?.packing) return undefined
+  if (!variant) return "unavailable"
+  if (!variant.manage_inventory || variant.allow_backorder) return undefined
+  const qty = variant.inventory_quantity ?? 0
+  if (qty <= 0) return "sold_out"
+  if (qty < item.quantity) return `only_${qty}`
+  return undefined
+}
+
 export const enrichLineItems = cache(async function enrichLineItems(
   lineItems:
     | HttpTypes.StoreCartLineItem[]
@@ -207,14 +259,15 @@ export const enrichLineItems = cache(async function enrichLineItems(
       (v: any) => v.id === item.variant_id
     )
 
-    // If product or variant is not found, return the original item
+    // If product or variant is not found, the product is gone or unpublished
     if (!product || !variant) {
-      return item
+      return { ...item, stock_issue: stockIssueFor(item, null) }
     }
 
     // If product and variant are found, enrich the item
     return {
       ...item,
+      stock_issue: stockIssueFor(item, variant),
       variant: {
         ...variant,
         product: omit(product, "variants"),
@@ -426,6 +479,26 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       email: formData.get("email"),
     } as any
 
+    // Never overwrite a saved phone with a blank one (a half-filled or racing
+    // form must not wipe the number the customer already gave us).
+    {
+      const typed = cleanPhone(String(formData.get("shipping_address.phone") ?? ""))
+      if (typed) {
+        data.shipping_address.phone = typed
+      } else {
+        const existing = await sdk.store.cart
+          .retrieve(cartId, { fields: "id,shipping_address.phone,billing_address.phone,metadata" }, await getAuthHeaders())
+          .then((r: any) => r.cart)
+          .catch(() => null)
+        const keep = existing?.shipping_address?.phone || existing?.billing_address?.phone || existing?.metadata?.contact_phone
+        if (keep) data.shipping_address.phone = keep
+      }
+      // Backup copy that travels with the cart onto the order (cart metadata is
+      // copied to order metadata), so the number is never lost even if the
+      // address record is.
+      if (data.shipping_address.phone) data.metadata = { contact_phone: data.shipping_address.phone }
+    }
+
     const sameAsBilling = formData.get("same_as_billing")
     if (sameAsBilling === "on") data.billing_address = data.shipping_address
 
@@ -439,7 +512,7 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         postal_code: formData.get("billing_address.postal_code"),
         city: formData.get("billing_address.city"),
         country_code: formData.get("billing_address.country_code"),
-        phone: formData.get("billing_address.phone"),
+        phone: cleanPhone(String(formData.get("billing_address.phone") ?? "")) || data.shipping_address.phone,
       }
     await updateCart(data)
 
@@ -469,9 +542,41 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
  * Called before the customer is sent to pay, so nobody pays for an item that
  * can no longer be fulfilled.
  */
+export async function assertCartContactSaved() {
+  const cartId = await getCartId()
+  if (!cartId) return
+  const fresh: any = await sdk.store.cart
+    .retrieve(cartId, { fields: "id,shipping_address.phone,billing_address.phone,metadata" }, await getAuthHeaders())
+    .then((r: any) => r.cart)
+    .catch(() => null)
+  if (!fresh) return
+  const phone = fresh.shipping_address?.phone || fresh.billing_address?.phone
+  if (!isValidPhone(phone)) {
+    throw new Error("We could not save your phone number. Please re-enter it so we can contact you about your delivery.")
+  }
+}
+
 export async function assertCartInStock() {
   const cartId = await getCartId()
   if (!cartId) return
+
+  // Re-price against live data right before paying; if the total moved, stop and
+  // let the customer see the new price instead of charging something different.
+  {
+    const getTotal = async () =>
+      sdk.store.cart
+        .retrieve(cartId, { fields: "id,total" }, await getAuthHeaders())
+        .then((r: any) => r.cart?.total)
+        .catch(() => undefined)
+    const before = await getTotal()
+    if (await repriceCart(cartId)) {
+      const after = await getTotal()
+      if (before !== undefined && after !== undefined && Math.round(before) !== Math.round(after)) {
+        revalidateTag("cart")
+        throw new Error("Some prices or discounts just changed, so your total was updated. Please review your order and press pay again.")
+      }
+    }
+  }
   const cart: any = await sdk.store.cart
     .retrieve(
       cartId,
@@ -530,6 +635,7 @@ export async function placeOrder() {
   }
 
   await assertCartInStock()
+  await assertCartContactSaved()
 
   // Never complete an order that has no phone number: re-read the cart fresh
   // (not the cached copy) and heal/validate it first.

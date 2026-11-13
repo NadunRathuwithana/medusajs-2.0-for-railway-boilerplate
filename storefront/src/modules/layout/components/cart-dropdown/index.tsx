@@ -17,7 +17,7 @@ import {
   Minus,
   Plus,
 } from "lucide-react"
-import { updateLineItem } from "@lib/data/cart"
+import { syncCart, updateLineItem } from "@lib/data/cart"
 import Spinner from "@modules/common/icons/spinner"
 import { getPricesForItem } from "@lib/util/get-product-price"
 import { getPercentageDiff } from "@lib/util/get-precentage-diff"
@@ -29,7 +29,15 @@ const CartDropdown = ({
 }) => {
   const [cartOpen, setCartOpen] = useState(false)
 
-  const open = () => setCartOpen(true)
+  const lastSync = useRef(0)
+  const open = () => {
+    setCartOpen(true)
+    // Show what we have instantly, then re-price against live products/discounts.
+    if (Date.now() - lastSync.current > 20_000 && (cartState?.items?.length ?? 0) > 0) {
+      lastSync.current = Date.now()
+      syncCart().catch(() => {})
+    }
+  }
   const close = () => setCartOpen(false)
 
   // Packing extras are charged in the total but never shown as products.

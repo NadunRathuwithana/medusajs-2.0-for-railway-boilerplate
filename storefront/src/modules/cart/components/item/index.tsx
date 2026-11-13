@@ -233,6 +233,15 @@ const Item = ({ item, type = "full" }: ItemProps) => {
           </div>
         </div>
 
+        {(item as any).stock_issue && (
+          <p className="mt-2 text-[12px] font-medium text-red-600">
+            {(item as any).stock_issue === "sold_out"
+              ? "Sold out. Please remove this item to continue."
+              : (item as any).stock_issue === "unavailable"
+              ? "No longer available. Please remove this item."
+              : `Only ${String((item as any).stock_issue).replace("only_", "")} left. Please lower the quantity.`}
+          </p>
+        )}
         <ErrorMessage error={error} data-testid="product-error-message" />
       </div>
     </div>

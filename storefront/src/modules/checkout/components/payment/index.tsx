@@ -11,6 +11,7 @@ import PaymentContainer from "@modules/checkout/components/payment-container"
 import { isStripe as isStripeFunc, paymentInfoMap, getPaymentPromoInfo, getAllPaymentPromoCodes } from "@lib/constants"
 import { StripeContext } from "@modules/checkout/components/payment-wrapper"
 import { initiatePaymentSession, applyPromotions } from "@lib/data/cart"
+import { isValidPhone } from "@lib/util/checkout-validation"
 import { trackAddPaymentInfo } from "@lib/analytics/track"
 import { wasEventTracked, markEventTracked } from "@lib/analytics/dedup"
 
@@ -172,7 +173,10 @@ const Payment = ({
         // Must match Review component's missingDetails logic
         const billingFirstName = cartRef.current?.billing_address?.first_name
         const email = cartRef.current?.email
-        if (!billingFirstName || !email) {
+        // Do not create the payment session (which is sent to Koko/Mintpay/Onepay)
+        // before a valid phone number is saved on the cart.
+        const cartPhone = cartRef.current?.shipping_address?.phone || cartRef.current?.billing_address?.phone
+        if (!billingFirstName || !email || !isValidPhone(cartPhone)) {
           // Validation error will be shown beautifully in the Review component
           return
         }

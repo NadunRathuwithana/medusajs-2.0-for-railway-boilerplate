@@ -6,7 +6,7 @@ import CheckoutForm from "@modules/checkout/templates/checkout-form"
 import { getPacking } from "@lib/data/addons"
 import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
 import MobileCheckoutSummary from "@modules/checkout/components/mobile-checkout-summary"
-import { enrichLineItems, retrieveCart } from "@lib/data/cart"
+import { enrichLineItems, retrieveLiveCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { getCustomer } from "@lib/data/customer"
 import BackButton from "@modules/common/components/back-button"
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 }
 
 const fetchCart = async () => {
-  const cart = await retrieveCart()
+  const cart = await retrieveLiveCart()
   if (!cart) {
     return notFound()
   }

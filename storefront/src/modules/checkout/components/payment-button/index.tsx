@@ -6,7 +6,7 @@ import { useElements, useStripe } from "@stripe/react-stripe-js"
 import React, { useState, useEffect } from "react"
 import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
-import { assertCartInStock, placeOrder } from "@lib/data/cart"
+import { assertCartContactSaved, assertCartInStock, placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { isKoko, isManual, isMintpay, isOnepay, isPaypal, isStripe } from "@lib/constants"
 import { useLiveCheckout } from "@modules/checkout/context/live-checkout-context"
@@ -483,6 +483,7 @@ const HostedPaymentButton = ({
     // cart before we leave the site (the form auto-saves on a short delay).
     try {
       await flushAddresses()
+      await assertCartContactSaved()
       await assertCartInStock()
     } catch (err: any) {
       setErrorMessage(err?.message || "Could not verify stock. Please try again.")
@@ -560,6 +561,7 @@ const KokoPaymentButton = ({
     setSubmitting(true)
     try {
       await flushAddresses()
+      await assertCartContactSaved()
       await assertCartInStock()
     } catch (err: any) {
       setErrorMessage(err?.message || "Could not verify stock. Please try again.")
@@ -667,6 +669,7 @@ const MintpayPaymentButton = ({
     setSubmitting(true)
     try {
       await flushAddresses()
+      await assertCartContactSaved()
       await assertCartInStock()
     } catch (err: any) {
       setErrorMessage(err?.message || "Could not verify stock. Please try again.")
