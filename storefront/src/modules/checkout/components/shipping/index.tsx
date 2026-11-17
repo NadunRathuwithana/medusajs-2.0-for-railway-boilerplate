@@ -112,7 +112,7 @@ const Shipping: React.FC<ShippingProps> = ({
                       <Radio checked={isSelected} />
                       <div className="flex flex-col">
                         <span className="text-[15px] font-medium text-gray-900">{option.name}</span>
-                        <span className="text-[13px] text-gray-500 mt-0.5">Approx. 3-7 business days</span>
+                        <span className="text-[13px] text-gray-500 mt-0.5">Approx. 3-10 working days</span>
                       </div>
                     </div>
                     <span className="text-[15px] font-bold text-gray-900">

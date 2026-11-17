@@ -74,7 +74,7 @@ const TrustSection = () => {
               Fast Delivery
             </h4>
             <p className="text-xs text-gray-500 font-medium leading-relaxed max-w-[280px]">
-              Standard delivery in 2-7 days. Transparent shipping rates with no
+              Standard delivery in 3-10 working days. Transparent shipping rates with no
               hidden fees.
             </p>
           </div>

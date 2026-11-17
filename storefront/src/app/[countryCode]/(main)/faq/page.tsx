@@ -18,7 +18,7 @@ export default function FAQPage() {
     },
     {
       question: "How long does shipping take?",
-      answer: "Standard shipping typically takes 3-7 business days. Personalised items may require an additional 2-4 business days for processing."
+      answer: "Standard shipping typically takes 3-10 working days. Personalised items may require an additional 2-4 business days for processing."
     },
     {
       question: "Can I return or exchange my order?",
