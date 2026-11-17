@@ -76,5 +76,11 @@ export default defineMiddlewares({
         rateLimit({ windowMs: 60_000, max: 30, keyPrefix: "meta-catalog-feed" }),
       ],
     },
+    {
+      matcher: "/feed/google-merchant.xml",
+      middlewares: [
+        rateLimit({ windowMs: 60_000, max: 30, keyPrefix: "google-merchant-feed" }),
+      ],
+    },
   ],
 })

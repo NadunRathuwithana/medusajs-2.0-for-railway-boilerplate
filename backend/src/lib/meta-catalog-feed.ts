@@ -6,7 +6,7 @@ import {
 import { MedusaContainer } from "@medusajs/framework/types"
 import { getRedisClient } from "./redis"
 
-const CACHE_KEY = "meta-catalog-feed:xml"
+const CACHE_KEY = "meta-catalog-feed:xml:v2"
 const CACHE_TTL_MS = 60 * 60 * 1000 // 1 hour — Meta polls on its own schedule, no need to regenerate more often than that.
 const STORE_URL = "https://cardle.lk"
 const BRAND = "Cardle"
@@ -34,6 +34,34 @@ function escapeXml(value: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&apos;")
+}
+
+// Image URLs from the media bucket can contain spaces/brackets ("1 (9)-01K.jpeg").
+// Google wants RFC 3986 URLs, so encode the path without double-encoding.
+function encodeUrl(value: string): string {
+  try {
+    return new URL(value).href
+  } catch {
+    return encodeURI(value)
+  }
+}
+
+// Medusa names the single option of "simple" products "Default option value" —
+// never show that to customers.
+function cleanOptionLabel(values: string[]): string {
+  return values
+    .filter((v) => v && !/^default( option)?( value)?$/i.test(v.trim()))
+    .join(", ")
+}
+
+const COLOR_WORDS = [
+  "off white","light cream","cream pink","forest green","dark grey","black edition",
+  "white","black","brown","green","blue","pink","orange","ocher","beige","natural","ash","cream","grey","gray",
+]
+function pickColor(values: string[]): string {
+  const joined = values.join(" ").toLowerCase()
+  const hit = COLOR_WORDS.find((c) => joined.includes(c))
+  return hit ? hit.replace(/\b\w/g, (m) => m.toUpperCase()) : ""
 }
 
 function stripHtml(value: string): string {
@@ -81,6 +109,8 @@ type FeedItem = {
   brand: string
   google_product_category: string
   fb_product_category: string
+  item_group_id: string
+  color: string
 }
 
 async function fetchCatalogProducts(container: MedusaContainer): Promise<{
@@ -193,14 +223,12 @@ export async function buildMetaCatalogFeedXml(container: MedusaContainer): Promi
       }
 
       const inStock = isVariantInStock(variant, availability[variant.id]?.availability ?? null)
-      const optionLabel = (variant.options || [])
-        .map((o) => o.value)
-        .filter(Boolean)
-        .join(", ")
+      const optionValues = (variant.options || []).map((o) => o.value).filter(Boolean)
+      const optionLabel = cleanOptionLabel(optionValues)
       const title = optionLabel ? `${product.title} – ${optionLabel}` : product.title
 
-      const imageLink = variant.images?.[0]?.url || productImage
-      if (!imageLink) {
+      const imageLink = encodeUrl(variant.images?.[0]?.url || productImage || "")
+      if (!variant.images?.[0]?.url && !productImage) {
         continue // Meta requires image_link — skip rather than emit an invalid item
       }
 
@@ -226,6 +254,8 @@ export async function buildMetaCatalogFeedXml(container: MedusaContainer): Promi
         brand: BRAND,
         google_product_category: PRODUCT_CATEGORY,
         fb_product_category: PRODUCT_CATEGORY,
+        item_group_id: product.id,
+        color: pickColor(optionValues),
       })
     }
   }
@@ -248,6 +278,9 @@ function renderFeedXml(items: FeedItem[]): string {
       <g:brand>${escapeXml(item.brand)}</g:brand>
       <g:google_product_category>${escapeXml(item.google_product_category)}</g:google_product_category>
       <g:fb_product_category>${escapeXml(item.fb_product_category)}</g:fb_product_category>
+      <g:item_group_id>${escapeXml(item.item_group_id)}</g:item_group_id>${item.color ? `
+      <g:color>${escapeXml(item.color)}</g:color>` : ""}
+      <g:identifier_exists>no</g:identifier_exists>
     </item>`
     )
     .join("\n")
@@ -257,7 +290,7 @@ function renderFeedXml(items: FeedItem[]): string {
   <channel>
     <title>Cardle Product Catalog</title>
     <link>${STORE_URL}</link>
-    <description>Cardle product feed for Meta Commerce Manager</description>
+    <description>Cardle product feed (Meta Commerce Manager and Google Merchant Center)</description>
 ${itemsXml}
   </channel>
 </rss>
