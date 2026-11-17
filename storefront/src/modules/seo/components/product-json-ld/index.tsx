@@ -63,7 +63,7 @@ export default function ProductJsonLd({ product }: ProductJsonLdProps) {
               "@type": "Organization",
               name: "Cardle",
             },
-            // Mirrors /shipping (LKR 300 island-wide, 2-7 business days) and
+            // Mirrors /shipping (LKR 300 island-wide, 3-10 working days) and
             // /returns (7-day returns). Update these if either page changes.
             shippingDetails: {
               "@type": "OfferShippingDetails",
@@ -86,8 +86,8 @@ export default function ProductJsonLd({ product }: ProductJsonLdProps) {
                 },
                 transitTime: {
                   "@type": "QuantitativeValue",
-                  minValue: 2,
-                  maxValue: 7,
+                  minValue: 3,
+                  maxValue: 8,
                   unitCode: "DAY",
                 },
               },

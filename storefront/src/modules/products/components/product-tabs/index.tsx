@@ -180,8 +180,8 @@ const ShippingInfoTab = ({ product }: ProductTabsProps) => {
       return result
     }
     return {
-      minDate: addWorkingDays(today, 2),
-      maxDate: addWorkingDays(today, 7),
+      minDate: addWorkingDays(today, 3),
+      maxDate: addWorkingDays(today, 10),
     }
   }, [])
 
@@ -207,7 +207,7 @@ const ShippingInfoTab = ({ product }: ProductTabsProps) => {
           </div>
           <div className="flex flex-col">
             <span className="text-xs text-gray-400 font-medium">Delivery Time</span>
-            <span className="text-sm font-semibold text-bold mt-0.5">2-7 Business Days</span>
+            <span className="text-sm font-semibold text-bold mt-0.5">3-10 Working Days</span>
           </div>
         </div>
 

@@ -5,7 +5,7 @@ import ObfuscatedEmail from "@modules/common/components/obfuscated-email"
 export const metadata: Metadata = {
   title: "Shipping Policy – Cardle Sri Lanka",
   description:
-    "Cardle delivers island-wide across Sri Lanka in 2–7 business days for LKR 300. Learn about our dispatch process, tracking, order cancellations and delivery terms.",
+    "Cardle delivers island-wide across Sri Lanka in 3–10 working days for LKR 300. Learn about our dispatch process, tracking, order cancellations and delivery terms.",
   alternates: {
     canonical: "https://cardle.lk/lk/shipping",
   },
@@ -36,7 +36,7 @@ export default function ShippingPolicyPage() {
           </h2>
           <p className="mb-4">
             Our team diligently strives to dispatch your package as quickly as
-            possible. Deliveries are usually completed within 5–7 working days,
+            possible. Deliveries are usually completed within 3–10 working days,
             excluding mercantile and public holidays. Once we receive your
             order, our dedicated in-house staff and courier partners work hard
             to ensure delivery within the specified timeframe. However, please
