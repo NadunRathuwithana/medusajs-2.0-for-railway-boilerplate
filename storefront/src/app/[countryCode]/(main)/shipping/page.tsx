@@ -5,7 +5,7 @@ import ObfuscatedEmail from "@modules/common/components/obfuscated-email"
 export const metadata: Metadata = {
   title: "Shipping Policy – Cardle Sri Lanka",
   description:
-    "Cardle delivers island-wide across Sri Lanka in 3–10 working days for LKR 300. Learn about our dispatch process, tracking, order cancellations and delivery terms.",
+    "Cardle delivers island-wide across Sri Lanka in 3–10 working days for LKR 500. Learn about our dispatch process, tracking, order cancellations and delivery terms.",
   alternates: {
     canonical: "https://cardle.lk/lk/shipping",
   },
@@ -68,7 +68,7 @@ export default function ShippingPolicyPage() {
           <h2 className="text-2xl font-semibold text-bold mb-4 uppercase">
             Delivery Cost
           </h2>
-          <p className="mb-4">Island wide LKR 300</p>
+          <p className="mb-4">Island wide LKR 500</p>
           <p>
             Delivery charges for your order will be calculated and displayed at
             the website checkout.
