@@ -63,13 +63,13 @@ export default function ProductJsonLd({ product }: ProductJsonLdProps) {
               "@type": "Organization",
               name: "Cardle",
             },
-            // Mirrors /shipping (LKR 300 island-wide, 3-10 working days) and
+            // Mirrors /shipping (LKR 500 island-wide, 3-10 working days) and
             // /returns (7-day returns). Update these if either page changes.
             shippingDetails: {
               "@type": "OfferShippingDetails",
               shippingRate: {
                 "@type": "MonetaryAmount",
-                value: "300",
+                value: "500",
                 currency: "LKR",
               },
               shippingDestination: {
