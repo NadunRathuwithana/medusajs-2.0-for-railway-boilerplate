@@ -26,6 +26,7 @@ import type {
   Logger,
 } from "@medusajs/framework/types"
 import crypto from "crypto"
+import { recordAttempt, getSessionOverride } from "./attempts"
 import type {
   OnepayOptions,
   OnepayCreateResponse,
@@ -262,9 +263,25 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
       )
     }
 
+    // Remember this link even if the session is replaced later, so a payment
+    // made on an old link can still be matched to its cart by the reconcile job.
+    await recordAttempt({
+      txn_id: response.data.ipg_transaction_id,
+      session_id: sessionId,
+      cart_id: inputData.cart_id ?? null,
+      reference,
+      amount: onepayAmount,
+      currency,
+      email,
+      phone,
+      created_at: Date.now(),
+      status: "pending",
+    })
+
     return {
       id: response.data.ipg_transaction_id,
       data: {
+        cart_id: inputData.cart_id ?? null,
         ipg_transaction_id: response.data.ipg_transaction_id,
         redirect_url: response.data.gateway.redirect_url,
         reference,
@@ -281,7 +298,13 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
   async authorizePayment(
     input: AuthorizePaymentInput
   ): Promise<AuthorizePaymentOutput> {
-    const ipgTransactionId = input.data?.ipg_transaction_id as string | undefined
+    // The reconcile job may have pointed this session at an earlier, already
+    // paid transaction (customer paid on a replaced link).
+    const overrideTxn = await getSessionOverride(
+      (input.data?.session_id as string | undefined) ?? ""
+    )
+    const ipgTransactionId =
+      overrideTxn ?? (input.data?.ipg_transaction_id as string | undefined)
 
     if (!ipgTransactionId) {
       this.logger_.warn("Onepay: authorizePayment called without ipg_transaction_id")
@@ -313,6 +336,7 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
         return {
           data: {
             ...input.data,
+            ipg_transaction_id: ipgTransactionId,
             paid_on: paidOn,
             verified_amount: amount,
             onepay_status: "success",

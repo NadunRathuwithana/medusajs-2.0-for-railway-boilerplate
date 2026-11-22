@@ -7,6 +7,8 @@ export async function POST(
   res: MedusaResponse
 ): Promise<void> {
   try {
+    const b = (req.body ?? {}) as any
+    console.log(`[onepay-webhook] received txn=${b.transaction_id} status=${b.status_message} session=${b.additional_data}`)
     const eventBus = req.scope.resolve(Modules.EVENT_BUS)
 
     await eventBus.emit({

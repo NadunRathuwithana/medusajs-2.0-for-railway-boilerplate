@@ -195,6 +195,8 @@ const Payment = ({
             billing_address: cartRef.current?.billing_address,
             shipping_address: cartRef.current?.shipping_address,
             email: cartRef.current?.email,
+            // Lets the backend link every Onepay attempt to its cart (order recovery).
+            cart_id: cartRef.current?.id,
             // Mintpay's order-create call needs line items and cart
             // timestamps too (see modules/mintpay-payment/service.ts) — Koko
             // and OnePay simply ignore these extra fields.
