@@ -47,3 +47,34 @@ export async function resetPaymentSession() {
   }
 }
 
+
+// ── Onepay.js (popup) helpers ──────────────────────────────────────────────
+export async function getOnepayJsToken() {
+  const cartId = await getCartId()
+  if (!cartId) return null
+  try {
+    return await sdk.client.fetch<any>("/store/onepay/js-token", {
+      method: "POST",
+      body: { cart_id: cartId },
+      headers: await getAuthHeaders(),
+    })
+  } catch (err) {
+    console.error("[OnePay.js] token error:", err)
+    return null
+  }
+}
+
+export async function confirmOnepayJs(transactionId: string) {
+  const cartId = await getCartId()
+  if (!cartId) return { ok: false }
+  try {
+    return await sdk.client.fetch<{ ok: boolean; pending?: boolean }>("/store/onepay/js-confirm", {
+      method: "POST",
+      body: { cart_id: cartId, transaction_id: transactionId },
+      headers: await getAuthHeaders(),
+    })
+  } catch (err) {
+    console.error("[OnePay.js] confirm error:", err)
+    return { ok: false }
+  }
+}

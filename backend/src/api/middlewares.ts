@@ -56,6 +56,12 @@ export default defineMiddlewares({
       ],
     },
     {
+      matcher: "/store/onepay/*",
+      middlewares: [
+        rateLimit({ windowMs: 60_000, max: 30, keyPrefix: "onepay-js" }),
+      ],
+    },
+    {
       matcher: "/store/contact",
       middlewares: [
         rateLimit({ windowMs: 15 * 60_000, max: 5, keyPrefix: "contact" }),

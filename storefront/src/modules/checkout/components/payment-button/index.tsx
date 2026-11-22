@@ -11,6 +11,7 @@ import { HttpTypes } from "@medusajs/types"
 import { isKoko, isManual, isMintpay, isOnepay, isPaypal, isStripe } from "@lib/constants"
 import { useLiveCheckout } from "@modules/checkout/context/live-checkout-context"
 import { clx } from "@medusajs/ui"
+import { getOnepayJsToken, confirmOnepayJs } from "../../../../app/[countryCode]/(checkout)/checkout/onepay/return/actions"
 
 type PaymentButtonProps = {
   cart: HttpTypes.StoreCart
@@ -158,12 +159,16 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       return (
         <>
           {debugInfo}
-          <HostedPaymentButton
-            notReady={notReady}
-            isPreparing={isSyncing}
-            session={activeSession as any}
-            data-testid={dataTestId}
-          />
+          {process.env.NEXT_PUBLIC_ONEPAY_JS === "true" ? (
+            <OnepayJsButton notReady={notReady} session={activeSession as any} />
+          ) : (
+            <HostedPaymentButton
+              notReady={notReady}
+              isPreparing={isSyncing}
+              session={activeSession as any}
+              data-testid={dataTestId}
+            />
+          )}
         </>
       )
     case isMintpay(activeProviderId):
@@ -439,6 +444,103 @@ const ManualTestPaymentButton = ({
   )
 }
 
+
+/**
+ * Onepay.js popup flow (NEXT_PUBLIC_ONEPAY_JS=true). The overlay keeps the
+ * customer on our page; on success we verify server-side, then place the
+ * order. The webhook + reconcile job remain the safety net if this tab dies.
+ */
+const OnepayJsButton = ({ session, notReady }: { session: any; notReady: boolean }) => {
+  const [error, setError] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const { flushAddresses } = useLiveCheckout()
+  const sessionId = session?.id as string | undefined
+
+  useEffect(() => {
+    if (notReady || !sessionId) return
+    let cancelled = false
+    let script: HTMLScriptElement | null = null
+
+    const onSuccess = async (e: any) => {
+      setBusy(true)
+      const txn = e?.detail?.transaction_id
+      let ok = false
+      for (let i = 0; i < 5 && txn && !ok; i++) {
+        const r = await confirmOnepayJs(txn)
+        ok = !!r?.ok
+        if (!ok) await new Promise((r2) => setTimeout(r2, 2000))
+      }
+      if (!ok) {
+        setError("We could not confirm your payment yet. If you were charged, your order will appear shortly. Do not pay again.")
+        setBusy(false)
+        return
+      }
+      try {
+        await placeOrder()
+      } catch (err: any) {
+        setError(err?.message || "Payment received. Finalising your order, please wait and check your email.")
+        setBusy(false)
+      }
+    }
+    const onFail = () => setError("Payment was not completed. You can try again.")
+
+    ;(async () => {
+      try {
+        await flushAddresses()
+        await assertCartContactSaved()
+        await assertCartInStock()
+      } catch (err: any) {
+        setError(err?.message || "Please check your details.")
+        return
+      }
+      const t = await getOnepayJsToken()
+      if (cancelled) return
+      if (!t) {
+        setError("Could not start payment. Please try again.")
+        return
+      }
+      const phone = String(t.customerPhoneNumber || "").replace(/[\s-]/g, "")
+      ;(window as any).onePayData = {
+        appid: t.appid,
+        hashToken: t.hashToken,
+        apptoken: t.apptoken,
+        amount: t.amount,
+        currency: t.currency,
+        orderReference: t.orderReference,
+        customerFirstName: t.customerFirstName,
+        customerLastName: t.customerLastName,
+        customerPhoneNumber: phone.startsWith("+") ? phone : phone.startsWith("0") ? "+94" + phone.slice(1) : "+" + phone,
+        customerEmail: t.customerEmail,
+        transactionRedirectUrl: `${window.location.origin}/checkout/onepay/return`,
+        additionalData: t.additionalData,
+      }
+      window.addEventListener("onePaySuccess", onSuccess)
+      window.addEventListener("onePayFail", onFail)
+      script = document.createElement("script")
+      script.src = "https://storage.googleapis.com/onepayjs/onepayv2.js"
+      script.async = true
+      document.body.appendChild(script)
+    })()
+
+    return () => {
+      cancelled = true
+      window.removeEventListener("onePaySuccess", onSuccess)
+      window.removeEventListener("onePayFail", onFail)
+      script?.remove()
+      const host = document.getElementById("onepay-btn")
+      if (host) host.innerHTML = ""
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notReady, sessionId])
+
+  return (
+    <>
+      <div id="onepay-btn" className={busy ? "pointer-events-none opacity-60" : ""} />
+      {notReady && <p className="text-sm text-ui-fg-subtle">Complete your details to pay.</p>}
+      <ErrorMessage error={error} data-testid="onepay-js-error-message" />
+    </>
+  )
+}
 
 const HostedPaymentButton = ({
   session,
