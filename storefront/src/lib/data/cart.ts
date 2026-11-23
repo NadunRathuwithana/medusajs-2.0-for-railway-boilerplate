@@ -628,6 +628,31 @@ export async function assertCartInStock() {
   }
 }
 
+/**
+ * Pre-flight check that RETURNS the friendly message instead of throwing.
+ * Next.js masks messages thrown from server actions in production, so the
+ * customer would only see a generic error. Never throws except on redirect.
+ */
+export async function checkCartReady(): Promise<{ error?: string }> {
+  try {
+    await assertCartContactSaved()
+    await assertCartInStock()
+    const cartId = await getCartId()
+    if (cartId) {
+      const fresh = await sdk.store.cart
+        .retrieve(cartId, { fields: "id,shipping_address.phone,billing_address.phone" }, await getAuthHeaders())
+        .then((r: any) => r.cart)
+        .catch(() => null)
+      if (fresh && !fresh.shipping_address?.phone && !fresh.billing_address?.phone) {
+        return { error: "Please enter your phone number so we can contact you about your delivery." }
+      }
+    }
+    return {}
+  } catch (err: any) {
+    return { error: err?.message || "Please check your details and try again." }
+  }
+}
+
 export async function placeOrder() {
   const cartId = await getCartId()
   if (!cartId) {

@@ -6,7 +6,7 @@ import { useElements, useStripe } from "@stripe/react-stripe-js"
 import React, { useState, useEffect } from "react"
 import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
-import { assertCartContactSaved, assertCartInStock, placeOrder } from "@lib/data/cart"
+import { checkCartReady, placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { isKoko, isManual, isMintpay, isOnepay, isPaypal, isStripe } from "@lib/constants"
 import { useLiveCheckout } from "@modules/checkout/context/live-checkout-context"
@@ -226,6 +226,12 @@ const StripePaymentButton = ({
   const onPaymentCompleted = async () => {
     try {
       await flushAddresses()
+      const ready = await checkCartReady()
+      if (ready.error) {
+        setErrorMessage(ready.error)
+        setSubmitting(false)
+        return
+      }
       await placeOrder()
     } catch (err: any) {
       if (err?.message?.includes("NEXT_REDIRECT") || err?.digest?.startsWith("NEXT_REDIRECT")) {
@@ -337,6 +343,12 @@ const PayPalPaymentButton = ({
   const onPaymentCompleted = async () => {
     try {
       await flushAddresses()
+      const ready = await checkCartReady()
+      if (ready.error) {
+        setErrorMessage(ready.error)
+        setSubmitting(false)
+        return
+      }
       await placeOrder()
     } catch (err: any) {
       if (err?.message?.includes("NEXT_REDIRECT") || err?.digest?.startsWith("NEXT_REDIRECT")) {
@@ -411,6 +423,12 @@ const ManualTestPaymentButton = ({
   const onPaymentCompleted = async () => {
     try {
       await flushAddresses()
+      const ready = await checkCartReady()
+      if (ready.error) {
+        setErrorMessage(ready.error)
+        setSubmitting(false)
+        return
+      }
       await placeOrder()
     } catch (err: any) {
       if (err?.message?.includes("NEXT_REDIRECT") || err?.digest?.startsWith("NEXT_REDIRECT")) {
@@ -487,8 +505,11 @@ const OnepayJsButton = ({ session, notReady }: { session: any; notReady: boolean
     ;(async () => {
       try {
         await flushAddresses()
-        await assertCartContactSaved()
-        await assertCartInStock()
+        const ready = await checkCartReady()
+        if (ready.error) {
+          setError(ready.error)
+          return
+        }
       } catch (err: any) {
         setError(err?.message || "Please check your details.")
         return
@@ -585,8 +606,12 @@ const HostedPaymentButton = ({
     // cart before we leave the site (the form auto-saves on a short delay).
     try {
       await flushAddresses()
-      await assertCartContactSaved()
-      await assertCartInStock()
+      const ready = await checkCartReady()
+      if (ready.error) {
+        setErrorMessage(ready.error)
+        setSubmitting(false)
+        return
+      }
     } catch (err: any) {
       setErrorMessage(err?.message || "Could not verify stock. Please try again.")
       setSubmitting(false)
@@ -663,8 +688,12 @@ const KokoPaymentButton = ({
     setSubmitting(true)
     try {
       await flushAddresses()
-      await assertCartContactSaved()
-      await assertCartInStock()
+      const ready = await checkCartReady()
+      if (ready.error) {
+        setErrorMessage(ready.error)
+        setSubmitting(false)
+        return
+      }
     } catch (err: any) {
       setErrorMessage(err?.message || "Could not verify stock. Please try again.")
       setSubmitting(false)
@@ -771,8 +800,12 @@ const MintpayPaymentButton = ({
     setSubmitting(true)
     try {
       await flushAddresses()
-      await assertCartContactSaved()
-      await assertCartInStock()
+      const ready = await checkCartReady()
+      if (ready.error) {
+        setErrorMessage(ready.error)
+        setSubmitting(false)
+        return
+      }
     } catch (err: any) {
       setErrorMessage(err?.message || "Could not verify stock. Please try again.")
       setSubmitting(false)
