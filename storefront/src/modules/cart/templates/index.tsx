@@ -5,6 +5,7 @@ import SignInPrompt from "../components/sign-in-prompt"
 import Divider from "@modules/common/components/divider"
 import { HttpTypes } from "@medusajs/types"
 import BackButton from "@modules/common/components/back-button"
+import FreeThird from "../components/free-third"
 
 const CartTemplate = ({
   cart,
@@ -30,6 +31,7 @@ const CartTemplate = ({
               <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100">
                 <ItemsTemplate items={cart?.items?.filter((i: any) => !i?.metadata?.packing)} />
               </div>
+              <FreeThird cart={cart} />
             </div>
 
             <div className="relative w-full lg:w-[400px] flex-shrink-0">
