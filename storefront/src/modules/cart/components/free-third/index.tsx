@@ -12,6 +12,13 @@ export function bagQty(cart: any): number {
 /** "Buy 2, get the 3rd free" nudge: shown when the cart holds exactly 2 bags. */
 export default async function FreeThird({ cart }: { cart: any }) {
   if (bagQty(cart) !== 2) return null
+  // The promo frees the CHEAPEST bag, so only offer totes that cost no more
+  // than the cheapest one already in the cart (what you pick is truly free).
+  const cap = Math.min(
+    ...(cart?.items || [])
+      .filter((i: any) => !i?.metadata?.packing)
+      .map((i: any) => Number(i.unit_price) || Infinity)
+  )
   const countryCode = cart?.shipping_address?.country_code || "lk"
   const { response } = await getProductsList({
     countryCode,
@@ -25,6 +32,7 @@ export default async function FreeThird({ cart }: { cart: any }) {
       )
       const price = v ? getPricesForVariant(v) : null
       if (!v || !price) return null
+      if (Number(price.calculated_price_number) > cap) return null
       return {
         variantId: v.id,
         title: p.title,
