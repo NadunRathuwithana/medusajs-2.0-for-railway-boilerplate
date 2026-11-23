@@ -22,7 +22,7 @@ export default function FreeThirdList({ options, countryCode }: { options: Optio
   }
 
   return (
-    <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100" data-testid="free-third">
+    <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 min-w-0 overflow-hidden" data-testid="free-third">
       <div className="flex items-center justify-between gap-3 mb-4">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-600">Buy 2 get 1 free</p>

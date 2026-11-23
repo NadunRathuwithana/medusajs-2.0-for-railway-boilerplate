@@ -22,7 +22,7 @@ const CartTemplate = ({
         </div>
         {cart?.items?.some((i: any) => !i?.metadata?.packing) ? (
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-12">
-            <div className="flex flex-col flex-1 gap-y-4 sm:gap-y-8">
+            <div className="flex flex-col flex-1 min-w-0 gap-y-4 sm:gap-y-8">
               {!customer && (
                 <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100">
                   <SignInPrompt />
