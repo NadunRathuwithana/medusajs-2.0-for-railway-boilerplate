@@ -37,7 +37,8 @@ const ShippingAddress = ({
 
   const setFormAddress = (
     address?: HttpTypes.StoreCartAddress,
-    email?: string
+    email?: string,
+    phone2?: string
   ) => {
     address &&
       setFormData((prevState: Record<string, any>) => ({
@@ -51,6 +52,7 @@ const ShippingAddress = ({
         "shipping_address.country_code":
           address?.country_code?.toLowerCase() || "",
         "shipping_address.phone": address?.phone ? cleanPhone(address.phone) : "",
+        ...(phone2 ? { "shipping_address.phone_2": cleanPhone(phone2) } : {}),
       }))
 
     email &&
@@ -63,7 +65,7 @@ const ShippingAddress = ({
   useEffect(() => {
     // Ensure cart is not null and has a shipping_address before setting form data
     if (cart && cart.shipping_address) {
-      setFormAddress(cart?.shipping_address, cart?.email)
+      setFormAddress(cart?.shipping_address, cart?.email, (cart?.metadata as any)?.contact_phone_2)
     }
 
     if (cart && !cart.email && customer?.email) {
@@ -77,7 +79,7 @@ const ShippingAddress = ({
     >
   ) => {
     const { name, value } = e.target
-    const updatedValue = name.endsWith(".phone") || name === "phone" ? cleanPhone(value) : value
+    const updatedValue = name.endsWith(".phone") || name.endsWith(".phone_2") || name === "phone" ? cleanPhone(value) : value
     setFormData({
       ...formData,
       [name]: updatedValue,
@@ -241,10 +243,11 @@ const ShippingAddress = ({
             "Enter a valid email address"
           )}
           required
+          wrapperClassName="col-span-2"
           data-testid="shipping-email-input"
         />
         <Input
-          label="Phone"
+          label="Mobile number"
           name="shipping_address.phone"
           type="tel"
           autoComplete="tel"
@@ -258,6 +261,22 @@ const ShippingAddress = ({
           )}
           required
           data-testid="shipping-phone-input"
+        />
+        <Input
+          label="Second phone"
+          placeholder="Optional"
+          name="shipping_address.phone_2"
+          type="tel"
+          autoComplete="off"
+          value={formData["shipping_address.phone_2"] || ""}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          error={fieldError(
+            "shipping_address.phone_2",
+            !formData["shipping_address.phone_2"] || isValidPhone(formData["shipping_address.phone_2"]),
+            "Enter a valid phone number or leave it empty"
+          )}
+          data-testid="shipping-phone2-input"
         />
       </div>
     </>

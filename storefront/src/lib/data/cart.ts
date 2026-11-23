@@ -497,6 +497,9 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       // copied to order metadata), so the number is never lost even if the
       // address record is.
       if (data.shipping_address.phone) data.metadata = { contact_phone: data.shipping_address.phone }
+      // Optional second number (blank clears it).
+      const phone2 = cleanPhone(String(formData.get("shipping_address.phone_2") ?? ""))
+      data.metadata = { ...(data.metadata || {}), contact_phone_2: isValidPhone(phone2) ? phone2 : "" }
     }
 
     const sameAsBilling = formData.get("same_as_billing")

@@ -32,6 +32,9 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
         {order.shipping_address?.phone && (
           <p className="text-sm text-gray-900">{order.shipping_address.phone}</p>
         )}
+        {(order.metadata as any)?.contact_phone_2 && (
+          <p className="text-sm text-gray-900">{(order.metadata as any).contact_phone_2}</p>
+        )}
         <p className="text-sm text-gray-500">{order.email}</p>
       </div>
     </div>

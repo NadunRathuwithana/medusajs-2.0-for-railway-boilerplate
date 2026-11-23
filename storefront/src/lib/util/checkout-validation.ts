@@ -103,6 +103,9 @@ export function isAddressesFormComplete(fd: FormData): boolean {
 
   if (!isValidEmail(email)) return false
   if (!isAddressFormDataComplete(fd, "shipping_address")) return false
+  // Optional second phone: empty is fine, but if typed it must be valid.
+  const phone2 = ((fd.get("shipping_address.phone_2") as string) || "").trim()
+  if (phone2 && !isValidPhone(phone2)) return false
   if (!sameAsBilling && !isAddressFormDataComplete(fd, "billing_address")) return false
 
   return true
