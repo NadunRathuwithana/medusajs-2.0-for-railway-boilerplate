@@ -8,11 +8,30 @@ export function bagQty(cart: any): number {
     .reduce((n: number, i: any) => n + (i.quantity || 0), 0)
 }
 
+/** True only while the BUY2GET1 promo is active in admin. Any failure = off. */
+async function isBuy2Get1On(): Promise<boolean> {
+  try {
+    const base = process.env.MEDUSA_BACKEND_URL || process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
+    const key = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
+    if (!base || !key) return false
+    const r = await fetch(`${base}/store/offers`, {
+      headers: { "x-publishable-api-key": key },
+      next: { revalidate: 60 },
+    })
+    if (!r.ok) return false
+    const j = await r.json()
+    return j?.buy2get1 === true
+  } catch {
+    return false
+  }
+}
+
 export type FreeOption = { variantId: string; title: string; thumbnail?: string; price: string }
 
 /** Totes the customer can pick free when the cart holds exactly 2 bags ([] otherwise). */
 export async function getFreeThirdOptions(cart: any): Promise<FreeOption[]> {
   if (bagQty(cart) !== 2) return []
+  if (!(await isBuy2Get1On())) return []
   // The promo frees the CHEAPEST bag, so only offer totes that cost no more
   // than the cheapest one already in the cart (what you pick is truly free).
   const cap = Math.min(
