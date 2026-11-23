@@ -6,14 +6,23 @@ import CartTotals from "@modules/common/components/cart-totals"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 import { Lock } from "lucide-react"
+import { useParams, useRouter } from "next/navigation"
+import { useState } from "react"
+import FreeThirdDialog from "../components/free-third/dialog"
+import type { FreeOption } from "../components/free-third/options"
 
 type SummaryProps = {
   cart: HttpTypes.StoreCart & {
     promotions: HttpTypes.StorePromotion[]
   }
+  freeOptions?: FreeOption[]
 }
 
-const Summary = ({ cart }: SummaryProps) => {
+const Summary = ({ cart, freeOptions = [] }: SummaryProps) => {
+  const router = useRouter()
+  const { countryCode } = useParams() as { countryCode: string }
+  const [offerOpen, setOfferOpen] = useState(false)
+  const goCheckout = () => router.push(`/${countryCode}/checkout`)
   const blocked = (cart.items ?? []).some((i: any) => !!i?.stock_issue)
   return (
     <div className="flex flex-col gap-y-4 sm:gap-y-6">
@@ -36,16 +45,31 @@ const Summary = ({ cart }: SummaryProps) => {
           Check out
         </button>
       ) : (
+      <>
+      <FreeThirdDialog
+        open={offerOpen}
+        options={freeOptions}
+        countryCode={countryCode}
+        onClose={() => setOfferOpen(false)}
+        onSkip={() => { setOfferOpen(false); goCheckout() }}
+      />
       <LocalizedClientLink
         href="/checkout"
         data-testid="checkout-button"
         className="w-full mt-4"
+        onClick={(e: any) => {
+          if (freeOptions.length) {
+            e.preventDefault()
+            setOfferOpen(true)
+          }
+        }}
       >
         <button className="w-full h-[60px] bg-[#111111] hover:bg-black text-white rounded-[16px] flex items-center justify-center gap-2 font-medium text-[16px] transition-colors shadow-lg">
           <Lock className="w-4 h-4" />
           Check out
         </button>
       </LocalizedClientLink>
+      </>
       )}
     </div>
   )

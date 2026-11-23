@@ -5,15 +5,16 @@ import SignInPrompt from "../components/sign-in-prompt"
 import Divider from "@modules/common/components/divider"
 import { HttpTypes } from "@medusajs/types"
 import BackButton from "@modules/common/components/back-button"
-import FreeThird from "../components/free-third"
+import { getFreeThirdOptions } from "../components/free-third/options"
 
-const CartTemplate = ({
+const CartTemplate = async ({
   cart,
   customer,
 }: {
   cart: HttpTypes.StoreCart | null
   customer: HttpTypes.StoreCustomer | null
 }) => {
+  const freeOptions = await getFreeThirdOptions(cart)
   return (
     <div className="py-4 sm:py-12 md:py-24 bg-[#fafafa] min-h-screen">
       <div className="content-container !px-4 sm:!px-6 max-w-[1140px] mx-auto" data-testid="cart-container">
@@ -31,13 +32,12 @@ const CartTemplate = ({
               <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100">
                 <ItemsTemplate items={cart?.items?.filter((i: any) => !i?.metadata?.packing)} />
               </div>
-              <FreeThird cart={cart} />
             </div>
 
             <div className="relative w-full lg:w-[400px] flex-shrink-0">
               <div className="sticky top-24 bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100">
                 {cart && cart.region && (
-                  <Summary cart={cart as any} />
+                  <Summary cart={cart as any} freeOptions={freeOptions} />
                 )}
               </div>
             </div>

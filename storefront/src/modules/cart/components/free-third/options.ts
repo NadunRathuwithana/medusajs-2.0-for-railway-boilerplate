@@ -1,6 +1,5 @@
 import { getProductsList } from "@lib/data/products"
 import { getPricesForVariant } from "@lib/util/get-product-price"
-import FreeThirdList from "./list"
 
 /** Bag qty in cart (packing / add-on rows don't count). */
 export function bagQty(cart: any): number {
@@ -9,9 +8,11 @@ export function bagQty(cart: any): number {
     .reduce((n: number, i: any) => n + (i.quantity || 0), 0)
 }
 
-/** "Buy 2, get the 3rd free" nudge: shown when the cart holds exactly 2 bags. */
-export default async function FreeThird({ cart }: { cart: any }) {
-  if (bagQty(cart) !== 2) return null
+export type FreeOption = { variantId: string; title: string; thumbnail?: string; price: string }
+
+/** Totes the customer can pick free when the cart holds exactly 2 bags ([] otherwise). */
+export async function getFreeThirdOptions(cart: any): Promise<FreeOption[]> {
+  if (bagQty(cart) !== 2) return []
   // The promo frees the CHEAPEST bag, so only offer totes that cost no more
   // than the cheapest one already in the cart (what you pick is truly free).
   const cap = Math.min(
@@ -44,6 +45,5 @@ export default async function FreeThird({ cart }: { cart: any }) {
     .filter(Boolean)
     .slice(0, 12) as any[]
 
-  if (!options.length) return null
-  return <FreeThirdList options={options} countryCode={countryCode} />
+  return options
 }
