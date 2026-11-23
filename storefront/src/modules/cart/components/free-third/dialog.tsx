@@ -42,14 +42,15 @@ export default function FreeThirdDialog({
         </Transition.Child>
         <div className="fixed inset-0 flex items-end sm:items-center justify-center sm:p-4">
           <Transition.Child as={Fragment} enter="ease-out duration-200" enterFrom="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95" enterTo="opacity-100 translate-y-0 sm:scale-100" leave="ease-in duration-150" leaveFrom="opacity-100" leaveTo="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95">
-            <Dialog.Panel className="w-full sm:max-w-[640px] bg-white rounded-t-3xl sm:rounded-3xl shadow-xl p-5 sm:p-7 max-h-[90vh] overflow-y-auto" data-testid="free-third-dialog">
+            <Dialog.Panel className="w-full sm:max-w-[720px] bg-white rounded-t-3xl sm:rounded-3xl shadow-xl max-h-[88vh] flex flex-col overflow-hidden" data-testid="free-third-dialog">
+              <div className="px-5 sm:px-7 pt-5 sm:pt-7 overflow-y-auto">
               <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-600">Buy 2 get 1 free</p>
               <Dialog.Title className="text-lg sm:text-xl font-semibold text-gray-900 mt-1">
                 Wait, your 3rd tote is free
               </Dialog.Title>
               <p className="text-[13px] text-gray-500 mt-1">Pick one below and we'll add it at no cost.</p>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pb-4">
                 {options.map((o) => (
                   <div key={o.variantId} className="flex flex-col gap-2">
                     <div className="aspect-square rounded-xl bg-gray-50 overflow-hidden">
@@ -73,16 +74,19 @@ export default function FreeThirdDialog({
                 ))}
               </div>
 
-              {error && <p className="text-[13px] text-rose-600 mt-3">{error}</p>}
+              {error && <p className="text-[13px] text-rose-600 pb-3">{error}</p>}
+              </div>
 
+              <div className="px-5 sm:px-7 py-3 border-t border-gray-100 bg-white">
               <button
                 onClick={onSkip}
                 disabled={!!busy}
-                className="w-full mt-5 h-11 rounded-xl text-[14px] font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                className="w-full h-11 rounded-xl text-[14px] font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
                 data-testid="free-third-skip"
               >
                 No thanks, continue to checkout
               </button>
+              </div>
             </Dialog.Panel>
           </Transition.Child>
         </div>
