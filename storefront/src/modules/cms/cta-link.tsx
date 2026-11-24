@@ -6,20 +6,21 @@ export default function CtaLink({
   href,
   className,
   children,
+  ...rest
 }: {
   href: string
   className?: string
-  children: React.ReactNode
-}) {
+  children?: React.ReactNode
+} & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "className" | "children">) {
   if (/^https?:\/\//i.test(href)) {
     return (
-      <a href={href} className={className} target="_blank" rel="noopener noreferrer">
+      <a href={href} className={className} target="_blank" rel="noopener noreferrer" {...rest}>
         {children}
       </a>
     )
   }
   return (
-    <LocalizedClientLink href={href.startsWith("/") ? href : `/${href}`} className={className}>
+    <LocalizedClientLink href={href.startsWith("/") ? href : `/${href}`} className={className} {...(rest as any)}>
       {children}
     </LocalizedClientLink>
   )

@@ -67,6 +67,8 @@ const HeroCarousel = ({ slides: SLIDES = DEFAULT_SLIDES }: { slides?: Slide[] })
   // Paused only while a finger is on the slide (so a swipe isn't fought by autoplay).
   const [isPaused, setIsPaused] = useState(false)
   const touchStart = useRef<{ x: number; y: number } | null>(null)
+  // Set when a touch turned into a swipe, so the slide link doesn't also fire.
+  const swiped = useRef(false)
 
   const goTo = useCallback((next: number) => {
     setIndex(((next % SLIDES.length) + SLIDES.length) % SLIDES.length)
@@ -85,6 +87,7 @@ const HeroCarousel = ({ slides: SLIDES = DEFAULT_SLIDES }: { slides?: Slide[] })
   const onTouchStart = (e: React.TouchEvent) => {
     setIsPaused(true)
     touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+    swiped.current = false
   }
 
   const onTouchEnd = (e: React.TouchEvent) => {
@@ -97,6 +100,7 @@ const HeroCarousel = ({ slides: SLIDES = DEFAULT_SLIDES }: { slides?: Slide[] })
     if (Math.abs(dx) < SWIPE_THRESHOLD_PX || Math.abs(dx) < Math.abs(dy)) {
       return // too small, or more vertical (a scroll) than horizontal
     }
+    swiped.current = true
     goTo(index + (dx < 0 ? 1 : -1))
   }
 
@@ -112,9 +116,25 @@ const HeroCarousel = ({ slides: SLIDES = DEFAULT_SLIDES }: { slides?: Slide[] })
           aria-hidden={i !== index}
           className={clx(
             "absolute inset-0 transition-opacity duration-1000 ease-in-out",
-            i === index ? "opacity-100 z-10" : "opacity-0 z-0"
+            i === index ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
           )}
         >
+          {/* Whole slide is clickable when it has a link */}
+          {slide.href && (
+            <CtaLink
+              href={slide.href}
+              aria-label={slide.title || slide.alt}
+              tabIndex={i === index ? 0 : -1}
+              className="absolute inset-0 z-[1]"
+              onClickCapture={(e) => {
+                if (swiped.current) {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  swiped.current = false
+                }
+              }}
+            />
+          )}
           <Image
             src={slide.mobile}
             alt={slide.alt}

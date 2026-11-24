@@ -29,6 +29,9 @@ export default async function PageBanner({
           {b.image_tablet && <source media="(max-width: 1024px)" srcSet={b.image_tablet} />}
           <img src={b.image_desktop!} alt={alt} className={HERO_IMG} loading="eager" />
         </picture>
+        {b.cta_href && (
+          <CtaLink href={b.cta_href} aria-label={b.title || b.alt || "Open"} className="absolute inset-0 z-[1]" />
+        )}
         {(b.title || b.eyebrow || b.cta_label) && (
           <BannerText eyebrow={b.eyebrow} title={b.title} ctaLabel={b.cta_label} ctaHref={b.cta_href} color={b.text_color} onImage />
         )}
@@ -42,12 +45,15 @@ export default async function PageBanner({
         {b.image_tablet && <source media="(max-width: 1024px)" srcSet={b.image_tablet} />}
         <img src={b.image_desktop!} alt={alt} className={HERO_IMG} loading="eager" />
       </picture>
+      {b.cta_href && (
+        <CtaLink href={b.cta_href} aria-label={b.title || b.alt || "Open"} className="absolute inset-0 z-[1]" />
+      )}
       {(b.title || b.eyebrow || b.cta_label) && (
-        <div className="absolute inset-0 bg-black/25 flex flex-col items-center justify-center text-center px-6">
+        <div className="absolute inset-0 z-[2] pointer-events-none bg-black/25 flex flex-col items-center justify-center text-center px-6">
           {b.eyebrow && <span className="text-white/90 uppercase tracking-[0.3em] text-xs font-semibold mb-2" style={b.text_color ? { color: b.text_color } : undefined}>{b.eyebrow}</span>}
           {b.title && <h1 className="text-white text-3xl md:text-5xl font-bold tracking-tight mb-4 max-w-3xl drop-shadow-lg" style={b.text_color ? { color: b.text_color } : undefined}>{b.title}</h1>}
           {b.cta_label && b.cta_href && (
-            <CtaLink href={b.cta_href} className="inline-flex items-center bg-white text-black px-7 py-3 rounded-full text-xs md:text-sm font-bold tracking-widest uppercase hover:bg-gray-200 transition-colors">
+            <CtaLink href={b.cta_href} className="pointer-events-auto inline-flex items-center bg-white text-black px-7 py-3 rounded-full text-xs md:text-sm font-bold tracking-widest uppercase hover:bg-gray-200 transition-colors">
               {b.cta_label}
             </CtaLink>
           )}

@@ -367,10 +367,12 @@ function BannerEditor({
                 <Field label="Text colour" hint="Colour of the label and headline. Auto is white over the image.">
                   <TextColorField value={f.text_color} onChange={(v) => set({ text_color: v })} />
                 </Field>
-                <div className="grid grid-cols-2 gap-4">
-                  <Field label="Button label" optional>{text("cta_label", "Shop the collection")}</Field>
-                  <Field label="Button link" optional>{text("cta_href", "/store")}</Field>
-                </div>
+                <Field label="Link" optional hint="The whole banner opens this link when clicked. A page path like /categories/tote-bags, or a full URL.">
+                  {text("cta_href", "/store")}
+                </Field>
+                <Field label="Button label" optional hint="Also show a button on the banner. Uses the link above.">
+                  {text("cta_label", "Shop the collection")}
+                </Field>
               </FormSection>
 
               <Divider />
