@@ -5,31 +5,41 @@
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
 
-// medusa build / start run from the backend root
-const here = join(process.cwd(), "branding")
-const b64 = (f) => readFileSync(join(here, f)).toString("base64")
-const LOGO = `data:image/png;base64,${b64("cardle-logo.png")}`
-const FAVICON = `data:image/x-icon;base64,${b64("favicon.ico")}`
+// Only read while the admin is being built (medusa build runs from the
+// backend root). At runtime (`medusa start` in .medusa/server) the files are
+// not there, so this must never throw: it just returns null and skips.
+const read = (f, mime) => {
+  try {
+    return `data:${mime};base64,${readFileSync(join(process.cwd(), "branding", f)).toString("base64")}`
+  } catch {
+    return null
+  }
+}
 
-const AVATAR_BOX = `function AvatarBox({ checked }) {
+const avatarBox = (logo) => `function AvatarBox({ checked }) {
   return jsx("div", {
     className: "mb-6 flex h-[50px] items-center justify-center",
-    children: jsx("img", { src: ${JSON.stringify(LOGO)}, alt: "Cardle", className: "h-8 w-auto dark:invert" })
+    children: jsx("img", { src: ${JSON.stringify(logo)}, alt: "Cardle", className: "h-8 w-auto dark:invert" })
   });
 }`
 
 export default function cardleAdminBranding() {
+  let LOGO, FAVICON
   return {
     name: "cardle-admin-branding",
     enforce: "pre",
+    buildStart() {
+      LOGO = read("cardle-logo.png", "image/png")
+      FAVICON = read("favicon.ico", "image/x-icon")
+    },
     transform(code, id) {
       if (!id.includes("@medusajs/dashboard")) return null
       let out = code
       const start = out.indexOf("function AvatarBox({ checked }) {")
-      if (start !== -1) {
+      if (start !== -1 && LOGO) {
         // end of the function = first "\n}\n" after it
         const end = out.indexOf("\n}\n", start)
-        if (end !== -1) out = out.slice(0, start) + AVATAR_BOX + out.slice(end + 2)
+        if (end !== -1) out = out.slice(0, start) + avatarBox(LOGO) + out.slice(end + 2)
       }
       out = out
         .replace(/Welcome to Medusa/g, "Welcome to Cardle")
@@ -37,9 +47,9 @@ export default function cardleAdminBranding() {
       return out === code ? null : { code: out, map: null }
     },
     transformIndexHtml(html) {
-      return html
-        .replace(/<link rel="icon"[^>]*>/, `<link rel="icon" href="${FAVICON}" />`)
-        .replace("</head>", "  <title>Cardle Admin</title>\n</head>")
+      let out = html.replace("</head>", "  <title>Cardle Admin</title>\n</head>")
+      if (FAVICON) out = out.replace(/<link rel="icon"[^>]*>/, `<link rel="icon" href="${FAVICON}" />`)
+      return out
     },
   }
 }
