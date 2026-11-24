@@ -99,7 +99,7 @@ const HeroCarousel = ({ slides: SLIDES = DEFAULT_SLIDES }: { slides?: Slide[] })
 
   return (
     <div
-      className="h-[62vh] min-h-[380px] max-h-[640px] w-full relative overflow-hidden bg-[#e5e5e5]"
+      className="group h-[62vh] min-h-[380px] max-h-[640px] w-full relative overflow-hidden bg-[#e5e5e5]"
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
@@ -168,7 +168,7 @@ const HeroCarousel = ({ slides: SLIDES = DEFAULT_SLIDES }: { slides?: Slide[] })
             type="button"
             onClick={() => goTo(index - 1)}
             aria-label="Previous slide"
-            className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 h-9 w-9 rounded-full bg-white/70 hover:bg-white text-gray-900 items-center justify-center shadow-sm backdrop-blur-sm transition-colors"
+            className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 h-8 w-8 rounded-full bg-black/20 hover:bg-black/35 text-white items-center justify-center backdrop-blur-sm opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity duration-300"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M15 18l-6-6 6-6" /></svg>
           </button>
@@ -176,7 +176,7 @@ const HeroCarousel = ({ slides: SLIDES = DEFAULT_SLIDES }: { slides?: Slide[] })
             type="button"
             onClick={() => goTo(index + 1)}
             aria-label="Next slide"
-            className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 h-9 w-9 rounded-full bg-white/70 hover:bg-white text-gray-900 items-center justify-center shadow-sm backdrop-blur-sm transition-colors"
+            className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 h-8 w-8 rounded-full bg-black/20 hover:bg-black/35 text-white items-center justify-center backdrop-blur-sm opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity duration-300"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M9 18l6-6-6-6" /></svg>
           </button>
