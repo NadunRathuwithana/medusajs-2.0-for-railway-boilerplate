@@ -50,6 +50,8 @@ import {
   RESEND_FROM_EMAIL,
 } from "lib/constants";
 
+import cardleAdminBranding from "./branding/admin-branding.js";
+
 loadEnv(process.env.NODE_ENV, process.cwd());
 
 const medusaConfig = {
@@ -74,6 +76,8 @@ const medusaConfig = {
   admin: {
     backendUrl: BACKEND_URL,
     disable: SHOULD_DISABLE_ADMIN,
+    // Cardle branding (logo, title, favicon) on the admin.
+    vite: () => ({ plugins: [cardleAdminBranding()] }),
   },
   modules: [
     // Site CMS: hero / page banners, creatives and the top promo bar.
