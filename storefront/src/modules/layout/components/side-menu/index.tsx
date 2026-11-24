@@ -18,7 +18,7 @@ const SideMenu = ({
   // Store, then each category with products, then the rest.
   const items: [string, string][] = [
     ["Home", "/"],
-    ["Store", "/store"],
+    ["All Bags", "/store"],
     ...categories.map((c) => [c.name, `/categories/${c.handle}`] as [string, string]),
     ["Cart", "/cart"],
     ["Account", "/account"],

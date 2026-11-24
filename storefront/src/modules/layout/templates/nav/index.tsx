@@ -42,9 +42,9 @@ export default async function Nav() {
             <div className="hidden small:flex items-center gap-x-6 h-full">
               <LocalizedClientLink
                 href="/store"
-                className="text-ui-fg-base hover:text-zinc-900 capitalize font-semibold text-sm transition-colors"
+                className="text-ui-fg-subtle hover:text-zinc-900 font-medium text-sm transition-colors whitespace-nowrap"
               >
-                Store
+                All Bags
               </LocalizedClientLink>
               {categories.map((c) => (
                 <LocalizedClientLink
