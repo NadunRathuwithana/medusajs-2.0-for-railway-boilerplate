@@ -61,10 +61,8 @@ const SWIPE_THRESHOLD_PX = 50
 
 const HeroCarousel = ({ slides: SLIDES = DEFAULT_SLIDES }: { slides?: Slide[] }) => {
   const [index, setIndex] = useState(0)
+  // Paused only while a finger is on the slide (so a swipe isn't fought by autoplay).
   const [isPaused, setIsPaused] = useState(false)
-  // Separate from hover/touch pausing: a visible control so keyboard and touch
-  // users can stop the autoplay for good (WCAG 2.2.2).
-  const [userPaused, setUserPaused] = useState(false)
   const touchStart = useRef<{ x: number; y: number } | null>(null)
 
   const goTo = useCallback((next: number) => {
@@ -72,12 +70,14 @@ const HeroCarousel = ({ slides: SLIDES = DEFAULT_SLIDES }: { slides?: Slide[] })
   }, [])
 
   useEffect(() => {
-    if (isPaused || userPaused || SLIDES.length <= 1) return
-    const timer = setInterval(() => {
+    if (isPaused || SLIDES.length <= 1) return
+    // Restarts on every slide change, so a manual arrow/swipe/dot gets a full
+    // AUTOPLAY_MS before the next auto advance.
+    const timer = setTimeout(() => {
       setIndex((prev) => (prev + 1) % SLIDES.length)
     }, AUTOPLAY_MS)
-    return () => clearInterval(timer)
-  }, [isPaused, userPaused])
+    return () => clearTimeout(timer)
+  }, [isPaused, index])
 
   const onTouchStart = (e: React.TouchEvent) => {
     setIsPaused(true)
@@ -100,8 +100,6 @@ const HeroCarousel = ({ slides: SLIDES = DEFAULT_SLIDES }: { slides?: Slide[] })
   return (
     <div
       className="h-[62vh] min-h-[380px] max-h-[640px] w-full relative overflow-hidden bg-[#e5e5e5]"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
@@ -163,17 +161,26 @@ const HeroCarousel = ({ slides: SLIDES = DEFAULT_SLIDES }: { slides?: Slide[] })
         )}
       </div>
 
-      {/* Pause / play */}
+      {/* Prev / next arrows (tablet & desktop; mobile swipes) */}
       {SLIDES.length > 1 && (
-        <button
-          type="button"
-          onClick={() => setUserPaused((v) => !v)}
-          aria-label={userPaused ? "Play slideshow" : "Pause slideshow"}
-          aria-pressed={userPaused}
-          className="absolute top-4 right-4 z-20 h-9 w-9 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center text-xs transition-colors"
-        >
-          <span aria-hidden>{userPaused ? "▶" : "❚❚"}</span>
-        </button>
+        <>
+          <button
+            type="button"
+            onClick={() => goTo(index - 1)}
+            aria-label="Previous slide"
+            className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 h-9 w-9 rounded-full bg-white/70 hover:bg-white text-gray-900 items-center justify-center shadow-sm backdrop-blur-sm transition-colors"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M15 18l-6-6 6-6" /></svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => goTo(index + 1)}
+            aria-label="Next slide"
+            className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 h-9 w-9 rounded-full bg-white/70 hover:bg-white text-gray-900 items-center justify-center shadow-sm backdrop-blur-sm transition-colors"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M9 18l6-6-6-6" /></svg>
+          </button>
+        </>
       )}
 
       {/* Dot navigation */}
