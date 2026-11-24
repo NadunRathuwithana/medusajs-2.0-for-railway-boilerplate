@@ -49,7 +49,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
       <div className="grid grid-cols-2 gap-4">
         <Input
           label="First name"
-          placeholder="e.g. Nimal"
+          placeholder="e.g. John"
           name="billing_address.first_name"
           autoComplete="given-name"
           value={formData["billing_address.first_name"] || ""}
@@ -65,7 +65,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
         />
         <Input
           label="Last name"
-          placeholder="e.g. Perera"
+          placeholder="e.g. Silva"
           name="billing_address.last_name"
           autoComplete="family-name"
           value={formData["billing_address.last_name"] || ""}
@@ -81,7 +81,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
         />
         <Input
           label="Address"
-          placeholder="House no, street, area"
+          placeholder="e.g. 25 Galle Road, Colombo 03"
           name="billing_address.address_1"
           autoComplete="address-line1"
           value={formData["billing_address.address_1"] || ""}
@@ -108,7 +108,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
         />
         <Input
           label="Postal code"
-          placeholder="e.g. 60000"
+          placeholder="e.g. 00300"
           name="billing_address.postal_code"
           autoComplete="postal-code"
           value={formData["billing_address.postal_code"] || ""}
@@ -124,7 +124,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
         />
         <Input
           label="City"
-          placeholder="e.g. Kurunegala"
+          placeholder="e.g. Colombo"
           name="billing_address.city"
           autoComplete="address-level2"
           value={formData["billing_address.city"] || ""}

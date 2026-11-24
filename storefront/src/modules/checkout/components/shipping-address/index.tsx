@@ -118,7 +118,7 @@ const ShippingAddress = ({
       <div className="grid grid-cols-2 gap-4">
         <Input
           label="First name"
-          placeholder="e.g. Nimal"
+          placeholder="e.g. John"
           name="shipping_address.first_name"
           autoComplete="given-name"
           value={formData["shipping_address.first_name"] || ""}
@@ -134,7 +134,7 @@ const ShippingAddress = ({
         />
         <Input
           label="Last name"
-          placeholder="e.g. Perera"
+          placeholder="e.g. Silva"
           name="shipping_address.last_name"
           autoComplete="family-name"
           value={formData["shipping_address.last_name"] || ""}
@@ -150,7 +150,7 @@ const ShippingAddress = ({
         />
         <Input
           label="Address"
-          placeholder="House no, street, area"
+          placeholder="e.g. 25 Galle Road, Colombo 03"
           name="shipping_address.address_1"
           autoComplete="address-line1"
           value={formData["shipping_address.address_1"] || ""}
@@ -177,7 +177,7 @@ const ShippingAddress = ({
         />
         <Input
           label="Postal code"
-          placeholder="e.g. 60000"
+          placeholder="e.g. 00300"
           name="shipping_address.postal_code"
           autoComplete="postal-code"
           value={formData["shipping_address.postal_code"] || ""}
@@ -193,7 +193,7 @@ const ShippingAddress = ({
         />
         <Input
           label="City"
-          placeholder="e.g. Kurunegala"
+          placeholder="e.g. Colombo"
           name="shipping_address.city"
           autoComplete="address-level2"
           value={formData["shipping_address.city"] || ""}
