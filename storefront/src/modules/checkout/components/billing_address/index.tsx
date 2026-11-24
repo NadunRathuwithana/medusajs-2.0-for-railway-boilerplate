@@ -49,6 +49,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
       <div className="grid grid-cols-2 gap-4">
         <Input
           label="First name"
+          placeholder="e.g. Nimal"
           name="billing_address.first_name"
           autoComplete="given-name"
           value={formData["billing_address.first_name"] || ""}
@@ -64,6 +65,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
         />
         <Input
           label="Last name"
+          placeholder="e.g. Perera"
           name="billing_address.last_name"
           autoComplete="family-name"
           value={formData["billing_address.last_name"] || ""}
@@ -79,6 +81,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
         />
         <Input
           label="Address"
+          placeholder="House no, street, area"
           name="billing_address.address_1"
           autoComplete="address-line1"
           value={formData["billing_address.address_1"] || ""}
@@ -95,6 +98,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
         />
         <Input
           label="Company"
+          placeholder="Optional"
           name="billing_address.company"
           value={formData["billing_address.company"] || ""}
           onChange={handleChange}
@@ -104,6 +108,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
         />
         <Input
           label="Postal code"
+          placeholder="e.g. 60000"
           name="billing_address.postal_code"
           autoComplete="postal-code"
           value={formData["billing_address.postal_code"] || ""}
@@ -119,6 +124,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
         />
         <Input
           label="City"
+          placeholder="e.g. Kurunegala"
           name="billing_address.city"
           autoComplete="address-level2"
           value={formData["billing_address.city"] || ""}
@@ -150,6 +156,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
         />
         <Input
           label="Phone"
+          placeholder="07X XXX XXXX"
           name="billing_address.phone"
           type="tel"
           autoComplete="tel"

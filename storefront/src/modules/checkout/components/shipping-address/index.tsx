@@ -118,6 +118,7 @@ const ShippingAddress = ({
       <div className="grid grid-cols-2 gap-4">
         <Input
           label="First name"
+          placeholder="e.g. Nimal"
           name="shipping_address.first_name"
           autoComplete="given-name"
           value={formData["shipping_address.first_name"] || ""}
@@ -133,6 +134,7 @@ const ShippingAddress = ({
         />
         <Input
           label="Last name"
+          placeholder="e.g. Perera"
           name="shipping_address.last_name"
           autoComplete="family-name"
           value={formData["shipping_address.last_name"] || ""}
@@ -148,6 +150,7 @@ const ShippingAddress = ({
         />
         <Input
           label="Address"
+          placeholder="House no, street, area"
           name="shipping_address.address_1"
           autoComplete="address-line1"
           value={formData["shipping_address.address_1"] || ""}
@@ -164,6 +167,7 @@ const ShippingAddress = ({
         />
         <Input
           label="Company"
+          placeholder="Optional"
           name="shipping_address.company"
           value={formData["shipping_address.company"] || ""}
           onChange={handleChange}
@@ -173,6 +177,7 @@ const ShippingAddress = ({
         />
         <Input
           label="Postal code"
+          placeholder="e.g. 60000"
           name="shipping_address.postal_code"
           autoComplete="postal-code"
           value={formData["shipping_address.postal_code"] || ""}
@@ -188,6 +193,7 @@ const ShippingAddress = ({
         />
         <Input
           label="City"
+          placeholder="e.g. Kurunegala"
           name="shipping_address.city"
           autoComplete="address-level2"
           value={formData["shipping_address.city"] || ""}
@@ -231,6 +237,7 @@ const ShippingAddress = ({
       <div className="grid grid-cols-2 gap-4 mb-4">
         <Input
           label="Email"
+          placeholder="you@example.com"
           name="email"
           type="email"
           autoComplete="email"
@@ -248,6 +255,7 @@ const ShippingAddress = ({
         />
         <Input
           label="Mobile number"
+          placeholder="07X XXX XXXX"
           name="shipping_address.phone"
           type="tel"
           autoComplete="tel"
@@ -264,7 +272,7 @@ const ShippingAddress = ({
         />
         <Input
           label="Second phone"
-          placeholder="Optional"
+          placeholder="07X XXX XXXX (optional)"
           name="shipping_address.phone_2"
           type="tel"
           autoComplete="off"
