@@ -229,7 +229,8 @@ function Preview({ f }: { f: Banner }) {
           <div className={`absolute inset-0 flex items-center px-[6%] ${textRight ? "justify-end" : "justify-center text-center"} ${!textRight ? "bg-black/20" : ""}`}>
             <div className={textRight ? "w-1/2 text-left" : ""}>
               {f.eyebrow && <p className="text-[10px] font-medium text-white/90" style={f.text_color ? { color: f.text_color, opacity: 0.9 } : undefined}>{f.eyebrow}</p>}
-              {f.title && <p className="text-xl font-bold leading-tight text-white drop-shadow" style={f.text_color ? { color: f.text_color } : undefined}>{f.title}</p>}
+              {f.title && <p className="text-xl font-semibold leading-tight text-white drop-shadow" style={f.text_color ? { color: f.text_color } : undefined}>{f.title}</p>}
+              {f.body && <p className="mt-1 text-[9px] text-white/90" style={f.text_color ? { color: f.text_color, opacity: 0.85 } : undefined}>{f.body}</p>}
               {f.cta_label && (
                 <span className="mt-2 inline-block rounded-full bg-white px-2.5 py-1 text-[8px] font-bold uppercase tracking-widest text-black">
                   {f.cta_label}
@@ -359,11 +360,9 @@ function BannerEditor({
                   <Field label="Label" optional>{text("eyebrow", "The Collection")}</Field>
                   <Field label="Headline" optional>{text("title", "Shop Cardle")}</Field>
                 </div>
-                {f.placement === "creative" && (
-                  <Field label="Text" optional>
-                    <Textarea value={f.body ?? ""} onChange={(e) => set({ body: e.target.value })} />
-                  </Field>
-                )}
+                <Field label="Subtext" optional hint="A short line under the headline.">
+                  <Textarea rows={2} value={f.body ?? ""} placeholder="Handmade from 100% cotton canvas in Sri Lanka." onChange={(e) => set({ body: e.target.value })} />
+                </Field>
                 <Field label="Text colour" hint="Colour of the label and headline. Auto is white over the image.">
                   <TextColorField value={f.text_color} onChange={(v) => set({ text_color: v })} />
                 </Field>

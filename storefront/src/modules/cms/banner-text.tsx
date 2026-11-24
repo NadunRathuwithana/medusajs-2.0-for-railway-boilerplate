@@ -8,6 +8,7 @@ import CtaLink from "./cta-link"
 export default function BannerText({
   eyebrow,
   title,
+  subtext,
   ctaLabel,
   ctaHref,
   onImage = false,
@@ -15,6 +16,7 @@ export default function BannerText({
 }: {
   eyebrow?: string | null
   title?: string | null
+  subtext?: string | null
   ctaLabel?: string | null
   ctaHref?: string | null
   onImage?: boolean
@@ -27,7 +29,12 @@ export default function BannerText({
       <div className="content-container max-w-[1440px] mx-auto w-full px-6 md:px-16 flex md:justify-end">
         <div className="w-full md:w-1/2 text-left">
           {eyebrow && <p className={`text-base md:text-xl font-medium ${onImage ? "text-white/90" : "text-gray-900"}`} style={c ? { color: c } : undefined}>{eyebrow}</p>}
-          {title && <h2 className={`text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.02] mt-1 ${tone}`} style={c ? { color: c } : undefined}>{title}</h2>}
+          {title && <h2 className={`text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tight leading-[1.02] mt-1 ${tone}`} style={c ? { color: c } : undefined}>{title}</h2>}
+          {subtext && (
+            <p className={`text-base md:text-lg mt-4 max-w-md ${onImage ? "text-white/90 drop-shadow" : "text-gray-700"}`} style={c ? { color: c, opacity: 0.85 } : undefined}>
+              {subtext}
+            </p>
+          )}
           {ctaLabel && ctaHref && (
             <CtaLink href={ctaHref} className="pointer-events-auto mt-6 inline-flex items-center bg-black text-white px-7 py-3 rounded-full text-xs md:text-sm font-bold tracking-widest uppercase hover:bg-gray-800 transition-colors">
               {ctaLabel}

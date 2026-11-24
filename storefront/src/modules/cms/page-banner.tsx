@@ -32,8 +32,8 @@ export default async function PageBanner({
         {b.cta_href && (
           <CtaLink href={b.cta_href} aria-label={b.title || b.alt || "Open"} className="absolute inset-0 z-[1]" />
         )}
-        {(b.title || b.eyebrow || b.cta_label) && (
-          <BannerText eyebrow={b.eyebrow} title={b.title} ctaLabel={b.cta_label} ctaHref={b.cta_href} color={b.text_color} onImage />
+        {(b.title || b.eyebrow || b.body || b.cta_label) && (
+          <BannerText eyebrow={b.eyebrow} title={b.title} subtext={b.body} ctaLabel={b.cta_label} ctaHref={b.cta_href} color={b.text_color} onImage />
         )}
       </section>
     )
@@ -51,7 +51,8 @@ export default async function PageBanner({
       {(b.title || b.eyebrow || b.cta_label) && (
         <div className="absolute inset-0 z-[2] pointer-events-none bg-black/25 flex flex-col items-center justify-center text-center px-6">
           {b.eyebrow && <span className="text-white/90 uppercase tracking-[0.3em] text-xs font-semibold mb-2" style={b.text_color ? { color: b.text_color } : undefined}>{b.eyebrow}</span>}
-          {b.title && <h1 className="text-white text-3xl md:text-5xl font-bold tracking-tight mb-4 max-w-3xl drop-shadow-lg" style={b.text_color ? { color: b.text_color } : undefined}>{b.title}</h1>}
+          {b.title && <h1 className="text-white text-3xl md:text-5xl font-semibold tracking-tight mb-4 max-w-3xl drop-shadow-lg" style={b.text_color ? { color: b.text_color } : undefined}>{b.title}</h1>}
+          {b.body && <p className="text-white/90 text-sm md:text-lg max-w-xl mb-5 drop-shadow" style={b.text_color ? { color: b.text_color, opacity: 0.85 } : undefined}>{b.body}</p>}
           {b.cta_label && b.cta_href && (
             <CtaLink href={b.cta_href} className="pointer-events-auto inline-flex items-center bg-white text-black px-7 py-3 rounded-full text-xs md:text-sm font-bold tracking-widest uppercase hover:bg-gray-200 transition-colors">
               {b.cta_label}

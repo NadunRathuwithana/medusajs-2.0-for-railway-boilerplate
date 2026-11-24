@@ -14,6 +14,7 @@ export default async function Hero() {
       alt: b.alt || b.title || "Cardle",
       eyebrow: b.eyebrow || undefined,
       title: b.title || undefined,
+      subtext: b.body || undefined,
       color: b.text_color || undefined,
       cta: b.cta_label || undefined,
       href: b.cta_href || undefined,

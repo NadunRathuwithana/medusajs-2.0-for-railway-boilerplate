@@ -15,6 +15,7 @@ export type Slide = {
   // Slide 1 already carries its headline in the artwork, so it only gets the button.
   eyebrow?: string
   title?: string
+  subtext?: string
   // Text colour from the CMS (#RRGGBB); white when unset.
   color?: string
   cta?: string
@@ -170,8 +171,16 @@ const HeroCarousel = ({ slides: SLIDES = DEFAULT_SLIDES }: { slides?: Slide[] })
           </span>
         )}
         {SLIDES[index].title && (
-          <p className="text-white text-2xl md:text-4xl font-bold tracking-tight mb-4 max-w-2xl drop-shadow-lg" style={SLIDES[index].color ? { color: SLIDES[index].color } : undefined}>
+          <p className="text-white text-2xl md:text-4xl font-semibold tracking-tight mb-4 max-w-2xl drop-shadow-lg" style={SLIDES[index].color ? { color: SLIDES[index].color } : undefined}>
             {SLIDES[index].title}
+          </p>
+        )}
+        {SLIDES[index].subtext && (
+          <p
+            className="text-white/90 text-sm md:text-base max-w-xl mb-5 -mt-2 drop-shadow"
+            style={SLIDES[index].color ? { color: SLIDES[index].color, opacity: 0.85 } : undefined}
+          >
+            {SLIDES[index].subtext}
           </p>
         )}
         {SLIDES[index].cta && SLIDES[index].href && (
