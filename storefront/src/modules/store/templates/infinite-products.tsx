@@ -21,9 +21,13 @@ const PRODUCT_LIMIT = 12
 export default async function InfiniteProducts({
   sortBy,
   countryCode,
+  categoryId,
+  listName = "All Products",
 }: {
   sortBy: SortOptions
   countryCode: string
+  categoryId?: string
+  listName?: string
 }) {
   const region = await getRegion(countryCode)
 
@@ -34,7 +38,7 @@ export default async function InfiniteProducts({
   const [{ response: { products, count } }, bnplProviders] = await Promise.all([
     getProductsListWithSort({
       page: 1,
-      queryParams: { limit: PRODUCT_LIMIT },
+      queryParams: { limit: PRODUCT_LIMIT, ...(categoryId ? { category_id: [categoryId] } : {}) } as any,
       sortBy,
       countryCode,
     }),
@@ -53,8 +57,8 @@ export default async function InfiniteProducts({
   return (
     <>
       <ProductListTracker
-        listId="store"
-        listName="All Products"
+        listId={categoryId ? `category-${categoryId}` : "store"}
+        listName={listName}
         currency={region.currency_code.toUpperCase()}
         items={trackedItems}
       />
@@ -62,7 +66,8 @@ export default async function InfiniteProducts({
         // Remounts (resetting to page 1) whenever the sort changes, since
         // the accumulated client-side list is only valid for the sort it
         // was loaded under.
-        key={sortBy}
+        key={`${sortBy}-${categoryId ?? "all"}`}
+        categoryId={categoryId}
         initialProducts={products}
         totalCount={count}
         sortBy={sortBy}

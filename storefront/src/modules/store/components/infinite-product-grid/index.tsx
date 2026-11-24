@@ -13,6 +13,7 @@ type InfiniteProductGridProps = {
   sortBy: SortOptions
   countryCode: string
   bnplProviders: any[]
+  categoryId?: string
 }
 
 export default function InfiniteProductGrid({
@@ -21,6 +22,7 @@ export default function InfiniteProductGrid({
   sortBy,
   countryCode,
   bnplProviders,
+  categoryId,
 }: InfiniteProductGridProps) {
   const [products, setProducts] = useState(initialProducts)
   const [page, setPage] = useState(1)
@@ -43,6 +45,7 @@ export default function InfiniteProductGrid({
         page: nextPage,
         sortBy,
         countryCode,
+        categoryId,
       })
       setProducts((prev) => {
         const combined = [...prev, ...newProducts]
@@ -58,7 +61,7 @@ export default function InfiniteProductGrid({
       loadingRef.current = false
       setIsLoading(false)
     }
-  }, [page, hasMore, sortBy, countryCode, totalCount])
+  }, [page, hasMore, sortBy, countryCode, totalCount, categoryId])
 
   useEffect(() => {
     const sentinel = sentinelRef.current

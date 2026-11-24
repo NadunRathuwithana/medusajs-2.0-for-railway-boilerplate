@@ -5,7 +5,7 @@ import { model } from "@medusajs/framework/utils"
  *
  * placement:
  *  - "hero"     homepage carousel slide
- *  - "page"     top banner of a page (page_key: store | collection | about)
+ *  - "page"     top banner of a page (page_key: store | collection | about | category:<handle>)
  *  - "creative" a named slot elsewhere on the site (slot_key, e.g. home-wide)
  */
 const Banner = model.define("cms_banner", {

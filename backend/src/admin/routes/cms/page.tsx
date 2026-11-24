@@ -31,6 +31,9 @@ const PAGE_KEYS = [
   { value: "collection", label: "Collection pages" },
   { value: "about", label: "About page" },
 ]
+// Category banners use page_key "category:<handle>"; the list is loaded from the store's categories.
+const categoryKeys = (cats: { name: string; handle: string }[]) =>
+  cats.map((c) => ({ value: `category:${c.handle}`, label: `Category: ${c.name}` }))
 const SLOT_KEYS = [{ value: "home-wide", label: "Homepage wide statement banner" }]
 
 const blank = (placement: Banner["placement"]): Banner => ({
@@ -82,7 +85,14 @@ function ImageField({ label, hint, value, onChange }: {
 function BannerDrawer({ banner, onClose, onSaved }: { banner: Banner | null; onClose: () => void; onSaved: () => void }) {
   const [f, setF] = useState<Banner | null>(banner)
   const [saving, setSaving] = useState(false)
+  const [cats, setCats] = useState<{ name: string; handle: string }[]>([])
   useEffect(() => setF(banner), [banner])
+  useEffect(() => {
+    sdk.admin.productCategory
+      .list({ limit: 200, fields: "name,handle" } as any)
+      .then((r: any) => setCats((r.product_categories || []).map((c: any) => ({ name: c.name, handle: c.handle }))))
+      .catch(() => setCats([]))
+  }, [])
   if (!f) return null
   const set = (patch: Partial<Banner>) => setF({ ...f, ...patch })
   const text = (k: keyof Banner, label: string, ph?: string) => (
@@ -117,7 +127,7 @@ function BannerDrawer({ banner, onClose, onSaved }: { banner: Banner | null; onC
               <Label>Page</Label>
               <Select value={f.page_key ?? "store"} onValueChange={(v) => set({ page_key: v })}>
                 <Select.Trigger><Select.Value /></Select.Trigger>
-                <Select.Content>{PAGE_KEYS.map((p) => <Select.Item key={p.value} value={p.value}>{p.label}</Select.Item>)}</Select.Content>
+                <Select.Content>{[...PAGE_KEYS, ...categoryKeys(cats)].map((p) => <Select.Item key={p.value} value={p.value}>{p.label}</Select.Item>)}</Select.Content>
               </Select>
             </div>
           )}
@@ -134,7 +144,7 @@ function BannerDrawer({ banner, onClose, onSaved }: { banner: Banner | null; onC
           <ImageField label="Tablet image (optional)" hint="Falls back to desktop." value={f.image_tablet} onChange={(u) => set({ image_tablet: u })} />
           <ImageField label="Mobile image (optional)" hint="Portrait crop, about 1000 x 1400. Falls back to desktop." value={f.image_mobile} onChange={(u) => set({ image_mobile: u })} />
           {text("alt", "Image description (alt text)", "Cardle handcrafted cotton tote bags")}
-          {text("eyebrow", "Small label above the headline")}
+          {text("eyebrow", "Small label above the headline", f.page_key?.startsWith("category:") ? "The Collection" : undefined)}
           {text("title", "Headline")}
           {(f.placement === "creative") && (
             <div className="flex flex-col gap-y-1">

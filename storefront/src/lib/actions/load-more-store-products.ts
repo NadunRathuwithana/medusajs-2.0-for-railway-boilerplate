@@ -15,16 +15,18 @@ export async function loadMoreStoreProducts({
   page,
   sortBy,
   countryCode,
+  categoryId,
 }: {
   page: number
   sortBy: SortOptions
   countryCode: string
+  categoryId?: string
 }): Promise<{ products: HttpTypes.StoreProduct[]; count: number }> {
   const {
     response: { products, count },
   } = await getProductsListWithSort({
     page,
-    queryParams: { limit: PRODUCT_LIMIT },
+    queryParams: { limit: PRODUCT_LIMIT, ...(categoryId ? { category_id: [categoryId] } : {}) } as any,
     sortBy,
     countryCode,
   })
