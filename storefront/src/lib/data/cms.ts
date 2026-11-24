@@ -11,6 +11,7 @@ export type CmsBanner = {
   body: string | null
   cta_label: string | null
   cta_href: string | null
+  text_color?: string | null
   alt: string | null
   image_desktop: string | null
   image_tablet: string | null

@@ -29,10 +29,10 @@ export default async function WideBanner() {
         </>
       )}
       <div className="relative content-container max-w-[1440px] mx-auto px-6 md:px-16 py-16 md:py-24 flex flex-col items-center text-center">
-        <span className="text-gray-400 uppercase tracking-[0.3em] text-xs md:text-sm font-semibold mb-4">
+        <span className="text-gray-400 uppercase tracking-[0.3em] text-xs md:text-sm font-semibold mb-4" style={c?.text_color ? { color: c.text_color, opacity: 0.8 } : undefined}>
           {eyebrow}
         </span>
-        <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold uppercase tracking-tighter leading-[1.05] mb-6 max-w-4xl">
+        <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold uppercase tracking-tighter leading-[1.05] mb-6 max-w-4xl" style={c?.text_color ? { color: c.text_color } : undefined}>
           {title}
         </h2>
         <p className="text-gray-400 text-sm md:text-base max-w-xl font-medium mb-10 leading-relaxed">

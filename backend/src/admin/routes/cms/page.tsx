@@ -22,6 +22,7 @@ type Banner = {
   body?: string | null
   cta_label?: string | null
   cta_href?: string | null
+  text_color?: string | null
   alt?: string | null
   image_desktop?: string | null
   image_tablet?: string | null
@@ -149,6 +150,65 @@ function FormSection({ title, description, children }: { title: string; descript
   )
 }
 
+const SWATCHES = [
+  { value: null, label: "Auto" },
+  { value: "#FFFFFF", label: "White" },
+  { value: "#000000", label: "Black" },
+  { value: "#1F2937", label: "Charcoal" },
+  { value: "#F5F0E6", label: "Cream" },
+]
+
+function TextColorField({ value, onChange }: { value?: string | null; onChange: (v: string | null) => void }) {
+  const [hex, setHex] = useState(value ?? "")
+  useEffect(() => setHex(value ?? ""), [value])
+  return (
+    <div className="flex flex-col gap-y-3">
+      <div className="flex flex-wrap items-center gap-2">
+        {SWATCHES.map((s) => {
+          const selected = (value ?? null) === s.value
+          return (
+            <button
+              key={s.label}
+              type="button"
+              onClick={() => onChange(s.value)}
+              className={`txt-compact-small flex items-center gap-x-2 rounded-md px-2.5 py-1.5 transition-fg ${
+                selected ? "bg-ui-bg-base shadow-borders-interactive-with-active" : "bg-ui-bg-component shadow-borders-base hover:bg-ui-bg-component-hover"
+              }`}
+            >
+              {s.value ? (
+                <span className="size-4 rounded-full shadow-borders-base" style={{ background: s.value }} />
+              ) : (
+                <span className="size-4 rounded-full shadow-borders-base bg-[conic-gradient(#fff_0_50%,#000_0_100%)]" />
+              )}
+              {s.label}
+            </button>
+          )
+        })}
+      </div>
+      <div className="flex items-center gap-x-2">
+        <input
+          type="color"
+          value={value ?? "#ffffff"}
+          onChange={(e) => onChange(e.target.value.toUpperCase())}
+          className="h-8 w-10 cursor-pointer rounded-md border-0 bg-transparent p-0"
+          aria-label="Custom colour"
+        />
+        <Input
+          className="w-32"
+          placeholder="#FFFFFF"
+          value={hex}
+          onChange={(e) => {
+            const v = e.target.value.trim()
+            setHex(v)
+            if (/^#[0-9a-fA-F]{6}$/.test(v)) onChange(v.toUpperCase())
+            if (v === "") onChange(null)
+          }}
+        />
+      </div>
+    </div>
+  )
+}
+
 /* ---------------------------------------------------------- live preview */
 
 function Preview({ f }: { f: Banner }) {
@@ -168,8 +228,8 @@ function Preview({ f }: { f: Banner }) {
         {hasText && (
           <div className={`absolute inset-0 flex items-center px-[6%] ${textRight ? "justify-end" : "justify-center text-center"} ${!textRight ? "bg-black/20" : ""}`}>
             <div className={textRight ? "w-1/2 text-left" : ""}>
-              {f.eyebrow && <p className="text-[10px] font-medium text-white/90">{f.eyebrow}</p>}
-              {f.title && <p className="text-xl font-bold leading-tight text-white drop-shadow">{f.title}</p>}
+              {f.eyebrow && <p className="text-[10px] font-medium text-white/90" style={f.text_color ? { color: f.text_color, opacity: 0.9 } : undefined}>{f.eyebrow}</p>}
+              {f.title && <p className="text-xl font-bold leading-tight text-white drop-shadow" style={f.text_color ? { color: f.text_color } : undefined}>{f.title}</p>}
               {f.cta_label && (
                 <span className="mt-2 inline-block rounded-full bg-white px-2.5 py-1 text-[8px] font-bold uppercase tracking-widest text-black">
                   {f.cta_label}
@@ -304,6 +364,9 @@ function BannerEditor({
                     <Textarea value={f.body ?? ""} onChange={(e) => set({ body: e.target.value })} />
                   </Field>
                 )}
+                <Field label="Text colour" hint="Colour of the label and headline. Auto is white over the image.">
+                  <TextColorField value={f.text_color} onChange={(v) => set({ text_color: v })} />
+                </Field>
                 <div className="grid grid-cols-2 gap-4">
                   <Field label="Button label" optional>{text("cta_label", "Shop the collection")}</Field>
                   <Field label="Button link" optional>{text("cta_href", "/store")}</Field>

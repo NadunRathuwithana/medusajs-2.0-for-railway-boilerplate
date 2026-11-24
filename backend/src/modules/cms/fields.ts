@@ -8,6 +8,7 @@ export const BANNER_FIELDS = [
   "body",
   "cta_label",
   "cta_href",
+  "text_color",
   "alt",
   "image_desktop",
   "image_tablet",
@@ -29,6 +30,8 @@ export function pickBannerInput(body: Record<string, any> = {}) {
     if (v === "") v = null
     if (key === "placement") {
       if (!PLACEMENTS.includes(v)) continue
+    } else if (key === "text_color") {
+      if (v !== null && !/^#[0-9a-fA-F]{6}$/.test(String(v))) v = null
     } else if (key === "sort_order") {
       v = Number.isFinite(Number(v)) ? Number(v) : 0
     } else if (key === "is_active") {

@@ -18,6 +18,8 @@ const Banner = model.define("cms_banner", {
   body: model.text().nullable(),
   cta_label: model.text().nullable(),
   cta_href: model.text().nullable(),
+  // Headline/label colour as #RRGGBB. null = automatic (white on images).
+  text_color: model.text().nullable(),
   alt: model.text().nullable(),
   image_desktop: model.text().nullable(),
   image_tablet: model.text().nullable(),
