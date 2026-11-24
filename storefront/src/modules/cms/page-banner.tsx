@@ -1,5 +1,6 @@
 import { getCms } from "@lib/data/cms"
 import CtaLink from "./cta-link"
+import BannerText from "./banner-text"
 import { HERO_SIZE, HERO_IMG } from "./hero-size"
 
 /**
@@ -18,7 +19,7 @@ export default async function PageBanner({
   if (!b) return <>{fallback}</>
 
   const alt = b.alt || b.title || "Cardle"
-  const isCategory = pageKey.startsWith("category:")
+  const isCategory = pageKey === "store" || pageKey.startsWith("category:")
   if (isCategory) {
     // Category banner: shorter, text on the LEFT over the image.
     return (
@@ -29,17 +30,7 @@ export default async function PageBanner({
           <img src={b.image_desktop!} alt={alt} className={HERO_IMG} loading="eager" />
         </picture>
         {(b.title || b.eyebrow || b.cta_label) && (
-          <div className="absolute inset-0 flex items-center">
-            <div className="content-container max-w-[1440px] mx-auto w-full px-6 md:px-16 text-left">
-              {b.eyebrow && <p className="text-sm md:text-base font-medium text-white/90 drop-shadow">{b.eyebrow}</p>}
-              {b.title && <h2 className="text-4xl md:text-6xl font-bold tracking-tight text-white mt-1 max-w-xl drop-shadow-lg">{b.title}</h2>}
-              {b.cta_label && b.cta_href && (
-                <CtaLink href={b.cta_href} className="mt-4 inline-flex items-center bg-white text-black px-6 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase hover:bg-gray-200 transition-colors">
-                  {b.cta_label}
-                </CtaLink>
-              )}
-            </div>
-          </div>
+          <BannerText eyebrow={b.eyebrow} title={b.title} ctaLabel={b.cta_label} ctaHref={b.cta_href} onImage />
         )}
       </section>
     )
