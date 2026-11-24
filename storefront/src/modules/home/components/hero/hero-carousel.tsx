@@ -166,18 +166,18 @@ const HeroCarousel = ({ slides: SLIDES = DEFAULT_SLIDES }: { slides?: Slide[] })
       {/* Live text and call to action for the active slide */}
       <div className="absolute inset-x-0 bottom-16 z-20 flex flex-col items-center px-6 text-center pointer-events-none">
         {SLIDES[index].eyebrow && (
-          <span className="text-white/90 uppercase tracking-[0.3em] text-xs font-semibold mb-2 drop-shadow" style={SLIDES[index].color ? { color: SLIDES[index].color } : undefined}>
+          <span className="text-white/90 uppercase tracking-[0.3em] text-xs font-semibold mb-2" style={SLIDES[index].color ? { color: SLIDES[index].color } : undefined}>
             {SLIDES[index].eyebrow}
           </span>
         )}
         {SLIDES[index].title && (
-          <p className="text-white text-2xl md:text-4xl font-semibold tracking-tight mb-4 max-w-2xl drop-shadow-lg" style={SLIDES[index].color ? { color: SLIDES[index].color } : undefined}>
+          <p className="text-white text-2xl md:text-4xl font-semibold tracking-tight mb-4 max-w-2xl" style={SLIDES[index].color ? { color: SLIDES[index].color } : undefined}>
             {SLIDES[index].title}
           </p>
         )}
         {SLIDES[index].subtext && (
           <p
-            className="text-white/90 text-sm md:text-base max-w-xl mb-5 -mt-2 drop-shadow"
+            className="text-white/90 text-sm md:text-base max-w-xl mb-5 -mt-2"
             style={SLIDES[index].color ? { color: SLIDES[index].color, opacity: 0.85 } : undefined}
           >
             {SLIDES[index].subtext}

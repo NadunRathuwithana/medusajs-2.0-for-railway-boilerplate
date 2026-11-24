@@ -23,7 +23,7 @@ export default function BannerText({
   color?: string | null
 }) {
   const c = color || undefined
-  const tone = onImage ? "text-white drop-shadow-lg" : "text-black"
+  const tone = onImage ? "text-white" : "text-black"
   return (
     <div className="absolute inset-0 z-[2] flex items-center pointer-events-none">
       <div className="content-container max-w-[1440px] mx-auto w-full px-6 md:px-16 flex md:justify-end">
@@ -31,7 +31,7 @@ export default function BannerText({
           {eyebrow && <p className={`text-base md:text-xl font-medium ${onImage ? "text-white/90" : "text-gray-900"}`} style={c ? { color: c } : undefined}>{eyebrow}</p>}
           {title && <h2 className={`text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tight leading-[1.02] mt-1 ${tone}`} style={c ? { color: c } : undefined}>{title}</h2>}
           {subtext && (
-            <p className={`text-base md:text-lg mt-4 max-w-md ${onImage ? "text-white/90 drop-shadow" : "text-gray-700"}`} style={c ? { color: c, opacity: 0.85 } : undefined}>
+            <p className={`text-base md:text-lg mt-4 max-w-md ${onImage ? "text-white/90" : "text-gray-700"}`} style={c ? { color: c, opacity: 0.85 } : undefined}>
               {subtext}
             </p>
           )}
