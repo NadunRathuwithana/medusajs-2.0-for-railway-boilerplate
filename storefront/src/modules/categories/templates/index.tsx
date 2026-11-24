@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import { Suspense } from "react"
 
 import PageBanner from "@modules/cms/page-banner"
+import { HERO_SIZE } from "@modules/cms/hero-size"
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import SortDropdown from "@modules/store/components/sort-dropdown"
@@ -32,7 +33,7 @@ export default function CategoryTemplate({
       <PageBanner
         pageKey={`category:${category.handle}`}
         fallback={
-          <section className="h-[38vh] min-h-[240px] max-h-[420px] w-full bg-[#e5e5e5] flex items-center">
+          <section className={`${HERO_SIZE} bg-[#e5e5e5] flex items-center`}>
             <div className="content-container max-w-[1440px] mx-auto w-full px-6 md:px-16">
               <p className="text-sm md:text-base font-medium text-gray-900">The Collection</p>
               <h2 className="text-4xl md:text-6xl font-bold tracking-tight text-black mt-1">{category.name}</h2>

@@ -4,6 +4,7 @@ import Image from "next/image"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { clx } from "@medusajs/ui"
 import CtaLink from "@modules/cms/cta-link"
+import { HERO_SIZE } from "@modules/cms/hero-size"
 
 export type Slide = {
   mobile: string
@@ -99,7 +100,7 @@ const HeroCarousel = ({ slides: SLIDES = DEFAULT_SLIDES }: { slides?: Slide[] })
 
   return (
     <div
-      className="group h-[62vh] min-h-[380px] max-h-[640px] w-full relative overflow-hidden bg-[#e5e5e5]"
+      className={`group ${HERO_SIZE} bg-[#e5e5e5]`}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >

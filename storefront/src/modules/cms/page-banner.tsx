@@ -1,5 +1,6 @@
 import { getCms } from "@lib/data/cms"
 import CtaLink from "./cta-link"
+import { HERO_SIZE, HERO_IMG } from "./hero-size"
 
 /**
  * Top banner of a page. Uses the first active CMS banner for `pageKey`;
@@ -21,11 +22,11 @@ export default async function PageBanner({
   if (isCategory) {
     // Category banner: shorter, text on the LEFT over the image.
     return (
-      <section className="h-[38vh] min-h-[240px] max-h-[420px] w-full relative overflow-hidden bg-[#e5e5e5]">
+      <section className={`${HERO_SIZE} bg-[#e5e5e5]`}>
         <picture>
           {b.image_mobile && <source media="(max-width: 768px)" srcSet={b.image_mobile} />}
           {b.image_tablet && <source media="(max-width: 1024px)" srcSet={b.image_tablet} />}
-          <img src={b.image_desktop!} alt={alt} className="absolute inset-0 w-full h-full object-cover object-center" loading="eager" />
+          <img src={b.image_desktop!} alt={alt} className={HERO_IMG} loading="eager" />
         </picture>
         {(b.title || b.eyebrow || b.cta_label) && (
           <div className="absolute inset-0 flex items-center">
@@ -44,11 +45,11 @@ export default async function PageBanner({
     )
   }
   return (
-    <section className="h-[62vh] min-h-[380px] max-h-[640px] w-full relative overflow-hidden bg-[#e5e5e5] flex flex-col items-center justify-center">
+    <section className={`${HERO_SIZE} bg-[#e5e5e5] flex flex-col items-center justify-center`}>
       <picture>
         {b.image_mobile && <source media="(max-width: 768px)" srcSet={b.image_mobile} />}
         {b.image_tablet && <source media="(max-width: 1024px)" srcSet={b.image_tablet} />}
-        <img src={b.image_desktop!} alt={alt} className="absolute inset-0 w-full h-full object-cover object-center" loading="eager" />
+        <img src={b.image_desktop!} alt={alt} className={HERO_IMG} loading="eager" />
       </picture>
       {(b.title || b.eyebrow || b.cta_label) && (
         <div className="absolute inset-0 bg-black/25 flex flex-col items-center justify-center text-center px-6">

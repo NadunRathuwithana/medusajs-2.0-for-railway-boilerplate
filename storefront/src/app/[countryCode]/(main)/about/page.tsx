@@ -1,3 +1,4 @@
+import { HERO_SIZE } from "@modules/cms/hero-size"
 import PageBanner from "@modules/cms/page-banner"
 import { Metadata } from "next"
 
@@ -13,14 +14,14 @@ export default function AboutPage() {
       <PageBanner
         pageKey="about"
         fallback={
-          <section className="h-[62vh] min-h-[380px] max-h-[640px] w-full relative overflow-hidden bg-[#111111] flex flex-col items-center justify-center">
+          <section className={`${HERO_SIZE} bg-[#111111] flex flex-col items-center justify-center`}>
         <picture>
           <source media="(max-width: 768px)" srcSet="/about/cardle-about-premium-cotton-tote-bags-mobile.jpg" />
           <source media="(max-width: 1024px)" srcSet="/about/cardle-about-premium-cotton-tote-bags-tablet.jpg" />
           <img
             src="/about/cardle-about-premium-cotton-tote-bags.jpg"
             alt="Cardle handcrafted cotton tote bags – the Cardle story, made in Sri Lanka"
-            className="absolute inset-0 w-full h-full object-cover object-center"
+            className="absolute inset-0 w-full h-full object-cover object-top"
             loading="eager"
           />
         </picture>

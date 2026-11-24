@@ -140,9 +140,9 @@ function BannerDrawer({ banner, onClose, onSaved }: { banner: Banner | null; onC
               </Select>
             </div>
           )}
-          <ImageField label="Desktop image" hint="Wide, about 2400 x 1000. Required for hero and page banners." value={f.image_desktop} onChange={(u) => set({ image_desktop: u })} />
+          <ImageField label="Desktop image" hint="Wide, 2400 x 800 (same size for every hero and page banner). Keep key content in the upper-middle. Required." value={f.image_desktop} onChange={(u) => set({ image_desktop: u })} />
           <ImageField label="Tablet image (optional)" hint="Falls back to desktop." value={f.image_tablet} onChange={(u) => set({ image_tablet: u })} />
-          <ImageField label="Mobile image (optional)" hint="Portrait crop, about 1000 x 1400. Falls back to desktop." value={f.image_mobile} onChange={(u) => set({ image_mobile: u })} />
+          <ImageField label="Mobile image (optional)" hint="Portrait, about 1000 x 1400 (all banners use the same height). Falls back to desktop." value={f.image_mobile} onChange={(u) => set({ image_mobile: u })} />
           {text("alt", "Image description (alt text)", "Cardle handcrafted cotton tote bags")}
           {text("eyebrow", "Small label above the headline", f.page_key?.startsWith("category:") ? "The Collection" : undefined)}
           {text("title", "Headline")}

@@ -1,3 +1,4 @@
+import { HERO_SIZE, HERO_IMG } from "@modules/cms/hero-size"
 import PageBanner from "@modules/cms/page-banner"
 import { Suspense } from "react"
 
@@ -21,14 +22,14 @@ const StoreTemplate = ({
       <PageBanner
         pageKey="store"
         fallback={
-          <section className="h-[62vh] min-h-[380px] max-h-[640px] w-full relative overflow-hidden bg-[#e5e5e5] flex flex-col items-center justify-center">
+          <section className={`${HERO_SIZE} bg-[#e5e5e5] flex flex-col items-center justify-center`}>
         <picture>
           <source media="(max-width: 768px)" srcSet="/store/buy-cotton-tote-bags-online-sri-lanka-mobile.jpg" />
           <source media="(max-width: 1024px)" srcSet="/store/buy-cotton-tote-bags-online-sri-lanka-tablet.jpg" />
           <img
             src="/store/buy-cotton-tote-bags-online-sri-lanka.jpg"
             alt="Cardle Store Hero Banner"
-            className="absolute inset-0 w-full h-full object-cover object-center"
+            className={HERO_IMG}
           />
         </picture>
       </section>
