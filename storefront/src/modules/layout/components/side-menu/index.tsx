@@ -8,14 +8,21 @@ import { Fragment } from "react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 
-const SideMenuItems = {
-  Home: "/",
-  Store: "/store",
-  Cart: "/cart",
-  Account: "/account",
-}
-
-const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
+const SideMenu = ({
+  regions,
+  categories = [],
+}: {
+  regions: HttpTypes.StoreRegion[] | null
+  categories?: { name: string; handle: string }[]
+}) => {
+  // Store, then each category with products, then the rest.
+  const items: [string, string][] = [
+    ["Home", "/"],
+    ["Store", "/store"],
+    ...categories.map((c) => [c.name, `/categories/${c.handle}`] as [string, string]),
+    ["Cart", "/cart"],
+    ["Account", "/account"],
+  ]
   return (
     <div className="h-full">
       <style>{`
@@ -92,7 +99,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
 
                     {/* Staggered Navigation Links */}
                     <ul className="flex flex-col gap-6 items-start justify-start mt-8 mb-auto">
-                      {Object.entries(SideMenuItems).map(([name, href], index) => {
+                      {items.map(([name, href], index) => {
                         return (
                           <li
                             key={name}
@@ -103,7 +110,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                               href={href}
                               className="text-2xl font-bold capitalize tracking-tight text-white hover:text-gray-400 transition-colors"
                               onClick={close}
-                              data-testid={`${name.toLowerCase()}-link`}
+                              data-testid={`${name.toLowerCase().replace(/\s+/g, "-")}-link`}
                             >
                               {name}
                             </LocalizedClientLink>

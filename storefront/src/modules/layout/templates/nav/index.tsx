@@ -8,12 +8,14 @@ import SideMenu from "@modules/layout/components/side-menu"
 import { User, ShoppingBag } from "lucide-react"
 import Image from "next/image"
 import { getCms } from "@lib/data/cms"
+import { listNavCategories } from "@lib/data/categories"
 import CtaLink from "@modules/cms/cta-link"
 
 export default async function Nav() {
-  const [regions, cms] = await Promise.all([
+  const [regions, cms, categories] = await Promise.all([
     listRegions().then((regions: StoreRegion[]) => regions),
     getCms(),
+    listNavCategories(),
   ])
   // undefined = CMS unreachable -> keep the original text; null = switched off in admin
   const promo =
@@ -44,6 +46,15 @@ export default async function Nav() {
               >
                 Store
               </LocalizedClientLink>
+              {categories.map((c) => (
+                <LocalizedClientLink
+                  key={c.handle}
+                  href={`/categories/${c.handle}`}
+                  className="text-ui-fg-subtle hover:text-zinc-900 font-medium text-sm transition-colors whitespace-nowrap"
+                >
+                  {c.name}
+                </LocalizedClientLink>
+              ))}
               {/* <LocalizedClientLink
                 href="/customize"
                 className="hover:text-ui-fg-base capitalize font-medium"
@@ -52,7 +63,7 @@ export default async function Nav() {
               </LocalizedClientLink> */}
             </div>
             <div className="small:hidden h-full">
-              <SideMenu regions={regions} />
+              <SideMenu regions={regions} categories={categories} />
             </div>
           </div>
 
