@@ -117,13 +117,13 @@ export default function OnepayReturnClient({
           }
         }
         if (attempt === 1) {
-          setMessage("Payment received. Placing your order. You can safely close this page, your confirmation will arrive by email.")
+          setMessage("Confirming your payment and placing your order. Please don't close this page.")
         }
         if (Date.now() > fastUntil && !slow) {
           slow = true
           setStuck(true)
           setMessage(
-            "Your order is being created, it can take a minute. Please don't pay again. You can safely close this page, your confirmation will arrive by email."
+            "Your order is being created, it can take a minute. Please don't pay again and don't close this page. Your confirmation will also arrive by email."
           )
         }
         await new Promise((res) => setTimeout(res, Date.now() > fastUntil ? 10_000 : 1500))

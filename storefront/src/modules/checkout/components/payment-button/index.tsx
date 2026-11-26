@@ -520,34 +520,43 @@ const returnPageUrl = (txn: string) =>
   `${window.location.pathname.replace(/\/checkout.*$/, "")}/checkout/onepay/return?txn=${encodeURIComponent(txn)}`
 
 /**
- * Full-screen confirmation shown the instant a payment is detected, so a
- * paying customer never stares at the card form. The order is created on the
- * server regardless (Onepay callback + 5s server watcher), so closing this
- * page is safe and we say so.
+ * Full-screen state while we finish a card payment. "checking" = we heard
+ * back from the popup but haven't verified with Onepay yet (real spinner, no
+ * tick). "placing" = Onepay confirmed the money, creating the order now.
+ * The order is created server-side either way, but customers are asked to
+ * stay so they land on their confirmation page.
  */
-const PaidScreen = ({ state }: { state: "placing" | "slow" }) => (
+const PaidScreen = ({ state }: { state: "checking" | "placing" | "slow" }) => (
   <div className="fixed inset-0 z-[2147483647] bg-white flex items-center justify-center px-6" role="status" aria-live="polite">
     <div className="max-w-sm text-center">
-      <div className="mx-auto mb-5 h-16 w-16 rounded-full bg-green-50 flex items-center justify-center">
-        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M20 6L9 17l-5-5" /></svg>
-      </div>
-      <h2 className="text-2xl font-semibold text-gray-900 mb-2">Payment successful</h2>
-      <p className="text-gray-600 mb-6">
-        {state === "placing"
-          ? "We're placing your order now."
-          : "Your order is being created. It can take a minute."}{" "}
-        You can safely close this page, your confirmation will arrive by email.
+      {state === "checking" ? (
+        <div className="mx-auto mb-5 h-14 w-14 rounded-full border-4 border-gray-200 border-t-gray-900 animate-spin" aria-hidden />
+      ) : (
+        <div className="mx-auto mb-5 h-16 w-16 rounded-full bg-green-50 flex items-center justify-center">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M20 6L9 17l-5-5" /></svg>
+        </div>
+      )}
+      <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+        {state === "checking" ? "Confirming your payment..." : "Payment successful"}
+      </h2>
+      <p className="text-gray-600 mb-3">
+        {state === "checking"
+          ? "This only takes a few seconds."
+          : state === "placing"
+          ? "Placing your order now."
+          : "Your order is being created, it can take a minute."}
       </p>
-      <div className="mx-auto h-1 w-40 overflow-hidden rounded-full bg-gray-100">
-        <div className="h-full w-1/2 rounded-full bg-green-600 animate-pulse" />
-      </div>
+      <p className="font-medium text-gray-900 mb-6">Please don't close this page.</p>
+      {state !== "checking" && (
+        <div className="mx-auto h-5 w-5 rounded-full border-2 border-gray-200 border-t-green-600 animate-spin" aria-hidden />
+      )}
     </div>
   </div>
 )
 
 const OnepayButton = ({ notReady, popup }: { notReady: boolean; popup: boolean }) => {
   const [phase, setPhase] = useState<OnepayPhase>("idle")
-  const [paid, setPaid] = useState<null | "placing" | "slow">(null)
+  const [paid, setPaid] = useState<null | "checking" | "placing" | "slow">(null)
   const [error, setError] = useState<string | null>(null)
   const [note, setNote] = useState<string | null>(null)
   const { flushAddresses } = useLiveCheckout()
@@ -574,8 +583,21 @@ const OnepayButton = ({ notReady, popup }: { notReady: boolean; popup: boolean }
     if (el?.parentNode) el.parentNode.removeChild(el)
   }
 
-  /** Paid: show the success screen at once, then create the order. */
-  const onPaid = async () => {
+  const backToCheckout = (msg: string) => {
+    finishing.current = false
+    busyRef.current = false
+    txnRef.current = null
+    setPaid(null)
+    setPhase("idle")
+    setError(msg)
+  }
+
+  /**
+   * The popup reported back (or our poll saw a change). `verified` = our
+   * server already confirmed with Onepay that it's paid. Otherwise verify
+   * first, showing a spinner, never a success tick for an unverified result.
+   */
+  const onPaid = async (verified = false) => {
     const txn = txnRef.current
     if (!txn || finishing.current) return
     finishing.current = true
@@ -585,6 +607,24 @@ const OnepayButton = ({ notReady, popup }: { notReady: boolean; popup: boolean }
     setError(null)
     setNote(null)
     setPhase("done")
+
+    if (!verified) {
+      setPaid("checking")
+      let ok = false
+      for (let i = 0; i < 8 && !ok; i++) {
+        const r = await statusCheck(txn)
+        if (r.failed) return backToCheckout("Payment was not completed. You have not been charged, please try again.")
+        ok = !!r.ok
+        if (!ok) await new Promise((res) => setTimeout(res, 1500))
+      }
+      if (!ok) {
+        // Onepay hasn't answered yet: the return page keeps checking
+        // (and the server finishes the order on its own if it was paid).
+        window.location.replace(returnPageUrl(txn))
+        return
+      }
+    }
+
     setPaid("placing")
     const slow = setTimeout(() => setPaid("slow"), 8000)
     try {
@@ -599,17 +639,9 @@ const OnepayButton = ({ notReady, popup }: { notReady: boolean; popup: boolean }
       }
       if (r?.failed) {
         clearTimeout(slow)
-        finishing.current = false
-        busyRef.current = false
-        txnRef.current = null
-        setPaid(null)
-        setPhase("idle")
-        setError("Payment was not completed. You have not been charged, please try again.")
-        return
+        return backToCheckout("Payment was not completed. You have not been charged, please try again.")
       }
     } catch {}
-    // Not confirmed yet: the return page keeps checking (and the server
-    // finishes the order on its own either way).
     window.location.replace(returnPageUrl(txn))
   }
 
@@ -638,7 +670,7 @@ const OnepayButton = ({ notReady, popup }: { notReady: boolean; popup: boolean }
         if (txnRef.current !== txn || finishing.current) return
         const r = await statusCheck(txn)
         if (txnRef.current !== txn || finishing.current) return
-        if (r.ok) return onPaid()
+        if (r.ok) return onPaid(true)
         if (r.failed) break
         await new Promise((res) => setTimeout(res, i < 3 ? 1500 : 3000))
       }
@@ -650,7 +682,7 @@ const OnepayButton = ({ notReady, popup }: { notReady: boolean; popup: boolean }
   handlers.current = { onPaid, onFailed, onClosed }
 
   useEffect(() => {
-    const ok = () => handlers.current.onPaid()
+    const ok = () => handlers.current.onPaid(false)
     const fail = () => handlers.current.onFailed()
     const onMessage = (e: MessageEvent) => {
       if (e.origin !== window.location.origin || e.data?.type !== "cardle:onepay-return") return
@@ -692,7 +724,9 @@ const OnepayButton = ({ notReady, popup }: { notReady: boolean; popup: boolean }
     const poll = setInterval(async () => {
       if (txnRef.current !== txn || finishing.current) return
       const r = await statusCheck(txn)
-      if (r.ok) handlers.current.onPaid()
+      // Only act on a confirmed payment. A decline is left to the popup:
+      // Onepay lets the customer correct the card and try again in place.
+      if (r.ok) handlers.current.onPaid(true)
     }, 2500)
     // 3. Onepay sent the popup to our return page: readable once it's ours.
     const frame = setInterval(() => {
@@ -705,7 +739,7 @@ const OnepayButton = ({ notReady, popup }: { notReady: boolean; popup: boolean }
           const q = new URL(href).searchParams
           const st = String(q.get("status_message") || q.get("status") || "").toUpperCase()
           if (["FAILED", "CANCELLED", "0", "2"].includes(st)) handlers.current.onFailed()
-          else handlers.current.onPaid()
+          else handlers.current.onPaid(false)
         }
       } catch {
         /* still on Onepay's domain */
