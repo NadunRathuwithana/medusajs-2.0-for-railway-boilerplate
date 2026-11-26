@@ -22,7 +22,20 @@ export default function OnepayReturnClient({
   const [message, setMessage] = useState("Please wait while we confirm your payment and place your order...")
   const hasRun = useRef(false)
 
+  // Onepay's popup (Onepay.js) follows the redirect URL inside its iframe.
+  // If we're framed, move this page to the full window and let it finish there.
+  const inFrame = typeof window !== "undefined" && window.self !== window.top
+
   useEffect(() => {
+    if (inFrame) {
+      try {
+        window.top!.location.href = window.location.href
+      } catch {
+        /* cross-origin top: fall through and finish in place */
+        return
+      }
+      return
+    }
     // Prevent double-run in React strict mode
     if (hasRun.current) return
     hasRun.current = true

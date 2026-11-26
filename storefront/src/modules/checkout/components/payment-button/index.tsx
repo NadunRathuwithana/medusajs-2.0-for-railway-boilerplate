@@ -514,6 +514,9 @@ const OnepayJsButton = ({ session, notReady }: { session: any; notReady: boolean
       const txn = e?.detail?.transaction_id || txnId
       setSubmitting(true)
       setError(null)
+      // Normally the popup lands on our return page, which takes over the whole
+      // window and places the order. Only finish here if that didn't happen.
+      await new Promise((r) => setTimeout(r, 6000))
       let ok = false
       for (let i = 0; i < 5 && txn && !ok; i++) {
         const r = await confirmOnepayJs(txn)
