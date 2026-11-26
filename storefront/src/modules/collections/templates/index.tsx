@@ -30,7 +30,7 @@ export default function CollectionTemplate({
         fallback={
           <section className={`${HERO_SIZE} bg-[#e5e5e5] flex flex-col items-center justify-center`}>
         <picture>
-          <source media="(max-width: 768px)" srcSet="/store/buy-cotton-tote-bags-online-sri-lanka-mobile.jpg" />
+          <source media="(max-width: 767px)" srcSet="/store/buy-cotton-tote-bags-online-sri-lanka-mobile.jpg" />
           <source media="(max-width: 1024px)" srcSet="/store/buy-cotton-tote-bags-online-sri-lanka-tablet.jpg" />
           <img
             src="/store/buy-cotton-tote-bags-online-sri-lanka.jpg"

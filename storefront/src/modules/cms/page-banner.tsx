@@ -25,8 +25,8 @@ export default async function PageBanner({
     return (
       <section className={`${HERO_SIZE} bg-[#e5e5e5]`}>
         <picture>
-          {b.image_mobile && <source media="(max-width: 768px)" srcSet={b.image_mobile} />}
-          {b.image_tablet && <source media="(max-width: 1024px)" srcSet={b.image_tablet} />}
+          {b.image_mobile && <source media="(max-width: 767px)" srcSet={b.image_mobile} />}
+          {b.image_tablet && <source media="(max-width: 1023px)" srcSet={b.image_tablet} />}
           <img src={b.image_desktop!} alt={alt} className={HERO_IMG} loading="eager" />
         </picture>
         {b.cta_href && (
@@ -41,8 +41,8 @@ export default async function PageBanner({
   return (
     <section className={`${HERO_SIZE} bg-[#e5e5e5] flex flex-col items-center justify-center`}>
       <picture>
-        {b.image_mobile && <source media="(max-width: 768px)" srcSet={b.image_mobile} />}
-        {b.image_tablet && <source media="(max-width: 1024px)" srcSet={b.image_tablet} />}
+        {b.image_mobile && <source media="(max-width: 767px)" srcSet={b.image_mobile} />}
+        {b.image_tablet && <source media="(max-width: 1023px)" srcSet={b.image_tablet} />}
         <img src={b.image_desktop!} alt={alt} className={HERO_IMG} loading="eager" />
       </picture>
       {b.cta_href && (

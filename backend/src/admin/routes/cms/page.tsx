@@ -345,8 +345,8 @@ function BannerEditor({
                   onChange={(u) => set({ image_desktop: u })}
                 />
                 <div className="grid grid-cols-2 gap-4">
-                  <ImageUpload label="Tablet" aspect="aspect-[4/3]" hint="Falls back to desktop." value={f.image_tablet} onChange={(u) => set({ image_tablet: u })} />
-                  <ImageUpload label="Mobile" aspect="aspect-[3/4]" hint="1000 x 1400 px. Falls back to desktop." value={f.image_mobile} onChange={(u) => set({ image_mobile: u })} />
+                  <ImageUpload label="Tablet" aspect="aspect-[4/3]" hint="4:3, e.g. 1600 x 1200 px. Falls back to desktop." value={f.image_tablet} onChange={(u) => set({ image_tablet: u })} />
+                  <ImageUpload label="Mobile" aspect="aspect-[3/4]" hint="3:4, e.g. 1080 x 1440 px. Falls back to desktop." value={f.image_mobile} onChange={(u) => set({ image_mobile: u })} />
                 </div>
                 <Field label="Image description" optional hint="Read by screen readers and search engines.">
                   {text("alt", "Cardle handcrafted cotton tote bags")}
