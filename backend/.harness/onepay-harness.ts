@@ -343,7 +343,7 @@ const scenarios: Scenario[] = [
   },
   {
     id: "S18", name: "Unpaid link left 24h+", expect: "no order, ledger expired",
-    run: async () => { const c = newCart(amt()); const { txn } = await startCheckout(c); const r = getRedisClient(); const a = await attempts.getAttempt(txn); a.created_at = Date.now() - 25 * 3600_000; await r.set("onepay:attempt:" + txn, JSON.stringify(a)); await r.zadd("onepay:attempts", a.created_at, txn); await r.del("onepay:reconcile:lock"); await reconcileMod.default(container); return { c, ctx: { st: await status(txn) } } },
+    run: async () => { const c = newCart(amt()); const { txn } = await startCheckout(c); const r = getRedisClient(); const a = await attempts.getAttempt(txn); a.created_at = Date.now() - 25 * 3600_000; await r.set("onepay:attempt:" + txn, JSON.stringify(a)); await r.zadd("onepay:attempts", a.created_at, txn); await r.del("onepay:reconcile:lock"); await r.del("onepay:reconcile:full"); await reconcileMod.default(container); return { c, ctx: { st: await status(txn) } } },
     check: (c, { st }) => (c.completed_at ? "ORDER CREATED" : st !== "expired" ? `ledger ${st}` : null),
   },
   {

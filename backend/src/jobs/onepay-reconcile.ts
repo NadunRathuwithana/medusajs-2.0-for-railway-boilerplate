@@ -231,7 +231,12 @@ export default async function onepayReconcileJob(container: MedusaContainer) {
     a.status === "pending" || a.status === "needs_review" || a.status === "recovered"
 
   // Full sweep every 5 minutes (links up to 48h old), otherwise the last 30 min.
-  const everyFive = new Date().getMinutes() % 5 === 0
+  let everyFive = true
+  if (redis) {
+    const last = Number(await redis.get("onepay:reconcile:full").catch(() => 0)) || 0
+    everyFive = Date.now() - last >= 5 * 60_000
+    if (everyFive) await redis.set("onepay:reconcile:full", String(Date.now()), "EX", 3600).catch(() => {})
+  }
   await settle((await listAttempts(MIN_AGE_MS, everyFive ? MAX_AGE_MS : HOT_MS)).filter(retryable))
 
   // Then watch fresh links every 5s for the rest of this minute.
