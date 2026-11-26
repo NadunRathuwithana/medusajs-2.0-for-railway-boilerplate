@@ -1,5 +1,5 @@
 import { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { redirect } from "next/navigation"
 
 import Wrapper from "@modules/checkout/components/payment-wrapper"
 import CheckoutForm from "@modules/checkout/templates/checkout-form"
@@ -15,10 +15,12 @@ export const metadata: Metadata = {
   title: "Checkout",
 }
 
-const fetchCart = async () => {
+const fetchCart = async (countryCode: string) => {
   const cart = await retrieveLiveCart()
   if (!cart) {
-    return notFound()
+    // No cart, or it already became an order: show the (empty) cart page
+    // rather than a 404.
+    redirect(`/${countryCode}/cart`)
   }
 
   if (cart?.items?.length) {
@@ -31,8 +33,9 @@ const fetchCart = async () => {
 
 import CheckoutTracker from "@components/analytics/CheckoutTracker"
 
-export default async function Checkout() {
-  const cart = await fetchCart()
+export default async function Checkout(props: { params: Promise<{ countryCode: string }> }) {
+  const { countryCode } = await props.params
+  const cart = await fetchCart(countryCode)
   const customer = await getCustomer()
   const packing = await getPacking()
 

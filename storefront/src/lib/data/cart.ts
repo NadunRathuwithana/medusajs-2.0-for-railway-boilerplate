@@ -23,8 +23,12 @@ export const retrieveCart = cache(async function retrieveCart() {
   }
 
   return await sdk.store.cart
-    .retrieve(cartId, { fields: "+region,+region.countries,+payment_collection.payment_sessions" }, { next: { tags: ["cart"] }, ...(await getAuthHeaders()) })
-    .then(({ cart }) => cart)
+    .retrieve(cartId, { fields: "+region,+region.countries,+payment_collection.payment_sessions,+completed_at" }, { next: { tags: ["cart"] }, ...(await getAuthHeaders()) })
+    // A completed cart already became an order (e.g. finished by the payment
+    // webhook or the recovery job while the customer was away). Treat it as no
+    // cart, so checkout can never take a second payment for it and the next
+    // add-to-cart starts a fresh one.
+    .then(({ cart }) => ((cart as any)?.completed_at ? null : cart))
     .catch(() => {
       return null
     })
@@ -692,9 +696,12 @@ export async function startOnepayCheckout(): Promise<
     const headers = await getAuthHeaders()
     const { cart } = await sdk.store.cart.retrieve(
       cartId,
-      { fields: "*payment_collection,*payment_collection.payment_sessions,*shipping_address,*billing_address,email,total,currency_code,customer_id,created_at,updated_at" },
+      { fields: "*payment_collection,*payment_collection.payment_sessions,*shipping_address,*billing_address,email,total,currency_code,customer_id,created_at,updated_at,completed_at" },
       headers
     )
+    if ((cart as any).completed_at) {
+      return { error: "This order has already been placed. Please check your email or your orders." }
+    }
     const res = await initiatePaymentSession(cart as any, {
       provider_id: "pp_onepay_onepay",
       data: {
