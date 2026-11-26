@@ -138,7 +138,6 @@ export default function PrintInvoice({ order }: { order: HttpTypes.StoreOrder })
                 Invoice
               </div>
               <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-                <Pill>Website</Pill>
                 <Pill>{method}</Pill>
               </div>
             </div>
@@ -163,7 +162,6 @@ export default function PrintInvoice({ order }: { order: HttpTypes.StoreOrder })
             </div>
             <div style={{ flex: 1 }}>
               <div style={label}>ORDER DETAILS</div>
-              <Row label="Channel" value="Website" />
               <Row label="Payment Method" value={method} />
               <Row label="Payment" value={cod ? "Pay on delivery" : "Paid"} />
               {promoCodes.length > 0 && <Row label="Offers" value={promoCodes.join(", ")} />}
@@ -191,9 +189,23 @@ export default function PrintInvoice({ order }: { order: HttpTypes.StoreOrder })
                   item.variant_title && !/default/i.test(item.variant_title) ? item.variant_title : null
                 return (
                   <tr key={item.id} style={{ borderBottom: `1px solid ${LINE}`, breakInside: "avoid" }}>
-                    <td style={{ padding: "16px 8px" }}>
-                      <div style={{ fontSize: 14, fontWeight: 700 }}>{item.product_title || item.title}</div>
-                      {variant && <div style={{ fontSize: 12.5, color: INK, marginTop: 2 }}>{variant}</div>}
+                    <td style={{ padding: "12px 8px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        {item.thumbnail ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={item.thumbnail}
+                            alt=""
+                            style={{ width: 52, height: 52, objectFit: "cover", borderRadius: 8, border: `1px solid ${LINE}`, background: "#f6efe7", flex: "none" }}
+                          />
+                        ) : (
+                          <div style={{ width: 52, height: 52, borderRadius: 8, background: "#f6efe7", flex: "none" }} />
+                        )}
+                        <div>
+                          <div style={{ fontSize: 14, fontWeight: 700 }}>{item.product_title || item.title}</div>
+                          {variant && <div style={{ fontSize: 12.5, color: INK, marginTop: 2 }}>{variant}</div>}
+                        </div>
+                      </div>
                     </td>
                     <td style={{ textAlign: "center", fontSize: 14, padding: "16px 8px" }}>{item.quantity}</td>
                     <td style={{ textAlign: "right", fontSize: 14, color: MUTED, padding: "16px 8px" }}>
