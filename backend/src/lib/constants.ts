@@ -94,14 +94,14 @@ export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
  * ONEPAY_APP_ID   — your unique application identifier from OnePay dashboard
  * ONEPAY_TOKEN    — API authorization token from OnePay dashboard
  * ONEPAY_HASH_SALT — secret used for SHA-256 hash generation (NEVER expose client-side)
- * ONEPAY_BASE_URL  — OnePay API base URL (defaults to live merchant API)
+ * ONEPAY_BASE_URL  — OnePay API base URL (defaults to https://api.onepay.lk, same as live)
  * ONEPAY_REDIRECT_URL — URL to redirect customer back after payment
  */
 export const ONEPAY_APP_ID = process.env.ONEPAY_APP_ID;
 export const ONEPAY_TOKEN = process.env.ONEPAY_TOKEN;
 export const ONEPAY_HASH_SALT = process.env.ONEPAY_HASH_SALT;
 export const ONEPAY_BASE_URL =
-  process.env.ONEPAY_BASE_URL || "https://merchant-api-live-v2.onepay.lk";
+  process.env.ONEPAY_BASE_URL || "https://api.onepay.lk";
 export const ONEPAY_REDIRECT_URL = process.env.ONEPAY_REDIRECT_URL;
 
 /**
