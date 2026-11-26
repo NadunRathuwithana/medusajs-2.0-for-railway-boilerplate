@@ -11,7 +11,6 @@ import { HttpTypes } from "@medusajs/types"
 import { isKoko, isManual, isMintpay, isOnepay, isPaypal, isStripe } from "@lib/constants"
 import { useLiveCheckout } from "@modules/checkout/context/live-checkout-context"
 import { clx } from "@medusajs/ui"
-import { confirmOnepayJs } from "../../../../app/[countryCode]/(checkout)/checkout/onepay/return/actions"
 
 type PaymentButtonProps = {
   cart: HttpTypes.StoreCart
@@ -506,141 +505,177 @@ const loadOnepayJs = () => {
   return onepayJsPromise
 }
 
-type OnepayPhase = "idle" | "starting" | "paying" | "confirming"
+type OnepayPhase = "idle" | "starting" | "paying" | "done"
+
+const statusCheck = async (txn: string): Promise<{ ok?: boolean; failed?: boolean }> => {
+  try {
+    const r = await fetch(`/api/onepay/status?txn=${encodeURIComponent(txn)}`, { cache: "no-store" })
+    return await r.json()
+  } catch {
+    return {}
+  }
+}
+
+const returnPageUrl = (txn: string) =>
+  `${window.location.pathname.replace(/\/checkout.*$/, "")}/checkout/onepay/return?txn=${encodeURIComponent(txn)}`
+
+/**
+ * Full-screen confirmation shown the instant a payment is detected, so a
+ * paying customer never stares at the card form. The order is created on the
+ * server regardless (Onepay callback + 5s server watcher), so closing this
+ * page is safe and we say so.
+ */
+const PaidScreen = ({ state }: { state: "placing" | "slow" }) => (
+  <div className="fixed inset-0 z-[2147483647] bg-white flex items-center justify-center px-6" role="status" aria-live="polite">
+    <div className="max-w-sm text-center">
+      <div className="mx-auto mb-5 h-16 w-16 rounded-full bg-green-50 flex items-center justify-center">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M20 6L9 17l-5-5" /></svg>
+      </div>
+      <h2 className="text-2xl font-semibold text-gray-900 mb-2">Payment successful</h2>
+      <p className="text-gray-600 mb-6">
+        {state === "placing"
+          ? "We're placing your order now."
+          : "Your order is being created. It can take a minute."}{" "}
+        You can safely close this page, your confirmation will arrive by email.
+      </p>
+      <div className="mx-auto h-1 w-40 overflow-hidden rounded-full bg-gray-100">
+        <div className="h-full w-1/2 rounded-full bg-green-600 animate-pulse" />
+      </div>
+    </div>
+  </div>
+)
 
 const OnepayButton = ({ notReady, popup }: { notReady: boolean; popup: boolean }) => {
   const [phase, setPhase] = useState<OnepayPhase>("idle")
+  const [paid, setPaid] = useState<null | "placing" | "slow">(null)
   const [error, setError] = useState<string | null>(null)
-  // Neutral status line (not an error), e.g. while we quietly check a closed popup.
   const [note, setNote] = useState<string | null>(null)
   const { flushAddresses } = useLiveCheckout()
   const txnRef = React.useRef<string | null>(null)
-  // Synchronous click lock: React state doesn't update between two clicks in
-  // the same instant, so a fast double tap used to open two popups/links.
+  // Synchronous click lock (React state doesn't update between two fast taps).
   const busyRef = React.useRef(false)
   const finishing = React.useRef(false)
   const overlayRef = React.useRef<Element | null>(null)
-  const observerRef = React.useRef<MutationObserver | null>(null)
+  const watchers = React.useRef<{ obs?: MutationObserver; poll?: any; frame?: any }>({})
 
-  // Warm the popup script while the customer fills the form.
   useEffect(() => {
     if (popup) loadOnepayJs().catch(() => {})
   }, [popup])
 
   const stopWatching = () => {
-    observerRef.current?.disconnect()
-    observerRef.current = null
+    watchers.current.obs?.disconnect()
+    clearInterval(watchers.current.poll)
+    clearInterval(watchers.current.frame)
+    watchers.current = {}
   }
-
   const removeOverlay = () => {
     const el = overlayRef.current
     overlayRef.current = null
     if (el?.parentNode) el.parentNode.removeChild(el)
   }
 
-  // Verify with Onepay, then complete the order. Never shows "failed" for a
-  // payment that may have gone through: it tells the customer not to pay again.
-  const finish = async (fromClose = false) => {
+  /** Paid: show the success screen at once, then create the order. */
+  const onPaid = async () => {
+    const txn = txnRef.current
+    if (!txn || finishing.current) return
+    finishing.current = true
+    busyRef.current = true
+    stopWatching()
+    removeOverlay()
+    setError(null)
+    setNote(null)
+    setPhase("done")
+    setPaid("placing")
+    const slow = setTimeout(() => setPaid("slow"), 8000)
+    try {
+      const r = await fetch("/api/onepay/finish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ txn }),
+      }).then((x) => x.json())
+      if (r?.order_id) {
+        window.location.replace(`/${r.country || "lk"}/order/confirmed/${r.order_id}`)
+        return
+      }
+      if (r?.failed) {
+        clearTimeout(slow)
+        finishing.current = false
+        busyRef.current = false
+        txnRef.current = null
+        setPaid(null)
+        setPhase("idle")
+        setError("Payment was not completed. You have not been charged, please try again.")
+        return
+      }
+    } catch {}
+    // Not confirmed yet: the return page keeps checking (and the server
+    // finishes the order on its own either way).
+    window.location.replace(returnPageUrl(txn))
+  }
+
+  const onFailed = () => {
+    if (finishing.current) return
+    stopWatching()
+    removeOverlay()
+    txnRef.current = null
+    busyRef.current = false
+    setNote(null)
+    setPhase("idle")
+    setError("Payment was not completed. You have not been charged, please try again.")
+  }
+
+  /** Popup closed by the customer: give the button back, check quietly. */
+  const onClosed = () => {
     const txn = txnRef.current
     if (!txn || finishing.current) return
     stopWatching()
-    removeOverlay()
-
-    if (fromClose) {
-      // Almost always "closed without paying": give the button back at once and
-      // check quietly in the background. Onepay can take a few seconds to report
-      // a payment, so if one shows up we finish the order then.
-      busyRef.current = false
-      setPhase("idle")
-      setError(null)
-      setNote("Payment window closed.")
-      ;(async () => {
-        for (let i = 0; i < 12; i++) {
-          if (txnRef.current !== txn || finishing.current) return
-          const r: any = await confirmOnepayJs(txn)
-          if (txnRef.current !== txn || finishing.current) return
-          if (r?.ok) return finishRef.current(false)
-          if (r?.failed) break // Onepay says not paid: nothing to wait for
-          await new Promise((r2) => setTimeout(r2, i < 3 ? 1500 : 3000))
-        }
-        if (txnRef.current === txn) setNote(null)
-      })()
-      return
-    }
-
-    finishing.current = true
-    busyRef.current = true
-    setPhase("confirming")
+    busyRef.current = false
+    setPhase("idle")
     setError(null)
-    setNote(null)
-
-    let ok = false
-    for (let i = 0; i < 8 && !ok; i++) {
-      const r = await confirmOnepayJs(txn)
-      ok = !!r?.ok
-      if (!ok && i < 7) await new Promise((r2) => setTimeout(r2, 1500))
-    }
-
-    if (!ok) {
-      finishing.current = false
-      // Paid per Onepay.js but not confirmed yet: hand over to the return
-      // page, which keeps checking and shows the right message.
-      window.location.href = `${window.location.pathname.replace(/\/checkout.*$/, "")}/checkout/onepay/return?txn=${encodeURIComponent(txn)}`
-      return
-    }
-
-    try {
-      await placeOrder() // redirects to the confirmation page on success
-    } catch (err: any) {
-      if (err?.message?.includes("NEXT_REDIRECT") || err?.digest?.startsWith("NEXT_REDIRECT")) throw err
-    }
-    // Order may already exist (webhook won the race) or needs another moment:
-    // the return page resolves both cases.
-    window.location.href = `${window.location.pathname.replace(/\/checkout.*$/, "")}/checkout/onepay/return?txn=${encodeURIComponent(txn)}`
+    setNote("Payment window closed.")
+    ;(async () => {
+      for (let i = 0; i < 8; i++) {
+        if (txnRef.current !== txn || finishing.current) return
+        const r = await statusCheck(txn)
+        if (txnRef.current !== txn || finishing.current) return
+        if (r.ok) return onPaid()
+        if (r.failed) break
+        await new Promise((res) => setTimeout(res, i < 3 ? 1500 : 3000))
+      }
+      if (txnRef.current === txn) setNote(null)
+    })()
   }
 
-  const finishRef = React.useRef(finish)
-  finishRef.current = finish
+  const handlers = React.useRef({ onPaid, onFailed, onClosed })
+  handlers.current = { onPaid, onFailed, onClosed }
 
   useEffect(() => {
-    const onSuccess = () => finishRef.current(false)
-    const onFail = () => {
-      if (finishing.current) return
-      stopWatching()
-      removeOverlay()
-      txnRef.current = null
-      busyRef.current = false
-      setNote(null)
-      setPhase("idle")
-      setError("Payment was not completed. You have not been charged, please try again.")
-    }
-    // Our return page, when Onepay loads it inside the popup.
+    const ok = () => handlers.current.onPaid()
+    const fail = () => handlers.current.onFailed()
     const onMessage = (e: MessageEvent) => {
-      if (e.origin !== window.location.origin) return
-      if (e.data?.type !== "cardle:onepay-return") return
-      if (e.data.failed) onFail()
-      else finishRef.current(false)
+      if (e.origin !== window.location.origin || e.data?.type !== "cardle:onepay-return") return
+      e.data.failed ? fail() : ok()
     }
-    window.addEventListener("onePaySuccess", onSuccess)
-    window.addEventListener("onePayFail", onFail)
+    window.addEventListener("onePaySuccess", ok)
+    window.addEventListener("onePayFail", fail)
     window.addEventListener("message", onMessage)
     return () => {
-      window.removeEventListener("onePaySuccess", onSuccess)
-      window.removeEventListener("onePayFail", onFail)
+      window.removeEventListener("onePaySuccess", ok)
+      window.removeEventListener("onePayFail", fail)
       window.removeEventListener("message", onMessage)
       stopWatching()
     }
   }, [])
 
-  // Track Onepay's overlay so closing it resets the button (and checks whether
-  // the customer paid before closing).
-  const watchOverlay = (before: Set<Element>) => {
+  /** While the popup is open, detect the payment as early as possible. */
+  const watch = (before: Set<Element>, txn: string) => {
     stopWatching()
     const find = () =>
       Array.from(document.body.children).find(
         (el) => !before.has(el) && (el.tagName === "IFRAME" || el.querySelector("iframe"))
       ) ?? null
     overlayRef.current = find()
+    // 1. Customer closed the popup.
     const obs = new MutationObserver(() => {
       if (!overlayRef.current) {
         overlayRef.current = find()
@@ -648,12 +683,35 @@ const OnepayButton = ({ notReady, popup }: { notReady: boolean; popup: boolean }
       }
       if (!overlayRef.current.isConnected) {
         overlayRef.current = null
-        stopWatching()
-        finishRef.current(true)
+        handlers.current.onClosed()
       }
     })
     obs.observe(document.body, { childList: true })
-    observerRef.current = obs
+    // 2. Ask our server every 2.5s whether Onepay has the money (beats
+    //    Onepay's own success screen, which sits there for several seconds).
+    const poll = setInterval(async () => {
+      if (txnRef.current !== txn || finishing.current) return
+      const r = await statusCheck(txn)
+      if (r.ok) handlers.current.onPaid()
+    }, 2500)
+    // 3. Onepay sent the popup to our return page: readable once it's ours.
+    const frame = setInterval(() => {
+      const ifr = overlayRef.current?.tagName === "IFRAME"
+        ? (overlayRef.current as HTMLIFrameElement)
+        : (overlayRef.current?.querySelector("iframe") as HTMLIFrameElement | null)
+      try {
+        const href = ifr?.contentWindow?.location.href
+        if (href && href.includes("/checkout/onepay/return")) {
+          const q = new URL(href).searchParams
+          const st = String(q.get("status_message") || q.get("status") || "").toUpperCase()
+          if (["FAILED", "CANCELLED", "0", "2"].includes(st)) handlers.current.onFailed()
+          else handlers.current.onPaid()
+        }
+      } catch {
+        /* still on Onepay's domain */
+      }
+    }, 250)
+    watchers.current = { obs, poll, frame }
   }
 
   const handlePayment = async () => {
@@ -663,7 +721,7 @@ const OnepayButton = ({ notReady, popup }: { notReady: boolean; popup: boolean }
     setError(null)
     setNote(null)
     finishing.current = false
-    txnRef.current = null // stops any background check of an earlier popup
+    txnRef.current = null
     try {
       await flushAddresses()
       const res = await startOnepayCheckout()
@@ -674,7 +732,6 @@ const OnepayButton = ({ notReady, popup }: { notReady: boolean; popup: boolean }
         return
       }
       txnRef.current = res.txn_id
-
       if (!popup) {
         window.location.href = res.redirect_url
         return
@@ -683,7 +740,6 @@ const OnepayButton = ({ notReady, popup }: { notReady: boolean; popup: boolean }
         await loadOnepayJs()
         const open = (window as any).openPaymentIframe
         if (typeof open !== "function") throw new Error("no popup")
-        // Direct mode: Onepay.js opens our server-made link (no secrets here).
         ;(window as any).onePayData = {
           directGatewayURL: res.redirect_url,
           directTransactionId: res.txn_id,
@@ -691,7 +747,7 @@ const OnepayButton = ({ notReady, popup }: { notReady: boolean; popup: boolean }
         const before = new Set(Array.from(document.body.children))
         open(res.redirect_url, res.txn_id)
         setPhase("paying")
-        watchOverlay(before)
+        watch(before, res.txn_id)
       } catch {
         window.location.href = res.redirect_url
       }
@@ -704,15 +760,16 @@ const OnepayButton = ({ notReady, popup }: { notReady: boolean; popup: boolean }
 
   const label =
     phase === "starting"
-      ? "Preparing secure payment..."
+      ? "Opening secure payment..."
       : phase === "paying"
       ? "Complete payment in the window"
-      : phase === "confirming"
-      ? "Confirming payment..."
+      : phase === "done"
+      ? "Payment successful"
       : "Place order"
 
   return (
     <>
+      {paid && <PaidScreen state={paid} />}
       <button
         type="button"
         onClick={handlePayment}
@@ -724,16 +781,11 @@ const OnepayButton = ({ notReady, popup }: { notReady: boolean; popup: boolean }
           phase !== "idle" && "cursor-wait"
         )}
       >
-        {phase !== "idle" && (
+        {(phase === "starting" || phase === "paying") && (
           <span className="w-4 h-4 border-2 border-white/25 border-t-white rounded-full animate-spin" aria-hidden />
         )}
         <span>{label}</span>
       </button>
-      {phase === "confirming" && (
-        <p className="mt-2 text-center text-xs text-gray-500">
-          Please keep this page open. Do not pay again.
-        </p>
-      )}
       {note && !error && (
         <p className="mt-2 text-center text-xs text-gray-500" data-testid="onepay-note">{note}</p>
       )}

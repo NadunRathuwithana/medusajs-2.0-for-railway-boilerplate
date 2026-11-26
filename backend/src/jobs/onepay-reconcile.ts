@@ -16,6 +16,7 @@ import {
   setSessionOverride,
   type OnepayAttempt,
 } from "../modules/onepay-payment/attempts"
+import { getRedisClient } from "../lib/redis"
 
 /**
  * Onepay order recovery.
@@ -28,7 +29,12 @@ import {
  * payment-webhook path (same as koko/mintpay reconcile).
  */
 
-const MIN_AGE_MS = 90_000 // give the normal return/webhook flow a head start
+// Runs every minute. Customers close the tab right after paying, so the
+// server must create the order itself within seconds of the payment, not
+// wait for the browser. Fresh links (< 30 min) are checked every minute;
+// older ones every 5 minutes to keep Onepay API calls low.
+const MIN_AGE_MS = 3_000
+const HOT_MS = 30 * 60_000
 const MAX_AGE_MS = 48 * 3600_000
 const PROVIDER_EVENT = "onepay_onepay"
 
@@ -181,34 +187,69 @@ export async function reconcileAttempt(
   return "recovered"
 }
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+const WATCH_MS = 15 * 60_000 // a payment link stays "hot" for 15 minutes
+const WATCH_EVERY_MS = 5_000
+
+/**
+ * Runs every minute and, inside that minute, keeps watching every recently
+ * opened payment link every 5 seconds. So when a customer pays and closes the
+ * tab straight away, the server itself creates the order within ~5 seconds.
+ * The browser is never required. Older links get a slower full sweep.
+ */
 export default async function onepayReconcileJob(container: MedusaContainer) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
   if (!ONEPAY_APP_ID || !ONEPAY_TOKEN) return
 
-  const attempts = (await listAttempts(MIN_AGE_MS, MAX_AGE_MS)).filter(
-    // needs_review is retried too: the cart can become matchable later
-    // (e.g. the customer comes back to checkout and a new session exists).
-    // "recovered" too: if the replayed webhook failed to finish the order,
-    // keep retrying (a completed cart just marks it done).
-    (a) => a.status === "pending" || a.status === "needs_review" || a.status === "recovered"
-  )
-  if (!attempts.length) return
+  // One runner at a time (a slow minute must not overlap the next one).
+  const redis = getRedisClient()
+  if (redis) {
+    const got = await redis.set("onepay:reconcile:lock", String(Date.now()), "EX", 58, "NX").catch(() => "OK")
+    if (got !== "OK") return
+  }
 
   let recovered = 0
   let review = 0
-  for (const a of attempts) {
-    try {
-      const out = await reconcileAttempt(container, a)
-      if (out === "recovered") recovered++
-      if (out === "review") review++
-    } catch (e: any) {
-      logger.error(`[onepay-reconcile] ${a.txn_id}: ${e.message}`)
+  const settle = async (list: OnepayAttempt[]) => {
+    for (const a of list) {
+      try {
+        const out = await reconcileAttempt(container, a)
+        if (out === "recovered") {
+          recovered++
+          logger.info(`[onepay-reconcile] order finished server-side for txn ${a.txn_id} (cart ${a.cart_id})`)
+        }
+        if (out === "review") review++
+      } catch (e: any) {
+        logger.error(`[onepay-reconcile] ${a.txn_id}: ${e.message}`)
+      }
     }
   }
-  logger.info(`[onepay-reconcile] checked ${attempts.length}, recovered ${recovered}, needs review ${review}`)
+  const retryable = (a: OnepayAttempt) =>
+    // needs_review is retried too: the cart can become matchable later.
+    // "recovered" too: if the replayed webhook failed to finish the order,
+    // keep retrying (a completed cart just marks it done).
+    a.status === "pending" || a.status === "needs_review" || a.status === "recovered"
+
+  // Full sweep every 5 minutes (links up to 48h old), otherwise the last 30 min.
+  const everyFive = new Date().getMinutes() % 5 === 0
+  await settle((await listAttempts(MIN_AGE_MS, everyFive ? MAX_AGE_MS : HOT_MS)).filter(retryable))
+
+  // Then watch fresh links every 5s for the rest of this minute.
+  const until = Date.now() + Number(process.env.ONEPAY_WATCH_WINDOW_MS ?? 50_000)
+  while (Date.now() + WATCH_EVERY_MS < until) {
+    await sleep(WATCH_EVERY_MS)
+    const hot = (await listAttempts(3_000, WATCH_MS)).filter(
+      (a) => a.status === "pending" || a.status === "recovered"
+    )
+    if (hot.length) await settle(hot)
+  }
+
+  if (recovered || review) {
+    logger.info(`[onepay-reconcile] recovered ${recovered}, needs review ${review}`)
+  }
 }
 
 export const config = {
   name: "onepay-reconcile",
-  schedule: "*/5 * * * *",
+  schedule: "* * * * *",
 }

@@ -26,6 +26,7 @@ process.env.ONEPAY_TOKEN = "testtoken"
 process.env.ONEPAY_HASH_SALT = "salt"
 process.env.ONEPAY_BASE_URL = `http://127.0.0.1:${PORT}`
 process.env.ONEPAY_REDIRECT_URL = "https://dev.cardle.lk/lk/checkout/onepay/return"
+process.env.ONEPAY_WATCH_WINDOW_MS = "0"
 
 // silence the provider's very chatty request logging
 const realLog = console.log
@@ -238,6 +239,7 @@ async function reconcileNow() {
       await r.zadd("onepay:cart:" + (a.cart_id || "none"), a.created_at, id)
     }
   }
+  await r.del("onepay:reconcile:lock")
   await reconcileMod.default(container)
   await drain()
 }
@@ -341,13 +343,30 @@ const scenarios: Scenario[] = [
   },
   {
     id: "S18", name: "Unpaid link left 24h+", expect: "no order, ledger expired",
-    run: async () => { const c = newCart(amt()); const { txn } = await startCheckout(c); const r = getRedisClient(); const a = await attempts.getAttempt(txn); a.created_at = Date.now() - 25 * 3600_000; await r.set("onepay:attempt:" + txn, JSON.stringify(a)); await r.zadd("onepay:attempts", a.created_at, txn); await reconcileMod.default(container); return { c, ctx: { st: await status(txn) } } },
+    run: async () => { const c = newCart(amt()); const { txn } = await startCheckout(c); const r = getRedisClient(); const a = await attempts.getAttempt(txn); a.created_at = Date.now() - 25 * 3600_000; await r.set("onepay:attempt:" + txn, JSON.stringify(a)); await r.zadd("onepay:attempts", a.created_at, txn); await r.del("onepay:reconcile:lock"); await reconcileMod.default(container); return { c, ctx: { st: await status(txn) } } },
     check: (c, { st }) => (c.completed_at ? "ORDER CREATED" : st !== "expired" ? `ledger ${st}` : null),
   },
   {
     id: "S19", name: "Double click Place order (two links) then pay the newest", expect: "1 order",
     run: async () => { const c = newCart(amt()); const [a, b] = await Promise.all([startCheckout(c), startCheckout(c)]); const cur = c.sessions[0].data.ipg_transaction_id; pay(cur); const r = await popupFinish(c, cur); return { c, ctx: { cur, r, a: a.txn, b: b.txn } } },
     check: (c, { cur, r }) => (!r.ok ? "failed" : !orderPaidWith(c, cur) ? "wrong txn" : null),
+  },
+  {
+    id: "S21", name: "YOUR CASE: pay, close the tab instantly, no callback", expect: "server alone creates the order within ~5-10s",
+    run: async () => {
+      const c = newCart(amt()); const { txn } = await startCheckout(c)
+      const r = getRedisClient(); await r.del("onepay:reconcile:lock")
+      process.env.ONEPAY_WATCH_WINDOW_MS = "16000"
+      const t0 = Date.now()
+      setTimeout(() => pay(txn), 2000) // customer pays 2s into the minute, then closes the tab
+      const job = reconcileMod.default(container)
+      let at = 0
+      while (!c.completed_at && Date.now() - t0 < 16000) { await sleep(100); await drain() }
+      at = Date.now() - t0
+      await job; process.env.ONEPAY_WATCH_WINDOW_MS = "0"
+      return { c, ctx: { txn, secs: Math.round((at - 2000) / 100) / 10 } }
+    },
+    check: (c, { txn, secs }) => (!orderPaidWith(c, txn) ? "no order without the browser" : secs > 10 ? `order took ${secs}s after payment` : null),
   },
   {
     id: "S20", name: "Failed old link + paid new link", expect: "1 order on the paid one, failed one ignored",

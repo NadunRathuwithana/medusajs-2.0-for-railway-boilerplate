@@ -505,6 +505,9 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       // Optional second number (blank clears it).
       const phone2 = cleanPhone(String(formData.get("shipping_address.phone_2") ?? ""))
       data.metadata = { ...(data.metadata || {}), contact_phone_2: isValidPhone(phone2) ? phone2 : "" }
+      // Meta match keys ride along with the address save, so the card
+      // payment finish doesn't need an extra cart update.
+      data.metadata = { ...(await metaMatchKeys()), ...data.metadata }
     }
 
     const sameAsBilling = formData.get("same_as_billing")
@@ -736,6 +739,26 @@ export async function startOnepayCheckout(): Promise<
   } catch (err: any) {
     return { error: err?.message || "Could not start the card payment. Please try again." }
   }
+}
+
+/** Meta CAPI match keys for the order (copied cart -> order metadata). */
+async function metaMatchKeys(): Promise<Record<string, string>> {
+  const out: Record<string, string> = {}
+  try {
+    const cookieStore = await getCookies()
+    const headersList = await getHeaders()
+    const fbc = cookieStore.get("_fbc")?.value
+    const fbp = cookieStore.get("_fbp")?.value
+    const forwardedFor = headersList.get("x-forwarded-for")
+    const clientIp =
+      forwardedFor?.split(",")[0]?.trim() || headersList.get("x-real-ip") || undefined
+    const eventSourceUrl = headersList.get("referer") || undefined
+    if (fbc) out.fbc = fbc
+    if (fbp) out.fbp = fbp
+    if (clientIp) out.client_ip_address = clientIp
+    if (eventSourceUrl) out.event_source_url = eventSourceUrl
+  } catch {}
+  return out
 }
 
 export async function placeOrder() {

@@ -6,7 +6,7 @@ import AnimatedOrderComplete from "@modules/order/components/animated-order-comp
 import { placeOrder } from "@lib/data/cart"
 import { Button } from "@medusajs/ui"
 
-import { checkOrderForCart, confirmOnepayJs } from "./actions"
+import { checkOrderForCart } from "./actions"
 
 export default function OnepayReturnClient({ 
   searchParams, 
@@ -83,44 +83,50 @@ export default function OnepayReturnClient({
       let slow = false
       while (Date.now() < deadline) {
         attempt++
+        // One fast request: verify with Onepay + create the order (or return
+        // the order the server already made while the customer was away).
         try {
-          const existingOrderId = await checkOrderForCart()
-          if (existingOrderId) {
-            const { clearCart } = await import("./actions")
-            await clearCart()
-            router.push(`/${countryCode}/order/confirmed/${existingOrderId}`)
+          const r = await fetch("/api/onepay/finish", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ txn }),
+          }).then((x) => x.json())
+          if (r?.order_id) {
+            window.location.replace(`/${r.country || countryCode}/order/confirmed/${r.order_id}`)
             return
           }
-        } catch (err) {
-          console.warn("[OnePay Return] checkOrderForCart error:", err)
-        }
-
-        if (txn) {
+          if (r?.failed) {
+            setStatus("error")
+            setMessage("Payment was not completed. You have not been charged. Please try again.")
+            return
+          }
+        } catch {}
+        // No txn in the URL (older links): fall back to the order lookup.
+        if (!txn) {
           try {
-            await confirmOnepayJs(txn)
-          } catch {}
-        }
-
-        try {
-          await placeOrder()
-        } catch (err: any) {
-          if (err?.digest?.startsWith?.("NEXT_REDIRECT") || err?.message?.includes?.("NEXT_REDIRECT")) {
-            return
+            const existingOrderId = await checkOrderForCart()
+            if (existingOrderId) {
+              const { clearCart } = await import("./actions")
+              await clearCart()
+              router.push(`/${countryCode}/order/confirmed/${existingOrderId}`)
+              return
+            }
+            await placeOrder()
+          } catch (err: any) {
+            if (err?.digest?.startsWith?.("NEXT_REDIRECT") || err?.message?.includes?.("NEXT_REDIRECT")) return
           }
-          console.warn(`[OnePay Return] placeOrder attempt ${attempt}:`, err?.message || err)
         }
-
-        if (attempt === 3) {
-          setMessage("Payment received. Finalising your order, this can take a few more seconds...")
+        if (attempt === 1) {
+          setMessage("Payment received. Placing your order. You can safely close this page, your confirmation will arrive by email.")
         }
         if (Date.now() > fastUntil && !slow) {
           slow = true
           setStuck(true)
           setMessage(
-            "We're still confirming your payment with the bank. Please don't pay again. If you were charged, your order is created automatically within a few minutes and you'll get an email. You can keep this page open."
+            "Your order is being created, it can take a minute. Please don't pay again. You can safely close this page, your confirmation will arrive by email."
           )
         }
-        await new Promise((res) => setTimeout(res, Date.now() > fastUntil ? 10_000 : attempt <= 3 ? 2000 : 4000))
+        await new Promise((res) => setTimeout(res, Date.now() > fastUntil ? 10_000 : 1500))
       }
       setMessage(
         "We couldn't confirm your payment yet. If you were charged, please don't pay again: contact us on WhatsApp and we'll sort it out right away."
