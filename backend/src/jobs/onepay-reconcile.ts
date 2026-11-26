@@ -59,24 +59,23 @@ async function fetchStatus(txnId: string) {
   return JSON.parse(await res.text())
 }
 
-export default async function onepayReconcileJob(container: MedusaContainer) {
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
-  if (!ONEPAY_APP_ID || !ONEPAY_TOKEN) return
+type Outcome = "recovered" | "review" | "done" | "failed" | "pending" | "expired"
 
+/**
+ * Settle one Onepay attempt: ask Onepay for the truth and, when paid with no
+ * order yet, finish the order through the normal payment-webhook path.
+ * Used by the cron job below and by the /api/collect callback (immediately).
+ */
+export async function reconcileAttempt(
+  container: MedusaContainer,
+  a: OnepayAttempt,
+  knownStatus?: any
+): Promise<Outcome> {
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const eventBus = container.resolve(Modules.EVENT_BUS)
 
-  const attempts = (await listAttempts(MIN_AGE_MS, MAX_AGE_MS)).filter(
-    // needs_review is retried too: the cart can become matchable later
-    // (e.g. the customer comes back to checkout and a new session exists).
-    (a) => a.status === "pending" || a.status === "needs_review"
-  )
-  if (!attempts.length) return
-
-  let recovered = 0
-  let review = 0
-
-  const emit = (sessionId: string, a: OnepayAttempt) =>
+  const emit = (sessionId: string) =>
     eventBus.emit(
       {
         name: PaymentWebhookEvents.WebhookReceived,
@@ -98,100 +97,114 @@ export default async function onepayReconcileJob(container: MedusaContainer) {
       { delay: 0, attempts: 3 }
     )
 
-  const flag = async (a: OnepayAttempt, note: string) => {
-    review++
+  const flag = async (note: string): Promise<Outcome> => {
     const already = a.status === "needs_review"
     await updateAttempt(a.txn_id, { status: "needs_review", note })
-    if (already) return // alerted on the first pass; keep retrying quietly
-    const msg = `[onepay-reconcile] PAID BUT NOT MATCHED: txn=${a.txn_id} amount=${a.amount} ${a.currency} email=${a.email} phone=${a.phone} cart=${a.cart_id} — ${note}`
-    logger.error(msg)
-    Sentry.captureMessage(msg, { level: "error", tags: { payment_provider: "onepay" } })
+    if (!already) {
+      const msg = `[onepay-reconcile] PAID BUT NOT MATCHED: txn=${a.txn_id} amount=${a.amount} ${a.currency} email=${a.email} phone=${a.phone} cart=${a.cart_id} — ${note}`
+      logger.error(msg)
+      Sentry.captureMessage(msg, { level: "error", tags: { payment_provider: "onepay" } })
+    }
+    return "review"
   }
 
+  const { paid, failed, amount } = interpret(knownStatus ?? (await fetchStatus(a.txn_id)))
+
+  if (failed) {
+    await updateAttempt(a.txn_id, { status: "failed" })
+    return "failed"
+  }
+  if (!paid) {
+    if (Date.now() - a.created_at > 24 * 3600_000) {
+      await updateAttempt(a.txn_id, { status: "expired" })
+      return "expired"
+    }
+    return "pending"
+  }
+
+  // PAID. Does its cart already have an order?
+  let cart: any = null
+  if (a.cart_id) {
+    const { data } = await query.graph({
+      entity: "cart",
+      filters: { id: a.cart_id },
+      fields: ["id", "completed_at", "total", "payment_collection.id", "payment_collection.payments.data", "payment_collection.payment_sessions.id", "payment_collection.payment_sessions.provider_id", "payment_collection.payment_sessions.status"],
+    })
+    cart = data[0] ?? null
+  }
+  if (cart?.completed_at) {
+    // Is THIS transaction the one the order was paid with? If not, the
+    // customer was charged twice for one order: flag it for a refund.
+    const usedTxns = (cart.payment_collection?.payments ?? [])
+      .map((p: any) => p?.data?.ipg_transaction_id)
+      .filter(Boolean)
+    if (usedTxns.length && !usedTxns.includes(a.txn_id)) {
+      return flag(`DUPLICATE PAYMENT: order already paid with ${usedTxns.join(",")}. Refund this one.`)
+    }
+    await updateAttempt(a.txn_id, { status: "done" })
+    return "done"
+  }
+
+  // Original session still exists -> normal path (authorize re-verifies).
+  const { data: own } = await query.graph({
+    entity: "payment_session",
+    filters: { id: a.session_id },
+    fields: ["id", "status"],
+  })
+  if (own[0]) {
+    await emit(a.session_id)
+    await updateAttempt(a.txn_id, { status: "recovered", note: `replayed on original session (${own[0].status})` })
+    return "recovered"
+  }
+
+  // Orphan: session was replaced. Attach the paid txn to the cart's
+  // current Onepay session, but only if the money matches the cart.
+  if (!cart) return flag("orphaned payment and no cart link (older attempt)")
+  const paidAmount = amount ?? a.amount
+  if (Math.abs(Number(cart.total) - paidAmount) > 0.01) {
+    return flag(`cart total ${cart.total} differs from paid ${paidAmount} (cart changed after payment)`)
+  }
+  // Newest Onepay session on the cart. A session marked "error" (the
+  // return page checked a replaced, unpaid link) is fine to re-use: the
+  // override makes authorization check the paid transaction instead.
+  const current = (cart.payment_collection?.payment_sessions ?? [])
+    .filter(
+      (s: any) =>
+        s?.provider_id === "pp_onepay_onepay" &&
+        ["pending", "requires_more", "error"].includes(s.status)
+    )
+    .pop()
+  if (!current) return flag("orphaned payment and cart has no live Onepay session")
+  await setSessionOverride(current.id, a.txn_id)
+  await emit(current.id)
+  await updateAttempt(a.txn_id, { status: "recovered", note: `attached to session ${current.id}` })
+  return "recovered"
+}
+
+export default async function onepayReconcileJob(container: MedusaContainer) {
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
+  if (!ONEPAY_APP_ID || !ONEPAY_TOKEN) return
+
+  const attempts = (await listAttempts(MIN_AGE_MS, MAX_AGE_MS)).filter(
+    // needs_review is retried too: the cart can become matchable later
+    // (e.g. the customer comes back to checkout and a new session exists).
+    // "recovered" too: if the replayed webhook failed to finish the order,
+    // keep retrying (a completed cart just marks it done).
+    (a) => a.status === "pending" || a.status === "needs_review" || a.status === "recovered"
+  )
+  if (!attempts.length) return
+
+  let recovered = 0
+  let review = 0
   for (const a of attempts) {
     try {
-      const { paid, failed, amount } = interpret(await fetchStatus(a.txn_id))
-
-      if (failed) {
-        await updateAttempt(a.txn_id, { status: "failed" })
-        continue
-      }
-      if (!paid) {
-        if (Date.now() - a.created_at > 24 * 3600_000) {
-          await updateAttempt(a.txn_id, { status: "expired" })
-        }
-        continue
-      }
-
-      // PAID. Does its cart already have an order?
-      let cart: any = null
-      if (a.cart_id) {
-        const { data } = await query.graph({
-          entity: "cart",
-          filters: { id: a.cart_id },
-          fields: ["id", "completed_at", "total", "payment_collection.id", "payment_collection.payment_sessions.id", "payment_collection.payment_sessions.provider_id", "payment_collection.payment_sessions.status"],
-        })
-        cart = data[0] ?? null
-      }
-      if (cart?.completed_at) {
-        await updateAttempt(a.txn_id, { status: "done" })
-        continue
-      }
-
-      // Original session still alive and pending -> normal path.
-      const { data: own } = await query.graph({
-        entity: "payment_session",
-        filters: { id: a.session_id },
-        fields: ["id", "status"],
-      })
-      if (own[0]) {
-        if (own[0].status === "pending" || own[0].status === "requires_more") {
-          await emit(a.session_id, a)
-          await updateAttempt(a.txn_id, { status: "recovered", note: "replayed webhook on original session" })
-          recovered++
-        } else {
-          // authorized/captured but cart not completed: let the webhook retry finish it
-          await emit(a.session_id, a)
-          await updateAttempt(a.txn_id, { status: "recovered", note: `replayed, session was ${own[0].status}` })
-          recovered++
-        }
-        continue
-      }
-
-      // Orphan: session was replaced. Attach the paid txn to the cart's
-      // current Onepay session, but only if the money matches the cart.
-      if (!cart) {
-        await flag(a, "orphaned payment and no cart link (older attempt)")
-        continue
-      }
-      const paidAmount = amount ?? a.amount
-      if (Math.abs(Number(cart.total) - paidAmount) > 0.01) {
-        await flag(a, `cart total ${cart.total} differs from paid ${paidAmount} (cart changed after payment)`)
-        continue
-      }
-      // Newest Onepay session on the cart. A session marked "error" (the
-      // return page checked a replaced, unpaid link) is fine to re-use: the
-      // override makes authorization check the paid transaction instead.
-      const current = (cart.payment_collection?.payment_sessions ?? [])
-        .filter(
-          (s: any) =>
-            s?.provider_id === "pp_onepay_onepay" &&
-            ["pending", "requires_more", "error"].includes(s.status)
-        )
-        .pop()
-      if (!current) {
-        await flag(a, "orphaned payment and cart has no live Onepay session")
-        continue
-      }
-      await setSessionOverride(current.id, a.txn_id)
-      await emit(current.id, a)
-      await updateAttempt(a.txn_id, { status: "recovered", note: `attached to session ${current.id}` })
-      recovered++
+      const out = await reconcileAttempt(container, a)
+      if (out === "recovered") recovered++
+      if (out === "review") review++
     } catch (e: any) {
       logger.error(`[onepay-reconcile] ${a.txn_id}: ${e.message}`)
     }
   }
-
   logger.info(`[onepay-reconcile] checked ${attempts.length}, recovered ${recovered}, needs review ${review}`)
 }
 

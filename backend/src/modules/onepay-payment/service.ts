@@ -313,7 +313,9 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
       siblings = (await listAttempts(0, 48 * 3600 * 1000)).filter((a) => a.cart_id === cartId)
     }
     for (const a of siblings) {
-      if (a.txn_id === currentTxn || a.status === "done" || a.status === "recovered") continue
+      // Same cart => at most one order, so re-using a sibling on a retry is
+      // safe (and needed: a completion can fail after authorize and retry).
+      if (a.txn_id === currentTxn || a.status === "failed" || a.status === "expired") continue
       if (needed && Number(a.amount) + 0.5 < needed) continue
       try {
         const r = await this.onepayRequest<OnepayStatusResponse>("/v3/transaction/status/", {

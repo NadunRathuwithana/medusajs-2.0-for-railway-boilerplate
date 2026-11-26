@@ -1,5 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { ContainerRegistrationKeys, Modules, PaymentWebhookEvents } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { getAttempt } from "../../modules/onepay-payment/attempts"
+import { reconcileAttempt } from "../../jobs/onepay-reconcile"
 
 async function processPaymentCollect(req: MedusaRequest) {
   const logger = req.scope.resolve(ContainerRegistrationKeys.LOGGER) || console;
@@ -26,7 +28,7 @@ async function processPaymentCollect(req: MedusaRequest) {
     logger.info(`Querying OnePay transaction status for transaction_id: ${transactionId}`);
 
     try {
-      const response = await fetch("https://api.onepay.lk/v3/transaction/status/", {
+      const response = await fetch(`${process.env.ONEPAY_BASE_URL || "https://api.onepay.lk"}/v3/transaction/status/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -44,54 +46,15 @@ async function processPaymentCollect(req: MedusaRequest) {
       if (responseData.status === 200 && responseData.data?.status === true) {
         queryResult = responseData.data;
 
-        // Resolve Medusa Payment Module
-        const paymentModuleService = req.scope.resolve(Modules.PAYMENT) as any;
-        
-        // Find matching payment session (since Payment record is only created post-capture)
-        const allSessions = await paymentModuleService.listPaymentSessions({}, {
-          take: 100
-        });
-
-        const session = allSessions.find((s: any) => s.data?.ipg_transaction_id === transactionId);
-
-        if (session) {
-          logger.info(`Found Medusa payment session with ID: ${session.id}`);
-
-          const bodyData = (req.body ?? {}) as Record<string, unknown>
-          const payloadData = {
-            ...bodyData,
-            additional_data: session.id,
-          }
-
-          // Emit the WebhookReceived event to let Medusa process it natively
-          const eventBus = req.scope.resolve(Modules.EVENT_BUS) as any;
-          await eventBus.emit({
-            name: PaymentWebhookEvents.WebhookReceived,
-            data: {
-              provider: "onepay_onepay",
-              payload: {
-                data: payloadData,
-                rawData: JSON.stringify(payloadData),
-                headers: req.headers as Record<string, unknown>,
-              },
-            },
-          }, {
-            delay: 5000,
-            attempts: 3,
-          });
-          logger.info(`Emitted WebhookReceived event for session: ${session.id}`);
+        // Every link we issue is in the attempts ledger, so look the txn up
+        // there (fast, exact) and settle it with the same logic as the
+        // reconcile job: completed? own session? replaced link? -> order.
+        const attempt = await getAttempt(transactionId)
+        if (attempt) {
+          const outcome = await reconcileAttempt(req.scope, attempt, responseData)
+          logger.info(`[onepay-collect] ${transactionId}: ${outcome}`)
         } else {
-          // Check if already captured/completed as a Payment
-          const allPayments = await paymentModuleService.listPayments({}, {
-            take: 100
-          });
-          const payment = allPayments.find((p: any) => p.data?.ipg_transaction_id === transactionId);
-
-          if (payment) {
-            logger.info(`Payment already completed/captured for transaction ID: ${transactionId}`);
-          } else {
-            logger.warn(`No payment or payment session found in Medusa matching transaction ID: ${transactionId}`);
-          }
+          logger.warn(`[onepay-collect] ${transactionId} is not in the attempts ledger`)
         }
       }
     } catch (error: any) {
