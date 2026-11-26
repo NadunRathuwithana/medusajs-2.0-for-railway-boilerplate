@@ -245,7 +245,13 @@ const Payment = ({
             // initiatePaymentSession returns {error: string} on failure
             // (instead of throwing) to avoid triggering Next.js error boundary
             if (result?.error) {
-              setError(result.error)
+              // Provider/network failures come back as vague technical text.
+              const raw = String(result.error)
+              setError(
+                /unknown error|failed to initialize|fetch failed|ECONN|timeout|5\d\d/i.test(raw)
+                  ? "This payment method isn't available right now. Please choose another one."
+                  : raw
+              )
             } else if (result?.session) {
               setSyncedSession(result.session)
               // Dedup per cart+method — switching providers is a genuinely
