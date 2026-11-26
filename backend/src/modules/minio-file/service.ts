@@ -191,7 +191,21 @@ class MinioFileProviderService extends AbstractFileProviderService {
 
     try {
       const parsedFilename = path.parse(file.filename)
-      const fileKey = `${parsedFilename.name}-${ulid()}${parsedFilename.ext}`
+      // Storage keys and x-amz-meta headers are part of the S3 request
+      // signature: spaces, en dashes, accents, brackets etc. in a filename
+      // made uploads fail with "signature does not match". Keep a clean,
+      // readable ASCII key (the original name is kept, encoded, as metadata).
+      const safeBase =
+        parsedFilename.name
+          .normalize('NFKD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^A-Za-z0-9._-]+/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^[-.]+|[-.]+$/g, '')
+          .toLowerCase()
+          .slice(0, 80) || 'file'
+      const safeExt = parsedFilename.ext.replace(/[^A-Za-z0-9.]/g, '').toLowerCase()
+      const fileKey = `${safeBase}-${ulid()}${safeExt}`
       
       // Handle different content types properly
       let content: Buffer
@@ -217,7 +231,7 @@ class MinioFileProviderService extends AbstractFileProviderService {
         content.length,
         {
           'Content-Type': file.mimeType,
-          'x-amz-meta-original-filename': file.filename,
+          'x-amz-meta-original-filename': encodeURIComponent(file.filename),
           'x-amz-acl': 'public-read'
         }
       )
