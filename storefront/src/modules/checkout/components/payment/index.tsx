@@ -8,7 +8,7 @@ import { CardElement } from "@stripe/react-stripe-js"
 import { StripeCardElementOptions } from "@stripe/stripe-js"
 
 import PaymentContainer from "@modules/checkout/components/payment-container"
-import { isStripe as isStripeFunc, paymentInfoMap, getPaymentPromoInfo, getAllPaymentPromoCodes } from "@lib/constants"
+import { isStripe as isStripeFunc, paymentInfoMap, getPaymentPromoInfo, getAllPaymentPromoCodes, isCodOverLimit, COD_LIMIT_MESSAGE } from "@lib/constants"
 import { StripeContext } from "@modules/checkout/components/payment-wrapper"
 import { initiatePaymentSession, applyPromotions } from "@lib/data/cart"
 import { isValidPhone } from "@lib/util/checkout-validation"
@@ -42,19 +42,30 @@ const Payment = ({
     activeSession?.provider_id ?? ""
   )
 
+  // COD is capped at LKR 8,000 (order total incl. delivery).
+  const codBlocked = isCodOverLimit(cart?.total)
+
   // Auto-select COD (pp_system_default) if available, otherwise fallback to the first available method
   useEffect(() => {
+    // Order grew past the COD limit while COD was picked: move to the next method.
+    if (codBlocked && selectedPaymentMethod === "pp_system_default") {
+      const next = availablePaymentMethods?.find((m) => m.id !== "pp_system_default")
+      setSelectedPaymentMethod(next?.id ?? "")
+      return
+    }
     if (!selectedPaymentMethod && availablePaymentMethods?.length > 0) {
       const codMethod = availablePaymentMethods.find(
         (m) => m.id === "pp_system_default"
       )
-      if (codMethod) {
+      if (codMethod && !codBlocked) {
         setSelectedPaymentMethod(codMethod.id)
       } else {
-        setSelectedPaymentMethod(availablePaymentMethods[0].id)
+        setSelectedPaymentMethod(
+          (availablePaymentMethods.find((m) => m.id !== "pp_system_default") ?? availablePaymentMethods[0]).id
+        )
       }
     }
-  }, [availablePaymentMethods, selectedPaymentMethod])
+  }, [availablePaymentMethods, selectedPaymentMethod, codBlocked])
 
 
   const isStripe = isStripeFunc(activeSession?.provider_id)
@@ -317,6 +328,8 @@ const Payment = ({
                               key={paymentMethod.id}
                               selectedPaymentOptionId={selectedPaymentMethod}
                               cart={cart}
+                              disabled={codBlocked && paymentMethod.id === "pp_system_default"}
+                              note={codBlocked && paymentMethod.id === "pp_system_default" ? COD_LIMIT_MESSAGE : undefined}
                             />
                           )
                         })}

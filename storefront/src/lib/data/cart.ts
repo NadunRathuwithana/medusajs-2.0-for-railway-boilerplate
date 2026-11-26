@@ -13,6 +13,7 @@ import { getProductsById } from "./products"
 import { getRegion } from "./regions"
 import { listCartShippingMethods } from "./fulfillment"
 import { cleanPhone, isValidPhone } from "@lib/util/checkout-validation"
+import { COD_LIMIT_MESSAGE, isCodOverLimit } from "@lib/constants"
 
 export const retrieveCart = cache(async function retrieveCart() {
   const cartId = await getCartId()
@@ -636,6 +637,18 @@ export async function assertCartInStock() {
  * Next.js masks messages thrown from server actions in production, so the
  * customer would only see a generic error. Never throws except on redirect.
  */
+/** True when the cart is set to pay by cash on delivery and is over the COD limit. */
+async function codOverLimit(cartId: string): Promise<boolean> {
+  const c = await sdk.store.cart
+    .retrieve(cartId, { fields: "id,total,*payment_collection.payment_sessions" }, await getAuthHeaders())
+    .then((r: any) => r.cart)
+    .catch(() => null)
+  if (!c) return false
+  const sessions = c.payment_collection?.payment_sessions ?? []
+  const cod = sessions.some((s: any) => String(s.provider_id || "").startsWith("pp_system_default") && s.status !== "canceled")
+  return cod && isCodOverLimit(c.total)
+}
+
 export async function checkCartReady(): Promise<{ error?: string }> {
   try {
     await assertCartContactSaved()
@@ -649,6 +662,7 @@ export async function checkCartReady(): Promise<{ error?: string }> {
       if (fresh && !fresh.shipping_address?.phone && !fresh.billing_address?.phone) {
         return { error: "Please enter your phone number so we can contact you about your delivery." }
       }
+      if (await codOverLimit(cartId)) return { error: COD_LIMIT_MESSAGE }
     }
     return {}
   } catch (err: any) {
@@ -664,6 +678,7 @@ export async function placeOrder() {
 
   await assertCartInStock()
   await assertCartContactSaved()
+  if (await codOverLimit(cartId)) throw new Error(COD_LIMIT_MESSAGE)
 
   // Never complete an order that has no phone number: re-read the cart fresh
   // (not the cached copy) and heal/validate it first.

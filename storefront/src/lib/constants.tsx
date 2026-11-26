@@ -58,6 +58,12 @@ export const isStripe = (providerId?: string) => {
 export const isPaypal = (providerId?: string) => {
   return providerId?.startsWith("pp_paypal")
 }
+// Cash on delivery is only offered up to this order total (LKR, incl. delivery).
+export const COD_MAX_TOTAL = 8000
+export const COD_LIMIT_MESSAGE =
+  "Cash on delivery is available for orders up to LKR 8,000. For this order, please pay by card, Koko or Mintpay."
+export const isCodOverLimit = (total?: number | null) => Number(total ?? 0) > COD_MAX_TOTAL
+
 export const isManual = (providerId?: string) => {
   return providerId?.startsWith("pp_system_default")
 }

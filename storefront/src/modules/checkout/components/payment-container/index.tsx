@@ -12,6 +12,7 @@ type PaymentContainerProps = {
   paymentProviderId: string
   selectedPaymentOptionId: string | null
   disabled?: boolean
+  note?: string
   paymentInfoMap: Record<string, { title: string; shortTitle?: string; icon: JSX.Element }>
   cart?: any
 }
@@ -21,6 +22,7 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
   selectedPaymentOptionId,
   paymentInfoMap,
   disabled = false,
+  note,
   cart,
 }) => {
   const isDevelopment = process.env.NODE_ENV === "development"
@@ -38,6 +40,7 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
           {
             "border-black bg-gray-50": isSelected,
             "border-gray-200 bg-white": !isSelected,
+            "opacity-60 cursor-not-allowed hover:bg-white": disabled,
           }
         )}
       >
@@ -71,6 +74,9 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
               Instant discount applied at checkout
             </span>
           </div>
+        )}
+        {note && (
+          <p className="pl-9 text-xs text-amber-700" data-testid="payment-option-note">{note}</p>
         )}
         {isManual(paymentProviderId) && isDevelopment && (
           <PaymentTest className="small:hidden text-[10px]" />
