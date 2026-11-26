@@ -110,9 +110,12 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
 
   // A payment session is actively being created/synced for the selected method —
   // this IS "in progress", so the button stays disabled AND shows a spinner.
+  // Only while details are complete: with details missing no session is being
+  // made (it waits for them), so a spinner there looked like an endless load.
   const isSyncing =
-    syncState.isLoading ||
-    (syncState.selectedMethod !== null && !activeSession)
+    !missingInfo &&
+    (syncState.isLoading ||
+      (syncState.selectedMethod !== null && !activeSession))
 
   const notReady = missingInfo || isSyncing
 
