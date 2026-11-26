@@ -483,8 +483,6 @@ const loadOnepayJs = () =>
   new Promise<void>((resolve, reject) => {
     // Onepay.js looks for #onepay-btn at load time and injects its "Pay Now"
     // button there, so the (hidden) host must exist before the script runs.
-    const old = document.querySelector(`script[src="${ONEPAY_JS_SRC}"]`)
-    old?.remove()
     const el = document.createElement("script")
     el.src = ONEPAY_JS_SRC
     el.async = true
@@ -573,15 +571,22 @@ const OnepayJsButton = ({ session, notReady }: { session: any; notReady: boolean
     try {
       const host = document.getElementById("onepay-btn")
       if (host) host.innerHTML = ""
-      await loadOnepayJs()
-      // Wait for Onepay.js to inject its button, then open the popup with it.
-      let btn: HTMLButtonElement | null = null
-      for (let i = 0; i < 20 && !btn; i++) {
-        btn = document.querySelector("#onepay-btn button")
-        if (!btn) await new Promise((r) => setTimeout(r, 150))
+      if (typeof (window as any).openPaymentIframe !== "function") await loadOnepayJs()
+      const open = (window as any).openPaymentIframe
+      if (typeof open === "function") {
+        // Onepay.js global: opens its popup on our link and listens for the
+        // result (fires onePaySuccess / onePayFail on window).
+        open(redirectUrl, txnId)
+      } else {
+        // Older script: drive its own injected "Pay Now" button.
+        let btn: HTMLButtonElement | null = null
+        for (let i = 0; i < 20 && !btn; i++) {
+          btn = document.querySelector("#onepay-btn button")
+          if (!btn) await new Promise((r) => setTimeout(r, 150))
+        }
+        if (!btn) throw new Error("no popup")
+        btn.click()
       }
-      if (!btn) throw new Error("no button")
-      btn.click()
       setSubmitting(false)
     } catch {
       // Popup unavailable: use the normal Onepay page instead.
