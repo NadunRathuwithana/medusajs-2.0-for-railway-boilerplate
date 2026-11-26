@@ -48,14 +48,25 @@ const Addresses = ({
   const dirty = useRef(false)
   const inflight = useRef<Promise<void> | null>(null)
 
-  const saveNow = useRef(async () => {
+  // Exact on-screen values of the last successful save. Lets "Place order"
+  // skip a redundant save (several server round trips) when nothing changed,
+  // while autofill/paste changes still count because we compare real values.
+  const lastSaved = useRef<string | null>(null)
+  const snapshot = () =>
+    formRef.current ? JSON.stringify(Array.from(new FormData(formRef.current).entries())) : ""
+
+  const saveNow = useRef(async (force = true) => {
     if (!formRef.current) return
+    const snap = snapshot()
+    if (!force && snap === lastSaved.current) return
     dirty.current = false
     const run = (async () => {
       try {
         await setAddresses(null, new FormData(formRef.current!))
+        lastSaved.current = snap
       } catch (e) {
         dirty.current = true
+        lastSaved.current = null
       }
     })()
     inflight.current = run
@@ -63,15 +74,15 @@ const Addresses = ({
     if (inflight.current === run) inflight.current = null
   }).current
 
-  const debouncedSubmit = useRef(debounce(() => saveNow(), 1500)).current
+  const debouncedSubmit = useRef(debounce(() => saveNow(true), 1500)).current
 
   useEffect(() => {
     registerFlush(async () => {
       debouncedSubmit.cancel()
       if (inflight.current) await inflight.current
-      // Always save what is on screen right before paying, even if nothing looks
-      // dirty (autofill/paste can change a field without a change event).
-      await saveNow()
+      // Save what is on screen right before paying unless it is exactly what
+      // was last saved (compared by value, so autofill/paste still saves).
+      await saveNow(false)
     })
     return () => registerFlush(null)
   }, [registerFlush, debouncedSubmit, saveNow])

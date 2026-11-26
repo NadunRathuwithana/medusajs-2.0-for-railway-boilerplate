@@ -679,8 +679,13 @@ export async function checkCartReady(): Promise<{ error?: string }> {
 export async function startOnepayCheckout(): Promise<
   { error: string } | { redirect_url: string; txn_id: string; session_id: string }
 > {
-  const ready = await checkCartReady()
-  if (ready.error) return { error: ready.error }
+  // Same checks as checkCartReady, run in parallel (the COD limit doesn't
+  // apply to card payments). This is the slow part of opening the popup.
+  try {
+    await Promise.all([assertCartContactSaved(), assertCartInStock()])
+  } catch (err: any) {
+    return { error: err?.message || "Please check your details and try again." }
+  }
   const cartId = await getCartId()
   if (!cartId) return { error: "Your cart has expired. Please refresh the page." }
   try {
