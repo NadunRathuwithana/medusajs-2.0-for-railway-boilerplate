@@ -27,6 +27,8 @@ export default function OnepayReturnClient({
   // and finishes the order). If nothing answers, take over the full window.
   const inFrame = typeof window !== "undefined" && window.self !== window.top
   const [framed, setFramed] = useState(false)
+  // Paid (or maybe paid) but no order yet: never show "Payment Failed" here.
+  const [stuck, setStuck] = useState(false)
 
   const statusMessage = String(searchParams?.status_message || searchParams?.status || "").toUpperCase()
   const failed = ["FAILED", "CANCELLED", "0", "2"].includes(statusMessage)
@@ -72,8 +74,13 @@ export default function OnepayReturnClient({
     //   2. point the cart at the paid transaction (when we know it)
     //   3. complete the cart ourselves
     const processOrder = async () => {
-      const deadline = Date.now() + 60_000
+      // Fast checks for a minute, then keep checking slowly for ~6 more minutes
+      // (the safety job finishes stuck orders within 5) and redirect as soon
+      // as the order exists.
+      const fastUntil = Date.now() + 60_000
+      const deadline = Date.now() + 7 * 60_000
       let attempt = 0
+      let slow = false
       while (Date.now() < deadline) {
         attempt++
         try {
@@ -106,13 +113,17 @@ export default function OnepayReturnClient({
         if (attempt === 3) {
           setMessage("Payment received. Finalising your order, this can take a few more seconds...")
         }
-        await new Promise((res) => setTimeout(res, attempt <= 3 ? 2000 : 4000))
+        if (Date.now() > fastUntil && !slow) {
+          slow = true
+          setStuck(true)
+          setMessage(
+            "We're still confirming your payment with the bank. Please don't pay again. If you were charged, your order is created automatically within a few minutes and you'll get an email. You can keep this page open."
+          )
+        }
+        await new Promise((res) => setTimeout(res, Date.now() > fastUntil ? 10_000 : attempt <= 3 ? 2000 : 4000))
       }
-
-      // Never tell a customer who may have paid that it failed.
-      setStatus("error")
       setMessage(
-        "We're still confirming your payment with the bank. If you were charged, your order will be created automatically within a few minutes and you'll get an email. Please don't pay again."
+        "We couldn't confirm your payment yet. If you were charged, please don't pay again: contact us on WhatsApp and we'll sort it out right away."
       )
     }
 
@@ -129,8 +140,12 @@ export default function OnepayReturnClient({
 
   return (
     <div className="py-24 min-h-[calc(100vh-64px)] flex justify-center">
-      <AnimatedOrderComplete status={status} message={message}>
-        {status === "error" && (
+      <AnimatedOrderComplete
+        status={status}
+        message={message}
+        title={stuck ? "Confirming your payment" : status === "error" ? "Payment not completed" : undefined}
+      >
+        {(status === "error" || stuck) && (
           <div className="flex flex-col items-center gap-3 mt-6">
             <Button onClick={() => router.push(`/${countryCode}/account${isLoggedIn ? '/orders' : ''}`)}>
               Check My Orders
