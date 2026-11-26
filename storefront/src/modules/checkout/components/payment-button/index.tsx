@@ -46,6 +46,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
 }) => {
   const [syncState, setSyncState] = useState<{
     isLoading: boolean
+    failed?: boolean
     selectedMethod: string | null
     session?: { id: string; provider_id: string; status: string; data: Record<string, unknown> } | null
   }>({
@@ -114,10 +115,11 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   // made (it waits for them), so a spinner there looked like an endless load.
   const isSyncing =
     !missingInfo &&
+    !syncState.failed &&
     (syncState.isLoading ||
       (syncState.selectedMethod !== null && !activeSession))
 
-  const notReady = missingInfo || isSyncing
+  const notReady = missingInfo || isSyncing || (!!syncState.failed && !activeSession)
 
   const debugInfo = null
 

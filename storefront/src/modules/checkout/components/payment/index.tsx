@@ -49,7 +49,10 @@ const Payment = ({
   useEffect(() => {
     // Order grew past the COD limit while COD was picked: move to the next method.
     if (codBlocked && selectedPaymentMethod === "pp_system_default") {
-      const next = availablePaymentMethods?.find((m) => m.id !== "pp_system_default")
+      // Card first: it's the main method and needs no extra signup.
+      const next =
+        availablePaymentMethods?.find((m) => isOnepay(m.id)) ??
+        availablePaymentMethods?.find((m) => m.id !== "pp_system_default")
       setSelectedPaymentMethod(next?.id ?? "")
       return
     }
@@ -61,7 +64,9 @@ const Payment = ({
         setSelectedPaymentMethod(codMethod.id)
       } else {
         setSelectedPaymentMethod(
-          (availablePaymentMethods.find((m) => m.id !== "pp_system_default") ?? availablePaymentMethods[0]).id
+          (availablePaymentMethods.find((m) => isOnepay(m.id)) ??
+            availablePaymentMethods.find((m) => m.id !== "pp_system_default") ??
+            availablePaymentMethods[0]).id
         )
       }
     }
@@ -287,10 +292,13 @@ const Payment = ({
           isLoading,
           selectedMethod: selectedPaymentMethod,
           session: syncedSession,
+          // Starting this method failed: the button must stop "loading" (the
+          // error is shown above it) instead of spinning forever.
+          failed: !!error && !isLoading,
         },
       })
     )
-  }, [isLoading, selectedPaymentMethod, syncedSession])
+  }, [isLoading, selectedPaymentMethod, syncedSession, error])
 
   const hasPaymentMethods = availablePaymentMethods?.length > 0
 
