@@ -18,9 +18,15 @@ export async function loadCartForOnepay(scope: MedusaContainer, cartId: string) 
   })
   const cart: any = data[0]
   if (!cart || cart.completed_at) return null
-  const session = (cart.payment_collection?.payment_sessions ?? []).find(
-    (s: any) => s.provider_id === "pp_onepay_onepay" && s.status === "pending"
-  )
+  // Newest Onepay session that can still be authorized ("error" = a check
+  // against a replaced, unpaid link failed; the override fixes that).
+  const session = (cart.payment_collection?.payment_sessions ?? [])
+    .filter(
+      (s: any) =>
+        s.provider_id === "pp_onepay_onepay" &&
+        ["pending", "requires_more", "error"].includes(s.status)
+    )
+    .pop()
   return { cart, session }
 }
 

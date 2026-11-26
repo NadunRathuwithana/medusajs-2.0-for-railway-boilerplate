@@ -38,6 +38,7 @@ export type OnepayAttempt = {
 const ATTEMPT_PREFIX = "onepay:attempt:"
 const INDEX_KEY = "onepay:attempts"
 const OVERRIDE_PREFIX = "onepay:override:"
+const CART_PREFIX = "onepay:cart:"
 const TTL_SECONDS = 14 * 24 * 3600
 
 export async function recordAttempt(a: OnepayAttempt): Promise<void> {
@@ -48,6 +49,9 @@ export async function recordAttempt(a: OnepayAttempt): Promise<void> {
       .multi()
       .set(ATTEMPT_PREFIX + a.txn_id, JSON.stringify(a), "EX", TTL_SECONDS)
       .zadd(INDEX_KEY, a.created_at, a.txn_id)
+      // Per-cart index: every link ever issued for this cart.
+      .zadd(CART_PREFIX + (a.cart_id || "none"), a.created_at, a.txn_id)
+      .expire(CART_PREFIX + (a.cart_id || "none"), TTL_SECONDS)
       .exec()
   } catch (e: any) {
     console.error("[onepay-attempts] record failed:", e?.message)
@@ -123,5 +127,20 @@ export async function getSessionOverride(sessionId: string): Promise<string | nu
     return await redis.get(OVERRIDE_PREFIX + sessionId)
   } catch {
     return null
+  }
+}
+
+/** Every Onepay attempt issued for a cart, newest first. */
+export async function listAttemptsForCart(cartId: string): Promise<OnepayAttempt[]> {
+  const redis = getRedisClient()
+  if (!redis || !cartId) return []
+  try {
+    const ids = await redis.zrevrange(CART_PREFIX + cartId, 0, 49)
+    if (!ids.length) return []
+    const raws = await redis.mget(ids.map((id) => ATTEMPT_PREFIX + id))
+    return raws.filter((r): r is string => !!r).map((r) => JSON.parse(r) as OnepayAttempt)
+  } catch (e: any) {
+    console.error("[onepay-attempts] listForCart failed:", e?.message)
+    return []
   }
 }

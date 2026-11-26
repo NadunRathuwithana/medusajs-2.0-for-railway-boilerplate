@@ -6,7 +6,7 @@ import AnimatedOrderComplete from "@modules/order/components/animated-order-comp
 import { placeOrder } from "@lib/data/cart"
 import { Button } from "@medusajs/ui"
 
-import { checkOrderForCart } from "./actions"
+import { checkOrderForCart, confirmOnepayJs } from "./actions"
 
 export default function OnepayReturnClient({ 
   searchParams, 
@@ -23,64 +23,62 @@ export default function OnepayReturnClient({
   const hasRun = useRef(false)
 
   // Onepay's popup (Onepay.js) follows the redirect URL inside its iframe.
-  // If we're framed, move this page to the full window and let it finish there.
+  // If we're framed, tell the checkout page underneath (it closes the popup
+  // and finishes the order). If nothing answers, take over the full window.
   const inFrame = typeof window !== "undefined" && window.self !== window.top
+  const [framed, setFramed] = useState(false)
+
+  const statusMessage = String(searchParams?.status_message || searchParams?.status || "").toUpperCase()
+  const failed = ["FAILED", "CANCELLED", "0", "2"].includes(statusMessage)
+  const txn: string | undefined =
+    searchParams?.txn ||
+    searchParams?.transaction_id ||
+    searchParams?.onepay_transaction_id ||
+    searchParams?.ipg_transaction_id ||
+    undefined
 
   useEffect(() => {
     if (inFrame) {
+      setFramed(true)
       try {
-        window.top!.location.href = window.location.href
-      } catch {
-        /* cross-origin top: fall through and finish in place */
-        return
-      }
-      return
+        window.parent.postMessage(
+          { type: "cardle:onepay-return", failed, txn },
+          window.location.origin
+        )
+      } catch {}
+      const t = setTimeout(() => {
+        try {
+          window.top!.location.href = window.location.href
+        } catch {}
+      }, 4000)
+      return () => clearTimeout(t)
     }
     // Prevent double-run in React strict mode
     if (hasRun.current) return
     hasRun.current = true
 
-
-
-    const statusMessage = searchParams?.status_message?.toUpperCase() || searchParams?.status
-    
-    // Explicitly check for failure/cancellation statuses from OnePay
-    if (
-      statusMessage === "FAILED" || 
-      statusMessage === "CANCELLED" || 
-      statusMessage === "0" || 
-      statusMessage === "2"
-    ) {
-      console.error("[OnePay Return] Payment cancelled or failed:", statusMessage)
+    if (failed) {
       setStatus("error")
-      setMessage("Payment was cancelled or failed. Please try again.")
-      // Reset the payment session so Medusa forces a fresh OnePay link next time
+      setMessage("Payment was cancelled or not completed. You have not been charged. Please try again.")
       import("./actions").then((actions) => {
         actions.resetPaymentSession().catch(console.error)
       })
       return
     }
 
-    // We do NOT validate the URL params strictly for success.
-    // OnePay's redirect URL params are unreliable / undocumented for browser redirect.
-    // The REAL payment verification happens server-side via the webhook.
-    // This page simply needs to:
-    //   1. Wait for the webhook to complete the order
-    //   2. OR try to complete the cart via placeOrder()
-    //   3. Then redirect to the order confirmation page
-
+    // Success path. The backend verifies every payment with Onepay (including
+    // a link checkout replaced), so we just keep trying to finish the order:
+    //   1. already placed by the webhook / reconcile job? -> confirmation page
+    //   2. point the cart at the paid transaction (when we know it)
+    //   3. complete the cart ourselves
     const processOrder = async () => {
-      const MAX_RETRIES = 8
-      
-      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-
-        
+      const deadline = Date.now() + 60_000
+      let attempt = 0
+      while (Date.now() < deadline) {
+        attempt++
         try {
-          // First: check if the webhook already completed the order
           const existingOrderId = await checkOrderForCart()
           if (existingOrderId) {
-
-            // Remove the cart cookie so a new cart is generated for the next purchase
             const { clearCart } = await import("./actions")
             await clearCart()
             router.push(`/${countryCode}/order/confirmed/${existingOrderId}`)
@@ -90,38 +88,44 @@ export default function OnepayReturnClient({
           console.warn("[OnePay Return] checkOrderForCart error:", err)
         }
 
-        try {
-          // Second: try to complete the cart ourselves via placeOrder()
-          // placeOrder() calls cart.complete() internally.
-          // If successful, it calls redirect() which throws NEXT_REDIRECT.
-          const cartRes = await placeOrder()
-          
-          // If placeOrder returned without redirecting, it returned the cart
-          // (meaning the cart wasn't ready to complete yet)
-          console.warn(`[OnePay Return] placeOrder returned without redirect. Attempt ${attempt}. Result:`, cartRes)
-        } catch (err: any) {
-          // NEXT_REDIRECT is thrown by Next.js redirect() — it means SUCCESS!
-          if (err?.digest?.startsWith?.("NEXT_REDIRECT") || err?.message?.includes?.("NEXT_REDIRECT")) {
-
-            return // Let the redirect happen
-          }
-          console.warn(`[OnePay Return] placeOrder error on attempt ${attempt}:`, err?.message || err)
+        if (txn) {
+          try {
+            await confirmOnepayJs(txn)
+          } catch {}
         }
 
-        // Wait before retrying — give the webhook time to process
-        const waitMs = attempt <= 3 ? 2000 : 3000
+        try {
+          await placeOrder()
+        } catch (err: any) {
+          if (err?.digest?.startsWith?.("NEXT_REDIRECT") || err?.message?.includes?.("NEXT_REDIRECT")) {
+            return
+          }
+          console.warn(`[OnePay Return] placeOrder attempt ${attempt}:`, err?.message || err)
+        }
 
-        await new Promise(res => setTimeout(res, waitMs))
+        if (attempt === 3) {
+          setMessage("Payment received. Finalising your order, this can take a few more seconds...")
+        }
+        await new Promise((res) => setTimeout(res, attempt <= 3 ? 2000 : 4000))
       }
 
-      // If we exhausted all retries, show error
-      console.error("[OnePay Return] All retries exhausted")
+      // Never tell a customer who may have paid that it failed.
       setStatus("error")
-      setMessage("Payment was processed, but we couldn't confirm your order yet. Please check your orders page or contact support.")
+      setMessage(
+        "We're still confirming your payment with the bank. If you were charged, your order will be created automatically within a few minutes and you'll get an email. Please don't pay again."
+      )
     }
 
     processOrder()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (framed) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-sm text-gray-500">
+        Finishing up...
+      </div>
+    )
+  }
 
   return (
     <div className="py-24 min-h-[calc(100vh-64px)] flex justify-center">

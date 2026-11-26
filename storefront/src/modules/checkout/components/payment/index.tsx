@@ -8,7 +8,7 @@ import { CardElement } from "@stripe/react-stripe-js"
 import { StripeCardElementOptions } from "@stripe/stripe-js"
 
 import PaymentContainer from "@modules/checkout/components/payment-container"
-import { isStripe as isStripeFunc, paymentInfoMap, getPaymentPromoInfo, getAllPaymentPromoCodes, isCodOverLimit, COD_LIMIT_MESSAGE } from "@lib/constants"
+import { isStripe as isStripeFunc, paymentInfoMap, getPaymentPromoInfo, getAllPaymentPromoCodes, isCodOverLimit, COD_LIMIT_MESSAGE, isOnepay } from "@lib/constants"
 import { StripeContext } from "@modules/checkout/components/payment-wrapper"
 import { initiatePaymentSession, applyPromotions } from "@lib/data/cart"
 import { isValidPhone } from "@lib/util/checkout-validation"
@@ -172,6 +172,25 @@ const Payment = ({
 
   useEffect(() => {
     let isMounted = true
+
+    // Onepay links are created when the customer clicks Place order (see
+    // startOnepayCheckout). Pre-creating them here made a new link on every
+    // cart change, so a customer could pay a link that was already replaced.
+    if (isOnepay(selectedPaymentMethod)) {
+      setIsLoading(false)
+      setError(null)
+      const dedupKey = `${cartIdRef.current}:${selectedPaymentMethod}`
+      if (paymentReady && !wasEventTracked("payment_info", dedupKey)) {
+        trackAddPaymentInfo({
+          items: cartRef.current?.items ?? [],
+          total: cartRef.current?.total,
+          currency: cartRef.current?.currency_code,
+          paymentType: selectedPaymentMethod,
+        })
+        markEventTracked("payment_info", dedupKey)
+      }
+      return
+    }
 
     if (paymentReady && selectedPaymentMethod && !paidByGiftcard) {
       if (!activeSession || activeSession.provider_id !== selectedPaymentMethod) {

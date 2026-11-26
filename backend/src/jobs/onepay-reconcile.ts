@@ -67,7 +67,9 @@ export default async function onepayReconcileJob(container: MedusaContainer) {
   const eventBus = container.resolve(Modules.EVENT_BUS)
 
   const attempts = (await listAttempts(MIN_AGE_MS, MAX_AGE_MS)).filter(
-    (a) => a.status === "pending"
+    // needs_review is retried too: the cart can become matchable later
+    // (e.g. the customer comes back to checkout and a new session exists).
+    (a) => a.status === "pending" || a.status === "needs_review"
   )
   if (!attempts.length) return
 
@@ -98,7 +100,9 @@ export default async function onepayReconcileJob(container: MedusaContainer) {
 
   const flag = async (a: OnepayAttempt, note: string) => {
     review++
+    const already = a.status === "needs_review"
     await updateAttempt(a.txn_id, { status: "needs_review", note })
+    if (already) return // alerted on the first pass; keep retrying quietly
     const msg = `[onepay-reconcile] PAID BUT NOT MATCHED: txn=${a.txn_id} amount=${a.amount} ${a.currency} email=${a.email} phone=${a.phone} cart=${a.cart_id} — ${note}`
     logger.error(msg)
     Sentry.captureMessage(msg, { level: "error", tags: { payment_provider: "onepay" } })
@@ -165,9 +169,16 @@ export default async function onepayReconcileJob(container: MedusaContainer) {
         await flag(a, `cart total ${cart.total} differs from paid ${paidAmount} (cart changed after payment)`)
         continue
       }
-      const current = (cart.payment_collection?.payment_sessions ?? []).find(
-        (s: any) => s?.provider_id === "pp_onepay_onepay" && s.status === "pending"
-      )
+      // Newest Onepay session on the cart. A session marked "error" (the
+      // return page checked a replaced, unpaid link) is fine to re-use: the
+      // override makes authorization check the paid transaction instead.
+      const current = (cart.payment_collection?.payment_sessions ?? [])
+        .filter(
+          (s: any) =>
+            s?.provider_id === "pp_onepay_onepay" &&
+            ["pending", "requires_more", "error"].includes(s.status)
+        )
+        .pop()
       if (!current) {
         await flag(a, "orphaned payment and cart has no live Onepay session")
         continue

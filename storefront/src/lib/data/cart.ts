@@ -670,6 +670,50 @@ export async function checkCartReady(): Promise<{ error?: string }> {
   }
 }
 
+/**
+ * Onepay: validate the cart and create a fresh payment link in ONE round trip,
+ * right when the customer clicks Place order. Creating the link on click (not
+ * in the background) means it always matches the final total, so a promo or
+ * address save can't swap it out from under a customer who is paying.
+ */
+export async function startOnepayCheckout(): Promise<
+  { error: string } | { redirect_url: string; txn_id: string; session_id: string }
+> {
+  const ready = await checkCartReady()
+  if (ready.error) return { error: ready.error }
+  const cartId = await getCartId()
+  if (!cartId) return { error: "Your cart has expired. Please refresh the page." }
+  try {
+    const headers = await getAuthHeaders()
+    const { cart } = await sdk.store.cart.retrieve(
+      cartId,
+      { fields: "*payment_collection,*payment_collection.payment_sessions,*shipping_address,*billing_address,email,total,currency_code,customer_id,created_at,updated_at" },
+      headers
+    )
+    const res = await initiatePaymentSession(cart as any, {
+      provider_id: "pp_onepay_onepay",
+      data: {
+        billing_address: cart.billing_address,
+        shipping_address: cart.shipping_address,
+        email: cart.email,
+        cart_id: cart.id,
+      },
+    })
+    if ("error" in res && res.error) return { error: res.error }
+    const data: any = (res as any).session?.data ?? {}
+    if (!data.redirect_url || !data.ipg_transaction_id) {
+      return { error: "Could not start the card payment. Please try again." }
+    }
+    return {
+      redirect_url: String(data.redirect_url),
+      txn_id: String(data.ipg_transaction_id),
+      session_id: String((res as any).session.id),
+    }
+  } catch (err: any) {
+    return { error: err?.message || "Could not start the card payment. Please try again." }
+  }
+}
+
 export async function placeOrder() {
   const cartId = await getCartId()
   if (!cartId) {

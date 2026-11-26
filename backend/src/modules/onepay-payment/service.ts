@@ -26,7 +26,7 @@ import type {
   Logger,
 } from "@medusajs/framework/types"
 import crypto from "crypto"
-import { recordAttempt, getSessionOverride } from "./attempts"
+import { recordAttempt, getSessionOverride, listAttemptsForCart, listAttempts, getAttempt, updateAttempt } from "./attempts"
 import type {
   OnepayOptions,
   OnepayCreateResponse,
@@ -295,6 +295,41 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
    * authorizePayment — verify payment status with Onepay directly.
    * Called when customer returns from Onepay redirect.
    */
+  /**
+   * Another Onepay link issued for the same cart that Onepay reports as paid,
+   * for at least the amount of the current link. Used when the customer paid
+   * a link that checkout later replaced.
+   */
+  private async findPaidSiblingTxn(
+    cartId: string | null,
+    currentTxn: string
+  ): Promise<{ txn: string; amount: number; paidOn: any } | null> {
+    if (!cartId) return null
+    const current = await getAttempt(currentTxn)
+    const needed = Number(current?.amount ?? 0)
+    let siblings = await listAttemptsForCart(cartId)
+    if (!siblings.length) {
+      // Links issued before the per-cart index existed.
+      siblings = (await listAttempts(0, 48 * 3600 * 1000)).filter((a) => a.cart_id === cartId)
+    }
+    for (const a of siblings) {
+      if (a.txn_id === currentTxn || a.status === "done" || a.status === "recovered") continue
+      if (needed && Number(a.amount) + 0.5 < needed) continue
+      try {
+        const r = await this.onepayRequest<OnepayStatusResponse>("/v3/transaction/status/", {
+          app_id: this.options_.appId,
+          onepay_transaction_id: a.txn_id,
+        })
+        const st = this.interpretStatusResponse(r)
+        if (st.isSuccess) return { txn: a.txn_id, amount: Number(st.amount ?? a.amount), paidOn: st.paidOn }
+        if (st.isFailure) await updateAttempt(a.txn_id, { status: "failed" })
+      } catch (e: any) {
+        this.logger_.warn(`Onepay: sibling check failed for ${a.txn_id}: ${e?.message}`)
+      }
+    }
+    return null
+  }
+
   async authorizePayment(
     input: AuthorizePaymentInput
   ): Promise<AuthorizePaymentOutput> {
@@ -339,6 +374,33 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
             ipg_transaction_id: ipgTransactionId,
             paid_on: paidOn,
             verified_amount: amount,
+            onepay_status: "success",
+            captured_at: new Date().toISOString(),
+          },
+          status: "captured",
+        }
+      }
+
+      // This link wasn't paid. Checkout may have replaced the link after the
+      // customer already paid an earlier one for the same cart (address save,
+      // promo, re-price all reset the session). Accept that earlier payment if
+      // it covers this cart's amount.
+      const sibling = await this.findPaidSiblingTxn(
+        (input.data?.cart_id as string | undefined) ?? null,
+        ipgTransactionId
+      )
+      if (sibling) {
+        this.logger_.info(
+          `Onepay: session ${input.data?.session_id} paid via earlier link ${sibling.txn} (current link ${ipgTransactionId} unpaid)`
+        )
+        await updateAttempt(sibling.txn, { status: "done", note: `matched to session ${input.data?.session_id}` })
+        return {
+          data: {
+            ...input.data,
+            ipg_transaction_id: sibling.txn,
+            replaced_link_txn: ipgTransactionId,
+            paid_on: sibling.paidOn,
+            verified_amount: sibling.amount,
             onepay_status: "success",
             captured_at: new Date().toISOString(),
           },
