@@ -702,24 +702,36 @@ export async function startOnepayCheckout(): Promise<
     if ((cart as any).completed_at) {
       return { error: "This order has already been placed. Please check your email or your orders." }
     }
-    const res = await initiatePaymentSession(cart as any, {
-      provider_id: "pp_onepay_onepay",
-      data: {
-        billing_address: cart.billing_address,
-        shipping_address: cart.shipping_address,
-        email: cart.email,
-        cart_id: cart.id,
+    // Call the SDK directly (not initiatePaymentSession): that helper
+    // revalidates the cart tag, which makes Next re-render the whole checkout
+    // inside this response and was a big part of the popup delay. The page
+    // doesn't need the new session; placeOrder revalidates later.
+    const resp = await sdk.store.payment.initiatePaymentSession(
+      cart as any,
+      {
+        provider_id: "pp_onepay_onepay",
+        data: {
+          billing_address: cart.billing_address,
+          shipping_address: cart.shipping_address,
+          email: cart.email,
+          cart_id: cart.id,
+        },
       },
-    })
-    if ("error" in res && res.error) return { error: res.error }
-    const data: any = (res as any).session?.data ?? {}
-    if (!data.redirect_url || !data.ipg_transaction_id) {
+      {},
+      headers
+    )
+    const session: any = (resp?.payment_collection?.payment_sessions ?? [])
+      .filter((x: any) => x.provider_id === "pp_onepay_onepay")
+      .sort((a: any, b: any) => new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime())
+      .pop()
+    const data: any = session?.data ?? {}
+    if (!session || !data.redirect_url || !data.ipg_transaction_id) {
       return { error: "Could not start the card payment. Please try again." }
     }
     return {
       redirect_url: String(data.redirect_url),
       txn_id: String(data.ipg_transaction_id),
-      session_id: String((res as any).session.id),
+      session_id: String(session.id),
     }
   } catch (err: any) {
     return { error: err?.message || "Could not start the card payment. Please try again." }
