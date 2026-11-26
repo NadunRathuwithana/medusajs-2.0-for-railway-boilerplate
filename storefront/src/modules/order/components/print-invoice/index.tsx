@@ -185,16 +185,23 @@ export default function PrintInvoice({ order }: { order: HttpTypes.StoreOrder })
                   item.compare_at_unit_price != null && Number(item.compare_at_unit_price) > unit
                     ? Number(item.compare_at_unit_price)
                     : null
+                const md = item.metadata || {}
+                const isPacking = md.packing === true
+                const photo: string | undefined = (isPacking ? md.image : null) || item.thumbnail || md.image
+                const title = isPacking ? `Packing: ${md.packing_name || "Extra"}` : item.product_title || item.title
                 const variant =
-                  item.variant_title && !/default/i.test(item.variant_title) ? item.variant_title : null
+                  !isPacking && item.variant_title && !/default/i.test(item.variant_title) ? item.variant_title : null
+                // Add-ons chosen on this bag (already included in its unit price).
+                const addons: Array<{ id: string; name: string; price: number; image?: string }> =
+                  Array.isArray(md.addons) ? md.addons : []
                 return (
                   <tr key={item.id} style={{ borderBottom: `1px solid ${LINE}`, breakInside: "avoid" }}>
                     <td style={{ padding: "12px 8px" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        {item.thumbnail ? (
+                        {photo ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
-                            src={item.thumbnail}
+                            src={photo}
                             alt=""
                             style={{ width: 52, height: 52, objectFit: "cover", borderRadius: 8, border: `1px solid ${LINE}`, background: "#f6efe7", flex: "none" }}
                           />
@@ -202,10 +209,28 @@ export default function PrintInvoice({ order }: { order: HttpTypes.StoreOrder })
                           <div style={{ width: 52, height: 52, borderRadius: 8, background: "#f6efe7", flex: "none" }} />
                         )}
                         <div>
-                          <div style={{ fontSize: 14, fontWeight: 700 }}>{item.product_title || item.title}</div>
+                          <div style={{ fontSize: 14, fontWeight: 700 }}>{title}</div>
                           {variant && <div style={{ fontSize: 12.5, color: INK, marginTop: 2 }}>{variant}</div>}
                         </div>
                       </div>
+                      {addons.length > 0 && (
+                        <div style={{ marginTop: 8, marginLeft: 64, display: "flex", flexDirection: "column", gap: 6 }}>
+                          {addons.map((a) => (
+                            <div key={a.id} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5, color: MUTED }}>
+                              {a.image ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={a.image} alt="" style={{ width: 26, height: 26, objectFit: "cover", borderRadius: 6, border: `1px solid ${LINE}`, flex: "none" }} />
+                              ) : (
+                                <div style={{ width: 26, height: 26, borderRadius: 6, background: "#f6efe7", flex: "none" }} />
+                              )}
+                              <span>
+                                + {a.name}
+                                {Number(a.price) > 0 ? ` (${fmt(Number(a.price))})` : ""}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </td>
                     <td style={{ textAlign: "center", fontSize: 14, padding: "16px 8px" }}>{item.quantity}</td>
                     <td style={{ textAlign: "right", fontSize: 14, color: MUTED, padding: "16px 8px" }}>
