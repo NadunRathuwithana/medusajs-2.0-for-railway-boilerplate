@@ -1,6 +1,7 @@
 "use client"
 
 import { HttpTypes } from "@medusajs/types"
+import PrintInvoice from "@modules/order/components/print-invoice"
 
 type OrderDetailsProps = {
   order: HttpTypes.StoreOrder
@@ -54,6 +55,7 @@ const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
           </div>
         </div>
       </div>
+      <PrintInvoice order={order} />
     </div>
   )
 }
