@@ -95,7 +95,7 @@ function AddToCartBtn({ product, onOpenModal }: { product: HttpTypes.StoreProduc
         isSoldOut ||
         (!hasOptions && (!product.variants || product.variants.length === 0))
       }
-      className="w-full lg:w-auto bg-[#111111] text-white px-4 sm:px-6 py-3 rounded-full text-xs font-bold tracking-widest capitalize hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-zinc-400 whitespace-nowrap"
+      className="w-full lg:w-auto min-h-[44px] bg-[#111111] text-white px-4 sm:px-6 py-3 rounded-full text-xs font-bold tracking-widest capitalize hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-zinc-400 whitespace-nowrap"
     >
       {isAdding ? "Adding..." : failed ? "Try again" : isSoldOut ? "Sold Out" : hasOptions ? "Options" : "Add to Cart"}
     </button>
@@ -215,7 +215,7 @@ export default function ProductCard({
             {(idx === 0 || showAllImages) && (
               <Image
                 src={src}
-                alt={`${product.title} - ${idx}`}
+                alt={`${product.title}, photo ${idx + 1}`}
                 fill
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 quality={75}

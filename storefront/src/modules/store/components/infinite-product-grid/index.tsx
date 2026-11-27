@@ -1,4 +1,5 @@
 "use client"
+import EmptyProducts from "@modules/store/components/empty-products"
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { HttpTypes } from "@medusajs/types"
@@ -85,6 +86,7 @@ export default function InfiniteProductGrid({
 
   return (
     <>
+      {products.length === 0 && !hasMore && <EmptyProducts />}
       <ul
         className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-8 sm:gap-x-6 sm:gap-y-12 w-full"
         data-testid="products-list"

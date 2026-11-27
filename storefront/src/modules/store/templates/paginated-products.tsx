@@ -1,3 +1,4 @@
+import EmptyProducts from "@modules/store/components/empty-products"
 import { getProductsListWithSort } from "@lib/data/products"
 import { getRegion } from "@lib/data/regions"
 import { getBnplProviders } from "@lib/data/payment"
@@ -94,6 +95,7 @@ export default async function PaginatedProducts({
         items={trackedItems}
         searchQuery={searchQuery}
       />
+      {products.length === 0 && <EmptyProducts message={searchQuery ? `No results for "${searchQuery}".` : undefined} />}
       <ul
         className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-8 sm:gap-x-6 sm:gap-y-12 w-full"
         data-testid="products-list"

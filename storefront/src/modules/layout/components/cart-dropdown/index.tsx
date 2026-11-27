@@ -68,7 +68,7 @@ const CartDropdown = ({
   return (
     <div className="h-full z-50">
       <button
-        className="hover:text-ui-fg-base flex items-center h-full"
+        className="hover:text-ui-fg-base flex items-center h-full px-3 -mx-3"
         onClick={open}
         aria-label="Open cart"
         data-testid="nav-cart-link"
@@ -123,7 +123,7 @@ const CartDropdown = ({
                       <button
                         onClick={close}
                         aria-label="Close cart"
-                        className="p-2.5 bg-white border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
+                        className="tap tap-sm p-2.5 bg-white border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
                       >
                         <X className="w-5 h-5 text-gray-500" />
                       </button>
@@ -345,7 +345,8 @@ const SidebarCartItem = ({ item, close }: { item: any; close: () => void }) => {
           <div className="flex items-center justify-between bg-white border border-gray-200 rounded-full px-1 py-1 w-[90px] shadow-sm">
             <button
               onClick={() => changeQuantity(optimisticQty - 1)}
-              className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-bold transition-all disabled:opacity-40"
+              aria-label="Decrease quantity"
+              className="tap tap-sm w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-bold transition-all disabled:opacity-40"
               disabled={optimisticQty <= 1}
             >
               <Minus className="w-3.5 h-3.5" strokeWidth={2.5} />
@@ -355,7 +356,8 @@ const SidebarCartItem = ({ item, close }: { item: any; close: () => void }) => {
             </span>
             <button
               onClick={() => changeQuantity(optimisticQty + 1)}
-              className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-bold transition-all disabled:opacity-40"
+              aria-label="Increase quantity"
+              className="tap tap-sm w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-bold transition-all disabled:opacity-40"
               disabled={optimisticQty >= 20}
             >
               <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />

@@ -56,7 +56,7 @@ const SearchResultsTemplate = ({
             </div>
           </>
         ) : (
-          <Text className="ml-8 small:ml-14 mt-3">No results.</Text>
+          <Text className="ml-8 small:ml-14 mt-3">No bags match that search. Try a different word, or browse the full collection.</Text>
         )}
       </div>
     </>

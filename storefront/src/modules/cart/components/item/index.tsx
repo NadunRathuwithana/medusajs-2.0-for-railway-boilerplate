@@ -208,7 +208,8 @@ const Item = ({ item, type = "full" }: ItemProps) => {
             <div className="flex items-center justify-between bg-white border border-gray-200 rounded-full px-1 py-1 w-[100px] shadow-sm">
               <button
                 onClick={() => changeQuantity(optimisticQty - 1)}
-                className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-bold transition-all disabled:opacity-40"
+                aria-label="Decrease quantity"
+                className="tap tap-sm w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-bold transition-all disabled:opacity-40"
                 disabled={optimisticQty <= 1}
               >
                 <Minus className="w-3.5 h-3.5" strokeWidth={2.5} />
@@ -218,7 +219,8 @@ const Item = ({ item, type = "full" }: ItemProps) => {
               </span>
               <button
                 onClick={() => changeQuantity(optimisticQty + 1)}
-                className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-bold transition-all disabled:opacity-40"
+                aria-label="Increase quantity"
+                className="tap tap-sm w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-bold transition-all disabled:opacity-40"
                 disabled={optimisticQty >= 20}
               >
                 <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />

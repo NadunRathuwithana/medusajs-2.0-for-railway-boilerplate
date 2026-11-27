@@ -283,7 +283,7 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
               <div key={idx} className="relative h-full" style={{ width: `${100 / loopImages.length}%` }}>
                 <Image
                   src={image.url}
-                  alt={`${product.title} – view ${idx} of ${images.length} | Cardle`}
+                  alt={`${product.title}, photo ${((idx - 1 + images.length) % images.length) + 1} of ${images.length}`}
                   fill
                   sizes="100vw"
                   style={{
@@ -379,7 +379,7 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
                 <Image
                   src={image.url}
                   priority={idx === firstRealLoopIdx}
-                  alt={`${product.title} – image ${idx} | Cardle`}
+                  alt={`${product.title}, photo ${((idx - 1 + images.length) % images.length) + 1} of ${images.length}`}
                   fill
                   sizes="100vw"
                   style={{ objectFit: "cover" }}
@@ -414,7 +414,7 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
               <Image
                 src={image.url}
                 priority={index === 0}
-                alt={`${product.title} – image ${index + 1} | Cardle`}
+                alt={`${product.title}, photo ${index + 1} of ${images.length}`}
                 fill
                 sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
                 style={{ objectFit: "cover", transition: "transform 0.4s ease" }}

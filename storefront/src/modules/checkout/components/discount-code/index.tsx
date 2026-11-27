@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useActionState, useState, useTransition } from "react"
+import React, { useActionState, useId, useState, useTransition } from "react"
 import { Tag, X, ChevronDown, ChevronUp } from "lucide-react"
 
 import { applyPromotions, submitPromotionForm } from "@lib/data/cart"
@@ -17,6 +17,7 @@ type DiscountCodeProps = {
 
 const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const inputId = useId()
   const [inputValue, setInputValue] = useState("")
   const [isPending, startTransition] = useTransition()
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
@@ -139,14 +140,14 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
             className="flex gap-2"
           >
             <input
-              id="promotion-input"
+              id={`promotion-input-${inputId}`}
               name="code"
               type="text"
               autoComplete="off"
               placeholder="Enter code"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value.toUpperCase())}
-              className="flex-1 min-w-0 h-9 px-3 text-[13px] border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:ring-black focus:border-black focus:bg-white transition-colors placeholder:text-gray-400 font-mono tracking-widest"
+              className="flex-1 min-w-0 h-11 sm:h-9 px-3 text-base sm:text-[13px] border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:ring-black focus:border-black focus:bg-white transition-colors placeholder:text-gray-400 font-mono tracking-widest"
               data-testid="discount-input"
               autoFocus
             />

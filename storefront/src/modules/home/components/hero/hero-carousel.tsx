@@ -1,6 +1,6 @@
 "use client"
 
-import Image from "next/image"
+import { getImageProps } from "next/image"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { clx } from "@medusajs/ui"
 import CtaLink from "@modules/cms/cta-link"
@@ -75,15 +75,24 @@ const HeroCarousel = ({ slides: SLIDES = DEFAULT_SLIDES }: { slides?: Slide[] })
     setIndex(((next % SLIDES.length) + SLIDES.length) % SLIDES.length)
   }, [])
 
+  // No autoplay for people who asked the OS for reduced motion; pause on hover/focus.
+  const [reduceMotion, setReduceMotion] = useState(false)
+  const [hovered, setHovered] = useState(false)
   useEffect(() => {
-    if (isPaused || SLIDES.length <= 1) return
+    try {
+      setReduceMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    if (isPaused || hovered || reduceMotion || SLIDES.length <= 1) return
     // Restarts on every slide change, so a manual arrow/swipe/dot gets a full
     // AUTOPLAY_MS before the next auto advance.
     const timer = setTimeout(() => {
       setIndex((prev) => (prev + 1) % SLIDES.length)
     }, AUTOPLAY_MS)
     return () => clearTimeout(timer)
-  }, [isPaused, index])
+  }, [isPaused, hovered, reduceMotion, index])
 
   const onTouchStart = (e: React.TouchEvent) => {
     setIsPaused(true)
@@ -110,7 +119,7 @@ const HeroCarousel = ({ slides: SLIDES = DEFAULT_SLIDES }: { slides?: Slide[] })
       className={`group ${HERO_SIZE} bg-[#e5e5e5]`}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
-    >
+     onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onFocus={() => setHovered(true)} onBlur={() => setHovered(false)}>
       {SLIDES.map((slide, i) => (
         <div
           key={`${slide.desktop}-${i}`}
@@ -136,30 +145,7 @@ const HeroCarousel = ({ slides: SLIDES = DEFAULT_SLIDES }: { slides?: Slide[] })
               }}
             />
           )}
-          <Image
-            src={slide.mobile}
-            alt={slide.alt}
-            fill
-            sizes="100vw"
-            className="block md:hidden object-cover object-top"
-            priority={i === 0}
-          />
-          <Image
-            src={slide.tablet}
-            alt={slide.alt}
-            fill
-            sizes="100vw"
-            className="hidden md:block lg:hidden object-cover object-top"
-            priority={i === 0}
-          />
-          <Image
-            src={slide.desktop}
-            alt={slide.alt}
-            fill
-            sizes="100vw"
-            className="hidden lg:block object-cover object-top"
-            priority={i === 0}
-          />
+          <HeroPicture slide={slide} eager={i === 0} />
         </div>
       ))}
 
@@ -225,7 +211,7 @@ const HeroCarousel = ({ slides: SLIDES = DEFAULT_SLIDES }: { slides?: Slide[] })
               aria-label={`Go to slide ${i + 1}`}
               aria-current={i === index}
               className={clx(
-                "h-1.5 rounded-full transition-all duration-300",
+                "tap h-1.5 rounded-full transition-all duration-300",
                 i === index ? "w-6 bg-white" : "w-1.5 bg-white/50 hover:bg-white/75"
               )}
             />
@@ -243,3 +229,28 @@ const HeroCarousel = ({ slides: SLIDES = DEFAULT_SLIDES }: { slides?: Slide[] })
 }
 
 export default HeroCarousel
+
+
+/**
+ * One <picture> per slide: the browser downloads only the crop for its
+ * breakpoint (three priority <Image>s preloaded all three on every device).
+ */
+function HeroPicture({ slide, eager }: { slide: { mobile: string; tablet: string; desktop: string; alt: string }; eager: boolean }) {
+  const common = { alt: slide.alt, fill: true, sizes: "100vw" } as const
+  const { props: { srcSet: m } } = getImageProps({ ...common, src: slide.mobile })
+  const { props: { srcSet: t } } = getImageProps({ ...common, src: slide.tablet })
+  const { props: d } = getImageProps({ ...common, src: slide.desktop })
+  return (
+    <picture>
+      <source media="(max-width: 767px)" srcSet={m} sizes="100vw" />
+      <source media="(max-width: 1023px)" srcSet={t} sizes="100vw" />
+      {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
+      <img
+        {...d}
+        loading={eager ? "eager" : "lazy"}
+        fetchPriority={eager ? "high" : "auto"}
+        className="absolute inset-0 w-full h-full object-cover object-top"
+      />
+    </picture>
+  )
+}

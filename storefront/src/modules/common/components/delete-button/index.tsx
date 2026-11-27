@@ -34,7 +34,8 @@ const DeleteButton = ({
       )}
     >
       <button
-        className="flex gap-x-1 text-ui-fg-subtle hover:text-ui-fg-base cursor-pointer"
+        className="tap flex gap-x-1 text-ui-fg-subtle hover:text-ui-fg-base cursor-pointer"
+        aria-label="Remove item"
         onClick={() => handleDelete(id)}
         disabled={isDeleting}
         data-testid={dataTestId}

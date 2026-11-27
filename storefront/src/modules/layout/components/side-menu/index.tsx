@@ -51,7 +51,7 @@ const SideMenu = ({
                 <Popover.Button
                   data-testid="nav-menu-button"
                   aria-label="Open menu"
-                  className="relative h-full flex flex-col justify-center items-start gap-1.5 focus:outline-none py-2 group cursor-pointer"
+                  className="relative h-full flex flex-col justify-center items-start gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-black py-2 px-3 -ml-3 group cursor-pointer"
                 >
                   <span className="w-6 h-0.5 bg-black rounded-full transition-all duration-300 group-hover:w-4" />
                   <span className="w-4 h-0.5 bg-black rounded-full transition-all duration-300 group-hover:w-6" />

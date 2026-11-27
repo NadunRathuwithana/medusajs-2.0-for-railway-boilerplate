@@ -35,7 +35,8 @@ const MobileCheckoutSummary = ({ cart, packing }: { cart: any; packing?: any }) 
         }`}
       >
         <div className="p-5 border-t border-gray-100">
-          <CheckoutSummary cart={cart} packing={packing} />
+          {/* Mounted only when open: no hidden duplicate controls in the tab order */}
+          {isOpen && <CheckoutSummary cart={cart} packing={packing} />}
         </div>
       </div>
     </div>

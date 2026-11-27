@@ -1,4 +1,5 @@
 "use client"
+import React from "react"
 
 import { HttpTypes } from "@medusajs/types"
 import { X, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react"
@@ -94,6 +95,27 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
     return false
   }, [selectedVariant])
 
+  const dialogRef = React.useRef<HTMLDivElement>(null)
+  // Focus the dialog on open, restore focus on close, Esc closes, Tab stays inside.
+  React.useEffect(() => {
+    const prev = document.activeElement as HTMLElement | null
+    dialogRef.current?.focus()
+    return () => prev?.focus?.()
+  }, [])
+  const onDialogKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      e.stopPropagation()
+      handleClose()
+      return
+    }
+    if (e.key !== "Tab" || !dialogRef.current) return
+    const f = dialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])')
+    if (!f.length) return
+    const first = f[0], last = f[f.length - 1]
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+  }
+
   const handleClose = () => {
     setIsClosing(true)
     setTimeout(() => {
@@ -146,7 +168,16 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-12" onClick={handleClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-12"
+      onClick={handleClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={product.title || "Quick view"}
+      ref={dialogRef}
+      tabIndex={-1}
+      onKeyDown={onDialogKeyDown}
+    >
       {/* Backdrop */}
       <div 
         className={clx(
@@ -167,7 +198,8 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
         {/* Close Button */}
         <button 
           onClick={handleClose}
-          className="absolute top-4 right-4 z-20 w-10 h-10 bg-white shadow-md border border-gray-100 flex items-center justify-center rounded-full hover:bg-gray-50 transition-colors"
+          aria-label="Close"
+          className="tap tap-sm absolute top-4 right-4 z-20 w-10 h-10 bg-white shadow-md border border-gray-100 flex items-center justify-center rounded-full hover:bg-gray-50 transition-colors"
         >
           <X className="w-5 h-5 text-gray-500" />
         </button>
