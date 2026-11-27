@@ -13,7 +13,7 @@ import { getProductsById } from "./products"
 import { getRegion } from "./regions"
 import { listCartShippingMethods } from "./fulfillment"
 import { cleanPhone, isValidPhone } from "@lib/util/checkout-validation"
-import { COD_LIMIT_MESSAGE, isCodOverLimit } from "@lib/constants"
+import { COD_LIMIT_MESSAGE, isCodOverLimit, getAllPaymentPromoCodes } from "@lib/constants"
 
 export const retrieveCart = cache(async function retrieveCart() {
   const cartId = await getCartId()
@@ -378,7 +378,18 @@ export async function initiatePaymentSession(
   }
 }
 
-export async function applyPromotions(codes: string[]) {
+export const CARD_PROMO_TYPED_MESSAGE =
+  "This discount is applied automatically when you pay by card. It can't be entered as a code."
+
+// Payment-method discounts (card 5% etc.) are applied only by the checkout
+// when that method is chosen. Anything typed by a customer is refused.
+export async function applyPromotions(codes: string[], opts?: { typed?: string }) {
+  if (opts?.typed) {
+    const reserved = getAllPaymentPromoCodes().map((c) => c.toUpperCase())
+    if (reserved.includes(opts.typed.trim().toUpperCase())) {
+      return { error: CARD_PROMO_TYPED_MESSAGE }
+    }
+  }
   const cartId = await getCartId()
   if (!cartId) {
     return { error: "No existing cart found" }
@@ -449,7 +460,7 @@ export async function submitPromotionForm(
 ) {
   const code = formData.get("code") as string
   try {
-    const res = await applyPromotions([code])
+    const res = await applyPromotions([code], { typed: code })
     if (res.error) {
       return res.error
     }

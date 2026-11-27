@@ -87,7 +87,11 @@ export default function PrintInvoice({ order }: { order: HttpTypes.StoreOrder })
   const total = Number(o.total || 0)
   // Card / BNPL orders are paid at checkout; cash on delivery is paid later.
   const amountPaid = cod ? 0 : total
-  const promoCodes: string[] = (o.promotions || []).map((p: any) => p?.code).filter(Boolean)
+  const cardCode = (process.env.NEXT_PUBLIC_PROMO_ONEPAY_CODE || "").toUpperCase()
+  const promoCodes: string[] = (o.promotions || [])
+    .map((p: any) => p?.code)
+    .filter(Boolean)
+    .map((c: string) => (cardCode && c.toUpperCase() === cardCode ? "Credit/Debit Card Off" : c))
 
   const label: React.CSSProperties = {
     fontSize: 10.5,

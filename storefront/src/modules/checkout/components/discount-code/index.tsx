@@ -4,6 +4,7 @@ import React, { useActionState, useState, useTransition } from "react"
 import { Tag, X, ChevronDown, ChevronUp } from "lucide-react"
 
 import { applyPromotions, submitPromotionForm } from "@lib/data/cart"
+import { getAllPaymentPromoCodes } from "@lib/constants"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
 import ErrorMessage from "../error-message"
@@ -43,7 +44,7 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
       const existing = promotions
         .filter((p) => p.code !== undefined)
         .map((p) => p.code!)
-      const res = await applyPromotions([...existing, code])
+      const res = await applyPromotions([...existing, code], { typed: code })
       if (res?.error) {
         setErrorMsg(res.error)
       } else {
@@ -64,6 +65,17 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
         <div className="flex flex-wrap gap-1.5 mb-3">
           {promotions.map((promotion) => {
             if (!promotion) return null;
+            // Payment-method discounts are automatic: never show the code.
+            const isPaymentPromo = getAllPaymentPromoCodes()
+              .map((c) => c.toUpperCase())
+              .includes((promotion.code || "").toUpperCase())
+            const isCard =
+              !!process.env.NEXT_PUBLIC_PROMO_ONEPAY_CODE &&
+              (promotion.code || "").toUpperCase() ===
+                process.env.NEXT_PUBLIC_PROMO_ONEPAY_CODE.toUpperCase()
+            const label = isPaymentPromo
+              ? isCard ? "Credit/Debit Card Off" : "Payment method discount"
+              : promotion.code
             return (
             <div
               key={promotion.id}
@@ -71,11 +83,11 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
               className="flex items-center gap-1 bg-green-50 border border-green-200 text-green-800 text-[12px] font-medium rounded-full px-2.5 py-1"
             >
               <Tag className="w-3 h-3 flex-shrink-0" />
-              <span data-testid="discount-code">{promotion.code}</span>
+              <span data-testid="discount-code">{label}</span>
               {promotion.application_method?.value !== undefined && (
                 <span className="text-green-600 ml-0.5">
                   {promotion.application_method.type === "percentage"
-                    ? `(${promotion.application_method.value}% off)`
+                    ? isPaymentPromo ? `(${promotion.application_method.value}%)` : `(${promotion.application_method.value}% off)`
                     : `(${convertToLocale({
                         amount: Number(promotion.application_method.value),
                         currency_code:
@@ -83,7 +95,7 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
                       })} off)`}
                 </span>
               )}
-              {!promotion.is_automatic && (
+              {!promotion.is_automatic && !isPaymentPromo && (
                 <button
                   onClick={() => promotion.code && removePromotionCode(promotion.code)}
                   className="ml-0.5 text-green-600 hover:text-green-900 transition-colors"
