@@ -2,7 +2,7 @@ import json,html,re,collections
 iss=json.load(open('/tmp/issues.json'))
 area={'shopping.md':'Shopping','v2-features.md':'V2 features','checkout.md':'Checkout & payments','emails.md':'Orders & emails','responsive.md':'Responsive & UI','performance-seo.md':'Performance & SEO','tracking.md':'Tracking','security.md':'Security','cutover.md':'Cutover'}
 fixed={'SEC-01':'ac2fd54','SEC-02':'ac2fd54 (partial)','SEC-03':'86c6052','SEC-04':'86c6052','SEC-07':'86c6052','CUT-03':'86c6052','PAY-01':'86c6052','PAY-02':'86c6052','PAY-03':'232e90d','SEO-01':'noindex commit','SEO-02':'noindex commit','PERF-03':'noindex commit','V2F-01':'noindex commit','CUT-08':'noindex commit','CUT-07':'noindex commit','UI-01':'c3c92f4','UI-02':'c3c92f4','MAIL-01':'86c6052'}
-owner={'CUT-01','CUT-02','CUT-04','CUT-05','MAIL-08','MAIL-12','MAIL-19','TRK-07','TRK-05','CUT-09','CUT-10','CUT-11'}
+owner={'CUT-01','CUT-02','CUT-04','MAIL-08','MAIL-12','MAIL-19','TRK-07','TRK-05','CUT-09','CUT-10','CUT-11'}
 rows=[]
 for f,i,t,s in iss:
     st='fixed' if i in fixed else ('owner' if i in owner else 'open')
@@ -29,7 +29,7 @@ fixrows=''.join(f'<tr><td><code>{e(c.split()[0])}</code></td><td>{e(m)}</td></tr
 ('c3c92f4','Global and checkout error pages; 16px inputs on mobile so iOS does not zoom (UI-01, UI-02)')])
 must=[('Give live its own Redis (or DB index). Dev and live share one today.','You','15 min'),
 ('After deploying V2 to live, run npx medusa db:migrate and db:sync-links in the live backend container. Take a pg_dump first.','You','20 min'),
-('Set KOKO_BASE_URL, MINTPAY_ENV and ONEPAY_BASE_URL explicitly on prod. Defaults point at sandbox.','You','10 min'),
+('Check ONEPAY_BASE_URL is set on prod (Koko and Mintpay are unchanged from V1, so nothing to do there).','You','5 min'),
 ('Set NEXT_PUBLIC_ONEPAY_JS=true on the live storefront (build time) and confirm which callback URL Onepay calls.','You','10 min'),
 ('Re-create the promo bar in Admin, Site CMS, after migration and check the hero banners.','You','5 min'),
 ('Create orders@, hello@, support@ mailboxes. Set RESEND_API_KEY, RESEND_FROM_EMAIL and SPF, DKIM, DMARC DNS.','You','60 min'),
@@ -47,7 +47,7 @@ risk=[('Every page is rendered per request and sent no-store, so Cloudflare cann
 ('Order confirmation email lacks add-ons, packing, COD amount due and delivery window.','Update the template (V2F-02, MAIL-02/03)','Claude','half day'),
 ('Ops webhook is fire and forget, so a failure drops an order from Ops.','Add retry or a reconcile pass (MAIL-18)','Claude','half day')]
 rk=''.join(f'<tr><td>{e(a)}</td><td>{e(b)}</td><td>{c}</td><td>{d}</td></tr>' for a,b,c,d in risk)
-pay=[('COD','PASS','PASS','PASS','n/a','PASS','Cap now also checked on the backend (needs dev retest)'),
+pay=[('COD','PASS','PASS','PASS','n/a','PASS','LKR 8,000 cap applies to COD only, now also checked on the backend (needs dev retest)'),
 ('OnePay','PASS','PASS','PASS','PASS','PASS','525/525 simulated, 105/105 repeat run, 11 real test-card runs pass'),
 ('Koko','PASS*','PASS*','PASS*','PASS*','PASS*','Code review only. Not configured on dev. Signature check correct'),
 ('Mintpay','PASS*','PASS*','PASS*','PASS*','PASS*','Code review only. Not configured on dev. Webhook is unverified, safe because authorize polls Mintpay')]
