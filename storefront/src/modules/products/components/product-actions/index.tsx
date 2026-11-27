@@ -53,6 +53,7 @@ export default function ProductActions({
   const addonsTotal = addons.filter((a) => addonIds.includes(a.id)).reduce((n, a) => n + a.price, 0)
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
+  const [addError, setAddError] = useState<string | null>(null)
   const countryCode = useParams().countryCode as string
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -64,8 +65,9 @@ export default function ProductActions({
   // re-fire a duplicate ViewContent.
   useEffect(() => {
     const { cheapestPrice } = getProductPrice({ product })
+    const v: any = product.variants?.[0]
     trackViewContent({
-      id: product.id!,
+      id: v?.sku || v?.id || product.id!,
       name: product.title!,
       price: cheapestPrice?.calculated_price_number || 0,
       currency: (cheapestPrice?.currency_code || region.currency_code).toUpperCase(),
@@ -193,6 +195,7 @@ export default function ProductActions({
     if (!selectedVariant?.id) return null
 
     setIsAdding(true)
+    setAddError(null)
 
     try {
       await addToCart({
@@ -211,12 +214,14 @@ export default function ProductActions({
       })
       const selectedPrice = selectedVariant ? variantPrice : cheapestPrice
       trackAddToCart({
-        id: selectedVariant.id,
+        id: (selectedVariant as any).sku || selectedVariant.id,
         name: `${product.title} - ${selectedVariant.title}`,
         price: (selectedPrice?.calculated_price_number || 0) + addonsTotal,
         quantity: 1,
         currency: (selectedPrice?.currency_code || region.currency_code).toUpperCase(),
       })
+    } catch (e: any) {
+      setAddError(e?.message && e.message.length < 140 ? e.message : "Could not add to cart. Please try again.")
     } finally {
       setIsAdding(false)
     }
@@ -309,6 +314,9 @@ export default function ProductActions({
                 : "Add to Cart"}
           </Button>
         </div>
+        {addError && (
+          <p className="text-sm text-rose-600 -mt-3" role="alert">{addError}</p>
+        )}
 
         <MobileActions
           product={product}

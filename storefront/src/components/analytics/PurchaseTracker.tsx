@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { trackPurchase } from "@lib/analytics/track"
+import { trackPurchase, whenTrackersReady } from "@lib/analytics/track"
 import { wasEventTracked, markEventTracked } from "@lib/analytics/dedup"
 
 export default function PurchaseTracker({ order }: { order: any }) {
@@ -21,17 +21,26 @@ export default function PurchaseTracker({ order }: { order: any }) {
       return
     }
 
-    trackPurchase(
-      {
-        id: order.id,
-        total: order.total,
-        currency: order.currency_code,
-        items: order.items,
-      },
-      order.id
-    )
     tracked.current = true
-    markEventTracked("purchases", order.id)
+    // After the Onepay full-page redirect the Pixel/gtag scripts may still be
+    // loading: wait for them, and only mark as sent once something fired.
+    whenTrackersReady().then((ready) => {
+      if (!ready) {
+        tracked.current = false
+        return
+      }
+      trackPurchase(
+        {
+          id: order.id,
+          total: order.total,
+          currency: order.currency_code,
+          items: order.items,
+          shipping_total: order.shipping_total,
+        } as any,
+        order.id
+      )
+      markEventTracked("purchases", order.id)
+    })
   }, [order])
 
   return null

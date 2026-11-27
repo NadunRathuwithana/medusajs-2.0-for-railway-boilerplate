@@ -764,6 +764,10 @@ async function metaMatchKeys(): Promise<Record<string, string>> {
     const clientIp =
       forwardedFor?.split(",")[0]?.trim() || headersList.get("x-real-ip") || undefined
     const eventSourceUrl = headersList.get("referer") || undefined
+    const ua = headersList.get("user-agent") || undefined
+    if (ua) out.client_user_agent = ua.slice(0, 512)
+    const gaCookie = cookieStore.get("_ga")?.value
+    if (gaCookie) out.ga_client_id = gaCookie
     if (fbc) out.fbc = fbc
     if (fbp) out.fbp = fbp
     if (clientIp) out.client_ip_address = clientIp
@@ -835,6 +839,10 @@ export async function placeOrder() {
     if (fbp) metaMetadata.fbp = fbp
     if (clientIp) metaMetadata.client_ip_address = clientIp
     if (eventSourceUrl) metaMetadata.event_source_url = eventSourceUrl
+    const ua = headersList.get("user-agent")
+    if (ua) metaMetadata.client_user_agent = ua.slice(0, 512)
+    const gaCookie = cookieStore.get("_ga")?.value
+    if (gaCookie) metaMetadata.ga_client_id = gaCookie
 
     if (Object.keys(metaMetadata).length > 0) {
       await updateCart({ metadata: metaMetadata })

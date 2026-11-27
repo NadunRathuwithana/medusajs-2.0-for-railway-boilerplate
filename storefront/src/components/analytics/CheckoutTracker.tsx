@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { trackInitiateCheckout } from "@lib/analytics/track"
+import { trackInitiateCheckout, whenTrackersReady } from "@lib/analytics/track"
 import { wasEventTracked, markEventTracked } from "@lib/analytics/dedup"
 
 export default function CheckoutTracker({ cart }: { cart: any }) {
@@ -17,13 +17,19 @@ export default function CheckoutTracker({ cart }: { cart: any }) {
       return
     }
 
-    trackInitiateCheckout({
-      items: cart.items,
-      total: cart.total,
-      currency: cart.currency_code,
-    })
     tracked.current = true
-    markEventTracked("checkouts", cart.id)
+    whenTrackersReady().then((ready) => {
+      if (!ready) {
+        tracked.current = false
+        return
+      }
+      trackInitiateCheckout({
+        items: cart.items,
+        total: cart.total,
+        currency: cart.currency_code,
+      })
+      markEventTracked("checkouts", cart.id)
+    })
   }, [cart])
 
   return null

@@ -6,6 +6,7 @@ import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import Image from "next/image"
 import { addToCart } from "@lib/data/cart"
+import { trackAddToCart } from "@lib/analytics/track"
 import { getProductPrice, isVariantInStock } from "@lib/util/get-product-price"
 import { clx } from "@medusajs/ui"
 import QuickViewModal from "./quick-view-modal"
@@ -23,6 +24,7 @@ const SITEWIDE_DISCOUNT_PERCENT = Number(process.env.NEXT_PUBLIC_SITEWIDE_DISCOU
 
 function AddToCartBtn({ product, onOpenModal }: { product: HttpTypes.StoreProduct, onOpenModal: () => void }) {
   const [isAdding, setIsAdding] = useState(false)
+  const [failed, setFailed] = useState(false)
   const countryCode = useParams().countryCode as string
 
   const hasOptions = (product.variants?.length || 0) > 1
@@ -61,12 +63,25 @@ function AddToCartBtn({ product, onOpenModal }: { product: HttpTypes.StoreProduc
     if (!variantId) return
 
     setIsAdding(true)
+    setFailed(false)
     try {
       await addToCart({
         variantId,
         quantity: 1,
         countryCode,
       })
+      const v: any = product.variants[0]
+      const { cheapestPrice } = getProductPrice({ product })
+      trackAddToCart({
+        id: v?.sku || variantId,
+        name: product.title || "",
+        price: cheapestPrice?.calculated_price_number || 0,
+        quantity: 1,
+        currency: (cheapestPrice?.currency_code || "LKR").toUpperCase(),
+      })
+    } catch {
+      setFailed(true)
+      setTimeout(() => setFailed(false), 3000)
     } finally {
       setIsAdding(false)
     }
@@ -82,7 +97,7 @@ function AddToCartBtn({ product, onOpenModal }: { product: HttpTypes.StoreProduc
       }
       className="w-full lg:w-auto bg-[#111111] text-white px-4 sm:px-6 py-3 rounded-full text-xs font-bold tracking-widest capitalize hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-zinc-400 whitespace-nowrap"
     >
-      {isAdding ? "Adding..." : isSoldOut ? "Sold Out" : hasOptions ? "Options" : "Add to Cart"}
+      {isAdding ? "Adding..." : failed ? "Try again" : isSoldOut ? "Sold Out" : hasOptions ? "Options" : "Add to Cart"}
     </button>
   )
 }

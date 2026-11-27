@@ -24,7 +24,8 @@ export default function GoogleAnalytics() {
         page_title: document.title,
       })
     }
-  }, [pathname, searchParams])
+  // path only: colour/sort query changes are not new pages
+  }, [pathname])
 
   if (!GA_MEASUREMENT_ID) return null
 

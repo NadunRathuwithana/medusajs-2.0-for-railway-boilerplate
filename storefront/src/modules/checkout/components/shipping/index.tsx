@@ -75,6 +75,21 @@ const Shipping: React.FC<ShippingProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [availableShippingMethods, selectedShippingMethod])
 
+  // Delivery is usually auto-selected on the server when the address is
+  // saved, so the click path above never runs: report the step once here.
+  useEffect(() => {
+    if (!selectedShippingMethod?.id || !cart.shipping_address?.address_1) return
+    if (wasEventTracked("shipping_info", cart.id)) return
+    trackAddShippingInfo({
+      items: cart.items ?? [],
+      total: cart.total,
+      currency: cart.currency_code,
+      shippingTier: selectedShippingMethod.name,
+    })
+    markEventTracked("shipping_info", cart.id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedShippingMethod?.id, cart.shipping_address?.address_1])
+
   // If no address is set, we don't show the shipping options as actionable
   const isAddressSet = !!cart.shipping_address?.country_code
   

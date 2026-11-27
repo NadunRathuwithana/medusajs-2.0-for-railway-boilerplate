@@ -12,6 +12,28 @@ const isClient = typeof window !== "undefined"
 const normalizeCurrency = (currency: string | undefined | null): string =>
   (currency || "LKR").toString().trim().toUpperCase()
 
+// Packing lines are internal, not products.
+const productLines = (items: any[] = []) => items.filter((i) => i?.metadata?.packing !== true)
+const qtySum = (items: any[]) => items.reduce((n, i) => n + (Number(i.quantity) || 1), 0)
+const metaContents = (items: any[]) =>
+  items.map((i) => ({ id: i.variant_id || i.id, quantity: Number(i.quantity) || 1, item_price: Number(i.unit_price) || 0 }))
+
+/** Wait (up to timeoutMs) for the Pixel / gtag scripts so early events are not dropped. */
+export const whenTrackersReady = (timeoutMs = 10000): Promise<boolean> =>
+  new Promise((resolve) => {
+    if (!isClient) return resolve(false)
+    const start = Date.now()
+    const tick = () => {
+      if (window.fbq || window.gtag) {
+        // give the other one a short grace period
+        if ((window.fbq && window.gtag) || Date.now() - start > 2500) return resolve(true)
+      }
+      if (Date.now() - start > timeoutMs) return resolve(!!(window.fbq || window.gtag))
+      setTimeout(tick, 200)
+    }
+    tick()
+  })
+
 export const trackViewItemList = (list: {
   listId: string
   listName: string
@@ -114,8 +136,8 @@ export const trackAddToCart = (item: { id: string; name: string; price: number; 
 
 export const trackInitiateCheckout = (cart: { items: any[]; total: number; currency: string }) => {
   if (!isClient) return
-
-  const content_ids = cart.items.map((i) => i.variant_id || i.id)
+  const items = productLines(cart.items)
+  const content_ids = items.map((i) => i.variant_id || i.id)
 
   if (window.fbq) {
     window.fbq("track", "InitiateCheckout", {
@@ -123,7 +145,8 @@ export const trackInitiateCheckout = (cart: { items: any[]; total: number; curre
       content_type: "product",
       value: cart.total,
       currency: normalizeCurrency(cart.currency),
-      num_items: cart.items.length,
+      num_items: qtySum(items),
+      contents: metaContents(items),
     })
   }
 
@@ -131,7 +154,7 @@ export const trackInitiateCheckout = (cart: { items: any[]; total: number; curre
     window.gtag("event", "begin_checkout", {
       currency: normalizeCurrency(cart.currency),
       value: cart.total,
-      items: cart.items.map((i) => ({
+      items: items.map((i) => ({
         item_id: i.variant_id || i.id,
         item_name: i.title,
         price: i.unit_price,
@@ -146,8 +169,8 @@ export const trackPurchase = (
   eventId: string
 ) => {
   if (!isClient) return
-
-  const content_ids = order.items.map((i) => i.variant_id || i.id)
+  const items = productLines(order.items)
+  const content_ids = items.map((i) => i.variant_id || i.id)
 
   if (window.fbq) {
     window.fbq(
@@ -158,7 +181,8 @@ export const trackPurchase = (
         content_type: "product",
         value: order.total,
         currency: normalizeCurrency(order.currency),
-        num_items: order.items.length,
+        num_items: qtySum(items),
+        contents: metaContents(items),
       },
       { eventID: eventId }
     )
@@ -169,7 +193,9 @@ export const trackPurchase = (
       transaction_id: order.id,
       value: order.total,
       currency: normalizeCurrency(order.currency),
-      items: order.items.map((i) => ({
+      shipping: (order as any).shipping_total,
+      coupon: (order as any).coupon,
+      items: items.map((i) => ({
         item_id: i.variant_id || i.id,
         item_name: i.title,
         price: i.unit_price,

@@ -4,6 +4,7 @@ import { Dialog, Transition } from "@headlessui/react"
 import { addToCart } from "@lib/data/cart"
 import { Fragment, useState } from "react"
 import type { FreeOption } from "./options"
+import { trackAddToCart } from "@lib/analytics/track"
 
 export default function FreeThirdDialog({
   open,
@@ -26,6 +27,8 @@ export default function FreeThirdDialog({
     setError(null)
     try {
       await addToCart({ variantId, quantity: 1, countryCode })
+      const opt = options.find((o) => o.variantId === variantId)
+      trackAddToCart({ id: variantId, name: opt?.title || "", price: 0, quantity: 1, currency: "LKR" })
       onClose()
     } catch {
       setError("Could not add that one. Please try again.")

@@ -6,6 +6,7 @@ import {
 import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa";
 import { EmailTemplates } from "../modules/email-notifications/templates";
 import { sendPurchaseEvent } from "../lib/meta-capi";
+import { sendGa4Purchase } from "../lib/ga4-mp";
 
 export default async function orderPlacedHandler({
   event: { data },
@@ -56,9 +57,10 @@ export default async function orderPlacedHandler({
   try {
     // Send Meta Conversions API event
     await sendPurchaseEvent(order);
-  } catch (error) {
-    console.error("[Meta CAPI] Error:", error);
+  } catch (error: any) {
+    console.error("[Meta CAPI] Error:", error?.message);
   }
+  await sendGa4Purchase(order);
 
   try {
     if (notificationModuleService)

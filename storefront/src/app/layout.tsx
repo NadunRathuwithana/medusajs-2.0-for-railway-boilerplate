@@ -1,3 +1,4 @@
+import CookieNotice from "@components/cookie-notice"
 import { getBaseURL } from "@lib/util/env"
 import { Metadata } from "next"
 import { headers } from "next/headers"
@@ -87,6 +88,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           <GoogleAnalytics />
         </Suspense>
         <main className="relative">{props.children}</main>
+        <CookieNotice />
       </body>
     </html>
   )

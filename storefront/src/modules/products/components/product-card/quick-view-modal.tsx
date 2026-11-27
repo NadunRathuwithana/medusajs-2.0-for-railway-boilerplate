@@ -7,6 +7,7 @@ import { useState, useMemo, useEffect } from "react"
 import { clx } from "@medusajs/ui"
 import { useParams } from "next/navigation"
 import { addToCart } from "@lib/data/cart"
+import { trackAddToCart } from "@lib/analytics/track"
 import { getProductPrice } from "@lib/util/get-product-price"
 import { isEqual } from "lodash"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -30,6 +31,7 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
   const [currentIndex, setCurrentIndex] = useState(0)
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
+  const [addError, setAddError] = useState<string | null>(null)
   const countryCode = useParams().countryCode as string
 
   // Animation states
@@ -102,9 +104,24 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
   const handleAddToCart = async () => {
     if (!selectedVariant?.id) return null
     setIsAdding(true)
-    await addToCart({ variantId: selectedVariant.id, quantity: 1, countryCode })
-    setIsAdding(false)
-    handleClose()
+    setAddError(null)
+    try {
+      await addToCart({ variantId: selectedVariant.id, quantity: 1, countryCode })
+      const { variantPrice, cheapestPrice } = getProductPrice({ product, variantId: selectedVariant.id })
+      const pr = variantPrice || cheapestPrice
+      trackAddToCart({
+        id: (selectedVariant as any).sku || selectedVariant.id,
+        name: `${product.title} - ${selectedVariant.title}`,
+        price: pr?.calculated_price_number || 0,
+        quantity: 1,
+        currency: (pr?.currency_code || "LKR").toUpperCase(),
+      })
+      handleClose()
+    } catch (e: any) {
+      setAddError("Could not add to cart. Please try again.")
+    } finally {
+      setIsAdding(false)
+    }
   }
 
   const { cheapestPrice } = getProductPrice({ product })
@@ -257,6 +274,7 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
             >
               {!selectedVariant ? "Select variant" : !inStock ? "Out of stock" : isAdding ? "Adding..." : "Add to Cart"}
             </button>
+            {addError && <p className="text-sm text-rose-600 text-center" role="alert">{addError}</p>}
             <LocalizedClientLink
               href={`/products/${product.handle}`}
               className="flex items-center justify-between w-full p-4 text-sm font-medium text-gray-600 hover:text-bold transition-colors rounded-xl hover:bg-gray-50"

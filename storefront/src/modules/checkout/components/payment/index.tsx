@@ -38,6 +38,8 @@ const Payment = ({
   const [syncedSession, setSyncedSession] = useState<any>(null)
   const [cardBrand, setCardBrand] = useState<string | null>(null)
   const [cardComplete, setCardComplete] = useState(false)
+  // AddPaymentInfo only for a method the customer actually picked (COD is pre-selected).
+  const userPickedRef = useRef(false)
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
     activeSession?.provider_id ?? ""
   )
@@ -185,7 +187,7 @@ const Payment = ({
       setIsLoading(false)
       setError(null)
       const dedupKey = `${cartIdRef.current}:${selectedPaymentMethod}`
-      if (paymentReady && !wasEventTracked("payment_info", dedupKey)) {
+      if (paymentReady && userPickedRef.current && !wasEventTracked("payment_info", dedupKey)) {
         trackAddPaymentInfo({
           items: cartRef.current?.items ?? [],
           total: cartRef.current?.total,
@@ -258,7 +260,7 @@ const Payment = ({
               // new "payment info submitted" event, but re-renders of the
               // same already-initiated session shouldn't re-fire.
               const dedupKey = `${cartIdRef.current}:${selectedPaymentMethod}`
-              if (!wasEventTracked("payment_info", dedupKey)) {
+              if (userPickedRef.current && !wasEventTracked("payment_info", dedupKey)) {
                 trackAddPaymentInfo({
                   items: cartRef.current?.items ?? [],
                   total: cartRef.current?.total,
@@ -338,7 +340,7 @@ const Payment = ({
                   <>
                     <RadioGroup
                       value={selectedPaymentMethod}
-                      onChange={(value: string) => setSelectedPaymentMethod(value)}
+                      onChange={(value: string) => { userPickedRef.current = true; setSelectedPaymentMethod(value) }}
                       className="flex flex-col gap-2"
                     >
                       {[...availablePaymentMethods]

@@ -48,6 +48,16 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
+          <h2 className="text-2xl font-semibold text-bold mb-4">Analytics and Advertising</h2>
+          <p className="mb-4">
+            We use the Meta Pixel and Google Analytics to understand how our website is used and to measure our ads. These tools set cookies and receive information about the pages you view and the products you add to your cart or buy.
+          </p>
+          <p>
+            When you place an order we also send the purchase to Meta through its Conversions API. Your email, phone number, name, city and postal code are hashed (scrambled) before they are sent, together with your IP address and browser details. You can contact us at any time to ask about or object to this processing.
+          </p>
+        </section>
+
+        <section>
           <h2 className="text-2xl font-semibold text-bold mb-4">How We Protect Your Information</h2>
           <p>
             We take reasonable measures to protect your personal information from unauthorized access, disclosure, or destruction. We use industry-standard security protocols, including SSL encryption, to secure your data.

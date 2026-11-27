@@ -27,7 +27,8 @@ export default function MetaPixel() {
     if (typeof window !== "undefined" && window.fbq) {
       window.fbq("track", "PageView")
     }
-  }, [pathname, searchParams])
+  // path only: colour/sort query changes are not new pages
+  }, [pathname])
 
   if (!PIXEL_ID) return null
 
