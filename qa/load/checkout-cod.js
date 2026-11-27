@@ -6,9 +6,9 @@
 // REAL ORDERS ARE CREATED ON DEV. They reserve stock, may fire the order.placed
 // subscribers (Meta CAPI, Cardle Ops webhook). See run-guide.md before running.
 //
-// NOTE: POST /store/carts/:id/complete is rate limited to 10/min per IP in
-// backend/src/api/middlewares.ts. From one PC expect at most ~10 orders/min total;
-// extra attempts return 429 (counted in rate_limited_429, not an error).
+// NOTE: POST /store/carts/:id/complete is rate limited to 10/min PER CART (keyFn in
+// backend/src/api/middlewares.ts), so a double submit (2 completes) + 1 replay per cart
+// stays under the limit. A 429 is counted in rate_limited_429, not treated as an error.
 import { check, sleep } from 'k6';
 import http from 'k6/http';
 import { Counter, Rate, Trend } from 'k6/metrics';
@@ -24,7 +24,7 @@ const completeTime = new Trend('cart_complete_duration', true);
 export const options = buildOptions(0.02, {
   'http_req_duration{kind:api}': ['p(95)<2000'],
   duplicate_orders: ['count==0'],
-  checkout_success: ['rate>0.5'], // loose: the per-IP rate limiter will reject many from one PC
+  checkout_success: ['rate>0.95'],
 });
 
 export function setup() {

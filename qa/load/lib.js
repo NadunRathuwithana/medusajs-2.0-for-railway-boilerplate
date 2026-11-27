@@ -204,11 +204,3 @@ export function loadCatalog() {
 
   return { region_id: region.id, currency_code: region.currency_code, products, categories };
 }
-
-export function summaryHandler(name) {
-  return function (data) {
-    const out = {};
-    out[`qa/load/results/${name}-${TEST_TYPE}-summary.json`] = JSON.stringify(data, null, 2);
-    return out;
-  };
-}
