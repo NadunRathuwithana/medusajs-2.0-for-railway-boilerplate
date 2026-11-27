@@ -26,6 +26,10 @@ export const removeAuthToken = async () => {
   const cookiesStore = await cookies()
   cookiesStore.set("_medusa_jwt", "", {
     maxAge: -1,
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
   })
 }
 

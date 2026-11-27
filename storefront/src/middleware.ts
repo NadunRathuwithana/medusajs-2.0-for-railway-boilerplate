@@ -1,3 +1,4 @@
+import { accessToken } from "@lib/util/access-token"
 import { HttpTypes } from "@medusajs/types"
 import { notFound } from "next/navigation"
 import { NextRequest, NextResponse } from "next/server"
@@ -130,7 +131,8 @@ export async function middleware(request: NextRequest) {
   const isMaintenanceModeEnv = process.env.NEXT_PUBLIC_ENABLE_MAINTENANCE_MODE === "true" || process.env.ENABLE_MAINTENANCE_MODE === "true"
   const isComingSoonEnv = process.env.NEXT_PUBLIC_ENABLE_COMING_SOON === "true" || process.env.ENABLE_COMING_SOON === "true"
 
-  const hasAccess = request.cookies.get("storefront_access")?.value === "1"
+  const accessCookie = request.cookies.get("storefront_access")?.value
+  const hasAccess = !!accessCookie && accessCookie !== "disabled" && accessCookie === (await accessToken())
   const isMaintenancePath = request.nextUrl.pathname.startsWith("/maintenance")
   const isComingSoonPath = request.nextUrl.pathname.startsWith("/coming-soon")
 

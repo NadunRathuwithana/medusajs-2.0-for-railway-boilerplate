@@ -32,11 +32,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const query = req.scope.resolve("query")
   const { data: carts } = await query.graph({
     entity: "cart",
-    fields: ["id", "metadata", "items.id", "items.metadata"],
+    fields: ["id", "metadata", "completed_at", "items.id", "items.metadata"],
     filters: { id: cartId },
   })
   const cart = carts[0] as any
   if (!cart) throw new MedusaError(MedusaError.Types.NOT_FOUND, "Cart not found")
+  if (cart.completed_at) throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "This cart is already checked out")
 
   const old = (cart.items ?? []).filter((i: any) => i.metadata?.packing === true).map((i: any) => i.id)
   if (old.length) await deleteLineItemsWorkflow(req.scope).run({ input: { cart_id: cartId, ids: old } })

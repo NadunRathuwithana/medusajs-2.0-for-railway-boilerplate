@@ -6,18 +6,9 @@ import { reconcileAttempt } from "../../jobs/onepay-reconcile"
 async function processPaymentCollect(req: MedusaRequest) {
   const logger = req.scope.resolve(ContainerRegistrationKeys.LOGGER) || console;
   
-  const logData = {
-    timestamp: new Date().toISOString(),
-    method: req.method,
-    url: req.url,
-    query: req.query,
-    body: req.body,
-    params: req.params,
-  };
-
-  logger.info("Incoming request to collect: " + JSON.stringify(logData, null, 2));
-
-  const transactionId = ((req.body as any)?.transaction_id || req.query?.transaction_id) as string | undefined;
+  const rawTxn = ((req.body as any)?.transaction_id || req.query?.transaction_id) as string | undefined;
+  const transactionId = typeof rawTxn === "string" ? rawTxn.slice(0, 64) : undefined;
+  logger.info(`[onepay-collect] ${req.method} txn=${transactionId || "(none)"}`);
   const appId = process.env.ONEPAY_APP_ID;
   const onepayToken = process.env.ONEPAY_TOKEN;
 
@@ -40,7 +31,7 @@ async function processPaymentCollect(req: MedusaRequest) {
       });
 
       const responseData = await response.json();
-      logger.info("OnePay Transaction Status Response: " + JSON.stringify(responseData, null, 2));
+      logger.info(`[onepay-collect] status for ${transactionId}: ${responseData?.data?.status}`);
 
       if (responseData.status === 200 && responseData.data?.status === true) {
         queryResult = responseData.data;
@@ -229,12 +220,19 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const currency = queryResult?.currency ? String(queryResult.currency) : "LKR";
   const dateTime = queryResult?.paid_on ? String(queryResult.paid_on) : new Date().toLocaleString();
 
-  const successHtml = renderSuccessPage(
+  let successHtml = renderSuccessPage(
     transactionId || "N/A",
     amount,
     currency,
     dateTime
   );
+  // Only say "successful" when Onepay itself confirmed the payment.
+  if (!queryResult) {
+    successHtml = successHtml
+      .replace("<title>Payment Successful</title>", "<title>Checking your payment</title>")
+      .replace("<h1>Payment Successful</h1>", "<h1>Checking your payment</h1>")
+      .replace("Thank you for your purchase! Your order is being processed.", "We could not confirm this payment yet. If you were charged, your order will be confirmed by email shortly.")
+  }
 
   res.setHeader("Content-Type", "text/html");
   res.status(200).send(successHtml);

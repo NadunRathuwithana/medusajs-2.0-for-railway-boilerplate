@@ -32,6 +32,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     if (!message || typeof message !== 'string' || message.trim().length < 10) {
       return res.status(400).json({ error: 'Message is required (minimum 10 characters)' })
     }
+    if (name.length > 100 || email.length > 200 || (subject && String(subject).length > 150) || message.length > 5000) {
+      return res.status(400).json({ error: 'Your message is too long. Please shorten it and try again.' })
+    }
 
     let notificationModuleService: INotificationModuleService | undefined
     try {
@@ -64,6 +67,10 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     }
 
     if (notificationModuleService) {
+      // Send in the background: the customer doesn't wait for Resend's pacing.
+      const svc = notificationModuleService
+      void (async () => {
+      const notificationModuleService = svc
       // 1. Customer auto-reply — send immediately so customer gets a fast response
       await notificationModuleService.createNotifications({
         to: email.trim(),
@@ -100,8 +107,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
           data: contactEmailData,
         })
       }
+      })().catch((e) => console.error('[Contact Form] email send failed:', e?.message))
     } else {
-      console.log(`[Contact Form] Mocked success (No notification module): ${name} - ${message}`)
+      console.log(`[Contact Form] Mocked success (No notification module) ${referenceNumber}`)
     }
 
     return res.status(200).json({
@@ -111,9 +119,8 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   } catch (error: any) {
     console.error('[Contact Form] Unhandled error:', error)
     // Send a structured JSON response instead of letting Medusa's error handler overwrite it
-    return res.status(400).json({
+    return res.status(500).json({
       error: 'Failed to send your message. Please try again later or email us directly.',
-      details: error?.message
     })
   }
 }

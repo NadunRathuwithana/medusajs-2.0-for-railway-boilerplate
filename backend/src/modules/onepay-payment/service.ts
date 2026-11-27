@@ -145,8 +145,7 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
   ): Promise<T> {
     const url = `${this.options_.baseUrl}${path}`
 
-    console.log("[Onepay] --> POST", url)
-    console.log("[Onepay] --> Body:", JSON.stringify(body, null, 2))
+    console.log("[Onepay] --> POST", url.replace(/\?.*$/, ""))
 
     const res = await fetch(url, {
       method: "POST",
@@ -159,8 +158,7 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
 
     const rawText = await res.text()
     // Log the FULL response — no truncation
-    console.log(`[Onepay] <-- HTTP Status: ${res.status}`)
-    console.log("[Onepay] <-- Full Response:", rawText)
+    console.log(`[Onepay] <-- HTTP ${res.status}`)
 
     // v3 API always returns 200, even on errors — check body for status
     let parsed: any
@@ -231,27 +229,13 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
       additionalData: sessionId,
     }
 
-    const hashInput = `${this.options_.appId}${currency}${onepayAmountStr}${this.options_.hashSalt}`
 
-    console.log("\n========== ONEPAY initiatePayment ===========")
-    console.log("[1] Medusa amount (raw)  :", amount)
-    console.log("[2] Amount for hash (str):", onepayAmountStr)
-    console.log("[3] Amount in payload    :", onepayAmount)
-    console.log("[6] Session ID           :", sessionId)
-    console.log("[7] Reference            :", reference)
-    console.log("[8] Redirect URL         :", this.options_.redirectUrl)
-    console.log("[9] Full request payload :")
-    console.log(JSON.stringify(requestBody, null, 2))
-    console.log("============================================\n")
 
     const response = await this.onepayRequest<OnepayCreateResponse>(
       "/v3/checkout/link/",
       requestBody
     )
 
-    console.log("\n========== ONEPAY RESPONSE ===========")
-    console.log(JSON.stringify(response, null, 2))
-    console.log("======================================\n")
 
     // v3 API actually returns status as a number (e.g. 200) and nests data
     if (response.status !== 200 || !response.data?.gateway?.redirect_url) {

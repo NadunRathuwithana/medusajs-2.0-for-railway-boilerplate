@@ -20,11 +20,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
   const { data: carts } = await query.graph({
     entity: "cart",
-    fields: ["id", "region_id", "currency_code"],
+    fields: ["id", "region_id", "currency_code", "completed_at"],
     filters: { id: cartId },
   })
-  const cart = carts[0]
+  const cart = carts[0] as any
   if (!cart) throw new MedusaError(MedusaError.Types.NOT_FOUND, "Cart not found")
+  if (cart.completed_at) throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "This cart is already checked out")
 
   const { data: variants } = await query.graph({
     entity: "variant",

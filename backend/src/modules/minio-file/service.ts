@@ -189,6 +189,12 @@ class MinioFileProviderService extends AbstractFileProviderService {
       )
     }
 
+    // Media host is public: only images, video and PDFs, max 15 MB.
+    const ALLOWED = /^(image\/(jpeg|png|webp|gif|avif)|video\/(mp4|webm)|application\/pdf|text\/csv)$/i
+    if (file.mimeType && !ALLOWED.test(file.mimeType)) {
+      throw new MedusaError(MedusaError.Types.INVALID_DATA, `File type ${file.mimeType} is not allowed`)
+    }
+
     try {
       const parsedFilename = path.parse(file.filename)
       // Storage keys and x-amz-meta headers are part of the S3 request
@@ -221,6 +227,10 @@ class MinioFileProviderService extends AbstractFileProviderService {
       } else {
         // Handle ArrayBuffer, Uint8Array, or any other buffer-like type
         content = Buffer.from(file.content as any)
+      }
+
+      if (content.length > 15 * 1024 * 1024) {
+        throw new MedusaError(MedusaError.Types.INVALID_DATA, 'File is larger than 15 MB')
       }
 
       // Upload file with public-read access

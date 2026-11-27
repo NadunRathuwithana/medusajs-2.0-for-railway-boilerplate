@@ -1,6 +1,21 @@
 import { defineMiddlewares } from "@medusajs/medusa"
 import type { MedusaRequest, MedusaResponse, MedusaNextFunction } from "@medusajs/framework/http"
 import { rateLimit } from "../lib/rate-limit"
+import { readPackingSettings } from "../modules/addons/lib"
+
+async function blockInternalPackingVariant(req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) {
+  try {
+    const vid = (req.body as any)?.variant_id
+    if (vid) {
+      const settings: any = await readPackingSettings(req.scope)
+      if (settings?.variant_id && settings.variant_id === vid) {
+        res.status(400).json({ message: "This item can't be added to the cart" })
+        return
+      }
+    }
+  } catch {}
+  next()
+}
 
 /**
  * Parses application/x-www-form-urlencoded bodies for the Koko webhook route.
@@ -77,6 +92,13 @@ export default defineMiddlewares({
       middlewares: [
         rateLimit({ windowMs: 15 * 60_000, max: 5, keyPrefix: "contact" }),
       ],
+    },
+    {
+      // The packing product is internal: it is only added by /packing at its
+      // configured price, never through the generic line-items endpoint.
+      matcher: "/store/carts/:id/line-items",
+      method: ["POST"],
+      middlewares: [blockInternalPackingVariant],
     },
     {
       matcher: "/store/carts/:id/addon-items",
