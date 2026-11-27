@@ -1,0 +1,45 @@
+diff --git a/dist/utils/compute-actions/buy-get.js b/dist/utils/compute-actions/buy-get.js
+index 08f8361ae8030697ad22d582805c41336db3796d..5b3f42dc1afc5496768003f342f05fcbb9284be1 100644
+--- a/dist/utils/compute-actions/buy-get.js
++++ b/dist/utils/compute-actions/buy-get.js
+@@ -5,6 +5,18 @@ exports.sortByBuyGetType = sortByBuyGetType;
+ const utils_1 = require("@medusajs/framework/utils");
+ const validations_1 = require("../validations");
+ const usage_1 = require("./usage");
++// Cardle patch: compare UNIT prices, so a line with qty 2 of a cheap bag does
++// not outrank one dearer bag. Buy items: dearest first. Targets: cheapest first,
++// so "buy 2 get 1" always frees the cheapest bag(s).
++function unitPrice(i) {
++    return utils_1.MathBN.div(i.subtotal, utils_1.MathBN.max(i.quantity, 1));
++}
++function sortByUnitPriceDesc(a, b) {
++    return utils_1.MathBN.lt(unitPrice(a), unitPrice(b)) ? 1 : -1;
++}
++function sortByUnitPriceAsc(a, b) {
++    return utils_1.MathBN.gt(unitPrice(a), unitPrice(b)) ? 1 : -1;
++}
+ function sortByPrice(a, b) {
+     return utils_1.MathBN.lt(a.subtotal, b.subtotal) ? 1 : -1;
+ }
+@@ -225,10 +237,10 @@ function createComputedActionsFromPromotionApplication(itemIdPromotionAmountMap,
+   Grabs all the items in the context where the rules apply
+   We then sort by price to prioritize most valuable item
+ */
+-function filterItemsByPromotionRules(itemsContext, rules) {
++function filterItemsByPromotionRules(itemsContext, rules, cheapestFirst = false) {
+     return itemsContext
+         .filter((item) => (0, validations_1.areRulesValidForContext)(rules || [], item, utils_1.ApplicationMethodTargetType.ITEMS))
+-        .sort(sortByPrice);
++        .sort(cheapestFirst ? sortByUnitPriceAsc : sortByUnitPriceDesc);
+ }
+ function getComputedActionsForBuyGet(promotion, itemsContext, methodIdPromoValueMap, eligibleBuyItemMap, eligibleTargetItemMap) {
+     if (!isValidPromotionContext(promotion, itemsContext)) {
+@@ -237,7 +249,7 @@ function getComputedActionsForBuyGet(promotion, itemsContext, methodIdPromoValue
+     const applicationConfig = normalizePromotionApplicationConfiguration(promotion);
+     const itemsMap = new Map(itemsContext.map((i) => [i.id, i]));
+     const eligibleBuyItems = filterItemsByPromotionRules(itemsContext, promotion.application_method?.buy_rules);
+-    const eligibleTargetItems = filterItemsByPromotionRules(itemsContext, promotion.application_method?.target_rules);
++    const eligibleTargetItems = filterItemsByPromotionRules(itemsContext, promotion.application_method?.target_rules, true);
+     const remainingBuyQuantities = calculateRemainingQuantities(eligibleBuyItems, eligibleBuyItemMap, promotion.code);
+     const remainingTargetQuantities = calculateRemainingQuantities(eligibleTargetItems, eligibleTargetItemMap, promotion.code);
+     const totalEligibleBuyItemsMap = new Map();
