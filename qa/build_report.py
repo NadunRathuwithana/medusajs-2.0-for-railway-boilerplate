@@ -31,13 +31,14 @@ must=[('Give live its own Redis (or DB index). Dev and live share one today.','Y
 ('After deploying V2 to live, run npx medusa db:migrate and db:sync-links in the live backend container. Take a pg_dump first.','You','20 min'),
 ('Check ONEPAY_BASE_URL is set on prod (Koko and Mintpay are unchanged from V1, so nothing to do there).','You','5 min'),
 ('Set NEXT_PUBLIC_ONEPAY_JS=true on the live storefront (build time) and confirm which callback URL Onepay calls.','You','10 min'),
-('Re-create the promo bar in Admin, Site CMS, after migration and check the hero banners.','You','5 min'),
+('Live keeps its own data. Nothing is copied from dev. After the migration, create the V2 content in live Admin: promo bar, hero banners, add-ons, packing options, CARD_5 and Buy 2 Get 1 promotions.','You','30 min'),
 ('Create orders@, hello@, support@ mailboxes. Set RESEND_API_KEY, RESEND_FROM_EMAIL and SPF, DKIM, DMARC DNS.','You','60 min'),
 ('Make sure META_TEST_EVENT_CODE is empty on prod and the pixel IDs match. Rotate the Meta access token if the CAPI error log ever ran.','You','15 min'),
 ('Run the k6 smoke, then load tests on dev off peak, and read the results against the thresholds in qa/load-test.md.','You','2 h'),
 ('Re-test the fixes on dev after the next deploy (COD over 8,000 blocked, card promo on COD blocked, two parallel card payments).','Claude','30 min'),
 ('Decide the privacy page and consent banner wording for Meta, Google and CAPI (PDPA).','You','1 h'),
-('Run the 15-step smoke test in qa/cutover.md right after go-live, with one small real card payment.','You','30 min')]
+('Run the 15-step smoke test in qa/cutover.md right after go-live, with one small real card payment.','You','30 min'),
+('Re-run this QA on live after cutover (read only: pages, tracking events, emails, one real payment, load canary).','Claude + You','half day')]
 ck=''.join(f'<li><label><input type="checkbox" id="ck{i}" data-k="{i}"> <span>{e(m)}</span></label><span class="mut"> {o}, {t}</span></li>' for i,(m,o,t) in enumerate(must))
 risk=[('Every page is rendered per request and sent no-store, so Cloudflare cannot cache HTML. An ad spike of about 45 pages/s lands on one Next process.','Make pages cacheable (remove headers() from the root layout, add revalidate to category calls), then retest','Claude','1 day'),
 ('Image optimizer (AVIF) runs on the same VPS with a 60 s cache.','Set images.minimumCacheTTL to a day or more, cache /_next/image in Cloudflare','Claude','1 h'),
@@ -93,7 +94,7 @@ code{{font-size:12.5px;background:var(--line);padding:1px 5px;border-radius:4px}
 <div class="wrap">
 <nav><a href="#verdict">Verdict</a><a href="#score">Scorecard</a><a href="#issues">Issues</a><a href="#fixes">Fixes</a><a href="#pay">Payments</a><a href="#resp">Responsive</a><a href="#perf">Perf and SEO</a><a href="#trk">Tracking</a><a href="#load">Load</a><a href="#sec">Security</a><a href="#go">Go-live</a><a href="#risk">Risks</a><a href="#app">Appendix</a></nav>
 <header><h1>Cardle V2 launch QA</h1><p class="mut">Target: dev.cardle.lk and api-dev.cardle.lk only. Live and the contabo branch untouched. Fixes are on branch v2-prelaunch-fixes. Report date 27 Nov 2026.</p></header>
-<section id="verdict"><div class="verdict"><b class="big">NO-GO today</b><p>V2 is close, but not ready for the live cutover until the must-do list in the go-live section is done. The checkout itself is solid. The blockers are about shared infrastructure and setup, not the payment flow.</p></div>
+<section id="verdict"><div class="verdict"><b class="big">GO for cutover, after the checklist</b><p>The code is ready. The checkout is solid and the security blocker is fixed. What is left is cutover setup on live (config, migrations, mailboxes) plus a re-run of this QA on live afterwards. Dev was missing live configs and credentials, so config findings are treated as cutover tasks, not code bugs. Live data stays as it is: nothing is copied from dev.</p></div>
 <div class="stats"><div class="card stat"><b>{tot['blocker']}</b>blockers found</div><div class="card stat"><b>{tot['major']}</b>majors found</div><div class="card stat"><b>{tot['minor']}</b>minors found</div><div class="card stat"><b>{sum(1 for r in rows if r['st']=='fixed')}</b>fixed in code</div><div class="card stat"><b>{openb}</b>blockers still open</div></div>
 <p class="mut" style="margin-top:12px">What was and was not checked: nine areas were reviewed from the code (read only). Browser checks on dev covered layout overflow at five widths on seven pages, 404 pages, headers and head tags. Not done: Lighthouse scores, a full screenshot set, live tracking events, and the load tests. The load tests are scripts for you to run. Counts include a few duplicate findings across areas.</p></section>
 <section id="score"><h2>Scorecard by area</h2><div class="grid">{score}</div></section>
