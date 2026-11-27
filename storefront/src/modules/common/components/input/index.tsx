@@ -46,7 +46,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             aria-invalid={!!error}
             onBlur={onBlur}
             className={clx(
-              "block w-full h-[38px] px-3 bg-gray-50 border rounded-lg text-[14px] text-gray-900 focus:outline-none focus:ring-1 hover:bg-gray-100 transition-colors duration-200 placeholder:text-gray-400",
+              "block w-full h-[44px] md:h-[38px] px-3 bg-gray-50 border rounded-lg text-[16px] md:text-[14px] text-gray-900 focus:outline-none focus:ring-1 hover:bg-gray-100 transition-colors duration-200 placeholder:text-gray-400",
               error
                 ? "border-rose-400 focus:ring-rose-400 focus:border-rose-400 bg-rose-50/60"
                 : "border-gray-200 focus:ring-black focus:border-black",
