@@ -38,10 +38,9 @@ export const GET = async (
       "payment_collections.payments.*",
     ],
     filters: {
-      $or: [
-        { customer_id: customerId },
-        { email: customer.email }
-      ]
+      // Medusa does not verify emails at registration, so matching on email
+      // would let anyone read a victim's guest orders. Only own orders.
+      customer_id: customerId
     },
     pagination: {
       skip: 0,

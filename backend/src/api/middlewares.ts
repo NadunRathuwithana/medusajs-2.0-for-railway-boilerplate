@@ -58,7 +58,18 @@ export default defineMiddlewares({
     {
       matcher: "/store/onepay/*",
       middlewares: [
-        rateLimit({ windowMs: 60_000, max: 30, keyPrefix: "onepay-js" }),
+        rateLimit({
+          windowMs: 60_000,
+          max: 60,
+          keyPrefix: "onepay-js",
+          // The storefront server makes these calls, so the client IP is not
+          // available: bucket per cart/txn so customers never share a limit.
+          keyFn: (req) => {
+            const b: any = req.body || {}
+            const q: any = req.query || {}
+            return String(b.cart_id || q.cart_id || b.transaction_id || q.transaction_id || b.txn_id || "shared")
+          },
+        }),
       ],
     },
     {
@@ -70,7 +81,7 @@ export default defineMiddlewares({
     {
       matcher: "/store/carts/:id/complete",
       middlewares: [
-        rateLimit({ windowMs: 60_000, max: 10, keyPrefix: "cart-complete" }),
+        rateLimit({ windowMs: 60_000, max: 10, keyPrefix: "cart-complete", keyFn: (req) => String((req.params as any)?.id || "shared") }),
       ],
     },
     {
