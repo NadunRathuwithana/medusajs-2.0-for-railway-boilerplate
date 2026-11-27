@@ -11,10 +11,10 @@ const REGION_URL = `${BASE_URL}/lk`
 async function getAllProducts(): Promise<{ handle: string; updated_at?: string | null }[]> {
   try {
     const { products } = await sdk.store.product.list(
-      { limit: 500, fields: "handle,updated_at" },
+      { limit: 500, fields: "handle,updated_at,metadata" },
       { next: { revalidate: 3600, tags: ["products"] } } as any
     )
-    return products || []
+    return (products || []).filter((p: any) => !p?.metadata?.internal && p?.handle !== "internal-packing")
   } catch {
     return []
   }

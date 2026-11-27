@@ -3,6 +3,9 @@ import { MetadataRoute } from "next"
 const BASE_URL = "https://cardle.lk"
 
 export default function robots(): MetadataRoute.Robots {
+  if (/\/\/(dev|staging)\./.test(process.env.NEXT_PUBLIC_BASE_URL || "")) {
+    return { rules: [{ userAgent: "*", disallow: "/" }] }
+  }
   return {
     rules: [
       {

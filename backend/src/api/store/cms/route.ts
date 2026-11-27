@@ -20,7 +20,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
   const [row] = await cms.listSiteSettings({ key: PROMO_KEY })
   const promo = row?.value as any
-  const promo_bar = promo?.is_active && promo?.text ? { text: promo.text, href: promo.href || null } : null
+  // No row yet (fresh DB): omit the key so the storefront keeps its built-in promo bar.
+  const promo_bar = !row ? undefined : promo?.is_active && promo?.text ? { text: promo.text, href: promo.href || null } : null
 
   res.setHeader("Cache-Control", "public, max-age=30, s-maxage=60")
   res.json({ banners, promo_bar })

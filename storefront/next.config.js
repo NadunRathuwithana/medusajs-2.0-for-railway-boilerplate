@@ -110,6 +110,10 @@ const nextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Content-Security-Policy-Report-Only", value: cspReportOnly },
+          // Dev/staging must never be indexed (NEXT_PUBLIC_BASE_URL host starts with dev.)
+          ...(/\/\/(dev|staging)\./.test(process.env.NEXT_PUBLIC_BASE_URL || "")
+            ? [{ key: "X-Robots-Tag", value: "noindex, nofollow" }]
+            : []),
         ],
       },
       {
@@ -117,7 +121,7 @@ const nextConfig = {
         // in particular every HTML document (the "/" region-redirect stub
         // included) must never be cached by Cloudflare or the browser, or a
         // stale pre-redirect / pre-deploy response gets served forever.
-        source: "/((?!_next/static|_next/image|favicon.ico).*)",
+        source: "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|webp|avif|svg|ico|woff2?)$).*)",
         headers: [
           {
             key: "Cache-Control",

@@ -42,7 +42,7 @@ export async function getCms(): Promise<CmsData> {
         ),
       { retries: 1, timeoutMs: 4000 }
     )
-    return { banners: data.banners ?? [], promo_bar: data.promo_bar ?? null }
+    return { banners: data.banners ?? [], promo_bar: "promo_bar" in data ? (data.promo_bar ?? null) : undefined }
   } catch {
     return { banners: [], promo_bar: undefined }
   }
