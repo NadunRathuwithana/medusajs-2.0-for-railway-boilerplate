@@ -122,6 +122,9 @@ const medusaConfig = {
             resolve: "@medusajs/event-bus-redis",
             options: {
               redisUrl: REDIS_URL,
+              // REDIS_NAMESPACE (e.g. "dev") keeps a second environment on the
+              // same Redis from consuming this one's events and jobs.
+              ...(process.env.REDIS_NAMESPACE ? { queueName: `${process.env.REDIS_NAMESPACE}:events-queue` } : {}),
             },
           },
           {
@@ -130,6 +133,12 @@ const medusaConfig = {
             options: {
               redis: {
                 url: REDIS_URL,
+                ...(process.env.REDIS_NAMESPACE
+                  ? {
+                      queueName: `${process.env.REDIS_NAMESPACE}:medusa-workflows`,
+                      jobQueueName: `${process.env.REDIS_NAMESPACE}:medusa-workflow-jobs`,
+                    }
+                  : {}),
               },
             },
           },
@@ -153,7 +162,7 @@ const medusaConfig = {
             },
           },
           // Notification provider via Resend — only included when Resend credentials are set
-          // TODO: MUST change onboarding@resend.dev to a verified cardle.lk address (e.g. hello@cardle.lk) before going live with real customers!
+          // RESEND_FROM_EMAIL must be a verified cardle.lk sender (orders@cardle.lk).
           ...(RESEND_API_KEY && RESEND_FROM_EMAIL
             ? [
                 {

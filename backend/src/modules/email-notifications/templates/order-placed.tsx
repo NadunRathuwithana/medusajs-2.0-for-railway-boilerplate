@@ -294,13 +294,23 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
             {shippingAddress.address_1}{shippingAddress.address_2 ? `, ${shippingAddress.address_2}` : ''}<br />
             {shippingAddress.city}{shippingAddress.province ? `, ${shippingAddress.province}` : ''} {shippingAddress.postal_code}<br />
             {shippingAddress.country_code?.toUpperCase()}
+            {shippingAddress.phone ? <><br />Phone: {shippingAddress.phone}</> : null}
+            {(order as any).metadata?.contact_phone_2 ? <><br />Second phone: {(order as any).metadata.contact_phone_2}</> : null}
           </Text>
+          <Text style={{ margin: '12px 0 0', fontSize: '13px', color: textSecondary, lineHeight: '1.6', fontFamily }}>
+            Delivery: island-wide, 3 to 10 working days.
+          </Text>
+          {String((order as any).payment_collections?.[0]?.payments?.[0]?.provider_id || (order as any).payment_collections?.[0]?.payment_sessions?.[0]?.provider_id || '').startsWith('pp_system_default') && (
+            <Text style={{ margin: '12px 0 0', fontSize: '14px', fontWeight: '700', color: textPrimary, fontFamily }}>
+              Cash on delivery: please have {formatCurrency(Number((order as any).total) || 0, order.currency_code)} ready.
+            </Text>
+          )}
         </Section>
 
         {/* CTA */}
         <Section style={{ textAlign: 'center' }}>
           <Button
-            href={`${shopUrl}/account/orders`}
+            href={`${shopUrl}/lk/order/confirmed/${order.id}`}
             style={{
               backgroundColor: bgDark,
               color: textLight,
@@ -319,6 +329,9 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
           </Button>
           <Text style={{ color: textSecondary, fontSize: '11px', margin: '20px 0 0', letterSpacing: '1px', textTransform: 'uppercase', fontFamily }}>
             YOU WILL RECEIVE ANOTHER EMAIL WHEN YOUR ORDER SHIPS.
+          </Text>
+          <Text style={{ color: textSecondary, fontSize: '12px', margin: '12px 0 0', fontFamily }}>
+            Questions? Reply to this email or write to hello@cardle.lk
           </Text>
         </Section>
       </Section>

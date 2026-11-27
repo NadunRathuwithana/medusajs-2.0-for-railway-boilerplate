@@ -26,7 +26,7 @@ export default async function passwordResetHandler({
       return
     }
 
-    const storeFrontUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cardle.lk'
+    const storeFrontUrl = process.env.STORE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://cardle.lk'
     const resetLink = `${storeFrontUrl}/account/reset-password?token=${token}&email=${encodeURIComponent(email)}`
 
     if (notificationModuleService) await notificationModuleService.createNotifications({
@@ -36,11 +36,11 @@ export default async function passwordResetHandler({
       data: {
         emailOptions: {
           replyTo: 'hello@cardle.lk',
-          subject: '🔒 Reset Your Cardle.lk Password',
+          subject: 'Reset your Cardle password',
         },
         customerFirstName: first_name ?? 'Customer',
         resetLink,
-        expiresInMinutes: 30,
+        expiresInMinutes: 15, // Medusa reset tokens expire after 15 minutes
         preview: 'Reset your password — link expires in 30 minutes.',
       },
     })

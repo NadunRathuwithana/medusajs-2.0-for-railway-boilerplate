@@ -86,7 +86,8 @@ export default function PrintInvoice({ order }: { order: HttpTypes.StoreOrder })
   const shipping = Number(o.shipping_total || 0)
   const total = Number(o.total || 0)
   // Card / BNPL orders are paid at checkout; cash on delivery is paid later.
-  const amountPaid = cod ? 0 : total
+  const captured = (o.payment_collections || []).some((pc: any) => (pc.payments || []).some((p: any) => !!p.captured_at)) || o.payment_status === "captured"
+  const amountPaid = cod || !captured ? 0 : total
   const cardCode = (process.env.NEXT_PUBLIC_PROMO_ONEPAY_CODE || "").toUpperCase()
   const promoCodes: string[] = (o.promotions || [])
     .map((p: any) => p?.code)
@@ -167,7 +168,7 @@ export default function PrintInvoice({ order }: { order: HttpTypes.StoreOrder })
             <div style={{ flex: 1 }}>
               <div style={label}>ORDER DETAILS</div>
               <Row label="Payment Method" value={method} />
-              <Row label="Payment" value={cod ? "Pay on delivery" : "Paid"} />
+              <Row label="Payment" value={cod ? "Pay on delivery" : captured ? "Paid" : "Payment pending"} />
               {promoCodes.length > 0 && <Row label="Offers" value={promoCodes.join(", ")} />}
             </div>
           </div>

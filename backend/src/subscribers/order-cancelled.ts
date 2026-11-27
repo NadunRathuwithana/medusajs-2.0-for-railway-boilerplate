@@ -28,10 +28,11 @@ export default async function orderCancelledHandler({
       to: order.email,
       channel: 'email',
       template: EmailTemplates.ORDER_CANCELLED,
+      idempotency_key: `order-cancelled-${order.id}`,
       data: {
         emailOptions: {
           replyTo: 'hello@cardle.lk',
-          subject: `❌ Order #${order.display_id} Cancelled`,
+          subject: `Cardle order #${order.display_id} cancelled`,
         },
         orderDisplayId: String(order.display_id),
         customerFirstName: order.shipping_address?.first_name ?? 'Customer',

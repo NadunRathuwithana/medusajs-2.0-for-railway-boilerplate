@@ -58,7 +58,8 @@ export class SmtpNotificationService extends AbstractNotificationProviderService
         pass: options.pass,
       },
       tls: {
-        rejectUnauthorized: false,
+        // Certificate checks stay on outside local development.
+        rejectUnauthorized: process.env.NODE_ENV !== "development",
       },
     }
 

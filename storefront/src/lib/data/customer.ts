@@ -87,7 +87,11 @@ export async function signup(_currentState: unknown, formData: FormData) {
     revalidateTag("customer")
     success = true
   } catch (error: any) {
-    return error.toString()
+    const msg = String(error?.message || error)
+    if (/401|unauthori[sz]ed|expired|invalid token/i.test(msg)) {
+      return "This reset link has expired (links last 15 minutes). Please request a new one."
+    }
+    return "Could not reset your password. Please try again."
   }
 
   if (success) {

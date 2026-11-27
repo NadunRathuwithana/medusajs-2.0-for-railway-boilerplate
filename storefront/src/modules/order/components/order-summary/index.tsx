@@ -18,7 +18,7 @@ const OrderSummary = ({ order }: OrderSummaryProps) => {
       <div className="flex flex-col gap-2 text-sm">
         <div className="flex items-center justify-between">
           <span className="text-gray-500">Subtotal</span>
-          <span className="font-medium text-gray-900">{getAmount(order.subtotal)}</span>
+          <span className="font-medium text-gray-900">{getAmount((order as any).item_subtotal ?? (Number(order.subtotal) - Number(order.shipping_total || 0)))}</span>
         </div>
 
         {order.discount_total > 0 && (

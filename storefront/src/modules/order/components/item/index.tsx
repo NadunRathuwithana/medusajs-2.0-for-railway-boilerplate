@@ -35,9 +35,9 @@ const Item = ({ item }: ItemProps) => {
     <div className="flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-xl hover:shadow-sm transition-shadow" data-testid="product-row">
       {/* Image */}
       <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-50 border border-gray-100">
-        {item.thumbnail ? (
+        {(item.thumbnail || (item as any).metadata?.image) ? (
           <img
-            src={item.thumbnail}
+            src={item.thumbnail || (item as any).metadata?.image}
             alt={item.title ?? "Product"}
             className="w-full h-full object-cover object-center"
           />
@@ -50,7 +50,7 @@ const Item = ({ item }: ItemProps) => {
       <div className="flex-1 min-w-0">
         {productHandle ? (
           <a
-            href={`/products/${productHandle}`}
+            href={`/lk/products/${productHandle}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm font-semibold text-gray-900 hover:underline hover:text-black transition-colors line-clamp-1"

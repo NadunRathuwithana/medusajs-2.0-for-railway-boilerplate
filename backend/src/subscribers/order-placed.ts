@@ -71,10 +71,12 @@ export default async function orderPlacedHandler({
         to: order.email,
         channel: "email",
         template: EmailTemplates.ORDER_PLACED,
+        // One confirmation per order even if the event is retried.
+        idempotency_key: `order-placed-${order.id}`,
         data: {
           emailOptions: {
             replyTo: "hello@cardle.lk",
-            subject: `Order Confirmed — #${order.display_id}`,
+            subject: `Cardle order #${order.display_id} confirmed`,
           },
           order,
           shippingAddress,

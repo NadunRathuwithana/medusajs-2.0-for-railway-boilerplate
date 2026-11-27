@@ -17,11 +17,14 @@ export default async function customerCreatedHandler({
     const customer = await customerModuleService.retrieveCustomer(data.id)
 
     if (!customer?.email) return
+    // Guest checkouts also create a customer record: welcome only real accounts.
+    if ((customer as any).has_account === false) return
 
     if (notificationModuleService) await notificationModuleService.createNotifications({
       to: customer.email,
       channel: 'email',
       template: EmailTemplates.CUSTOMER_WELCOME,
+      idempotency_key: `welcome-${customer.id}`,
       data: {
         emailOptions: {
           replyTo: 'hello@cardle.lk',
@@ -29,7 +32,7 @@ export default async function customerCreatedHandler({
         },
         customerFirstName: customer.first_name ?? 'Customer',
         customerEmail: customer.email,
-        shopUrl: process.env.NEXT_PUBLIC_BASE_URL || 'https://cardle.lk',
+        shopUrl: process.env.STORE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://cardle.lk',
         preview: 'Welcome! Your account has been created.',
       },
     })

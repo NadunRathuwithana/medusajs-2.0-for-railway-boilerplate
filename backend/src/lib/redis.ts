@@ -11,6 +11,9 @@ export function getRedisClient(): Redis | null {
     redisClient = new Redis(process.env.REDIS_URL, {
       maxRetriesPerRequest: 1,
       lazyConnect: true,
+      // Separate key space per environment on a shared Redis (onepay ledger,
+      // reconcile lock, rate limits). Empty on live = unchanged keys.
+      ...(process.env.REDIS_NAMESPACE ? { keyPrefix: `${process.env.REDIS_NAMESPACE}:` } : {}),
     })
     redisClient.on("error", (err) => {
       console.error("[redis] Connection error:", err.message)
