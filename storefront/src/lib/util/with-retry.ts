@@ -10,8 +10,9 @@
 export async function withRetry<T>(
   fn: () => Promise<T>,
   {
-    retries = 2,
-    timeoutMs = 8000,
+    // Worst case ~12s (2 x 6s + backoff) instead of ~25s before a page errors.
+    retries = 1,
+    timeoutMs = 6000,
     baseDelayMs = 300,
   }: { retries?: number; timeoutMs?: number; baseDelayMs?: number } = {}
 ): Promise<T> {

@@ -1,3 +1,4 @@
+import { optimizedSrcSet } from "@modules/cms/img"
 import { getCms } from "@lib/data/cms"
 import CtaLink from "@modules/cms/cta-link"
 import { ArrowRight } from "@medusajs/icons"
@@ -22,9 +23,9 @@ export default async function WideBanner() {
       {c?.image_desktop && (
         <>
           <picture>
-            {c.image_mobile && <source media="(max-width: 767px)" srcSet={c.image_mobile} />}
-            {c.image_tablet && <source media="(max-width: 1023px)" srcSet={c.image_tablet} />}
-            <img src={c.image_desktop} alt={c.alt || ""} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+            {c.image_mobile && <source media="(max-width: 767px)" srcSet={optimizedSrcSet(c.image_mobile)} sizes="100vw" />}
+            {c.image_tablet && <source media="(max-width: 1023px)" srcSet={optimizedSrcSet(c.image_tablet)} sizes="100vw" />}
+            <img src={c.image_desktop} srcSet={optimizedSrcSet(c.image_desktop)} sizes="100vw" alt={c.alt || ""} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
           </picture>
           <div className="absolute inset-0 bg-black/55" />
         </>

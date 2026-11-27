@@ -1,9 +1,11 @@
+import { canonical } from "@lib/util/site"
 import { HERO_SIZE } from "@modules/cms/hero-size"
 import PageBanner from "@modules/cms/page-banner"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "About Cardle | Sri Lanka's Make-to-Order Cotton Tote Bag Brand",
+  alternates: { canonical: canonical("/about") },
+  title: { absolute: "About Cardle | Sri Lanka's Make-to-Order Cotton Tote Bag Brand" },
   description: "Learn about the Cardle story. Elevating the everyday carry with zero-stretch engineering and premium materials. Cardle - Carry everything, compromise nothing.",
 }
 

@@ -43,6 +43,8 @@ const nextConfig = {
     // was actually pointing at — flipping it on lets Next's built-in
     // optimizer do the resize/reformat work it was already set up for.
     formats: ["image/avif", "image/webp"],
+    // Optimised images are cached a day on the VPS (default 60s re-encodes AVIF constantly).
+    minimumCacheTTL: 86400,
     remotePatterns: [
       ...(process.env.NODE_ENV !== "production"
         ? [{ protocol: "http", hostname: "localhost" }]
@@ -89,6 +91,13 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      {
+        // Home on www goes straight to the region page (one hop, not two).
+        source: "/",
+        has: [{ type: "host", value: "www.cardle.lk" }],
+        destination: "https://cardle.lk/lk",
+        permanent: true,
+      },
       {
         source: "/:path*",
         has: [{ type: "host", value: "www.cardle.lk" }],

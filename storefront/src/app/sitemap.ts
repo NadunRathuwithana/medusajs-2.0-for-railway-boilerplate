@@ -32,10 +32,23 @@ async function getAllCollections(): Promise<{ handle: string; updated_at?: strin
   }
 }
 
+async function getAllCategories(): Promise<{ handle: string; updated_at?: string | null; parent?: string | null }[]> {
+  try {
+    const { product_categories } = await sdk.store.category.list(
+      { limit: 200, fields: "handle,updated_at,parent_category.handle" } as any,
+      { next: { revalidate: 3600, tags: ["categories"] } } as any
+    )
+    return (product_categories || []).map((c: any) => ({ handle: c.handle, updated_at: c.updated_at, parent: c.parent_category?.handle ?? null }))
+  } catch {
+    return []
+  }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [products, collections] = await Promise.all([
+  const [products, collections, categories] = await Promise.all([
     getAllProducts(),
     getAllCollections(),
+    getAllCategories(),
   ])
 
   const staticPages: MetadataRoute.Sitemap = [
@@ -81,6 +94,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.3,
     },
+    ...["refunds", "privacy", "terms"].map((p) => ({
+      url: `${REGION_URL}/${p}`,
+      lastModified: new Date(),
+      changeFrequency: "yearly" as const,
+      priority: 0.2,
+    })),
   ]
 
   const collectionPages: MetadataRoute.Sitemap = collections
@@ -101,5 +120,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }))
 
-  return [...staticPages, ...collectionPages, ...productPages]
+  const categoryPages: MetadataRoute.Sitemap = categories
+    .filter((c) => !!c.handle)
+    .map((c) => ({
+      url: `${REGION_URL}/categories/${c.parent ? `${c.parent}/` : ""}${c.handle}`,
+      lastModified: c.updated_at ? new Date(c.updated_at) : new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    }))
+
+  return [...staticPages, ...categoryPages, ...collectionPages, ...productPages]
 }

@@ -1,7 +1,7 @@
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Contact Us | Cardle",
+  title: { absolute: "Contact Us | Cardle" },
   description:
     "Get in touch with Cardle's team. Send us a message or chat on WhatsApp for help with orders, shipping, returns, or any product questions.",
   alternates: {

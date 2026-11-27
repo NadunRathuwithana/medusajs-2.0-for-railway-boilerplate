@@ -1,10 +1,12 @@
+import { canonical } from "@lib/util/site"
 import { Metadata } from "next"
 
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import StoreTemplate from "@modules/store/templates"
 
 export const metadata: Metadata = {
-  title: "Buy Cotton Tote Bags Online Sri Lanka | Cardle Store",
+  alternates: { canonical: canonical("/store") },
+  title: { absolute: "Buy Cotton Tote Bags Online Sri Lanka | Cardle Store" },
   description: "Browse the Cardle collection. Premium handcrafted cotton tote bags made to order in Sri Lanka.",
 }
 

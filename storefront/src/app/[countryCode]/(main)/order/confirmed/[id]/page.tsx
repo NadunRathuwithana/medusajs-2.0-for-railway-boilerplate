@@ -1,3 +1,4 @@
+import { NOINDEX } from "@lib/util/site"
 import { Metadata } from "next"
 
 import OrderCompletedTemplate from "@modules/order/templates/order-completed-template"
@@ -26,6 +27,7 @@ async function getOrder(id: string) {
 }
 
 export const metadata: Metadata = {
+  robots: NOINDEX,
   title: "Order Confirmed",
   description: "You purchase was successful",
 }

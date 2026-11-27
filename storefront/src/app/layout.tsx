@@ -1,24 +1,15 @@
 import CookieNotice from "@components/cookie-notice"
 import { getBaseURL } from "@lib/util/env"
 import { Metadata } from "next"
-import { headers } from "next/headers"
+import { IS_INDEXABLE, SITE_URL } from "@lib/util/site"
 import "styles/globals.css"
 
-// Canonical host is always the non-www apex domain, regardless of which
-// host (www.cardle.lk or cardle.lk) actually served the request.
-const CANONICAL_SITE_URL = "https://cardle.lk"
+// Static metadata: no headers() here, so pages are not forced to render
+// dynamically just for a canonical. Each indexable page sets its own
+// alternates.canonical (see lib/util/site.ts).
+const CANONICAL_SITE_URL = SITE_URL
 
 export async function generateMetadata(): Promise<Metadata> {
-  const headersList = await headers()
-  // middleware.ts always resolves "/" (and every other path) to a
-  // region-prefixed one ("/lk", "/lk/store", ...) before this ever renders,
-  // so x-pathname is already the real, 200-serving URL — canonicalizing to
-  // anything else would point Google at a URL that just redirects, which is
-  // exactly the stale-index problem this fix is for. "/lk" is the fallback
-  // for the rare case the header is missing (e.g. /maintenance).
-  const pathname = headersList.get("x-pathname") || "/lk"
-  const canonicalUrl = `${CANONICAL_SITE_URL}${pathname}`
-
   return {
     metadataBase: new URL(getBaseURL()),
     title: {
@@ -39,13 +30,11 @@ export async function generateMetadata(): Promise<Metadata> {
     authors: [{ name: "Cardle", url: CANONICAL_SITE_URL }],
     creator: "Cardle",
     publisher: "Cardle",
-    alternates: {
-      canonical: canonicalUrl,
-    },
     openGraph: {
+      images: [{ url: "/cardle-cotton-tote-bags-sri-lanka-preview.jpg", alt: "Cardle cotton tote bags" }],
       type: "website",
       locale: "en_LK",
-      url: canonicalUrl,
+      url: CANONICAL_SITE_URL,
       siteName: "Cardle",
       title: "Cardle – Premium Cotton Tote Bags Sri Lanka",
       description:
@@ -56,7 +45,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "Cardle – Premium Cotton Tote Bags Sri Lanka",
       description: "Handcrafted make-to-order cotton tote bags. Shop online at cardle.lk",
     },
-    robots: {
+    robots: !IS_INDEXABLE ? { index: false, follow: false } : {
       index: true,
       follow: true,
       googleBot: {

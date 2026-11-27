@@ -1,9 +1,11 @@
+import { canonical } from "@lib/util/site"
 import { Metadata } from "next"
 
 import ObfuscatedEmail from "@modules/common/components/obfuscated-email"
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Cardle",
+  alternates: { canonical: canonical("/privacy") },
+  title: { absolute: "Privacy Policy | Cardle" },
   description:
     "Cardle's privacy policy explains how we collect, use, and protect your personal data when you shop at cardle.lk. Your information is never sold to third parties.",
   robots: {

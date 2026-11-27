@@ -1,7 +1,7 @@
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Payment Cancelled | Cardle",
+  title: { absolute: "Payment Cancelled | Cardle" },
   description: "Koko payment cancelled",
 }
 

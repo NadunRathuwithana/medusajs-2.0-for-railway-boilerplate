@@ -3,7 +3,7 @@ import { Metadata } from "next"
 import ObfuscatedEmail from "@modules/common/components/obfuscated-email"
 
 export const metadata: Metadata = {
-  title: "Return/ Refunds and Exchange Policy | Cardle",
+  title: { absolute: "Return/ Refunds and Exchange Policy | Cardle" },
   description:
     "Cardle's 7-day return, refund and exchange policy for handcrafted cotton tote bags. Learn how to request an exchange or refund, conditions that apply, and how to reach our team.",
   alternates: {

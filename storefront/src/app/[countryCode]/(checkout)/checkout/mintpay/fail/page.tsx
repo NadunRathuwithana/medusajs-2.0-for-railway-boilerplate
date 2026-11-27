@@ -2,7 +2,7 @@ import { Metadata } from "next"
 import { resetPaymentSession } from "../return/actions"
 
 export const metadata: Metadata = {
-  title: "Payment Failed | Cardle",
+  title: { absolute: "Payment Failed | Cardle" },
   description: "Mintpay payment failed or cancelled",
 }
 

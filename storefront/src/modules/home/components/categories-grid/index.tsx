@@ -1,3 +1,4 @@
+import { optimizedSrcSet } from "@modules/cms/img"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 const categories = [
@@ -33,6 +34,9 @@ export default function CategoriesGrid() {
           >
             <img 
               src={cat.image} 
+              srcSet={optimizedSrcSet(cat.image)}
+              sizes="(max-width: 767px) 100vw, 33vw"
+              loading="lazy"
               alt={cat.title}
               title={cat.title}
               className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"

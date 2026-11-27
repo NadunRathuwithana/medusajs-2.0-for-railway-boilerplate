@@ -1,5 +1,9 @@
+import type { Metadata } from "next"
+import { NOINDEX } from "@lib/util/site"
 import { getCustomer } from "@lib/data/customer"
 import AccountLayout from "@modules/account/templates/account-layout"
+
+export const metadata: Metadata = { robots: NOINDEX }
 
 export default async function AccountPageLayout({
   dashboard,

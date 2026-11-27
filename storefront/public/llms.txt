@@ -1,7 +1,7 @@
 # Cardle
 
 > Cardle is a Sri Lankan premium cotton tote bag brand founded in 2024. All bags
-> are handcrafted and made to order, with delivery across Sri Lanka in 2–7
+> are handcrafted and made to order, with delivery across Sri Lanka in 3–10
 > business days. Cotton totes start at LKR 990.
 
 ## Docs
@@ -25,7 +25,7 @@
 ## Optional
 - Made from 100% natural cotton canvas, zero-stretch canvas engineering
 - Payment: OnePay, Koko (BNPL), Cash on Delivery
-- Delivery: LKR 300 island-wide, 2–7 business days
+- Delivery: LKR 500 island-wide, 3–10 working days
 - Custom and bulk/corporate orders available
 - Contact: hello@cardle.lk · WhatsApp +94 77 949 7859 · Mon–Fri 9am–6pm, Sat 10am–4pm
 - Social: [Instagram](https://www.instagram.com/cardle_lk/) · [TikTok](https://www.tiktok.com/@cardle.srilanka/) · [Facebook](https://www.facebook.com/people/Cardlelk/61585796349137/)

@@ -10,7 +10,7 @@ import { useParams } from "next/navigation"
 import { addToCart } from "@lib/data/cart"
 import { trackAddToCart } from "@lib/analytics/track"
 import { getProductPrice } from "@lib/util/get-product-price"
-import { isEqual } from "lodash"
+import isEqual from "lodash/isEqual"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
 

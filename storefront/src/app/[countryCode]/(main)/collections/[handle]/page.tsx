@@ -66,12 +66,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const canonicalUrl = `https://cardle.lk/lk/collections/${params.handle}`
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
+      images: [{ url: "/cardle-cotton-tote-bags-sri-lanka-preview.jpg", alt: "Cardle cotton tote bags" }],
       title,
       description,
       type: "website",

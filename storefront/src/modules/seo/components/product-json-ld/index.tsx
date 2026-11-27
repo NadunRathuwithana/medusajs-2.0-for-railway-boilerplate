@@ -81,7 +81,7 @@ export default function ProductJsonLd({ product }: ProductJsonLdProps) {
                 handlingTime: {
                   "@type": "QuantitativeValue",
                   minValue: 0,
-                  maxValue: 2,
+                  maxValue: 2, // handling 0-2 + transit 3-8 = 3-10 working days (policy)
                   unitCode: "DAY",
                 },
                 transitTime: {

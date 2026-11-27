@@ -1,3 +1,4 @@
+import { canonical } from "@lib/util/site"
 import { Metadata } from "next"
 
 import Hero from "@modules/home/components/hero"
@@ -12,12 +13,13 @@ import OrganisationJsonLd from "@modules/seo/components/organisation-json-ld"
 import WebsiteJsonLd from "@modules/seo/components/website-json-ld"
 
 export const metadata: Metadata = {
+  alternates: { canonical: canonical("") },
   // Absolute: bypasses the root layout's `%s | Cardle Sri Lanka` template —
   // this string already carries full branding, so letting the template
   // apply on top would double it up ("... | Shop Online | Cardle Sri Lanka").
   title: { absolute: "Cardle – Premium Cotton Tote Bags Sri Lanka | Shop Online" },
   description:
-    "Shop handcrafted cotton tote bags made to order in Sri Lanka. Free delivery available. Explore Cardle's collection of premium, sustainable bags. Order online at cardle.lk",
+    "Shop handcrafted cotton tote bags made to order in Sri Lanka. Island-wide delivery. Explore Cardle's collection of premium, sustainable bags. Order online at cardle.lk",
 }
 
 export default async function Home({
@@ -31,8 +33,11 @@ export default async function Home({
   const { page } = await searchParams
   const pageNumber = page ? parseInt(page) : 1
 
-  const collections = await getCollectionsWithProducts(countryCode)
-  const region = await getRegion(countryCode)
+  // In parallel: they don't depend on each other.
+  const [collections, region] = await Promise.all([
+    getCollectionsWithProducts(countryCode),
+    getRegion(countryCode),
+  ])
 
   // Previously `return null` here — a slow/failing backend call silently
   // rendered a blank page below the header, with no visible error. Throwing

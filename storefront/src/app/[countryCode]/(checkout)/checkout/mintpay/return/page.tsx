@@ -3,7 +3,7 @@ import MintpayReturnClient from "./client"
 import { getCustomer } from "@lib/data/customer"
 
 export const metadata: Metadata = {
-  title: "Mintpay Payment | Cardle",
+  title: { absolute: "Mintpay Payment | Cardle" },
   description: "Processing your Mintpay payment",
 }
 

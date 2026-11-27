@@ -3,7 +3,7 @@ import { cache } from "react"
 
 export const listCategories = cache(async function () {
   return sdk.store.category
-    .list({ fields: "+category_children" }, { next: { tags: ["categories"] } })
+    .list({ fields: "+category_children" }, { next: { tags: ["categories"], revalidate: 300 } } as any)
     .then(({ product_categories }) => product_categories)
 })
 
@@ -15,7 +15,7 @@ export const getCategoriesList = cache(async function (
     // TODO: Look into fixing the type
     // @ts-ignore
     { limit, offset },
-    { next: { tags: ["categories"] } }
+    { next: { tags: ["categories"], revalidate: 300 } } as any
   )
 })
 
@@ -27,7 +27,7 @@ export const getCategoryByHandle = cache(async function (
     // TODO: Look into fixing the type
     // @ts-ignore
     { handle: categoryHandle },
-    { next: { tags: ["categories"] } }
+    { next: { tags: ["categories"], revalidate: 300 } } as any
   )
 })
 
@@ -43,7 +43,7 @@ export const listNavCategories = cache(async function (): Promise<
     const { product_categories } = await sdk.store.category.list(
       // @ts-ignore
       { fields: "id,name,handle,rank,parent_category_id,category_children.id", limit: 100 },
-      { next: { tags: ["categories"] } } as any
+      { next: { tags: ["categories"], revalidate: 300 } } as any
     )
     const top = (product_categories || [])
       .filter((c: any) => !c.parent_category_id)

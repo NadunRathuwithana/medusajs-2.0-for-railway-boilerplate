@@ -2,7 +2,7 @@ import { Metadata } from "next"
 import KokoReturnClient from "./client"
 
 export const metadata: Metadata = {
-  title: "Koko Payment | Cardle",
+  title: { absolute: "Koko Payment | Cardle" },
   description: "Processing your Koko payment",
 }
 

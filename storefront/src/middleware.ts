@@ -224,9 +224,11 @@ export async function middleware(request: NextRequest) {
   let response = NextResponse.redirect(redirectUrl, 307)
 
   // If no country code is set, we redirect to the relevant region.
+  // 308 (permanent): Cardle only ever serves /lk, so search engines should
+  // move ranking signals to the /lk URL.
   if (!urlHasCountryCode && countryCode) {
     redirectUrl = `${request.nextUrl.origin}/${countryCode}${redirectPath}${queryString}`
-    response = NextResponse.redirect(`${redirectUrl}`, 307)
+    response = NextResponse.redirect(`${redirectUrl}`, 308)
   }
 
   // If a cart_id is in the params, we set it as a cookie and redirect to the checkout.

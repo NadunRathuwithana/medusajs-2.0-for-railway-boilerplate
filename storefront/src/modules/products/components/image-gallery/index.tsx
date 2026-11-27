@@ -413,7 +413,9 @@ const ImageGallery = ({ product }: ImageGalleryProps) => {
             >
               <Image
                 src={image.url}
-                priority={index === 0}
+                // Desktop copy: eager but not preloaded (the mobile carousel
+                // above holds the preload), so phones don't fetch both.
+                loading={index === 0 ? "eager" : "lazy"}
                 alt={`${product.title}, photo ${index + 1} of ${images.length}`}
                 fill
                 sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"

@@ -3,7 +3,7 @@ import { Metadata } from "next"
 import ObfuscatedEmail from "@modules/common/components/obfuscated-email"
 
 export const metadata: Metadata = {
-  title: "Shipping Policy – Cardle Sri Lanka",
+  title: { absolute: "Shipping Policy – Cardle Sri Lanka" },
   description:
     "Cardle delivers island-wide across Sri Lanka in 3–10 working days for LKR 500. Learn about our dispatch process, tracking, order cancellations and delivery terms.",
   alternates: {

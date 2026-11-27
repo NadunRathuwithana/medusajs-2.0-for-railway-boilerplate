@@ -62,12 +62,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     const canonicalUrl = `https://cardle.lk/lk/categories/${params.category.join("/")}`
 
     return {
-      title: `${title} | Cardle`,
+      title: { absolute: `${title} | Cardle` },
       description,
       alternates: {
         canonical: canonicalUrl,
       },
       openGraph: {
+        images: [{ url: "/cardle-cotton-tote-bags-sri-lanka-preview.jpg", alt: "Cardle cotton tote bags" }],
         title: `${title} | Cardle`,
         description,
         type: "website",

@@ -22,9 +22,12 @@ export default function robots(): MetadataRoute.Robots {
           "/account/",
           "/cart",
           "/admin/",
-          "/lk/checkout/",
-          "/lk/account/",
+          "/lk/checkout",
+          "/lk/account",
           "/lk/cart",
+          "/lk/search",
+          "/lk/results/",
+          "/lk/order/",
         ],
       },
       // Allow image crawler explicitly (important for image SEO)
@@ -36,7 +39,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "GPTBot",
         allow: "/",
-        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout/", "/lk/account/"],
+        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout", "/lk/account", "/lk/cart", "/lk/search", "/lk/results/", "/lk/order/"],
       },
       // "Claude-Web" is a retired user-agent string — Anthropic's current
       // crawlers are ClaudeBot (bulk/training crawl) and Claude-User
@@ -45,37 +48,37 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "ClaudeBot",
         allow: "/",
-        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout/", "/lk/account/"],
+        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout", "/lk/account", "/lk/cart", "/lk/search", "/lk/results/", "/lk/order/"],
       },
       {
         userAgent: "Claude-User",
         allow: "/",
-        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout/", "/lk/account/"],
+        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout", "/lk/account", "/lk/cart", "/lk/search", "/lk/results/", "/lk/order/"],
       },
       {
         userAgent: "PerplexityBot",
         allow: "/",
-        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout/", "/lk/account/"],
+        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout", "/lk/account", "/lk/cart", "/lk/search", "/lk/results/", "/lk/order/"],
       },
       {
         userAgent: "Google-Extended",
         allow: "/",
-        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout/", "/lk/account/"],
+        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout", "/lk/account", "/lk/cart", "/lk/search", "/lk/results/", "/lk/order/"],
       },
       {
         userAgent: "Applebot-Extended",
         allow: "/",
-        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout/", "/lk/account/"],
+        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout", "/lk/account", "/lk/cart", "/lk/search", "/lk/results/", "/lk/order/"],
       },
       {
         userAgent: "Amazonbot",
         allow: "/",
-        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout/", "/lk/account/"],
+        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout", "/lk/account", "/lk/cart", "/lk/search", "/lk/results/", "/lk/order/"],
       },
       {
         userAgent: "Bytespider",
         allow: "/",
-        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout/", "/lk/account/"],
+        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout", "/lk/account", "/lk/cart", "/lk/search", "/lk/results/", "/lk/order/"],
       },
       // Common Crawl feeds many LLM pretraining datasets — allowing it
       // (with the same path restrictions as the other AI crawlers) improves
@@ -83,7 +86,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "CCBot",
         allow: "/",
-        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout/", "/lk/account/"],
+        disallow: ["/api/", "/checkout/", "/account/", "/lk/checkout", "/lk/account", "/lk/cart", "/lk/search", "/lk/results/", "/lk/order/"],
       },
     ],
     sitemap: `${BASE_URL}/sitemap.xml`,

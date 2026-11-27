@@ -1,9 +1,11 @@
+import { canonical } from "@lib/util/site"
 import { Metadata } from "next"
 
 import ObfuscatedEmail from "@modules/common/components/obfuscated-email"
 
 export const metadata: Metadata = {
-  title: "Terms of Service | Cardle",
+  alternates: { canonical: canonical("/terms") },
+  title: { absolute: "Terms of Service | Cardle" },
   description:
     "Read Cardle's terms of service governing use of our website and purchase of handcrafted cotton tote bags. Applies to all visitors and buyers on cardle.lk.",
   robots: {

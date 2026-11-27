@@ -1,3 +1,4 @@
+import { NOINDEX } from "@lib/util/site"
 import { Metadata } from "next"
 
 import SearchResultsTemplate from "@modules/search/templates/search-results-template"
@@ -6,6 +7,7 @@ import { search } from "@modules/search/actions"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 
 export const metadata: Metadata = {
+  robots: NOINDEX,
   title: "Search",
   description: "Explore all of our products.",
 }

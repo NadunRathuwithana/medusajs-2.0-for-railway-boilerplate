@@ -2,7 +2,7 @@ import { Metadata } from "next"
 import FAQJsonLd from "@modules/seo/components/faq-json-ld"
 
 export const metadata: Metadata = {
-  title: "FAQ – Cardle Tote Bags | Shipping, Returns & Care",
+  title: { absolute: "FAQ – Cardle Tote Bags | Shipping, Returns & Care" },
   description:
     "Find answers to common questions about Cardle's handcrafted cotton tote bags — shipping times, returns, materials, care instructions and more.",
   alternates: {

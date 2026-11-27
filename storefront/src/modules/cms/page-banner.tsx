@@ -1,3 +1,4 @@
+import { optimizedSrcSet } from "@modules/cms/img"
 import { getCms } from "@lib/data/cms"
 import CtaLink from "./cta-link"
 import BannerText from "./banner-text"
@@ -25,9 +26,9 @@ export default async function PageBanner({
     return (
       <section className={`${HERO_SIZE} bg-[#e5e5e5]`}>
         <picture>
-          {b.image_mobile && <source media="(max-width: 767px)" srcSet={b.image_mobile} />}
-          {b.image_tablet && <source media="(max-width: 1023px)" srcSet={b.image_tablet} />}
-          <img src={b.image_desktop!} alt={alt} className={HERO_IMG} loading="eager" />
+          {b.image_mobile && <source media="(max-width: 767px)" srcSet={optimizedSrcSet(b.image_mobile)} sizes="100vw" />}
+          {b.image_tablet && <source media="(max-width: 1023px)" srcSet={optimizedSrcSet(b.image_tablet)} sizes="100vw" />}
+          <img src={b.image_desktop!} srcSet={optimizedSrcSet(b.image_desktop)} sizes="100vw" alt={alt} className={HERO_IMG} loading="eager" fetchPriority="high" />
         </picture>
         {b.cta_href && (
           <CtaLink href={b.cta_href} aria-label={b.title || b.alt || "Open"} className="absolute inset-0 z-[1]" />
@@ -41,14 +42,14 @@ export default async function PageBanner({
   return (
     <section className={`${HERO_SIZE} bg-[#e5e5e5] flex flex-col items-center justify-center`}>
       <picture>
-        {b.image_mobile && <source media="(max-width: 767px)" srcSet={b.image_mobile} />}
-        {b.image_tablet && <source media="(max-width: 1023px)" srcSet={b.image_tablet} />}
-        <img src={b.image_desktop!} alt={alt} className={HERO_IMG} loading="eager" />
+        {b.image_mobile && <source media="(max-width: 767px)" srcSet={optimizedSrcSet(b.image_mobile)} sizes="100vw" />}
+        {b.image_tablet && <source media="(max-width: 1023px)" srcSet={optimizedSrcSet(b.image_tablet)} sizes="100vw" />}
+        <img src={b.image_desktop!} srcSet={optimizedSrcSet(b.image_desktop)} sizes="100vw" alt={alt} className={HERO_IMG} loading="eager" fetchPriority="high" />
       </picture>
       {b.cta_href && (
         <CtaLink href={b.cta_href} aria-label={b.title || b.alt || "Open"} className="absolute inset-0 z-[1]" />
       )}
-      {(b.title || b.eyebrow || b.cta_label) && (
+      {(b.title || b.eyebrow || b.body || b.cta_label) && (
         <div className="absolute inset-0 z-[2] pointer-events-none bg-black/25 flex flex-col items-center justify-center text-center px-6">
           {b.eyebrow && <span className="text-white/90 uppercase tracking-[0.3em] text-xs font-semibold mb-2" style={b.text_color ? { color: b.text_color } : undefined}>{b.eyebrow}</span>}
           {b.title && <h1 className="text-white text-3xl md:text-5xl font-semibold tracking-tight mb-4 max-w-3xl" style={b.text_color ? { color: b.text_color } : undefined}>{b.title}</h1>}
