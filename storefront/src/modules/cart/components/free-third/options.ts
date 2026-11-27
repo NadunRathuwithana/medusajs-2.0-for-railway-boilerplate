@@ -38,7 +38,8 @@ export async function getFreeThirdOptions(cart: any): Promise<FreeOption[]> {
   const cap = Math.min(
     ...(cart?.items || [])
       .filter((i: any) => !i?.metadata?.packing)
-      .map((i: any) => Number(i.unit_price) || Infinity)
+      // Bag price only: add-on extras don't make a cheaper tote "free-able".
+      .map((i: any) => Number(i?.metadata?.base_price ?? i.unit_price) || Infinity)
   )
   const countryCode = cart?.shipping_address?.country_code || "lk"
   const { response } = await getProductsList({

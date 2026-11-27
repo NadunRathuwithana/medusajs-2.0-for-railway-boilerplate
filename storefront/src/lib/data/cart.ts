@@ -194,6 +194,10 @@ export async function deleteLineItem(lineId: string) {
 async function repriceCart(cartId: string) {
   try {
     await sdk.store.cart.update(cartId, {}, {}, await getAuthHeaders())
+    // Add-on bags and packing lines have custom prices Medusa never refreshes.
+    await sdk.client
+      .fetch(`/store/carts/${cartId}/reprice-extras`, { method: "POST", headers: await getAuthHeaders() })
+      .catch(() => {})
     return true
   } catch {
     return false

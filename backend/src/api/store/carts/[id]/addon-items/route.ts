@@ -41,7 +41,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   }
 
   // Only add-ons that are active AND offered for this product count.
-  const wanted: string[] = Array.isArray(addon_ids) ? [...new Set(addon_ids.map(String))] : []
+  const wanted: string[] = Array.isArray(addon_ids) ? [...new Set(addon_ids.map(String))].slice(0, 10) : []
+  if (typeof variant_id !== "string" || variant_id.length > 64) throw new MedusaError(MedusaError.Types.INVALID_DATA, "variant_id is invalid")
   let chosen: any[] = []
   if (wanted.length) {
     const links = await svc.listAddonProducts({ product_id: variant.product_id, addon_id: wanted })

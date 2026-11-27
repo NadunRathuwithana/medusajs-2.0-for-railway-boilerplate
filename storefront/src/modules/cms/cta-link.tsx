@@ -12,6 +12,13 @@ export default function CtaLink({
   className?: string
   children?: React.ReactNode
 } & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "className" | "children">) {
+  if (/^(mailto:|tel:)/i.test(href)) {
+    return (
+      <a href={href} className={className} {...rest}>
+        {children}
+      </a>
+    )
+  }
   if (/^https?:\/\//i.test(href)) {
     return (
       <a href={href} className={className} target="_blank" rel="noopener noreferrer" {...rest}>

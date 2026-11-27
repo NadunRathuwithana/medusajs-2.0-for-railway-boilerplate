@@ -9,7 +9,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   try {
     const promo = req.scope.resolve(Modules.PROMOTION) as any
     const [p] = await promo.listPromotions(
-      { code: "BUY2GET1" },
+      { code: process.env.BUY2GET1_PROMO_CODE || "BUY2GET1" },
       { relations: ["campaign"], take: 1 }
     )
     if (p && p.status === "active") {

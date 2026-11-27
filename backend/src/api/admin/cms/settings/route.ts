@@ -1,6 +1,7 @@
+import { revalidateStorefront } from "../../../../lib/revalidate-storefront"
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { CMS_MODULE } from "../../../../modules/cms"
-import { PROMO_KEY } from "../../../../modules/cms/fields"
+import { safeUrl, PROMO_KEY } from "../../../../modules/cms/fields"
 
 async function readPromo(cms: any) {
   const [row] = await cms.listSiteSettings({ key: PROMO_KEY })
@@ -18,11 +19,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const body = ((req.body as any)?.promo_bar ?? {}) as Record<string, any>
   const value = {
     text: String(body.text ?? "").trim().slice(0, 140),
-    href: String(body.href ?? "").trim().slice(0, 300),
+    href: safeUrl(String(body.href ?? "").trim().slice(0, 300) || null, "link") ?? "",
     is_active: Boolean(body.is_active),
   }
   const row = await readPromo(cms)
   if (row) await cms.updateSiteSettings({ id: row.id, value })
   else await cms.createSiteSettings({ key: PROMO_KEY, value })
+  revalidateStorefront(["cms"])
   res.json({ promo_bar: value })
 }

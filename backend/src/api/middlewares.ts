@@ -79,6 +79,29 @@ export default defineMiddlewares({
       ],
     },
     {
+      matcher: "/store/carts/:id/addon-items",
+      middlewares: [rateLimit({ windowMs: 60_000, max: 30, keyPrefix: "addon-items", keyFn: (req) => String((req.params as any)?.id || "shared") })],
+    },
+    {
+      matcher: "/store/carts/:id/reprice-extras",
+      middlewares: [rateLimit({ windowMs: 60_000, max: 30, keyPrefix: "reprice-extras", keyFn: (req) => String((req.params as any)?.id || "shared") })],
+    },
+    {
+      matcher: "/store/carts/:id/promotions",
+      middlewares: [rateLimit({ windowMs: 60_000, max: 20, keyPrefix: "promo-apply", keyFn: (req) => String((req.params as any)?.id || "shared") })],
+    },
+    {
+      // Login / register / reset: keyed by the email being tried, so one
+      // account can't be brute-forced (storefront calls come from one IP).
+      matcher: "/auth/customer/emailpass*",
+      middlewares: [rateLimit({ windowMs: 15 * 60_000, max: 10, keyPrefix: "auth", keyFn: (req) => String(((req.body as any)?.email || (req.body as any)?.identifier || "shared")).toLowerCase().slice(0, 120) })],
+    },
+    {
+      matcher: "/store/customers",
+      method: ["POST"],
+      middlewares: [rateLimit({ windowMs: 15 * 60_000, max: 10, keyPrefix: "register", keyFn: (req) => String((req.body as any)?.email || "shared").toLowerCase().slice(0, 120) })],
+    },
+    {
       matcher: "/store/carts/:id/complete",
       middlewares: [
         rateLimit({ windowMs: 60_000, max: 10, keyPrefix: "cart-complete", keyFn: (req) => String((req.params as any)?.id || "shared") }),

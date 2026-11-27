@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 
 /**
@@ -21,22 +21,38 @@ export function Lightbox({
   footer?: React.ReactNode
 }) {
   const [mounted, setMounted] = useState(false)
+  const boxRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     setMounted(true)
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose()
+    const opener = document.activeElement as HTMLElement | null
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return onClose()
+      if (e.key !== "Tab" || !boxRef.current) return
+      // Keep Tab inside the viewer.
+      const f = boxRef.current.querySelectorAll<HTMLElement>('button, a[href], [tabindex]:not([tabindex="-1"])')
+      if (!f.length) return
+      const first = f[0], last = f[f.length - 1]
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+    }
     document.addEventListener("keydown", onKey)
-    const prev = document.body.style.overflow
-    document.body.style.overflow = "hidden"
+    // iOS needs the body pinned, overflow:hidden alone still scrolls.
+    const y = window.scrollY
+    const prev = { overflow: document.body.style.overflow, position: document.body.style.position, top: document.body.style.top, width: document.body.style.width }
+    Object.assign(document.body.style, { overflow: "hidden", position: "fixed", top: `-${y}px`, width: "100%" })
+    setTimeout(() => boxRef.current?.querySelector<HTMLElement>("button")?.focus(), 0)
     return () => {
       document.removeEventListener("keydown", onKey)
-      document.body.style.overflow = prev
+      Object.assign(document.body.style, prev)
+      window.scrollTo(0, y)
+      opener?.focus?.()
     }
   }, [onClose])
   if (!mounted) return null
   return createPortal(
     <div role="dialog" aria-modal="true" aria-label={alt} onClick={onClose}
       className="fixed inset-0 z-[200] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in-top">
-      <div onClick={(e) => e.stopPropagation()}
+      <div ref={boxRef} onClick={(e) => e.stopPropagation()}
         className="relative flex w-full max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
         <button type="button" onClick={onClose} aria-label="Close"
           className="absolute top-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-lg text-gray-800 shadow hover:bg-white">✕</button>

@@ -22,7 +22,8 @@ export default async function WideBanner() {
       {c?.image_desktop && (
         <>
           <picture>
-            {c.image_mobile && <source media="(max-width: 768px)" srcSet={c.image_mobile} />}
+            {c.image_mobile && <source media="(max-width: 767px)" srcSet={c.image_mobile} />}
+            {c.image_tablet && <source media="(max-width: 1023px)" srcSet={c.image_tablet} />}
             <img src={c.image_desktop} alt={c.alt || ""} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
           </picture>
           <div className="absolute inset-0 bg-black/55" />

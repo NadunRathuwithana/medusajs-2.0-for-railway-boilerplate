@@ -24,7 +24,7 @@ export async function getProductAddons(productId: string): Promise<Addon[]> {
       () =>
         sdk.client.fetch<{ addons: Addon[] }>(`/store/addons?product_id=${encodeURIComponent(productId)}`, {
           method: "GET",
-          headers: nextFetchOptions(["addons"], 60) as any,
+          headers: nextFetchOptions(["addons"], 30) as any,
         }),
       { retries: 1, timeoutMs: 4000 }
     )
@@ -40,7 +40,7 @@ export async function getPacking(): Promise<Packing> {
       () =>
         sdk.client.fetch<Packing>("/store/packing", {
           method: "GET",
-          headers: nextFetchOptions(["packing"], 60) as any,
+          headers: nextFetchOptions(["packing"], 30) as any,
         }),
       { retries: 1, timeoutMs: 4000 }
     )

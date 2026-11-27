@@ -1,3 +1,4 @@
+import { revalidateStorefront } from "../../../../lib/revalidate-storefront"
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { CMS_MODULE } from "../../../../modules/cms"
 import { pickBannerInput } from "../../../../modules/cms/fields"
@@ -12,5 +13,6 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const cms = req.scope.resolve(CMS_MODULE) as any
   const data = pickBannerInput(req.body as any)
   const banner = await cms.createBanners(data)
+  revalidateStorefront(["cms"])
   res.status(201).json({ banner })
 }

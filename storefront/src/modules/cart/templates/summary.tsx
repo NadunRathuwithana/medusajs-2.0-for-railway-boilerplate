@@ -22,6 +22,9 @@ const Summary = ({ cart, freeOptions = [] }: SummaryProps) => {
   const router = useRouter()
   const { countryCode } = useParams() as { countryCode: string }
   const [offerOpen, setOfferOpen] = useState(false)
+  // Ask once per cart: after "No thanks" the next Check out goes straight through.
+  const skipKey = `free-third-skipped:${cart.id}:${(cart.items ?? []).length}`
+  const wasSkipped = () => { try { return sessionStorage.getItem(skipKey) === "1" } catch { return false } }
   const goCheckout = () => router.push(`/${countryCode}/checkout`)
   const blocked = (cart.items ?? []).some((i: any) => !!i?.stock_issue)
   return (
@@ -51,14 +54,14 @@ const Summary = ({ cart, freeOptions = [] }: SummaryProps) => {
         options={freeOptions}
         countryCode={countryCode}
         onClose={() => setOfferOpen(false)}
-        onSkip={() => { setOfferOpen(false); goCheckout() }}
+        onSkip={() => { try { sessionStorage.setItem(skipKey, "1") } catch {} ; setOfferOpen(false); goCheckout() }}
       />
       <LocalizedClientLink
         href="/checkout"
         data-testid="checkout-button"
         className="w-full mt-4"
         onClick={(e: any) => {
-          if (freeOptions.length) {
+          if (freeOptions.length && !wasSkipped()) {
             e.preventDefault()
             setOfferOpen(true)
           }
