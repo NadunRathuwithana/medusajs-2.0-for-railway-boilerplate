@@ -10,7 +10,6 @@ async function processPaymentCollect(req: MedusaRequest) {
     timestamp: new Date().toISOString(),
     method: req.method,
     url: req.url,
-    headers: req.headers,
     query: req.query,
     body: req.body,
     params: req.params,
@@ -65,7 +64,11 @@ async function processPaymentCollect(req: MedusaRequest) {
   return { transactionId, queryResult };
 }
 
+const esc = (v: unknown) =>
+  String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string))
+
 function renderSuccessPage(transactionId: string, amount: string, currency: string, dateTime: string) {
+  transactionId = esc(transactionId); amount = esc(amount); currency = esc(currency); dateTime = esc(dateTime)
   return `<!DOCTYPE html>
 <html lang="en">
 <head>

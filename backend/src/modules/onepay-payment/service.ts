@@ -237,8 +237,6 @@ class OnepayPaymentService extends AbstractPaymentProvider<OnepayOptions> {
     console.log("[1] Medusa amount (raw)  :", amount)
     console.log("[2] Amount for hash (str):", onepayAmountStr)
     console.log("[3] Amount in payload    :", onepayAmount)
-    console.log("[4] Hash input string    :", hashInput)
-    console.log("[5] Computed hash        :", hash)
     console.log("[6] Session ID           :", sessionId)
     console.log("[7] Reference            :", reference)
     console.log("[8] Redirect URL         :", this.options_.redirectUrl)
