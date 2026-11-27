@@ -15,7 +15,8 @@ if (process.env.SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
     tracesSampleRate: 0.1,
-    environment: process.env.NODE_ENV || "development",
+    // SENTRY_ENVIRONMENT (e.g. "dev" / "production") tells dev and live apart.
+    environment: process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV || "development",
   })
 }
 

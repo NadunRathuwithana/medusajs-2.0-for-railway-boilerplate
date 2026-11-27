@@ -53,7 +53,9 @@ export default function BnplWidget({
               src={logo.src}
               alt={logo.alt}
               title={logo.alt}
-              className={clx("object-contain ml-1", compact ? "h-4" : "h-7")}
+              width={compact ? 48 : 84}
+              height={compact ? 16 : 28}
+              className={clx("object-contain ml-1 w-auto", compact ? "h-4" : "h-7")}
             />
           </div>
         )

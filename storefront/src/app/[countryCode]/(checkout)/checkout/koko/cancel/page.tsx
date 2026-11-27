@@ -39,7 +39,7 @@ export default function KokoCancelPage() {
       </p>
 
       <a
-        href="/checkout"
+        href="/lk/checkout?step=payment"
         className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors"
       >
         Return to Checkout

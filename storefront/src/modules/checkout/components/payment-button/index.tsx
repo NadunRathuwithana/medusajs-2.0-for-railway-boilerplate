@@ -439,7 +439,11 @@ const ManualTestPaymentButton = ({
     }
   }
 
+  const manualLock = React.useRef(false)
   const handlePayment = () => {
+    if (manualLock.current) return
+    manualLock.current = true
+    setTimeout(() => { manualLock.current = false }, 4000)
     setSubmitting(true)
     onPaymentCompleted()
   }
@@ -861,7 +865,18 @@ const KokoPaymentButton = ({
     return () => clearTimeout(timer)
   }, [notReady, sessionReady])
 
+  const clickLock0 = React.useRef(false)
   const handleClick = async () => {
+    // Synchronous lock: a fast double/triple tap must not start two payments.
+    if (clickLock0.current) return
+    clickLock0.current = true
+    try {
+      await handleClickInner0()
+    } finally {
+      clickLock0.current = false
+    }
+  }
+  const handleClickInner0 = async () => {
     // notReady already reflects the live (instant, no network) Addresses
     // form validity — this is just a final synchronous guard in case the
     // disabled attribute was somehow bypassed.
@@ -973,7 +988,18 @@ const MintpayPaymentButton = ({
     return () => clearTimeout(timer)
   }, [notReady, sessionReady])
 
+  const clickLock1 = React.useRef(false)
   const handleClick = async () => {
+    // Synchronous lock: a fast double/triple tap must not start two payments.
+    if (clickLock1.current) return
+    clickLock1.current = true
+    try {
+      await handleClickInner1()
+    } finally {
+      clickLock1.current = false
+    }
+  }
+  const handleClickInner1 = async () => {
     // notReady already reflects the live (instant, no network) Addresses
     // form validity — this is just a final synchronous guard in case the
     // disabled attribute was somehow bypassed.

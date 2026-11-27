@@ -666,8 +666,12 @@ async function codOverLimit(cartId: string): Promise<boolean> {
     .then((r: any) => r.cart)
     .catch(() => null)
   if (!c) return false
-  const sessions = c.payment_collection?.payment_sessions ?? []
-  const cod = sessions.some((s: any) => String(s.provider_id || "").startsWith("pp_system_default") && s.status !== "canceled")
+  // Only the most recent live session counts: a stale COD session left
+  // behind after switching to card/Koko/Mintpay must not block that payment.
+  const live = (c.payment_collection?.payment_sessions ?? [])
+    .filter((s: any) => s.status !== "canceled" && s.status !== "error")
+    .sort((a: any, b: any) => +new Date(b.created_at || 0) - +new Date(a.created_at || 0))
+  const cod = String(live[0]?.provider_id || "").startsWith("pp_system_default")
   return cod && isCodOverLimit(c.total)
 }
 

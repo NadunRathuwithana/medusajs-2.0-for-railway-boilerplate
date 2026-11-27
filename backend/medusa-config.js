@@ -58,6 +58,15 @@ const medusaConfig = {
   projectConfig: {
     databaseUrl: DATABASE_URL,
     databaseLogging: false,
+    // Explicit pool: dev and live share one Postgres (default max 100
+    // connections), so each backend keeps to DATABASE_POOL_MAX (default 20).
+    databaseDriverOptions: {
+      pool: {
+        min: 2,
+        max: Number(process.env.DATABASE_POOL_MAX || 20),
+        idleTimeoutMillis: 30000,
+      },
+    },
     redisUrl: REDIS_URL,
     workerMode: WORKER_MODE,
     http: {

@@ -210,8 +210,20 @@ export default async function onepayReconcileJob(container: MedusaContainer) {
 
   let recovered = 0
   let review = 0
+  // Hard time budget so a big backlog can never outlive the 58s lock and
+  // overlap the next run; 4 Onepay calls at a time, newest links first.
+  const startedAt = Date.now()
+  const BUDGET_MS = 52_000
   const settle = async (list: OnepayAttempt[]) => {
-    for (const a of list) {
+    const queue = [...list].sort((x: any, y: any) => Number(y.created_at || 0) - Number(x.created_at || 0))
+    const worker = async () => {
+      while (queue.length && Date.now() - startedAt < BUDGET_MS) {
+        await settleOne(queue.shift()!)
+      }
+    }
+    await Promise.all([worker(), worker(), worker(), worker()])
+  }
+  const settleOne = async (a: OnepayAttempt) => {
       try {
         const out = await reconcileAttempt(container, a)
         if (out === "recovered") {
@@ -222,7 +234,6 @@ export default async function onepayReconcileJob(container: MedusaContainer) {
       } catch (e: any) {
         logger.error(`[onepay-reconcile] ${a.txn_id}: ${e.message}`)
       }
-    }
   }
   const retryable = (a: OnepayAttempt) =>
     // needs_review is retried too: the cart can become matchable later.
@@ -240,7 +251,10 @@ export default async function onepayReconcileJob(container: MedusaContainer) {
   await settle((await listAttempts(MIN_AGE_MS, everyFive ? MAX_AGE_MS : HOT_MS)).filter(retryable))
 
   // Then watch fresh links every 5s for the rest of this minute.
-  const until = Date.now() + Number(process.env.ONEPAY_WATCH_WINDOW_MS ?? 50_000)
+  const until = Math.min(
+    Date.now() + Number(process.env.ONEPAY_WATCH_WINDOW_MS ?? 50_000),
+    startedAt + BUDGET_MS
+  )
   while (Date.now() + WATCH_EVERY_MS < until) {
     await sleep(WATCH_EVERY_MS)
     const hot = (await listAttempts(3_000, WATCH_MS)).filter(

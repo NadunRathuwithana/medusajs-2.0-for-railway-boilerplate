@@ -49,8 +49,40 @@ const MobileActions: React.FC<MobileActionsProps> = ({
     return variantPrice || cheapestPrice || null
   }, [price])
 
+  const canAdd = !!variant && !!inStock && !isAdding && !optionsDisabled && !!selectedPrice
+  const needsOptions = !variant && (product.variants?.length ?? 0) > 1
+
   return (
     <>
+      {/* Sticky Add to Cart on phones once the main button scrolls away */}
+      <div
+        className={clx(
+          "md:hidden fixed inset-x-0 bottom-0 z-[60] bg-white border-t border-gray-200 px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(0,0,0,0.06)] transition-transform duration-200",
+          show ? "translate-y-0" : "translate-y-full pointer-events-none"
+        )}
+        aria-hidden={!show}
+        data-testid="mobile-actions"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900 truncate">{product.title}</p>
+            {selectedPrice && (
+              <p className="text-sm text-gray-700">{selectedPrice.calculated_price}</p>
+            )}
+          </div>
+          <Button
+            onClick={needsOptions ? open : handleAddToCart}
+            disabled={needsOptions ? false : !canAdd}
+            isLoading={isAdding}
+            className="h-11 px-5 rounded-full"
+            tabIndex={show ? 0 : -1}
+            data-testid="mobile-cart-button"
+          >
+            {needsOptions ? "Select options" : !inStock && variant ? "Out of stock" : "Add to Cart"}
+          </Button>
+        </div>
+      </div>
+
       <Transition appear show={state} as={Fragment}>
         <Dialog as="div" className="relative z-[75]" onClose={close}>
           <Transition.Child

@@ -6,7 +6,7 @@ import SignInPrompt from "../components/sign-in-prompt"
 import Divider from "@modules/common/components/divider"
 import { HttpTypes } from "@medusajs/types"
 import BackButton from "@modules/common/components/back-button"
-import { getFreeThirdOptions } from "../components/free-third/options"
+import { getFreeThirdOptions, isBuy2Get1On, bagQty } from "../components/free-third/options"
 
 const CartTemplate = async ({
   cart,
@@ -16,6 +16,9 @@ const CartTemplate = async ({
   customer: HttpTypes.StoreCustomer | null
 }) => {
   const freeOptions = await getFreeThirdOptions(cart)
+  // No tote cheap enough to pick for free, but the offer still applies:
+  // tell the customer one more bag makes the cheapest one free.
+  const freeHint = !freeOptions.length && bagQty(cart) % 3 === 2 && (await isBuy2Get1On())
   return (
     <div className="py-4 sm:py-12 md:py-24 bg-[#fafafa] min-h-screen">
       <div className="content-container !px-4 sm:!px-6 max-w-[1140px] mx-auto" data-testid="cart-container">
@@ -51,7 +54,14 @@ const CartTemplate = async ({
             <div className="relative w-full lg:w-[400px] flex-shrink-0">
               <div className="sticky top-24 bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100">
                 {cart && cart.region && (
+                  <>
+                  {freeHint && (
+                    <p className="mb-3 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-900" data-testid="free-third-hint">
+                      Buy 2 Get 1: add one more bag and the cheapest bag in your cart is free.
+                    </p>
+                  )}
                   <Summary cart={cart as any} freeOptions={freeOptions} />
+                  </>
                 )}
               </div>
             </div>

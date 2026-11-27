@@ -9,7 +9,7 @@ export function bagQty(cart: any): number {
 }
 
 /** True only while the BUY2GET1 promo is active in admin. Any failure = off. */
-async function isBuy2Get1On(): Promise<boolean> {
+export async function isBuy2Get1On(): Promise<boolean> {
   try {
     const base = process.env.MEDUSA_BACKEND_URL || process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
     const key = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY

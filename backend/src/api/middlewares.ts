@@ -94,6 +94,24 @@ export default defineMiddlewares({
       ],
     },
     {
+      // Payment callbacks/webhooks: generous per-IP cap so junk traffic can't
+      // hammer Onepay's status API or the DB (real providers send a handful).
+      matcher: "/hooks/payment/*",
+      middlewares: [rateLimit({ windowMs: 60_000, max: 120, keyPrefix: "hooks-payment" })],
+    },
+    {
+      matcher: "/collect",
+      middlewares: [rateLimit({ windowMs: 60_000, max: 60, keyPrefix: "collect" })],
+    },
+    {
+      matcher: "/api/collect",
+      middlewares: [rateLimit({ windowMs: 60_000, max: 60, keyPrefix: "collect" })],
+    },
+    {
+      matcher: "/webhooks/onepay",
+      middlewares: [rateLimit({ windowMs: 60_000, max: 120, keyPrefix: "onepay-webhook" })],
+    },
+    {
       // The packing product is internal: it is only added by /packing at its
       // configured price, never through the generic line-items endpoint.
       matcher: "/store/carts/:id/line-items",

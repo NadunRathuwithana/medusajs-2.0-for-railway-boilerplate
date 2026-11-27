@@ -2,6 +2,7 @@ import { HttpTypes } from "@medusajs/types"
 import { clx } from "@medusajs/ui"
 import Image from "next/image"
 import React from "react"
+import { isVariantInStock } from "@lib/util/get-product-price"
 
 type OptionSelectProps = {
   option: HttpTypes.StoreProductOption
@@ -50,12 +51,19 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
             }
           }
 
+          // Sold out when every variant with this value is out of stock.
+          const withValue = (variants || []).filter((vr) => vr.options?.some((o) => o.value === v && (o.option_id === option.id || o.option?.title === option.title)))
+          const soldOut = withValue.length > 0 && withValue.every((vr) => !isVariantInStock(vr as any))
+
           return (
               <button
                 onClick={() => updateOption(option.title ?? "", v ?? "")}
                 key={v}
+                aria-label={soldOut ? `${v} (sold out)` : undefined}
+                title={soldOut ? "Sold out" : undefined}
                 className={clx(
                   "transition-all duration-200",
+                  soldOut && "opacity-50 line-through",
                   {
                     "h-12 rounded-full min-w-[3.5rem] px-5 flex items-center justify-center text-sm font-medium overflow-hidden": !isColor || !imageUrl,
                     "flex flex-col items-center gap-1.5": isColor && imageUrl,
