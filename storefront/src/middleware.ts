@@ -195,7 +195,7 @@ export async function middleware(request: NextRequest) {
   const countryCode = regionMap && (await getCountryCode(request, regionMap))
 
   const urlHasCountryCode =
-    countryCode && request.nextUrl.pathname.split("/")[1].includes(countryCode)
+    countryCode && request.nextUrl.pathname.split("/")[1]?.toLowerCase() === countryCode
 
   // check if one of the country codes is in the url
   if (
@@ -206,8 +206,14 @@ export async function middleware(request: NextRequest) {
     return passThrough(request)
   }
 
-  const redirectPath =
+  // A path that starts with another 2-letter region we don't sell to
+  // (/us/products/x) goes to the same page under our region, not /lk/us/... (404).
+  let redirectPath =
     request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname
+  const firstSeg = request.nextUrl.pathname.split("/")[1] || ""
+  if (/^[a-z]{2}$/i.test(firstSeg) && !regionMap.has(firstSeg.toLowerCase())) {
+    redirectPath = request.nextUrl.pathname.slice(firstSeg.length + 1)
+  }
 
   const queryString = request.nextUrl.search ? request.nextUrl.search : ""
 

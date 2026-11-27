@@ -28,9 +28,10 @@ async function isBuy2Get1On(): Promise<boolean> {
 
 export type FreeOption = { variantId: string; title: string; thumbnail?: string; price: string }
 
-/** Totes the customer can pick free when the cart holds exactly 2 bags ([] otherwise). */
+/** Totes the customer can pick free when one more bag would be free ([] otherwise). */
 export async function getFreeThirdOptions(cart: any): Promise<FreeOption[]> {
-  if (bagQty(cart) !== 2) return []
+  // 2, 5, 8... bags: one more bag would unlock another free one.
+  if (bagQty(cart) % 3 !== 2) return []
   if (!(await isBuy2Get1On())) return []
   // The promo frees the CHEAPEST bag, so only offer totes that cost no more
   // than the cheapest one already in the cart (what you pick is truly free).

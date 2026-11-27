@@ -43,6 +43,10 @@ const CartDropdown = ({
   // Packing extras are charged in the total but never shown as products.
   const productItems = (cartState?.items ?? []).filter((i: any) => !i?.metadata?.packing)
   const packingItems = (cartState?.items ?? []).filter((i: any) => i?.metadata?.packing)
+  // When one more bag would be free (Buy 2 Get 1), send checkout through the
+  // cart page so the free-bag picker can be offered.
+  const bagCount = (cartState?.items ?? []).filter((i: any) => !i?.metadata?.packing).reduce((n: number, i: any) => n + (i.quantity || 0), 0)
+  const checkoutHref = bagCount % 3 === 2 ? "/cart" : "/checkout"
 
   const totalItems =
     productItems.reduce((acc, item) => {
@@ -146,7 +150,7 @@ const CartDropdown = ({
                             <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 text-[13px] text-gray-600">
                               <span>Packing: {packingItems.map((i: any) => i.metadata?.packing_name || "Extra").join(", ")}</span>
                               <span className="font-medium text-gray-900">
-                                +{convertToLocale({ amount: packingItems.reduce((a: number, i: any) => a + Number(i.unit_price || 0) * i.quantity, 0), currency_code: cartState!.currency_code, maximumFractionDigits: 0 })}
+                                +{convertToLocale({ amount: packingItems.reduce((a: number, i: any) => a + Number(i.unit_price || 0) * i.quantity, 0), currency_code: cartState!.currency_code })}
                               </span>
                             </div>
                           )}
@@ -199,7 +203,7 @@ const CartDropdown = ({
 
                           {/* Checkout Button */}
                           <LocalizedClientLink
-                            href="/checkout"
+                            href={checkoutHref}
                             onClick={close}
                             className="w-full block"
                           >
@@ -237,6 +241,7 @@ const SidebarCartItem = ({ item, close }: { item: any; close: () => void }) => {
   const [isPending, startTransition] = useTransition()
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const latestQtyRef = useRef(item.quantity)
+  const [qtyError, setQtyError] = useState<string | null>(null)
 
   // Sync optimistic qty when server state arrives (and we're not mid-update)
   useEffect(() => {
@@ -249,18 +254,22 @@ const SidebarCartItem = ({ item, close }: { item: any; close: () => void }) => {
   const changeQuantity = (newQty: number) => {
     if (newQty < 1 || newQty > 20) return
     setOptimisticQty(newQty)
+    setQtyError(null)
 
     if (debounceRef.current) clearTimeout(debounceRef.current)
 
     debounceRef.current = setTimeout(() => {
+      // Clear the handle so server state can sync back in after this update.
+      debounceRef.current = null
       startTransition(async () => {
         try {
           await updateLineItem({
             lineId: item.id,
             quantity: newQty,
           })
-        } catch (err) {
+        } catch (err: any) {
           setOptimisticQty(item.quantity) // Revert on error
+          setQtyError("Could not update quantity. Please try again.")
         }
       })
     }, 500)
@@ -319,12 +328,13 @@ const SidebarCartItem = ({ item, close }: { item: any; close: () => void }) => {
             className="text-[13px] text-gray-500 mb-2"
           />
           <LineItemAddons metadata={item.metadata} currencyCode={currency_code || undefined} />
+          {qtyError && <p className="text-xs text-rose-600 mt-1" role="alert">{qtyError}</p>}
         </div>
 
         {/* Price & Quantity */}
         <div className="flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between mt-auto gap-2 sm:gap-0">
-          {/* Price */}
-          <div className="flex items-center gap-2 text-[14px]">
+          {/* Price (dimmed until the server confirms the new total) */}
+          <div className={`flex items-center gap-2 text-[14px] transition-opacity ${isPending || optimisticQty !== item.quantity ? "opacity-50" : ""}`}>
             {hasReducedPrice ? (
               <>
                 <span className="text-gray-500 line-through relative">

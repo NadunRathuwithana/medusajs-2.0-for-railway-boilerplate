@@ -183,6 +183,8 @@ export default function ProductActions({
     )
   }, [selectedVariant])
 
+  const hasPrice = !!getProductPrice({ product, variantId: selectedVariant?.id })[selectedVariant ? "variantPrice" : "cheapestPrice"]
+
   // check if the selected variant is in stock
   const inStock = useMemo(() => isVariantInStock(selectedVariant), [selectedVariant])
 
@@ -294,7 +296,7 @@ export default function ProductActions({
         />
         {addonsTotal > 0 && (
           <p className="text-sm text-gray-600 -mb-2">
-            Add-ons: +{convertToLocale({ amount: addonsTotal, currency_code: region.currency_code, maximumFractionDigits: 0 })}
+            Add-ons: +{convertToLocale({ amount: addonsTotal, currency_code: region.currency_code })}
           </p>
         )}
 
@@ -302,7 +304,7 @@ export default function ProductActions({
         <div className="flex items-center w-full mt-2">
           <Button
             onClick={handleAddToCart}
-            disabled={!inStock || !selectedVariant || !!disabled || isAdding}
+            disabled={!inStock || !selectedVariant || !!disabled || isAdding || !hasPrice}
             className="w-full h-14 rounded-full bg-black hover:bg-gray-800 text-white text-base font-medium shadow-none transition-colors border-none"
             isLoading={isAdding}
             data-testid="add-product-button"
@@ -314,6 +316,14 @@ export default function ProductActions({
                 : "Add to Cart"}
           </Button>
         </div>
+        {selectedVariant && inStock && (selectedVariant as any).manage_inventory && !(selectedVariant as any).allow_backorder &&
+          typeof (selectedVariant as any).inventory_quantity === "number" && (selectedVariant as any).inventory_quantity <= 3 && (
+          <p className="text-sm font-medium text-amber-700 -mt-3">Only {(selectedVariant as any).inventory_quantity} left</p>
+        )}
+        {selectedVariant && (selectedVariant as any).manage_inventory && (selectedVariant as any).allow_backorder &&
+          ((selectedVariant as any).inventory_quantity ?? 0) <= 0 && (
+          <p className="text-sm text-gray-600 -mt-3">Made to order. Ships a little later than in-stock bags.</p>
+        )}
         {addError && (
           <p className="text-sm text-rose-600 -mt-3" role="alert">{addError}</p>
         )}

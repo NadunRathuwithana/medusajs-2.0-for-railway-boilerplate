@@ -30,32 +30,33 @@ export const retrieveRegion = cache(async function (id: string) {
 })
 
 const regionMap = new Map<string, HttpTypes.StoreRegion>()
-regionMap.clear() // Force clear on hot reload
+let regionMapAt = 0
+const REGION_TTL_MS = 10 * 60 * 1000
 
+/**
+ * Returns the region for a country code, or null when the code is unknown.
+ * A backend failure THROWS (so the page shows the error page / 5xx instead of
+ * a 404 that search engines would de-index).
+ */
 export const getRegion = cache(async function (countryCode: string) {
-  try {
-    if (regionMap.has(countryCode)) {
-      return regionMap.get(countryCode)
-    }
-
-    const regions = await listRegions()
-
-    if (!regions) {
-      return null
-    }
-
-    regions.forEach((region) => {
-      region.countries?.forEach((c) => {
-        regionMap.set(c?.iso_2 ?? "", region)
-      })
-    })
-
-    const region = countryCode
-      ? regionMap.get(countryCode)
-      : regionMap.get(process.env.NEXT_PUBLIC_DEFAULT_REGION || "lk")
-
-    return region
-  } catch (e: any) {
-    return null
+  if (Date.now() - regionMapAt > REGION_TTL_MS) regionMap.clear()
+  const key = countryCode || process.env.NEXT_PUBLIC_DEFAULT_REGION || "lk"
+  if (regionMap.has(key)) {
+    return regionMap.get(key)
   }
+
+  const regions = await listRegions()
+  if (!regions) {
+    throw new Error("Regions could not be loaded")
+  }
+
+  regionMap.clear()
+  regions.forEach((region) => {
+    region.countries?.forEach((c) => {
+      regionMap.set(c?.iso_2 ?? "", region)
+    })
+  })
+  regionMapAt = Date.now()
+
+  return regionMap.get(key) ?? null
 })

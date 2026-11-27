@@ -11,18 +11,23 @@ export const metadata: Metadata = {
 }
 
 type Params = {
-  params: { query: string; countryCode: string }
-  searchParams: {
+  params: Promise<{ query: string; countryCode: string }>
+  searchParams: Promise<{
     sortBy?: SortOptions
     page?: string
-  }
+  }>
 }
 
-export default async function SearchResults({ params, searchParams }: Params) {
-  const { query } = params
-  const { sortBy, page } = searchParams
+export default async function SearchResults(props: Params) {
+  const params = await props.params
+  const searchParams = await props.searchParams
 
-  const hits = await search(query).then((data) => data)
+  let query = params.query
+  try { query = decodeURIComponent(params.query) } catch {}
+  const { sortBy } = searchParams
+  const page = String(Math.max(1, parseInt(searchParams.page || "1") || 1))
+
+  const hits = await search(query).catch(() => [] as any[])
 
   const ids = hits
     .map((h) => h.objectID || h.id)

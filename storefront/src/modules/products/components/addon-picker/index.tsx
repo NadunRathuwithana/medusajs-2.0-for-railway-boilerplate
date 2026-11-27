@@ -43,7 +43,7 @@ export default function AddonPicker({
   const scroll = (dir: 1 | -1) =>
     track.current?.scrollBy({ left: dir * track.current.clientWidth * 0.8, behavior: "smooth" })
   const price = (n: number) =>
-    n > 0 ? `+${convertToLocale({ amount: n, currency_code: currencyCode, maximumFractionDigits: 0 })}` : "Free"
+    n > 0 ? `+${convertToLocale({ amount: n, currency_code: currencyCode })}` : "Free"
 
   return (
     <div className="flex flex-col gap-y-3" data-testid="addon-picker">

@@ -58,7 +58,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     item.unit_price = base + extra
     item.metadata = {
       addons: chosen
-        .sort((a, b) => a.sort_order - b.sort_order)
+        .sort((a, b) => (a.sort_order - b.sort_order) || String(a.id).localeCompare(String(b.id)))
         .map((a) => ({ id: a.id, name: a.name, price: Number(a.price || 0), image: a.image })),
       base_price: base,
     }

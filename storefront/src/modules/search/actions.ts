@@ -26,5 +26,6 @@ export async function search(query: string) {
   // const index = searchClient.initIndex(SEARCH_INDEX_NAME)
   // const { hits } = (await index.search(query)) as { hits: Hits[] }
 
-  return hits
+  // Never surface internal products (the packing line) in search.
+  return hits.filter((h: any) => h?.handle !== "internal-packing")
 }

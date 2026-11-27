@@ -21,7 +21,10 @@ export const isOrderPlacedTemplateData = (data: any): data is OrderPlacedTemplat
   typeof data.order === 'object' && typeof data.shippingAddress === 'object'
 
 const formatCurrency = (amount: number, currency: string) => {
-  return `${currency?.toUpperCase() ?? ''} ${Number(amount).toFixed(2)}`
+  // Same format as the website: LKR 2,960 / LKR 2,960.50
+  const n = Number(amount) || 0
+  const frac = Number.isInteger(n) ? 0 : 2
+  return `${currency?.toUpperCase() ?? ''} ${n.toLocaleString('en-US', { minimumFractionDigits: frac, maximumFractionDigits: frac })}`
 }
 
 /** Resolve item subtotal: tries every field MedusaJS v2 may use, then falls back to summing items */
@@ -248,16 +251,26 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
                     )}
                     <td style={{ width: '100%', verticalAlign: 'middle', paddingLeft: (item as any).thumbnail ? '16px' : '0', paddingRight: '16px' }}>
                       <Text style={{ margin: '0 0 6px', fontWeight: '500', fontSize: '15px', color: textPrimary, fontFamily }}>
-                        {item.product_title ?? item.title}
+                        {(item as any).metadata?.packing ? 'Packing' : (item.product_title ?? item.title)}
                       </Text>
                       <Text style={{ margin: '0', fontSize: '13px', color: textSecondary, fontFamily }}>
-                        {item.title}
+                        {(item as any).metadata?.packing ? ((item as any).metadata?.packing_name || 'Extra packing') : item.title}
                       </Text>
+                      {Array.isArray((item as any).metadata?.addons) && (item as any).metadata.addons.length > 0 && (
+                        <Text style={{ margin: '4px 0 0', fontSize: '12px', color: textSecondary, fontFamily }}>
+                          Add-ons: {(item as any).metadata.addons.map((a: any) => `${a.name}${Number(a.price) > 0 ? ` (+${formatCurrency(a.price, order.currency_code)})` : ''}`).join(', ')}
+                        </Text>
+                      )}
                     </td>
                     <td style={{ textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                       <Text style={{ margin: '0', fontWeight: '400', fontSize: '14px', color: textPrimary, fontFamily }}>
-                        {formatCurrency((item.unit_price ?? 0) * item.quantity, order.currency_code)}
+                        {formatCurrency((item as any).total ?? (item.unit_price ?? 0) * item.quantity, order.currency_code)}
                       </Text>
+                      {Number((item as any).discount_total || 0) > 0 && (
+                        <Text style={{ margin: '2px 0 0', fontSize: '12px', color: textSecondary, textDecoration: 'line-through', fontFamily }}>
+                          {formatCurrency((item.unit_price ?? 0) * item.quantity, order.currency_code)}
+                        </Text>
+                      )}
                     </td>
                   </tr>
                 </tbody>

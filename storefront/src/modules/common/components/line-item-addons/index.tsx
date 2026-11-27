@@ -27,7 +27,7 @@ export default function LineItemAddons({
         <li key={a.id} className="text-[12px] text-gray-500">
           + {a.name}
           {a.price > 0 && currencyCode
-            ? ` (${convertToLocale({ amount: a.price, currency_code: currencyCode, maximumFractionDigits: 0 })})`
+            ? ` (${convertToLocale({ amount: a.price, currency_code: currencyCode })})`
             : ""}
         </li>
       ))}

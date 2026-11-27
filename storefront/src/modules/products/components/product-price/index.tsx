@@ -18,7 +18,8 @@ export default function ProductPrice({
   const selectedPrice = variant ? variantPrice : cheapestPrice
 
   if (!selectedPrice) {
-    return <div className="block w-32 h-9 bg-gray-100 animate-pulse" />
+    // No price for this region: say so instead of an endless skeleton.
+    return <p className="text-base font-medium text-gray-500" data-testid="product-price-unavailable">Currently unavailable</p>
   }
 
   const hasDiscount = Number(selectedPrice.percentage_diff) > 0

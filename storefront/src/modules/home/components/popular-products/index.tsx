@@ -21,6 +21,8 @@ export default async function PopularProducts({
   if (collectionHandle) {
     const collection = await getCollectionByHandle(collectionHandle)
     collectionId = collection?.id
+    // Collection missing: hide the rail instead of showing random products.
+    if (!collectionId) return null
   }
 
   // Fetch up to 10 latest or popular products to show in the slider

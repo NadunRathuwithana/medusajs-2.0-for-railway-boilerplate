@@ -57,7 +57,7 @@ export default function Packing({ cart, packing }: { cart: any; packing: Packing
   }
 
   const money = (n: number) =>
-    n > 0 ? `+${convertToLocale({ amount: n, currency_code: cart.currency_code, maximumFractionDigits: 0 })}` : "Free"
+    n > 0 ? `+${convertToLocale({ amount: n, currency_code: cart.currency_code })}` : "Free"
 
   return (
     <div className="mb-4" data-testid="packing-summary">

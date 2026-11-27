@@ -19,8 +19,8 @@ export default function CollectionTemplate({
   page?: string
   countryCode: string
 }) {
-  const pageNumber = page ? parseInt(page) : 1
-  const sort = sortBy || "created_at"
+  const pageNumber = Math.max(1, parseInt(page || "1") || 1)
+  const sort = sortBy || "best_selling"
 
   return (
     <div className="w-full bg-white">

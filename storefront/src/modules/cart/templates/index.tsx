@@ -1,4 +1,5 @@
 import ItemsTemplate from "./items"
+import { convertToLocale } from "@lib/util/money"
 import Summary from "./summary"
 import EmptyCartMessage from "../components/empty-cart-message"
 import SignInPrompt from "../components/sign-in-prompt"
@@ -31,6 +32,19 @@ const CartTemplate = async ({
               )}
               <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100">
                 <ItemsTemplate items={cart?.items?.filter((i: any) => !i?.metadata?.packing)} />
+                {(cart?.items ?? []).some((i: any) => i?.metadata?.packing) && (
+                  <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between text-sm text-gray-700" data-testid="cart-packing-row">
+                    <span>
+                      Packing: {(cart?.items ?? []).filter((i: any) => i?.metadata?.packing).map((i: any) => i.metadata?.packing_name || "Extra").join(", ")}
+                    </span>
+                    <span className="font-medium">
+                      {convertToLocale({
+                        amount: (cart?.items ?? []).filter((i: any) => i?.metadata?.packing).reduce((n: number, i: any) => n + Number(i.total ?? i.unit_price * i.quantity), 0),
+                        currency_code: cart!.currency_code,
+                      })}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 

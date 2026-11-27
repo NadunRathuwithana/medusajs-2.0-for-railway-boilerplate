@@ -33,7 +33,8 @@ export const getBestSellingProductIds = cache(async function (): Promise<string[
 // See lib/data/regions.ts for why `revalidate` (not just `tags`) matters on
 // Next 15 — without it these product reads were live, uncached backend
 // round-trips on every single page load.
-const PRODUCTS_REVALIDATE_SECONDS = 300
+// 60s keeps stock and price close to live without hitting the backend on every view.
+const PRODUCTS_REVALIDATE_SECONDS = 60
 
 export const getProductsById = cache(async function ({
   ids,
@@ -74,7 +75,10 @@ export const getProductByHandle = cache(async function (
         nextFetchOptions(["products"], PRODUCTS_REVALIDATE_SECONDS)
       )
       .then(({ products }) => {
-        return products[0]
+        const p: any = products[0]
+        // Internal products (e.g. the packing line) are not shoppable pages.
+        if (p?.metadata?.internal || p?.handle === "internal-packing") return undefined
+        return p
       })
   )
 })
@@ -180,7 +184,7 @@ export const getProductsListWithSort = cache(async function ({
     sortedProducts = sortProducts(products, sortBy)
   }
 
-  const pageParam = (page - 1) * limit
+  const pageParam = (Math.max(1, Number(page) || 1) - 1) * limit
 
   const nextPage = count > pageParam + limit ? pageParam + limit : null
 

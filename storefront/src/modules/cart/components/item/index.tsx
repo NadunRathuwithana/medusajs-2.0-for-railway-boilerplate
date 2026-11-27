@@ -168,8 +168,8 @@ const Item = ({ item, type = "full" }: ItemProps) => {
             <LineItemAddons metadata={item.metadata} currencyCode={currency_code || undefined} />
           </div>
 
-          {/* Price block */}
-          <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-1 flex-shrink-0">
+          {/* Price block (dimmed until the server confirms the new total) */}
+          <div className={`flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-1 flex-shrink-0 transition-opacity ${isPending || optimisticQty !== item.quantity ? "opacity-50" : ""}`}>
             {hasReducedPrice ? (
               <>
                 <span className="text-gray-400 text-[13px] line-through">
